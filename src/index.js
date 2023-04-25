@@ -192,6 +192,11 @@ option3.text = 'Calcium';
 option3.value = 'calcium';
 layersList.add(option3);
 
+const option4 = document.createElement('option');
+option4.text = 'Titanium';
+option4.value = 'titanium';
+layersList.add(option4);
+
 layersList.selectedIndex = 0;
 
 layersList.addEventListener('change', function() {
@@ -215,6 +220,11 @@ layersList.addEventListener('change', function() {
     case 'calcium':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       viewer.imageryLayers.addImageryProvider( new Cesium.IonImageryProvider({ assetId: 1613583 }) );
+      break;
+
+    case 'titanium':
+      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
+      viewer.imageryLayers.addImageryProvider( new Cesium.IonImageryProvider({ assetId: 1613582 }) );
       break;
 
     default:
