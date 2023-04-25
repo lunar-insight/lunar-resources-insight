@@ -8,6 +8,9 @@ const CopywebpackPlugin = require('copy-webpack-plugin');
 const cesiumSource = 'node_modules/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
 
+const dotenv = require('dotenv');
+dotenv.config();
+
 module.exports = {
   context: __dirname,
   mode: 'development',
@@ -87,6 +90,9 @@ module.exports = {
     new webpack.optimize.SplitChunksPlugin({
       name: 'cesium',
       minChunks: module => module.context && module.context.indexOf('cesium') !== -1
+    }),
+    new webpack.DefinePlugin({
+      'process.env.CESIUM_ION_ACCESS_TOKEN': JSON.stringify(process.env.CESIUM_ION_ACCESS_TOKEN),
     })
   ]
 };

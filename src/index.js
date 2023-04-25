@@ -11,7 +11,7 @@ const Cesium = require('cesium/Cesium');
 require('./css/main.css');
 require('cesium/Widgets/widgets.css');
 
-Cesium.Ion.defaultAccessToken = '';
+Cesium.Ion.defaultAccessToken = process.env.CESIUM_ION_ACCESS_TOKEN;
 
 // Define a default blank imageryProvider
 const viewer = new Cesium.Viewer('cesiumContainer', {
