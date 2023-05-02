@@ -197,7 +197,14 @@ option4.text = 'Titanium';
 option4.value = 'titanium';
 layersList.add(option4);
 
+const option5 = document.createElement('option');
+option5.text = 'Test';
+option5.value = 'test'
+layersList.add(option5);
+
 layersList.selectedIndex = 0;
+
+const mapServerWmsUrl = 'http://localhost/cgi-bin/mapserv.exe?map=C:/ms4w/apps/lunar_resources/config.map';
 
 layersList.addEventListener('change', function() {
 
@@ -225,6 +232,21 @@ layersList.addEventListener('change', function() {
     case 'titanium':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       viewer.imageryLayers.addImageryProvider( new Cesium.IonImageryProvider({ assetId: 1613582 }) );
+      break;
+
+    case 'test':
+      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
+      const customLayerUrl = '';
+      viewer.imageryLayers.addImageryProvider(
+        new Cesium.WebMapServiceImageryProvider({
+          url: mapServerWmsUrl,
+          layers: 'Global20ppd_SRV_LPGRS_Fe',
+          parameters: {
+            transparent: true,
+            format: 'image/png'
+          }
+        })
+      );
       break;
 
     default:
