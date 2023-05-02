@@ -216,27 +216,48 @@ layersList.addEventListener('change', function() {
 
     case 'magnesium':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      viewer.imageryLayers.addImageryProvider( new Cesium.IonImageryProvider({ assetId: 1613585 }) );
-      break;
-
-    case 'iron':
-      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      viewer.imageryLayers.addImageryProvider( new Cesium.IonImageryProvider({ assetId: 1613584 }) );
+      viewer.imageryLayers.addImageryProvider(
+        new Cesium.WebMapServiceImageryProvider({
+          url: mapServerWmsUrl,
+          layers: 'Global20ppd_SRV_LPGRS_Mg',
+          parameters: {
+            transparent: true,
+            format: 'image/png'
+          }
+        })
+      );
       break;
 
     case 'calcium':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      viewer.imageryLayers.addImageryProvider( new Cesium.IonImageryProvider({ assetId: 1613583 }) );
+      viewer.imageryLayers.addImageryProvider(
+        new Cesium.WebMapServiceImageryProvider({
+          url: mapServerWmsUrl,
+          layers: 'Global20ppd_SRV_LPGRS_Ca',
+          parameters: {
+            transparent: true,
+            format: 'image/png'
+          }
+        })
+      );
       break;
 
     case 'titanium':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      viewer.imageryLayers.addImageryProvider( new Cesium.IonImageryProvider({ assetId: 1613582 }) );
+      viewer.imageryLayers.addImageryProvider(
+        new Cesium.WebMapServiceImageryProvider({
+          url: mapServerWmsUrl,
+          layers: 'Global20ppd_LPGRS_Ti',
+          parameters: {
+            transparent: true,
+            format: 'image/png'
+          }
+        })
+      );
       break;
 
-    case 'test':
+    case 'iron':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      const customLayerUrl = '';
       viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
