@@ -1,4 +1,5 @@
-// TODO : Faire un menu déroulant pour nos couches
+// TODO : Retirer le async pour la sélection
+// TODO : Transparence du raster
 // https://sandcastle.cesium.com/index.html?src=Imagery%20Layers%20Manipulation.html
 // https://jsfiddle.net/q2vo8nge/
 // https://www.freecodecamp.org/french/news/balise-html-select-comment-creer-un-menu-deroulant-ou-une-liste-deroulante/
@@ -36,6 +37,7 @@ if (!scene.pickPositionSupported) {
 };
 
 scene.fog.enabled = false;
+// Voir pourquoi on vois toujours l'atmosphère
 scene.globe.showGroundAtmosphere = false;
 //viewer.scene.enableLighting = false;
 scene.moon.show = false;
@@ -66,25 +68,39 @@ mouseButton.addEventListener('click', function() {
       pixelOffset: new Cesium.Cartesian2(15, 0),
     }
   });
+
   handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
   scene.canvas.setAttribute('willReadFrequently', 'true');
-  handler.setInputAction(function (movement) {
-    //viewer.scene.cesiumWidget.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
+
+  handler.setInputAction(async function (movement) {
     const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, scene.globe.ellipsoid);
     if (cartesian) {
       const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
       const longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
       const latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
-      // Si la coordonnée est positive - pb si il est inférieur à 0 il ajoute quand même un espace
+
       const longSign = Number(longitudeString) > 0 ? ' ' : '';
       const latSign = Number(latitudeString) > 0 ? ' ' : '';
 
       entity.position = cartesian;
       entity.label.show = true;
 
-      entity.label.text =
-        `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
-        `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0`;
+      const pixelValue = await getFeatureInfo(
+        parseFloat(longitudeString),
+        parseFloat(latitudeString)
+      );
+
+      if (pixelValue !== null) {
+        entity.label.text =
+          `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
+          `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0` +
+          `\nValue: ${pixelValue.toFixed(2)} wt.%`;
+      } else {
+        entity.label.text =
+          `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
+          `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0` +
+          `\nValue: N/A`;
+      }
     } else {
       entity.label.show = false;
     }
@@ -174,52 +190,47 @@ const layersList = document.getElementById('layersSelect');
 
 const option0 = document.createElement('option');
 option0.text = 'Basemap';
-option0.value = 'basemap';
+option0.value = 'BASEMAP';
 layersList.add(option0);
 
 const option1 = document.createElement('option');
 option1.text = 'Magnesium';
-option1.value = 'magnesium';
+option1.value = 'MAGNESIUM';
 layersList.add(option1);
 
 const option2 = document.createElement('option');
 option2.text = 'Iron';
-option2.value = 'iron';
+option2.value = 'IRON';
 layersList.add(option2);
 
 const option3 = document.createElement('option');
 option3.text = 'Calcium';
-option3.value = 'calcium';
+option3.value = 'CALCIUM';
 layersList.add(option3);
 
 const option4 = document.createElement('option');
 option4.text = 'Titanium';
-option4.value = 'titanium';
+option4.value = 'TITANIUM';
 layersList.add(option4);
-
-const option5 = document.createElement('option');
-option5.text = 'Test';
-option5.value = 'test'
-layersList.add(option5);
 
 layersList.selectedIndex = 0;
 
-const mapServerWmsUrl = 'http://localhost/cgi-bin/mapserv.exe?map=C:/ms4w/apps/lunar_resources/config.map';
+const mapServerWmsUrl = 'http://localhost:8090/geoserver/lunar-resources/wms';
 
 layersList.addEventListener('change', function() {
 
   switch (layersList.value) {
 
-    case 'basemap':
+    case 'BASEMAP':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       break;
 
-    case 'magnesium':
+    case 'MAGNESIUM':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
-          layers: 'Global20ppd_SRV_LPGRS_Mg',
+          layers: 'lunar-resources:MAGNESIUM',
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -228,12 +239,12 @@ layersList.addEventListener('change', function() {
       );
       break;
 
-    case 'calcium':
+    case 'CALCIUM':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
-          layers: 'Global20ppd_SRV_LPGRS_Ca',
+          layers: 'lunar-resources:CALCIUM',
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -242,12 +253,12 @@ layersList.addEventListener('change', function() {
       );
       break;
 
-    case 'titanium':
+    case 'TITANIUM':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
-          layers: 'Global20ppd_LPGRS_Ti',
+          layers: 'lunar-resources:TITANIUM',
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -256,12 +267,12 @@ layersList.addEventListener('change', function() {
       );
       break;
 
-    case 'iron':
+    case 'IRON':
       if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
-          layers: 'Global20ppd_SRV_LPGRS_Fe',
+          layers: 'lunar-resources:IRON',
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -275,3 +286,68 @@ layersList.addEventListener('change', function() {
       break;
   }
 })
+
+/*
+    Fonction d'appel d'information de pixel du serveur WMS
+*/
+
+async function getFeatureInfo(longitude, latitude) {
+  const url = new Cesium.Resource({
+    url: mapServerWmsUrl,
+    queryParameters: {
+      service: "WMS",
+      version: "1.1.1",
+      request: "GetFeatureInfo",
+      layers: 'lunar-resources:'+layersList.value,
+      styles: "",
+      srs: "EPSG:4326",
+      //http://localhost:8090/geoserver/lunar-resources/wms/reflect?service=WMS&version=1.1.1&request=GetFeatureInfo&layers=lunar-resources%3AGlobal20ppd_SRV_LPGRS_geotiffCa_tiles&bbox=-180.0%2C-74.99583217560433%2C180.0%2C74.99583217560433&width=768&height=330&srs=EPSG%3A4326&styles=&format=application/openlayers
+      format: "image/png",
+      bbox: `${longitude - 0.1},${latitude - 0.1},${longitude + 0.1},${latitude + 0.1}`,
+      // Mettre defaut a 1 pour avoir l'erreur classique
+      width: 2,
+      height: 2,
+      query_layers: 'lunar-resources:'+layersList.value,
+      info_format: "text/plain",
+      x: 1,
+      y: 1,
+    },
+  });
+  try {
+    const response = await url.fetch();
+    if (response instanceof Response && response.ok) {
+      const text = await response.text();
+      const pixelValue = parseFloat(text);
+      console.log(pixelValue);
+      return pixelValue;
+    } else {
+      console.error("Invalid or unexpected response from the map server:", response);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching GetFeatureInfo:", error);
+    return null;
+  }
+}
+
+
+/*   try {
+    const response = await url.fetch();
+
+    if (response instanceof Response && response.ok) {
+      const text = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, "text/html");
+      const pixelValue = parseFloat(doc.querySelector("p").textContent);
+      console.log(pixelValue);
+      return pixelValue;
+    } else {
+      console.error("Invalid or unexpected response from the map server:", response);
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching GetFeatureInfo:", error);
+    return null;
+  }
+} */
+
