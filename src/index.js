@@ -89,7 +89,6 @@ mouseButton.addEventListener('click', function() {
         parseFloat(longitudeString),
         parseFloat(latitudeString)
       );
-
       if (pixelValue !== null) {
         entity.label.text =
           `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
@@ -106,81 +105,6 @@ mouseButton.addEventListener('click', function() {
     }
   }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 });
-
-
-
-// }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-
-// viewer.cesiumWidget.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
-//   let ellipsoid = viewer.scene.globe.ellipsoid;
-//   let cartesian = viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
-//   if (cartesian) {
-//     let cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-
-    
-
-//     let positionString = '(' + longitudeString + ', ' + latitudeString + ')';
-//     console.log(positionString)
-    //let mousePosition = new Cesium.Cartesian2(movement.endPosition.x, movement.endPosition.y)
-    //console.log(viewer.scene.canva.getContext('webgl'));
-    //let pixelColor = viewer.scene.canvas.getContext('2d').getImageData(mousePosition.x, mousePosition.y, 1, 1).data;
-    //console.log(pixelColor)
-    
-
-    // Récupération de la valeur du pixel
-    //console.log(viewer.camera.pickEllipsoid(movement.endPosition, viewer.scene.globe.ellipsoid))
-    //var pixelValue = viewer.scene.globe.pick(viewer.camera.getPickRay(movement.endPosition))
-    //console.log(pixelValue)
-/*     if (pixelValue) {
-      console.log("Position : ", positionString, ", Pixel value : ", pixelValue);
-    } else {
-      console.log("Position : ", positionString, ", Pixel value : No data");
-    } */
-
-
-    //console.log(positionString);
-//   }
-// }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
-
-
-
-/* viewer.cesiumWidget.screenSpaceEventHandler.setInputAction(function onMouseMove(movement) {
-  
-  var ellipsoid = viewer.scene.globe.ellipsoid;
-  var cartesian = viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
-  
-  if (cartesian) {
-
-    // Convertion des coordonnées cartographiques en coordonnées de canvas
-    var windowPosition = Cesium.SceneTransforms.wgs84ToWindowCoordinates(viewer.scene, cartesian);
-
-    // Création d'un canevas caché pour récupérer la valeur du pixel
-    var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
-    canvas.width = viewer.scene.canvas.clientWidth;
-    canvas.height = viewer.scene.canvas.clientHeight;
-    context.drawImage(viewer.scene.canvas, 0, 0, canvas.width, canvas.height);
-    console.log(context);
-
-    // Récupération de la valeur du pixel à partir du canvas
-    var pixelData = context.getImageData(windowPosition.x, canvas.height - windowPosition.y, 1, 1).data;
-    var pixelValue = pixelData[0];
-
-    // Affichage de la position et de la valeur du pixel dans la console
-
-    var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-    var longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
-    var latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
-    var positionString = '(' + longitudeString + ', ' + latitudeString + ')';
-    console.log(pixelValue);
-/*     if (pixelValue) {
-      console.log("Position : ", positionString, ", Pixel value : ", pixelValue);
-    } else {
-      console.log("Position : ", positionString, ", Pixel value : No data");
-    } */
-//  }
-//}, Cesium.ScreenSpaceEventType.MOUSE_MOVE); */
-
 
 /*
     Map selection
@@ -290,7 +214,7 @@ layersList.addEventListener('change', function() {
 /*
     Fonction d'appel d'information de pixel du serveur WMS
 */
-
+//TODO: prendre en charge le "Could not extract pixel value from response: no features were found"
 async function getFeatureInfo(longitude, latitude) {
   const url = new Cesium.Resource({
     url: mapServerWmsUrl,
@@ -301,10 +225,8 @@ async function getFeatureInfo(longitude, latitude) {
       layers: 'lunar-resources:'+layersList.value,
       styles: "",
       srs: "EPSG:4326",
-      //http://localhost:8090/geoserver/lunar-resources/wms/reflect?service=WMS&version=1.1.1&request=GetFeatureInfo&layers=lunar-resources%3AGlobal20ppd_SRV_LPGRS_geotiffCa_tiles&bbox=-180.0%2C-74.99583217560433%2C180.0%2C74.99583217560433&width=768&height=330&srs=EPSG%3A4326&styles=&format=application/openlayers
       format: "image/png",
       bbox: `${longitude - 0.1},${latitude - 0.1},${longitude + 0.1},${latitude + 0.1}`,
-      // Mettre defaut a 1 pour avoir l'erreur classique
       width: 2,
       height: 2,
       query_layers: 'lunar-resources:'+layersList.value,
@@ -313,15 +235,19 @@ async function getFeatureInfo(longitude, latitude) {
       y: 1,
     },
   });
+
   try {
-    const response = await url.fetch();
-    if (response instanceof Response && response.ok) {
-      const text = await response.text();
-      const pixelValue = parseFloat(text);
+    const responseText = await url.fetch();
+    const match = responseText.match(/VALUE = (\d+\.\d+|NaN)/);
+    if (match && match[1]) {
+      const pixelValue = parseFloat(match[1]);
+      if (isNaN(pixelValue)) {
+        return null;
+      }
       console.log(pixelValue);
       return pixelValue;
     } else {
-      console.error("Invalid or unexpected response from the map server:", response);
+      console.error("Could not extract pixel value from response:", responseText);
       return null;
     }
   } catch (error) {
@@ -329,25 +255,3 @@ async function getFeatureInfo(longitude, latitude) {
     return null;
   }
 }
-
-
-/*   try {
-    const response = await url.fetch();
-
-    if (response instanceof Response && response.ok) {
-      const text = await response.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(text, "text/html");
-      const pixelValue = parseFloat(doc.querySelector("p").textContent);
-      console.log(pixelValue);
-      return pixelValue;
-    } else {
-      console.error("Invalid or unexpected response from the map server:", response);
-      return null;
-    }
-  } catch (error) {
-    console.error("Error fetching GetFeatureInfo:", error);
-    return null;
-  }
-} */
-
