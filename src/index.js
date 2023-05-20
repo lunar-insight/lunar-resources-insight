@@ -247,6 +247,7 @@ async function getFeatureInfo(longitude, latitude) {
       console.log(pixelValue);
       return pixelValue;
     } else {
+      // Missing pixel info detection (eg. other map under)
       return null;
     }
   } catch (error) {
