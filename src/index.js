@@ -247,7 +247,6 @@ async function getFeatureInfo(longitude, latitude) {
       console.log(pixelValue);
       return pixelValue;
     } else {
-      console.error("Could not extract pixel value from response:", responseText);
       return null;
     }
   } catch (error) {
