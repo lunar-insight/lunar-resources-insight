@@ -1,6 +1,3 @@
-// TODO : Retirer le async pour la sélection
-// TODO : Transparence du raster
-// TODO : CSS personnalisé sur le thème de Offworld Horizon
 // https://sandcastle.cesium.com/index.html?src=Imagery%20Layers%20Manipulation.html
 // https://jsfiddle.net/q2vo8nge/
 // https://www.freecodecamp.org/french/news/balise-html-select-comment-creer-un-menu-deroulant-ou-une-liste-deroulante/
