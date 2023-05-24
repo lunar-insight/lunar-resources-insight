@@ -1,5 +1,6 @@
 // TODO : Retirer le async pour la sélection
 // TODO : Transparence du raster
+// TODO : CSS personnalisé sur le thème de Offworld Horizon
 // https://sandcastle.cesium.com/index.html?src=Imagery%20Layers%20Manipulation.html
 // https://jsfiddle.net/q2vo8nge/
 // https://www.freecodecamp.org/french/news/balise-html-select-comment-creer-un-menu-deroulant-ou-une-liste-deroulante/
@@ -52,59 +53,68 @@ let handler;
     Mouse
 */
 
-const mouseButton = document.createElement('button');
-mouseButton.innerHTML = "Mouse Data";
-const toolbar = document.getElementsByClassName('cesium-viewer-toolbar')[0];
-toolbar.appendChild(mouseButton);
-
-mouseButton.addEventListener('click', function() {
-  const entity = viewer.entities.add({
-    label: {
-      show: false,
-      showBackground: true,
-      font: "14px monospace",
-      horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
-      verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-      pixelOffset: new Cesium.Cartesian2(15, 0),
-    }
-  });
-
-  handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
-  scene.canvas.setAttribute('willReadFrequently', 'true');
-
-  handler.setInputAction(async function (movement) {
-    const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, scene.globe.ellipsoid);
-    if (cartesian) {
-      const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-      const longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
-      const latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
-
-      const longSign = Number(longitudeString) > 0 ? ' ' : '';
-      const latSign = Number(latitudeString) > 0 ? ' ' : '';
-
-      entity.position = cartesian;
-      entity.label.show = true;
-
-      const pixelValue = await getFeatureInfo(
-        parseFloat(longitudeString),
-        parseFloat(latitudeString)
-      );
-      if (pixelValue !== null) {
-        entity.label.text =
-          `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
-          `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0` +
-          `\nValue: ${pixelValue.toFixed(2)} wt.%`;
-      } else {
-        entity.label.text =
-          `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
-          `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0` +
-          `\nValue: N/A`;
-      }
-    } else {
-      entity.label.show = false;
-    }
-  }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+const entity = viewer.entities.add({
+  label: {
+    show: false,
+    showBackground: true,
+    font: "14px monospace",
+    horizontalOrigin: Cesium.HorizontalOrigin.LEFT,
+    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+    pixelOffset: new Cesium.Cartesian2(15, 0),
+  },
 });
+
+const mouseCheckbox = document.createElement('input');
+mouseCheckbox.type = "checkbox";
+mouseCheckbox.checked = true;
+mouseCheckbox.id = "mouseDataCheckbox";
+mouseCheckbox.className = "mouseDataQueryCheckbox";
+
+const label = document.createElement('label');
+label.htmlFor = "mouseDataCheckbox";
+label.className = "labelMouseDataQueryCheckbox"
+label.appendChild(document.createTextNode('Cursor Data Query'));
+
+const toolbar = document.getElementsByClassName('cesium-viewer-toolbar')[0];
+toolbar.appendChild(mouseCheckbox);
+toolbar.appendChild(label);
+
+handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+scene.canvas.setAttribute('willReadFrequently', 'true');
+
+handler.setInputAction(async function (movement) {
+  const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, scene.globe.ellipsoid);
+  if (cartesian && mouseCheckbox.checked) {
+    const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+    const longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
+    const latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
+
+    const longSign = Number(longitudeString) > 0 ? ' ' : '';
+    const latSign = Number(latitudeString) > 0 ? ' ' : '';
+
+    entity.position = cartesian;
+    entity.label.show = true;
+
+    const pixelValue = await getFeatureInfo(
+      parseFloat(longitudeString),
+      parseFloat(latitudeString)
+    );
+
+    if (pixelValue !== null) {
+      entity.label.text =
+        `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
+        `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0` +
+        `\nValue: ${pixelValue.toFixed(2)} wt.%`;
+    } else {
+      entity.label.text =
+        `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
+        `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0` +
+        `\nValue: N/A`;
+    }
+  } else {
+    entity.label.show = false;
+  }
+}, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
 /*
     Map selection

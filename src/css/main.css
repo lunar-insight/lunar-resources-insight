@@ -22,3 +22,14 @@ body,
   font-size: 14px;
   pointer-events: none;
 }
+
+.mouseDataQueryCheckbox {
+  margin: 10px;
+}
+
+.labelMouseDataQueryCheckbox {
+  color: grey;
+  border: 1px solid beige;
+  padding: 5px;
+  border-radius: 10px;
+}
