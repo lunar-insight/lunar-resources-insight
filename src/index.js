@@ -12,8 +12,18 @@ require('cesium/Widgets/widgets.css');
 
 Cesium.Ion.defaultAccessToken = process.env.CESIUM_ION_ACCESS_TOKEN;
 
+const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400);
+
+Cesium.Ellipsoid.WGS84 = ellipsoid;
+const mapProjection = new Cesium.GeographicProjection(ellipsoid);
+
+const globe = new Cesium.Globe(ellipsoid);
+globe.showGroundAtmosphere = false;
+
 // Define a default blank imageryProvider
 const viewer = new Cesium.Viewer('cesiumContainer', {
+  globe: globe,
+  mapProjection: mapProjection,
   imageryProvider: new Cesium.WebMapServiceImageryProvider({
     url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
     layers: 'LROC_WAC',
@@ -35,12 +45,11 @@ if (!scene.pickPositionSupported) {
 };
 
 scene.fog.enabled = false;
-// Voir pourquoi on vois toujours l'atmosphère
-scene.globe.showGroundAtmosphere = false;
-//viewer.scene.enableLighting = false;
+viewer.scene.enableLighting = false;
 scene.moon.show = false;
 scene.sun.show = false;
-//viewer.scene.shadowMap.enabled = false;
+viewer.scene.skyAtmosphere.show = false;
+viewer.scene.shadowMap.enabled = false;
 
 
 
