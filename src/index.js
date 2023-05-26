@@ -10,7 +10,7 @@ const Cesium = require('cesium/Cesium');
 require('./css/main.css');
 require('cesium/Widgets/widgets.css');
 
-Cesium.Ion.defaultAccessToken = process.env.CESIUM_ION_ACCESS_TOKEN;
+Cesium.Ion.defaultAccessToken = undefined;
 
 const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400);
 
@@ -51,7 +51,7 @@ scene.sun.show = false;
 viewer.scene.skyAtmosphere.show = false;
 viewer.scene.shadowMap.enabled = false;
 
-
+viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
 let handler;
 
