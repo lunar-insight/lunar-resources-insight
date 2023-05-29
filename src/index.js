@@ -53,11 +53,11 @@ viewer.scene.shadowMap.enabled = false;
 
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
-let handler;
-
 /*
     Mouse
 */
+
+let handler;
 
 const entity = viewer.entities.add({
   label: {
@@ -157,20 +157,26 @@ layersList.selectedIndex = 0;
 
 const mapServerWmsUrl = 'http://localhost:8090/geoserver/lunar-resources/wms';
 
+let activeLayer;
+
 layersList.addEventListener('change', function() {
+
+  if (activeLayer) {
+    viewer.imageryLayers.remove(activeLayer);
+  }
 
   switch (layersList.value) {
 
     case 'BASEMAP':
-      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
+      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       break;
 
     case 'MAGNESIUM':
-      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      viewer.imageryLayers.addImageryProvider(
+      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
+      activeLayer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
-          layers: 'lunar-resources:MAGNESIUM',
+          layers: 'lunar-resources:' + layersList.value,
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -180,11 +186,11 @@ layersList.addEventListener('change', function() {
       break;
 
     case 'CALCIUM':
-      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      viewer.imageryLayers.addImageryProvider(
+      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
+      activeLayer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
-          layers: 'lunar-resources:CALCIUM',
+          layers: 'lunar-resources:' + layersList.value,
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -194,11 +200,11 @@ layersList.addEventListener('change', function() {
       break;
 
     case 'TITANIUM':
-      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      viewer.imageryLayers.addImageryProvider(
+      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
+      activeLayer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
-          layers: 'lunar-resources:TITANIUM',
+          layers: 'lunar-resources:' + layersList.value,
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -208,11 +214,11 @@ layersList.addEventListener('change', function() {
       break;
 
     case 'IRON':
-      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      viewer.imageryLayers.addImageryProvider(
+      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
+      activeLayer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: mapServerWmsUrl,
-          layers: 'lunar-resources:IRON',
+          layers: 'lunar-resources:' + layersList.value,
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -222,10 +228,35 @@ layersList.addEventListener('change', function() {
       break;
 
     default:
-      if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
+      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
       break;
   }
+
+  slider.value = 0;
+  info.textContent = '0%';
 })
+
+/*
+    Transparency slider
+*/
+
+const slider = document.getElementById('transparency-slider');
+const info = document.getElementById('transparency-info');
+
+slider.addEventListener('input', function() {
+  if (activeLayer) {
+    activeLayer.alpha = 1 - (slider.value / 100);
+  }
+
+  //let transparency = Math.round(slider.value / 100);
+  //info.textContent = transparency + '% Transparent';
+
+
+  //activeLayer.alpha = 1 - (slider.value / 100); // Update of the opacity of the active layer
+  info.textContent = slider.value + '%';
+
+})
+
 
 /*
     Fonction d'appel d'information de pixel du serveur WMS
