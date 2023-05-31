@@ -2,9 +2,6 @@
 // https://jsfiddle.net/q2vo8nge/
 // https://www.freecodecamp.org/french/news/balise-html-select-comment-creer-un-menu-deroulant-ou-une-liste-deroulante/
 // https://sandcastle.cesium.com/?src=3D%20Tiles%20Next%20S2%20Globe.html
-// https://github.com/CesiumGS/cesium/issues/7953
-// https://sandcastle.cesium.com/?src=Picking.html
-
 
 const Cesium = require('cesium/Cesium');
 require('./css/main.css');
@@ -160,81 +157,45 @@ const mapServerWmsUrl = 'http://localhost:8090/geoserver/lunar-resources/wms';
 let activeLayer;
 
 layersList.addEventListener('change', function() {
+  updateLayerStyle();
+});
+
+const toggleColorSwitch = document.getElementById('toggleColorSwitch');
+let isColorStyle = false;
+
+toggleColorSwitch.addEventListener('change', function() {
+  isColorStyle = !isColorStyle;
+  updateLayerStyle();
+});
+
+function updateLayerStyle() {
+
+  const styleSuffix = isColorStyle ? 'COLOR' : 'GRAY';
 
   if (activeLayer) {
     viewer.imageryLayers.remove(activeLayer);
   }
 
-  switch (layersList.value) {
+  if (layersList.value !== 'BASEMAP') {
+    const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${layersList.value}`;
 
-    case 'BASEMAP':
-      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      break;
-
-    case 'MAGNESIUM':
-      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      activeLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.WebMapServiceImageryProvider({
-          url: mapServerWmsUrl,
-          layers: 'lunar-resources:' + layersList.value,
-          parameters: {
-            transparent: true,
-            format: 'image/png'
-          }
-        })
-      );
-      break;
-
-    case 'CALCIUM':
-      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      activeLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.WebMapServiceImageryProvider({
-          url: mapServerWmsUrl,
-          layers: 'lunar-resources:' + layersList.value,
-          parameters: {
-            transparent: true,
-            format: 'image/png'
-          }
-        })
-      );
-      break;
-
-    case 'TITANIUM':
-      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      activeLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.WebMapServiceImageryProvider({
-          url: mapServerWmsUrl,
-          layers: 'lunar-resources:' + layersList.value,
-          parameters: {
-            transparent: true,
-            format: 'image/png'
-          }
-        })
-      );
-      break;
-
-    case 'IRON':
-      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      activeLayer = viewer.imageryLayers.addImageryProvider(
-        new Cesium.WebMapServiceImageryProvider({
-          url: mapServerWmsUrl,
-          layers: 'lunar-resources:' + layersList.value,
-          parameters: {
-            transparent: true,
-            format: 'image/png'
-          }
-        })
-      );
-      break;
-
-    default:
-      //if (viewer.imageryLayers.length > 1) { viewer.imageryLayers.remove(viewer.imageryLayers.get(1)) };
-      break;
+    activeLayer = viewer.imageryLayers.addImageryProvider(
+      new Cesium.WebMapServiceImageryProvider({
+        url: mapServerWmsUrl,
+        layers: 'lunar-resources:' + layersList.value,
+        parameters: {
+          transparent: true,
+          format: 'image/png',
+          styles: styleName
+        }
+      })
+    );
   }
 
   slider.value = 0;
   info.textContent = '0%';
-})
+
+}
 
 /*
     Transparency slider
@@ -261,7 +222,7 @@ slider.addEventListener('input', function() {
 /*
     Fonction d'appel d'information de pixel du serveur WMS
 */
-//TODO: prendre en charge le "Could not extract pixel value from response: no features were found"
+
 async function getFeatureInfo(longitude, latitude) {
   const url = new Cesium.Resource({
     url: mapServerWmsUrl,
@@ -291,7 +252,6 @@ async function getFeatureInfo(longitude, latitude) {
       if (isNaN(pixelValue)) {
         return null;
       }
-      console.log(pixelValue);
       return pixelValue;
     } else {
       // Missing pixel info detection (eg. other map under)
@@ -302,3 +262,4 @@ async function getFeatureInfo(longitude, latitude) {
     return null;
   }
 }
+
