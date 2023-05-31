@@ -192,30 +192,23 @@ function updateLayerStyle() {
     );
   }
 
-  slider.value = 0;
-  info.textContent = '0%';
+  slider.value = 100;
+  info.textContent = '100%';
 
 }
 
 /*
-    Transparency slider
+    opacity slider
 */
 
-const slider = document.getElementById('transparency-slider');
-const info = document.getElementById('transparency-info');
+const slider = document.getElementById('opacity-slider');
+const info = document.getElementById('opacity-info');
 
 slider.addEventListener('input', function() {
   if (activeLayer) {
-    activeLayer.alpha = 1 - (slider.value / 100);
+    activeLayer.alpha = slider.value / 100;
   }
-
-  //let transparency = Math.round(slider.value / 100);
-  //info.textContent = transparency + '% Transparent';
-
-
-  //activeLayer.alpha = 1 - (slider.value / 100); // Update of the opacity of the active layer
   info.textContent = slider.value + '%';
-
 })
 
 
