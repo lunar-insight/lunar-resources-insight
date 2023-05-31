@@ -128,7 +128,6 @@ input:checked + .slider:before {
   transform: translateX(26px);
 }
 
-/* Arrondir les bords pour le slider */
 .slider.round {
   border-radius: 34px;
 }
