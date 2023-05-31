@@ -1,0 +1,47 @@
+#opacity-slider {
+    position: absolute;
+    top: 50px;
+    right: 50px; 
+    width: 200px;
+    height: 20px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ddd;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .2s;
+  }
+  
+  #opacity-slider:hover {
+    opacity: 1;
+  }
+  
+  #opacity-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+  
+  #opacity-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #4CAF50;
+    cursor: pointer;
+  }
+  
+  #opacity-info {
+    position:absolute;
+    top: 54px;
+    right: 260px;
+    color: #4CAF50
+  }
+  
+  #opacity-slider-title {
+    position: absolute;
+    top: 35px;
+    right: 50px;
+    color: bisque;
+  }

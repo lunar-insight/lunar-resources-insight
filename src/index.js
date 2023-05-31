@@ -4,7 +4,9 @@
 // https://sandcastle.cesium.com/?src=3D%20Tiles%20Next%20S2%20Globe.html
 
 const Cesium = require('cesium/Cesium');
-require('./css/main.css');
+require('./css/main.scss');
+require('./css/opacity.scss');
+require('./css/switch.scss');
 require('cesium/Widgets/widgets.css');
 
 Cesium.Ion.defaultAccessToken = undefined;
