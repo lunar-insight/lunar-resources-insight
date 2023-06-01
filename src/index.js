@@ -1,8 +1,3 @@
-// https://sandcastle.cesium.com/index.html?src=Imagery%20Layers%20Manipulation.html
-// https://jsfiddle.net/q2vo8nge/
-// https://www.freecodecamp.org/french/news/balise-html-select-comment-creer-un-menu-deroulant-ou-une-liste-deroulante/
-// https://sandcastle.cesium.com/?src=3D%20Tiles%20Next%20S2%20Globe.html
-
 const Cesium = require('cesium/Cesium');
 require('./css/main.scss');
 require('./css/opacity.scss');
@@ -23,7 +18,6 @@ const mapProjection = new Cesium.GeographicProjection(ellipsoid);
 const globe = new Cesium.Globe(ellipsoid);
 globe.showGroundAtmosphere = false;
 
-// Define a default blank imageryProvider
 const viewer = new Cesium.Viewer('cesiumContainer', {
   globe: globe,
   mapProjection: mapProjection,
