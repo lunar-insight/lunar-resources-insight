@@ -7,7 +7,11 @@ const Cesium = require('cesium/Cesium');
 require('./css/main.scss');
 require('./css/opacity.scss');
 require('./css/switch.scss');
+require('./css/legend.scss');
 require('cesium/Widgets/widgets.css');
+
+import colorRamp from './image/color-ramp.png';
+import grayRamp from './image/gray-ramp.png';
 
 Cesium.Ion.defaultAccessToken = undefined;
 
@@ -174,6 +178,8 @@ function updateLayerStyle() {
 
   const styleSuffix = isColorStyle ? 'COLOR' : 'GRAY';
 
+  const legendContainer = document.getElementById('legend-container');
+
   if (activeLayer) {
     viewer.imageryLayers.remove(activeLayer);
   }
@@ -192,6 +198,15 @@ function updateLayerStyle() {
         }
       })
     );
+
+    const legendImage = document.getElementById('legend-image');
+
+    if (styleSuffix === 'COLOR') {
+      legendImage.src = colorRamp;
+    } else if (styleSuffix === 'GRAY') {
+      legendImage.src = grayRamp;
+    }
+
   }
 
   slider.value = 100;
