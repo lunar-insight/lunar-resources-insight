@@ -5,12 +5,26 @@
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
 }
 
 #legend-image {
     width: 207px; /* 829/4 */
     height: 15px; /* 60/4 */
+}
+
+#legend-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.ramp-and-value-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100px;
 }
 
 #min-value-label, #max-value-label {

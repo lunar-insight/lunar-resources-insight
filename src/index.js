@@ -183,6 +183,7 @@ function updateLayerStyle() {
   const styleSuffix = isColorStyle ? 'COLOR' : 'GRAY';
 
   const legendContainer = document.getElementById('legend-container');
+  const legentTitle = document.getElementById('legend-title');
 
   if (activeLayer) {
     viewer.imageryLayers.remove(activeLayer);
