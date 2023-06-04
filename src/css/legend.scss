@@ -3,9 +3,17 @@
     top: 0;
     left: 50%;
     transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 #legend-image {
     width: 207px; /* 829/4 */
     height: 15px; /* 60/4 */
+}
+
+#min-value-label, #max-value-label {
+    font-size: 16px;
+    color: #ffffff;
 }

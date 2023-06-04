@@ -120,6 +120,16 @@ handler.setInputAction(async function (movement) {
 }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
 /*
+    MinMax value definition
+*/
+const layerMinMaxValues = {
+  'MAGNESIUM': {min: 2.08, max: 9.60},
+  'IRON': {min: 2.69, max: 27.53},
+  'CALCIUM': {min: 7.12, max: 13.38},
+  'TITANIUM': {min: 0.08, max: 18.45},
+};
+
+/*
     Map selection
 */
 
@@ -178,6 +188,10 @@ function updateLayerStyle() {
     viewer.imageryLayers.remove(activeLayer);
   }
 
+  const legendImage = document.getElementById('legend-image');
+  const minValueLabel = document.getElementById('min-value-label');
+  const maxValueLabel = document.getElementById('max-value-label');
+
   if (layersList.value !== 'BASEMAP') {
     const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${layersList.value}`;
 
@@ -193,14 +207,21 @@ function updateLayerStyle() {
       })
     );
 
-    const legendImage = document.getElementById('legend-image');
-
     if (styleSuffix === 'COLOR') {
       legendImage.src = colorRamp;
     } else if (styleSuffix === 'GRAY') {
       legendImage.src = grayRamp;
     }
 
+    const layerValues = layerMinMaxValues[layersList.value];
+    if (layerValues) {
+      minValueLabel.textContent = layerValues.min;
+      maxValueLabel.textContent = layerValues.max;
+    }
+
+  } else {
+    minValueLabel.textContent = '';
+    maxValueLabel.textContent = '';
   }
 
   slider.value = 100;
