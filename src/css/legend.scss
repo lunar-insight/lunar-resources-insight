@@ -11,6 +11,15 @@
 #legend-image {
     width: 207px; /* 829/4 */
     height: 15px; /* 60/4 */
+    margin: 0 auto;
+}
+
+.legend-and-values {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    position: relative;
 }
 
 #legend-title {
@@ -21,13 +30,21 @@
     text-align: center;
 }
 
-.ramp-and-value-container {
-    display: flex;
-    justify-content: space-between;
-    width: 100px;
-}
-
 #min-value-label, #max-value-label {
     font-size: 16px;
     color: #ffffff;
+}
+
+.value-container {
+    display: flex;
+    text-align: center;
+    width: 30px;
+}
+
+#min-value-label {
+    left: 0;
+}
+
+#max-value-label {
+    right: 0;
 }
