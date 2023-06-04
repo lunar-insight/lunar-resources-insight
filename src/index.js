@@ -34,6 +34,7 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   }),
   timeline: false,
   animation: false,
+  baseLayerPicker: false,
 });
 
 const scene = viewer.scene;
