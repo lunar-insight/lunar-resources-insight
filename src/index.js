@@ -10,12 +10,14 @@ import grayRamp from './image/gray-ramp.png';
 
 Cesium.Ion.defaultAccessToken = undefined;
 
-const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400);
+//const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400);
+const ellipsoid = new Cesium.Ellipsoid(6378137.0, 6378137.0, 6356752.3142);
 
 Cesium.Ellipsoid.WGS84 = ellipsoid;
 const mapProjection = new Cesium.GeographicProjection(ellipsoid);
 
 const globe = new Cesium.Globe(ellipsoid);
+
 globe.showGroundAtmosphere = false;
 
 const viewer = new Cesium.Viewer('cesiumContainer', {
