@@ -160,50 +160,17 @@ layerButtons.forEach(button => {
 
 document.getElementById('BASEMAP').click();
 
-/* const layersList = document.getElementById('layersSelect');
-
-const option0 = document.createElement('option');
-option0.text = 'Basemap';
-option0.value = 'BASEMAP';
-layersList.add(option0);
-
-const option1 = document.createElement('option');
-option1.text = 'Magnesium';
-option1.value = 'MAGNESIUM';
-layersList.add(option1);
-
-const option2 = document.createElement('option');
-option2.text = 'Iron';
-option2.value = 'IRON';
-layersList.add(option2);
-
-const option3 = document.createElement('option');
-option3.text = 'Calcium';
-option3.value = 'CALCIUM';
-layersList.add(option3);
-
-const option4 = document.createElement('option');
-option4.text = 'Titanium';
-option4.value = 'TITANIUM';
-layersList.add(option4);
-
-layersList.selectedIndex = 0; */
-
 const mapServerWmsUrl = 'http://localhost:8090/geoserver/lunar-resources/wms';
 
-let activeLayer;
-
-/* layersList.addEventListener('change', function() {
-  updateLayerStyle();
-}); */
-
-const toggleColorSwitch = document.getElementById('toggleColorSwitch');
+const toggleColorSwitch = document.getElementById('toggle-color-switch');
 let isColorStyle = false;
 
 toggleColorSwitch.addEventListener('change', function() {
   isColorStyle = !isColorStyle;
   updateLayerStyle();
 });
+
+let activeLayer;
 
 function updateLayerStyle() {
 
@@ -318,12 +285,3 @@ async function getFeatureInfo(longitude, latitude) {
     return null;
   }
 }
-
-document.getElementById('toggle-sidebar').addEventListener('click', function() {
-  let sidebar = document.getElementById('sidebar');
-  if (sidebar.classList.contains('hidden')) {
-    sidebar.classList.remove('hidden');
-  } else {
-    sidebar.classList.add('hidden');
-  }
-});
