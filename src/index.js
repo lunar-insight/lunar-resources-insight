@@ -179,7 +179,9 @@ layerButtons.forEach(button => {
 
 document.getElementById('BASEMAP').click();
 
-const mapServerWmsUrl = 'http://localhost:8090/geoserver/lunar-resources/wms';
+/*
+    Layer color switch
+*/
 
 const toggleColorSwitch = document.getElementById('toggle-color-switch');
 let isColorStyle = false;
@@ -188,6 +190,12 @@ toggleColorSwitch.addEventListener('change', function() {
   isColorStyle = !isColorStyle;
   updateLayerStyle();
 });
+
+/*
+    Update layer function
+*/
+
+const mapServerWmsUrl = 'http://localhost:8090/geoserver/lunar-resources/wms';
 
 let activeLayer;
 
