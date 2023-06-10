@@ -1,0 +1,46 @@
+#main {
+    display: flex;
+}
+
+#sidebar {
+    width: 150px;
+    height: 100vh;
+    padding: 50px 0;
+    background-color: #21252984;
+    overflow: auto;
+    z-index: 1;
+}
+
+#btn-group {
+    position: flex;
+    flex-direction: column;
+    width: 100%;
+    height: calc(100% - 50px);
+}
+  
+.layer-btn {
+    box-sizing: border-box;
+    background-color: #9CAEBC;
+    border: 10px solid #C3C2BE;
+    border-radius: 15px;
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  
+    &:hover {
+        background-color: #91A3B0;
+    }
+  
+    &.selected {
+        background-color: #212529;
+    }
+}
+  

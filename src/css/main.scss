@@ -11,6 +11,7 @@ body {
   width: 100vw;
   height: 50px;
   background-color: #21252984;
+  z-index: 1;
 }
 
 #cesiumContainer {
@@ -19,7 +20,6 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -1;
 }
 
 
@@ -38,36 +38,4 @@ body {
   border: 1px solid beige;
   padding: 5px;
   border-radius: 10px;
-}
-
-#sidebar {
-  position: absolute;
-  top: 50px;
-  left: 0;
-  width: 250px;
-  height: calc(100vh - 50px);
-  background-color: #21252984;
-  transition: transform 0.3s ease-in-out;
-
-  &.hidden {
-    transform: translateX(-100%);
-  }
-}
-
-#toggle-sidebar {
-  position: fixed;
-  top: 10px; // Ajoutez la position où vous voulez que le bouton apparaisse
-  left: 10px;
-  padding: 10px 20px;
-  background-color: #21252984;
-  border: none;
-  border-radius: 5px;
-  color: white;
-  font-size: 1em;
-  cursor: pointer;
-  transition: background-color 0.3s ease-in-out;
-
-  &:hover {
-    background-color: #212529;
-  }
 }

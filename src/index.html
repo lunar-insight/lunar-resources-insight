@@ -11,42 +11,41 @@
 
 <body>
 
-  <div id="top-bar"></div>
+  <div id="main">
+    <div id="sidebar">
+      <div id="btn-group" class="btn-group"></div>
+    </div>
+    
+    <div id="top-bar"></div>
 
-  <div id="cesiumContainer"></div>
+    <div id="cesiumContainer"></div>
+  
 
-  <div id="layersSelectContainer">
-    <label for="layersSelect">Choose a layer:</label>
-    <select id="layersSelect" size="5"></select>
-  </div>
+    <div id="opacity-slider-title">Transparency</div>
 
-  <div id="opacity-slider-title">Transparency</div>
+    <div id="opacityToolbar">
+      <input type="range" min="0" max="100" value="100" step="1" id="opacity-slider">
+      <span id="opacity-info">100%</span>
+    </div>
 
-  <div id="opacityToolbar">
-    <input type="range" min="0" max="100" value="100" step="1" id="opacity-slider">
-    <span id="opacity-info">100%</span>
-  </div>
+    <label class="switch">
+      <input type="checkbox" id="toggleColorSwitch">
+      <span class="slider round"></span>
+    </label>
 
-  <label class="switch">
-    <input type="checkbox" id="toggleColorSwitch">
-    <span class="slider round"></span>
-  </label>
-
-  <div id="legend-container">
-    <p id="legend-title">Colorimetry value in weight percent (wt.%)</p>
-    <div class="legend-and-values">
-      <div class="value-container">
-        <span id="min-value-label"></span>
-      </div>
-      <img id="legend-image" src="">
-      <div class="value-container">
-        <span id="max-value-label"></span>
+    <div id="legend-container">
+      <p id="legend-title">Colorimetry value in weight percent (wt.%)</p>
+      <div class="legend-and-values">
+        <div class="value-container">
+          <span id="min-value-label"></span>
+        </div>
+        <img id="legend-image" src="">
+        <div class="value-container">
+          <span id="max-value-label"></span>
+        </div>
       </div>
     </div>
   </div>
-
-  <button id="toggle-sidebar">Toggle Sidebar</button>
-  <div id="sidebar"></div>
 
 </body>
 

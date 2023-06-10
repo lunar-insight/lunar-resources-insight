@@ -3,6 +3,7 @@ require('./css/main.scss');
 require('./css/opacity.scss');
 require('./css/switch.scss');
 require('./css/legend.scss');
+require('./css/sidebar.scss');
 require('cesium/Widgets/widgets.css');
 
 import colorRamp from './image/color-ramp.png';
@@ -136,7 +137,30 @@ const layerMinMaxValues = {
     Map selection
 */
 
-const layersList = document.getElementById('layersSelect');
+let selectedValue;
+
+const layerNames = ['BASEMAP', 'MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
+const html = layerNames.map(name => `<button id="${name}" class="layer-btn">${name}</button>`).join('');
+document.getElementById('btn-group').innerHTML = html;
+
+const layerButtons = document.querySelectorAll('.layer-btn');
+
+layerButtons.forEach(button => {
+  button.addEventListener('click', function() {
+    if(this.classList.contains('selected')) {
+      return;
+    }
+    layerButtons.forEach(btn => {
+      btn.classList.remove('selected');
+    });
+    this.classList.add('selected');
+    updateLayerStyle();
+  });
+});
+
+document.getElementById('BASEMAP').click();
+
+/* const layersList = document.getElementById('layersSelect');
 
 const option0 = document.createElement('option');
 option0.text = 'Basemap';
@@ -163,15 +187,15 @@ option4.text = 'Titanium';
 option4.value = 'TITANIUM';
 layersList.add(option4);
 
-layersList.selectedIndex = 0;
+layersList.selectedIndex = 0; */
 
 const mapServerWmsUrl = 'http://localhost:8090/geoserver/lunar-resources/wms';
 
 let activeLayer;
 
-layersList.addEventListener('change', function() {
+/* layersList.addEventListener('change', function() {
   updateLayerStyle();
-});
+}); */
 
 const toggleColorSwitch = document.getElementById('toggleColorSwitch');
 let isColorStyle = false;
@@ -186,7 +210,7 @@ function updateLayerStyle() {
   const styleSuffix = isColorStyle ? 'COLOR' : 'GRAY';
 
   const legendContainer = document.getElementById('legend-container');
-  const legentTitle = document.getElementById('legend-title');
+  const legendTitle = document.getElementById('legend-title');
 
   if (activeLayer) {
     viewer.imageryLayers.remove(activeLayer);
@@ -196,13 +220,16 @@ function updateLayerStyle() {
   const minValueLabel = document.getElementById('min-value-label');
   const maxValueLabel = document.getElementById('max-value-label');
 
-  if (layersList.value !== 'BASEMAP') {
-    const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${layersList.value}`;
+  const selectedElement = document.querySelector('.selected');
+  selectedValue = selectedElement ? selectedElement.id : null;
+
+  if (selectedValue && selectedValue !== 'BASEMAP') {
+    const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${selectedValue}`;
 
     activeLayer = viewer.imageryLayers.addImageryProvider(
       new Cesium.WebMapServiceImageryProvider({
         url: mapServerWmsUrl,
-        layers: 'lunar-resources:' + layersList.value,
+        layers: 'lunar-resources:' + selectedValue,
         parameters: {
           transparent: true,
           format: 'image/png',
@@ -217,7 +244,7 @@ function updateLayerStyle() {
       legendImage.src = grayRamp;
     }
 
-    const layerValues = layerMinMaxValues[layersList.value];
+    const layerValues = layerMinMaxValues[selectedValue];
     if (layerValues) {
       minValueLabel.textContent = layerValues.min;
       maxValueLabel.textContent = layerValues.max;
@@ -259,14 +286,14 @@ async function getFeatureInfo(longitude, latitude) {
       service: "WMS",
       version: "1.1.1",
       request: "GetFeatureInfo",
-      layers: 'lunar-resources:'+layersList.value,
+      layers: 'lunar-resources:'+selectedValue,
       styles: "",
       srs: "EPSG:4326",
       format: "image/png",
       bbox: `${longitude - 0.1},${latitude - 0.1},${longitude + 0.1},${latitude + 0.1}`,
       width: 2,
       height: 2,
-      query_layers: 'lunar-resources:'+layersList.value,
+      query_layers: 'lunar-resources:'+selectedValue,
       info_format: "text/plain",
       x: 1,
       y: 1,

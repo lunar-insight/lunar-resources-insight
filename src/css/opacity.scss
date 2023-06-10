@@ -3,6 +3,7 @@
   top: 0px;
   right: 25%;
   color: bisque;
+  z-index: 2;
 }
 
 #opacityToolbar {
@@ -12,6 +13,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  z-index: 2;
 
   #opacity-slider {
       width: 200px;
