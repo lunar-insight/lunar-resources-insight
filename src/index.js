@@ -137,10 +137,29 @@ const layerMinMaxValues = {
     Map selection
 */
 
+const layerNames = ['BASEMAP', 'MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
+
+const layerData = {
+  'BASEMAP': {name: 'Basemap', number: '', symbol: '', mass: ''},
+  'MAGNESIUM': {name: 'Magnesium', number: '12', symbol: 'Mg', mass: '24,3055'},
+  'IRON': {name: 'Iron', number: '26', symbol: 'Fe', mass: '55,845 (2)'},
+  'CALCIUM': {name: 'Calcium', number: '20', symbol: 'Ca', mass: '40,078 (4)'},
+  'TITANIUM': {name: 'Titanium', number: '22', symbol: 'Ti', mass: '47,867 (1)'},
+};
+
+const html = layerNames.map(name => {
+  const data = layerData[name];
+  return `
+    <button id="${name}" class="layer-btn">
+      <div class="name">${data ? data.name : name}</div>
+      <div class="number">${data ? data.number : ''}</div>
+      <div class="symbol">${data ? data.symbol : ''}</div>
+      <div class="mass">${data ? data.mass : ''}</div>
+    </button>`;
+}).join('');
+
 let selectedValue;
 
-const layerNames = ['BASEMAP', 'MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
-const html = layerNames.map(name => `<button id="${name}" class="layer-btn">${name}</button>`).join('');
 document.getElementById('btn-group').innerHTML = html;
 
 const layerButtons = document.querySelectorAll('.layer-btn');

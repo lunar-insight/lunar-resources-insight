@@ -19,6 +19,7 @@
 }
   
 .layer-btn {
+    position: relative;
     box-sizing: border-box;
     background-color: rgba(156, 174, 188, 0);
     border: 10px solid #C3C2BE;
@@ -26,14 +27,45 @@
     color: white;
     padding: 10px;
     cursor: pointer;
-    width: 100px;
-    height: 100px;
+    width: 125px;
+    height: 125px;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
     margin-top: 5px;
     margin-bottom: 5px;
+
+    .name {
+        position: absolute;
+        top: 2px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .number {
+        position: absolute;
+        top: 20px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .symbol {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        font-weight: bold;
+        font-size: 25px;
+    }
+
+    .mass {
+        position: absolute;
+        bottom: 2px;
+        width: 100%;
+        text-align: center;
+    }
   
     &:hover {
         background-color: rgba(145, 163, 176, 0.5);
