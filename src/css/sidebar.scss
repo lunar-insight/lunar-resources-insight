@@ -3,6 +3,7 @@
 }
 
 #sidebar {
+    box-sizing: border-box;
     width: 150px;
     height: 100vh;
     padding: 50px 0;
@@ -38,33 +39,26 @@
 
     .name {
         position: absolute;
-        top: 2px;
+        top: 65%;
         width: 100%;
         text-align: center;
     }
 
     .number {
         position: absolute;
-        top: 20px;
-        width: 100%;
+        left: 5px;
+        top: 5px;
         text-align: center;
     }
 
     .symbol {
         position: absolute;
-        top: 50%;
+        top: 45%;
         left: 50%;
         transform: translate(-50%, -50%);
         text-align: center;
         font-weight: bold;
-        font-size: 25px;
-    }
-
-    .mass {
-        position: absolute;
-        bottom: 2px;
-        width: 100%;
-        text-align: center;
+        font-size: 30px;
     }
   
     &:hover {

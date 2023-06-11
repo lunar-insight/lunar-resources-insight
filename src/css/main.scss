@@ -12,6 +12,19 @@ body {
   height: 50px;
   background-color: #21252984;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 25px;
+  background-color: #21252984;
+  z-index: 1;
 }
 
 #cesiumContainer {
@@ -29,13 +42,21 @@ body {
   left: 10px;
 }
 
-.mouseDataQueryCheckbox {
+.mouse-data-query-checkbox {
   margin: 10px;
 }
 
-.labelMouseDataQueryCheckbox {
+.label-mouse-data-query-checkbox {
   color: grey;
   border: 1px solid beige;
   padding: 5px;
   border-radius: 10px;
+}
+
+#coords {
+  padding: 5px;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  z-index: 2;
 }

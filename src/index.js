@@ -55,6 +55,16 @@ viewer.scene.shadowMap.enabled = false;
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
 /*
+
+  Bottom bar information
+*/
+/*
+const coordsDiv = document.createElement('div');
+coordsDiv.id = 'coords';
+coordsDiv.style.textAlign = 'center';
+document.getElementById('bottom-bar').appendChild(coordsDiv);
+*/
+/*
     Mouse
 */
 
@@ -70,7 +80,7 @@ const entity = viewer.entities.add({
     pixelOffset: new Cesium.Cartesian2(15, 0),
   },
 });
-
+/*
 const mouseCheckbox = document.createElement('input');
 mouseCheckbox.type = "checkbox";
 mouseCheckbox.checked = true;
@@ -85,13 +95,16 @@ label.appendChild(document.createTextNode('Cursor Data Query'));
 const toolbar = document.getElementsByClassName('cesium-viewer-toolbar')[0];
 toolbar.appendChild(mouseCheckbox);
 toolbar.appendChild(label);
+*/
+const coordsDiv = document.getElementById('coords');
 
+const mouseCheckbox = document.getElementById('mouse-data-checkbox');
 handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
 scene.canvas.setAttribute('willReadFrequently', 'true');
 
 handler.setInputAction(async function (movement) {
   const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, scene.globe.ellipsoid);
-  if (cartesian && mouseCheckbox.checked) {
+  if (cartesian) {
     const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
     const longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
     const latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
@@ -99,27 +112,29 @@ handler.setInputAction(async function (movement) {
     const longSign = Number(longitudeString) > 0 ? ' ' : '';
     const latSign = Number(latitudeString) > 0 ? ' ' : '';
 
-    entity.position = cartesian;
-    entity.label.show = true;
+    coordsDiv.innerText =
+    `Latitude: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0`+
+    `, Longitude: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0`;
 
-    const pixelValue = await getFeatureInfo(
-      parseFloat(longitudeString),
-      parseFloat(latitudeString)
-    );
+    const pixelValuePromise = getFeatureInfo(parseFloat(longitudeString), parseFloat(latitudeString));
 
-    if (pixelValue !== null) {
-      entity.label.text =
-        `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
-        `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0` +
-        `\nValue: ${pixelValue.toFixed(2)} wt.%`;
-    } else {
-      entity.label.text =
-        `Lon: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0` +
-        `\nLat: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0` +
-        `\nValue: N/A`;
-    }
+    pixelValuePromise.then((pixelValue) => {
+      entity.position = cartesian;
+
+      if (mouseCheckbox.checked) {
+        entity.label.show = true;
+        
+        if (pixelValue !== null) {
+          entity.label.text = `${pixelValue.toFixed(2)} wt.%`;
+        } else {
+          entity.label.text = `N/A`;
+        }
+      } else {
+        entity.label.show = false;
+      }
+    });
   } else {
-    entity.label.show = false;
+    coordsDiv.innerText = '';
   }
 }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
@@ -140,11 +155,11 @@ const layerMinMaxValues = {
 const layerNames = ['BASEMAP', 'MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
 
 const layerData = {
-  'BASEMAP': {name: 'Basemap', number: '', symbol: '', mass: ''},
-  'MAGNESIUM': {name: 'Magnesium', number: '12', symbol: 'Mg', mass: '24,3055'},
-  'IRON': {name: 'Iron', number: '26', symbol: 'Fe', mass: '55,845 (2)'},
-  'CALCIUM': {name: 'Calcium', number: '20', symbol: 'Ca', mass: '40,078 (4)'},
-  'TITANIUM': {name: 'Titanium', number: '22', symbol: 'Ti', mass: '47,867 (1)'},
+  'BASEMAP': {name: 'Basemap', number: '', symbol: ''},
+  'MAGNESIUM': {name: 'Magnesium', number: '12', symbol: 'Mg'},
+  'IRON': {name: 'Iron', number: '26', symbol: 'Fe'},
+  'CALCIUM': {name: 'Calcium', number: '20', symbol: 'Ca'},
+  'TITANIUM': {name: 'Titanium', number: '22', symbol: 'Ti'},
 };
 
 const html = layerNames.map(name => {
@@ -154,7 +169,6 @@ const html = layerNames.map(name => {
       <div class="name">${data ? data.name : name}</div>
       <div class="number">${data ? data.number : ''}</div>
       <div class="symbol">${data ? data.symbol : ''}</div>
-      <div class="mass">${data ? data.mass : ''}</div>
     </button>`;
 }).join('');
 
