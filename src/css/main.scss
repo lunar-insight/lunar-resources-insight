@@ -4,6 +4,10 @@ body {
   padding: 0;
 }
 
+#main {
+  display: flex;
+}
+
 #top-bar {
   position: fixed;
   top: 0;

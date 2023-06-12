@@ -3,7 +3,8 @@ require('./css/main.scss');
 require('./css/opacity.scss');
 require('./css/switch.scss');
 require('./css/legend.scss');
-require('./css/sidebar.scss');
+require('./css/left-sidebar.scss');
+require('./css/right-sidebar.scss')
 require('cesium/Widgets/widgets.css');
 
 import colorRamp from './image/color-ramp.png';

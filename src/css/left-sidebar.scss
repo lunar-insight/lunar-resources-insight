@@ -1,8 +1,4 @@
-#main {
-    display: flex;
-}
-
-#sidebar {
+#left-sidebar {
     box-sizing: border-box;
     width: 150px;
     height: 100vh;
@@ -10,6 +6,7 @@
     background-color: #21252984;
     overflow: auto;
     z-index: 1;
+    order: 1;
 }
 
 #btn-group {
