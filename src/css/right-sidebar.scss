@@ -1,0 +1,12 @@
+#right-sidebar {
+    box-sizing: border-box;
+    width: 250px;
+    height: 100vh;
+    height: calc(100vh - 50px - 25px);
+    background-color: #21252984;
+    overflow: auto;
+    z-index: 1;
+    order: 1;
+    margin-top: 50px;
+    margin-bottom: 25px;
+}
