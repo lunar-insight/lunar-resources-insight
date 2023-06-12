@@ -56,16 +56,6 @@ viewer.scene.shadowMap.enabled = false;
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
 /*
-
-  Bottom bar information
-*/
-/*
-const coordsDiv = document.createElement('div');
-coordsDiv.id = 'coords';
-coordsDiv.style.textAlign = 'center';
-document.getElementById('bottom-bar').appendChild(coordsDiv);
-*/
-/*
     Mouse
 */
 
@@ -81,22 +71,7 @@ const entity = viewer.entities.add({
     pixelOffset: new Cesium.Cartesian2(15, 0),
   },
 });
-/*
-const mouseCheckbox = document.createElement('input');
-mouseCheckbox.type = "checkbox";
-mouseCheckbox.checked = true;
-mouseCheckbox.id = "mouseDataCheckbox";
-mouseCheckbox.className = "mouseDataQueryCheckbox";
 
-const label = document.createElement('label');
-label.htmlFor = "mouseDataCheckbox";
-label.className = "labelMouseDataQueryCheckbox"
-label.appendChild(document.createTextNode('Cursor Data Query'));
-
-const toolbar = document.getElementsByClassName('cesium-viewer-toolbar')[0];
-toolbar.appendChild(mouseCheckbox);
-toolbar.appendChild(label);
-*/
 const coordsDiv = document.getElementById('coords');
 
 const mouseCheckbox = document.getElementById('mouse-data-checkbox');
@@ -117,21 +92,19 @@ handler.setInputAction(async function (movement) {
     `Latitude: ${`${latSign}${latitudeString}`.slice(-11)}\u00B0`+
     `, Longitude: ${`${longSign}${longitudeString}`.slice(-11)}\u00B0`;
 
+    entity.position = cartesian;
+    entity.label.show = mouseCheckbox.checked;
+
     const pixelValuePromise = getFeatureInfo(parseFloat(longitudeString), parseFloat(latitudeString));
 
     pixelValuePromise.then((pixelValue) => {
-      entity.position = cartesian;
 
       if (mouseCheckbox.checked) {
-        entity.label.show = true;
-        
         if (pixelValue !== null) {
           entity.label.text = `${pixelValue.toFixed(2)} wt.%`;
         } else {
           entity.label.text = `N/A`;
         }
-      } else {
-        entity.label.show = false;
       }
     });
   } else {
