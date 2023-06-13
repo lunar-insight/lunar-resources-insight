@@ -9,6 +9,12 @@ body {
   justify-content: space-between;
 }
 
+.cesium-viewer-fullscreenContainer {
+  position: relative;
+  z-index: 2;
+}
+
+
 #top-bar {
   position: fixed;
   top: 0;
@@ -20,6 +26,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.cesium-viewer-toolbar {
+  position: relative; 
+  z-index: 2;
 }
 
 #bottom-bar {

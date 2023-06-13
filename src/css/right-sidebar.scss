@@ -1,5 +1,4 @@
 #right-sidebar {
-    box-sizing: border-box;
     width: 250px;
     height: 100vh;
     height: calc(100vh - 50px - 25px);
@@ -9,6 +8,16 @@
     order: 1;
     margin-top: 50px;
     margin-bottom: 25px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    align-items: center;
+}
+
+.option-container {
+    order: -1;
+    width: 100%;
+    text-align: center;
 }
 
 .mouse-data-query-checkbox {
