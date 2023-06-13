@@ -237,8 +237,8 @@ function updateLayerStyle() {
     maxValueLabel.textContent = '';
   }
 
-  slider.value = 100;
-  info.textContent = '100%';
+  slider.value = 0;
+  info.textContent = '0%';
 
 }
 
@@ -251,7 +251,7 @@ const info = document.getElementById('opacity-info');
 
 slider.addEventListener('input', function() {
   if (activeLayer) {
-    activeLayer.alpha = slider.value / 100;
+    activeLayer.alpha = 1 - slider.value / 100;
   }
   info.textContent = slider.value + '%';
 })
