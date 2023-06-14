@@ -143,6 +143,7 @@ const html = layerNames.map(name => {
       <div class="name">${data ? data.name : name}</div>
       <div class="number">${data ? data.number : ''}</div>
       <div class="symbol">${data ? data.symbol : ''}</div>
+      <div class="info-icon material-symbols-outlined">info</div>
     </button>`;
 }).join('');
 
