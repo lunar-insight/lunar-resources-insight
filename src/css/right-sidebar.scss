@@ -25,8 +25,31 @@
 }
   
 .label-mouse-data-query-checkbox {
-    color: grey;
-    border: 1px solid beige;
+    color: #C3C2BE;
+    border: 1px solid #CED4DA;
     padding: 5px;
     border-radius: 10px;
+}
+
+#pointer-selection-group {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+
+    .icon-btn {
+        background: #21252984;
+        border-style: solid;
+        border-width: 2px;
+        border-color: #CED4DA;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+            color: #C3C2BE;
+        }
+    }
 }
