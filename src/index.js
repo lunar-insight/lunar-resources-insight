@@ -126,10 +126,9 @@ const layerMinMaxValues = {
     Map selection
 */
 
-const layerNames = ['BASEMAP', 'MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
+const layerNames = ['MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
 
 const layerData = {
-  'BASEMAP': {name: 'Basemap', number: '', symbol: ''},
   'MAGNESIUM': {name: 'Magnesium', number: '12', symbol: 'Mg'},
   'IRON': {name: 'Iron', number: '26', symbol: 'Fe'},
   'CALCIUM': {name: 'Calcium', number: '20', symbol: 'Ca'},
@@ -166,7 +165,19 @@ layerButtons.forEach(button => {
   });
 });
 
-document.getElementById('BASEMAP').click();
+/*
+    Deselect button
+*/
+
+const deselectBtn = document.getElementById('basemap');
+deselectBtn.addEventListener('click', function() {
+  layerButtons.forEach(btn => {
+    btn.classList.remove('selected');
+  });
+  updateLayerStyle();
+});
+
+deselectBtn.click();
 
 /*
     Layer color switch
