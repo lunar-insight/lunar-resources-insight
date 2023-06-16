@@ -27,6 +27,39 @@
     }
 }
 
+.geo-btn {
+    position: relative;
+    width: 200px;
+    height: 50px;
+    background-size: cover;
+    background-position: center;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid white;
+    border-radius: 15px;
+    color: white;
+    font-size: 17px;
+    
+    /* ajoutez ceci */
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: black;
+        border-radius: 15px;
+        opacity: 0; /* l'élément est complètement transparent par défaut */
+    }
+    
+    &:hover::after {
+        opacity: 0.5; /* ajustez cette valeur pour obtenir le niveau de foncement désiré */
+    }
+}
+
 
 #btn-group {
     position: flex;
@@ -93,4 +126,3 @@
         background-color: #91A3B0;
     }
 }
-  

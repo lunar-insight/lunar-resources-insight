@@ -56,6 +56,21 @@ viewer.scene.shadowMap.enabled = false;
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
 /*
+  Geologic layer button selection
+*/
+
+import geoButton from './image/geologic-button-background.jpg'
+
+let style = document.createElement('style');
+style.innerHTML = `
+  .geo-btn {
+    background-image: url('${geoButton}');
+  }
+`;
+document.head.appendChild(style);
+
+
+/*
     Mouse
 */
 
