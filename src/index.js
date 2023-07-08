@@ -69,6 +69,35 @@ style.innerHTML = `
 `;
 document.head.appendChild(style);
 
+let geologicLayers = [];
+
+document.getElementById("geoButton").addEventListener('click', function () {
+  geologicLayers.forEach(function(layer) {
+    viewer.imageryLayers.remove(layer);
+  });
+  geologicLayers = [];
+
+  const geologicLayerNames = [
+    'GeoUnits',
+    'GeoContacts',
+    'Linear_Features',
+    'Labels_Global'
+  ];
+  
+  geologicLayerNames.forEach(function(layerName) {
+    const layer = viewer.imageryLayers.addImageryProvider(
+      new Cesium.WebMapServiceImageryProvider({
+        url: 'http://localhost:8090/geoserver/lunar-resources/wms',
+        layers: 'lunar-resources:' + layerName,
+        parameters: {
+          transparent: true,
+          format: 'image/png'
+        }
+      })
+    );
+    geologicLayers.push(layer);
+  });
+});
 
 /*
     Mouse
