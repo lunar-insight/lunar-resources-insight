@@ -218,6 +218,10 @@ deselectBtn.addEventListener('click', function() {
   layerButtons.forEach(btn => {
     btn.classList.remove('selected');
   });
+  geologicLayers.forEach(function(layer) {
+    viewer.imageryLayers.remove(layer);
+  })
+  geologicLayers = [];
   updateLayerStyle();
 });
 
