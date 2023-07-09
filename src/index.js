@@ -55,6 +55,13 @@ viewer.scene.shadowMap.enabled = false;
 
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
+
+/*
+================
+SECONDARY LAYERS
+================
+*/
+
 /*
   Geologic layer button selection
 */
@@ -71,7 +78,7 @@ document.head.appendChild(style);
 
 let geologicLayers = [];
 
-document.getElementById("geoButton").addEventListener('click', function () {
+document.getElementById("geo-button").addEventListener('click', function () {
   geologicLayers.forEach(function(layer) {
     viewer.imageryLayers.remove(layer);
   });
@@ -98,6 +105,17 @@ document.getElementById("geoButton").addEventListener('click', function () {
     geologicLayers.push(layer);
   });
 });
+
+document.getElementById("deselect-secondary-layer-button").addEventListener('click', function() {
+  geologicLayers.forEach(function(layer) {
+    viewer.imageryLayers.remove(layer);
+  });
+  geologicLayers = [];
+})
+
+/*
+===========================
+*/
 
 /*
     Mouse
@@ -218,10 +236,6 @@ deselectBtn.addEventListener('click', function() {
   layerButtons.forEach(btn => {
     btn.classList.remove('selected');
   });
-  geologicLayers.forEach(function(layer) {
-    viewer.imageryLayers.remove(layer);
-  })
-  geologicLayers = [];
   updateLayerStyle();
 });
 

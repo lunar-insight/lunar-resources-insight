@@ -13,9 +13,21 @@
     align-items: center;
 }
 
+#secondary-layer-group-title {
+    color: white;
+    z-index: 2;
+    margin: 5px;
+}
 
-.deselect-btn {
+#secondary-layer-button-group {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.deselect-sec-layer-btn {
     position: relative;
+    height: 40px;
     z-index: 2;
     display: flex;
     justify-content: center;
@@ -24,8 +36,15 @@
     border-radius: 15px;
     color: white;
     font-size: 17px;
-    background-color: transparent;
-
+    margin: 15px;
+    background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 5px,
+        #808080 3px,
+        #808080 6px
+    );
+    //background-color: transparent;
     &:hover {
         background-color: rgba(145, 163, 176, 0.5)
     }
@@ -46,8 +65,7 @@
     color: white;
     font-size: 17px;
     margin: 15px;
-    
-    /* ajoutez ceci */
+
     &::after {
         content: "";
         position: absolute;
@@ -57,14 +75,30 @@
         bottom: 0;
         background-color: black;
         border-radius: 15px;
-        opacity: 0; /* l'élément est complètement transparent par défaut */
+        opacity: 0;
     }
     
     &:hover::after {
-        opacity: 0.5; /* ajustez cette valeur pour obtenir le niveau de foncement désiré */
+        opacity: 0.5;
     }
 }
 
+.deselect-btn {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid white;
+    border-radius: 15px;
+    color: white;
+    font-size: 17px;
+    background-color: transparent;
+
+    &:hover {
+        background-color: rgba(145, 163, 176, 0.5)
+    }
+}
 
 #btn-group {
     position: flex;
