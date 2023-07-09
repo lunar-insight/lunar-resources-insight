@@ -24,8 +24,10 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
-    width: calc(100% - 30px);
-    margin: 10px;
+    width: 275px;
+    box-sizing: border-box;
+    padding: 10px;
+    //margin: 10px;
 }
 
 .deselect-sec-layer-btn {
@@ -69,6 +71,7 @@
     border-radius: 15px;
     color: white;
     font-size: 17px;
+    overflow: hidden;
 
     &::after {
         content: "";

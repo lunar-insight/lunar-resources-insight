@@ -79,30 +79,35 @@ document.head.appendChild(style);
 let geologicLayers = [];
 
 document.getElementById("geo-button").addEventListener('click', function () {
-  geologicLayers.forEach(function(layer) {
-    viewer.imageryLayers.remove(layer);
-  });
-  geologicLayers = [];
 
-  const geologicLayerNames = [
-    'GeoUnits',
-    'GeoContacts',
-    'Linear_Features',
-    'Labels_Global'
-  ];
-  
-  geologicLayerNames.forEach(function(layerName) {
-    const layer = viewer.imageryLayers.addImageryProvider(
-      new Cesium.WebMapServiceImageryProvider({
-        url: 'http://localhost:8090/geoserver/lunar-resources/wms',
-        layers: 'lunar-resources:' + layerName,
-        parameters: {
-          transparent: true,
-          format: 'image/png'
-        }
-      })
-    );
-    geologicLayers.push(layer);
+  if (geologicLayers.length === 0) {
+    const geologicLayerNames = [
+      'GeoUnits',
+      'GeoContacts',
+      'Linear_Features',
+      'Labels_Global'
+    ];
+    
+    geologicLayerNames.forEach(function(layerName) {
+      const layer = viewer.imageryLayers.addImageryProvider(
+        new Cesium.WebMapServiceImageryProvider({
+          url: 'http://localhost:8090/geoserver/lunar-resources/wms',
+          layers: 'lunar-resources:' + layerName,
+          parameters: {
+            transparent: true,
+            format: 'image/png'
+          }
+        })
+      );
+      geologicLayers.push(layer);
+    });
+  }
+});
+
+document.getElementById("transparency").addEventListener('input', function() {
+  const transparency = this.value;
+  geologicLayers.forEach(function(layer) {
+    layer.alpha = transparency;
   });
 });
 
