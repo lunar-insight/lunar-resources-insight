@@ -81,6 +81,10 @@ let geologicLayers = [];
 document.getElementById("geo-button").addEventListener('click', function () {
 
   if (geologicLayers.length === 0) {
+
+    let optionContainer = document.getElementById("geo-button-option-container");
+    optionContainer.style.display = "block";
+
     const geologicLayerNames = [
       'GeoUnits',
       'GeoContacts',
@@ -116,6 +120,10 @@ document.getElementById("deselect-secondary-layer-button").addEventListener('cli
     viewer.imageryLayers.remove(layer);
   });
   geologicLayers = [];
+
+  let optionContainer = document.getElementById("geo-button-option-container");
+  optionContainer.style.display = "none";
+
 })
 
 /*
