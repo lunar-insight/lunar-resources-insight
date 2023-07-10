@@ -83,7 +83,11 @@ document.getElementById("geo-button").addEventListener('click', function () {
   if (geologicLayers.length === 0) {
 
     let optionContainer = document.getElementById("geo-button-option-container");
+    optionContainer.classList.add('unfold-animation');
     optionContainer.style.display = "block";
+
+    let transparencyContainer = document.getElementById("transparency-container");
+    transparencyContainer.style.display = "block";
 
     const geologicLayerNames = [
       'GeoUnits',
@@ -123,6 +127,9 @@ document.getElementById("deselect-secondary-layer-button").addEventListener('cli
 
   let optionContainer = document.getElementById("geo-button-option-container");
   optionContainer.style.display = "none";
+
+  let transparencyContainer = document.getElementById("transparency-container");
+  transparencyContainer.style.display = "none";
 
 })
 
