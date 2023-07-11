@@ -394,3 +394,28 @@ async function getFeatureInfo(longitude, latitude) {
     return null;
   }
 }
+
+/*
+  Graph template
+*/
+
+import graphTemplate from "./image/graph-template.jpg"
+
+let styleGraphTemplate = document.createElement('style');
+styleGraphTemplate.innerHTML = `
+  #graph-template-container {
+    background-image: url('${graphTemplate}');
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    bottom: 0;
+    width: calc(100% - 10px);
+    height: calc(200px - 10px);=
+    margin: 5px;
+    opacity: 0.5;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+`;
+document.head.appendChild(styleGraphTemplate);
+
+
