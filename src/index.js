@@ -92,8 +92,7 @@ document.getElementById("geo-button").addEventListener('click', function () {
     const geologicLayerNames = [
       'GeoUnits',
       'GeoContacts',
-      'Linear_Features',
-      'Labels_Global'
+      'Linear_Features'
     ];
     
     geologicLayerNames.forEach(function(layerName) {
