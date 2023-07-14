@@ -133,6 +133,16 @@ document.getElementById("deselect-secondary-layer-button").addEventListener('cli
 
 })
 
+import defaultLayerBackground from "./image/default-layer-background.jpg"
+
+let styleNoneButton = document.createElement('style');
+styleNoneButton.innerHTML = `
+  #deselect-secondary-layer-button {
+    background-image: url('${defaultLayerBackground}');
+  }
+`;
+document.head.appendChild(styleNoneButton);
+
 /*
 ===========================
 */
