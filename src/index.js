@@ -86,13 +86,14 @@ document.getElementById("geo-button").addEventListener('click', function () {
     optionContainer.classList.add('unfold-animation');
     optionContainer.style.display = "block";
 
-    let transparencyContainer = document.getElementById("transparency-container");
+    let transparencyContainer = document.getElementById("transparency-container-geo-btn");
     transparencyContainer.style.display = "block";
+
+    document.getElementById('transparency-geo-btn-value').textContent = '25%'
 
     const geologicLayerNames = [
       'GeoUnits',
-      'GeoContacts',
-      'Linear_Features'
+      'GeoContacts'
     ];
     
     geologicLayerNames.forEach(function(layerName) {
@@ -106,16 +107,21 @@ document.getElementById("geo-button").addEventListener('click', function () {
           }
         })
       );
+      layer.alpha = 0.25;
       geologicLayers.push(layer);
     });
+
+    document.getElementById("transparency").value = 25;
   }
 });
 
 document.getElementById("transparency").addEventListener('input', function() {
   const transparency = this.value;
   geologicLayers.forEach(function(layer) {
-    layer.alpha = transparency;
+    layer.alpha = transparency / 100;
   });
+
+  document.getElementById('transparency-geo-btn-value').textContent = transparency + '%';
 });
 
 document.getElementById("deselect-secondary-layer-button").addEventListener('click', function() {
@@ -127,7 +133,7 @@ document.getElementById("deselect-secondary-layer-button").addEventListener('cli
   let optionContainer = document.getElementById("geo-button-option-container");
   optionContainer.style.display = "none";
 
-  let transparencyContainer = document.getElementById("transparency-container");
+  let transparencyContainer = document.getElementById("transparency-container-geo-btn");
   transparencyContainer.style.display = "none";
 
 })
