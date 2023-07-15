@@ -111,11 +111,11 @@ document.getElementById("geo-button").addEventListener('click', function () {
       geologicLayers.push(layer);
     });
 
-    document.getElementById("transparency").value = 25;
+    document.getElementById("transparency-geo-btn").value = 25;
   }
 });
 
-document.getElementById("transparency").addEventListener('input', function() {
+document.getElementById("transparency-geo-btn").addEventListener('input', function() {
   const transparency = this.value;
   geologicLayers.forEach(function(layer) {
     layer.alpha = transparency / 100;
