@@ -55,6 +55,12 @@ viewer.scene.shadowMap.enabled = false;
 
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
+const chemicalLayerNames = ['MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
+
+const geologicLayerNames = ['GeoUnits', 'GeoContacts'];
+
+let geologicLayerName;
+let chemicalLayerName;
 
 /*
 ================
@@ -90,12 +96,7 @@ document.getElementById("geo-button").addEventListener('click', function () {
     transparencyContainer.style.display = "block";
 
     document.getElementById('transparency-geo-btn-value').textContent = '25%'
-
-    const geologicLayerNames = [
-      'GeoUnits',
-      'GeoContacts'
-    ];
-    
+  
     geologicLayerNames.forEach(function(layerName) {
       const layer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
@@ -110,6 +111,8 @@ document.getElementById("geo-button").addEventListener('click', function () {
       layer.alpha = 0.25;
       geologicLayers.push(layer);
     });
+
+    geologicLayerName = 'GeoUnits';
 
     document.getElementById("transparency-geo-btn").value = 25;
   }
@@ -129,6 +132,8 @@ document.getElementById("deselect-secondary-layer-button").addEventListener('cli
     viewer.imageryLayers.remove(layer);
   });
   geologicLayers = [];
+
+  geologicLayerName = null;
 
   let optionContainer = document.getElementById("geo-button-option-container");
   optionContainer.style.display = "none";
@@ -192,18 +197,45 @@ handler.setInputAction(async function (movement) {
     entity.position = cartesian;
     entity.label.show = mouseCheckbox.checked;
 
-    const pixelValuePromise = getFeatureInfo(parseFloat(longitudeString), parseFloat(latitudeString));
+    const featureInfoPromise = getFeatureInfo(
+      parseFloat(longitudeString),
+      parseFloat(latitudeString),
+      geologicLayerName,
+      chemicalLayerName
+    );
 
-    pixelValuePromise.then((pixelValue) => {
-
+    featureInfoPromise.then((info) => {
+      
       if (mouseCheckbox.checked) {
-        if (pixelValue !== null) {
-          entity.label.text = `${pixelValue.toFixed(2)} wt.%`;
+        if (info != null) {
+          
+          let labelText = '';
+
+          if (info.hasOwnProperty('chemical')) {
+            labelText += `${info.chemical.toFixed(2)} wt.%`;
+            //console.log(`Chemical: ${info.chemical.toFixed(2)} wt.%`);
+          }
+
+          if (info.hasOwnProperty('geologic')) {
+            if (labelText !== '') {
+              labelText += '\n';
+            }
+            labelText += `${info.geologic.firstUn1} (${info.geologic.firstUnit})`;
+            //console.log(`Geologic: ${info.geologic.firstUn1} (${info.geologic.firstUnit})`);
+          }
+
+          if (labelText === '') {
+            labelText = 'No data';
+          }
+
+          entity.label.text = labelText;
+
         } else {
-          entity.label.text = `N/A`;
+          entity.label.text = 'No Data';
         }
       }
     });
+
   } else {
     coordsDiv.innerText = '';
   }
@@ -223,8 +255,6 @@ const layerMinMaxValues = {
     Map selection
 */
 
-const layerNames = ['MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
-
 const layerData = {
   'MAGNESIUM': {name: 'Magnesium', number: '12', symbol: 'Mg'},
   'IRON': {name: 'Iron', number: '26', symbol: 'Fe'},
@@ -232,7 +262,7 @@ const layerData = {
   'TITANIUM': {name: 'Titanium', number: '22', symbol: 'Ti'},
 };
 
-const html = layerNames.map(name => {
+const html = chemicalLayerNames.map(name => {
   const data = layerData[name];
   return `
     <button id="${name}" class="layer-btn">
@@ -341,9 +371,13 @@ function updateLayerStyle() {
       maxValueLabel.textContent = layerValues.max;
     }
 
+    chemicalLayerName = selectedValue;
+
   } else {
     minValueLabel.textContent = '';
     maxValueLabel.textContent = '';
+
+    chemicalLayerName = null;
   }
 
   slider.value = 100;
@@ -370,22 +404,47 @@ slider.addEventListener('input', function() {
     Fonction d'appel d'information de pixel du serveur WMS
 */
 
-async function getFeatureInfo(longitude, latitude) {
+async function getFeatureInfo(longitude, latitude, geologicLayer = null, chemicalLayer = null) {
+
+  let results = {};
+
+  if (geologicLayer) {
+    const geologicInfo = await getLayerInfo(longitude, latitude, geologicLayer);
+    if (geologicInfo) {
+      results.geologic = geologicInfo;
+    }
+  }
+
+  if (chemicalLayer) {
+    const chemicalInfo = await getLayerInfo(longitude, latitude, chemicalLayer);
+    if (chemicalInfo) {
+      results.chemical = chemicalInfo;
+    }
+  }
+
+  if (Object.keys(results).length > 0) {
+    return results;
+  } else {
+    return null;
+  }
+}
+
+async function getLayerInfo(longitude, latitude, layerName) {
   const url = new Cesium.Resource({
     url: mapServerWmsUrl,
     queryParameters: {
       service: "WMS",
       version: "1.1.1",
       request: "GetFeatureInfo",
-      layers: 'lunar-resources:'+selectedValue,
+      layers: 'lunar-resources:' + layerName,
       styles: "",
       srs: "EPSG:4326",
       format: "image/png",
       bbox: `${longitude - 0.1},${latitude - 0.1},${longitude + 0.1},${latitude + 0.1}`,
       width: 2,
       height: 2,
-      query_layers: 'lunar-resources:'+selectedValue,
-      info_format: "text/plain",
+      query_layers: 'lunar-resources:' + layerName,
+      info_format: "application/json",
       x: 1,
       y: 1,
     },
@@ -393,22 +452,31 @@ async function getFeatureInfo(longitude, latitude) {
 
   try {
     const responseText = await url.fetch();
-    const match = responseText.match(/VALUE = (\d+\.\d+|NaN)/);
-    if (match && match[1]) {
-      const pixelValue = parseFloat(match[1]);
-      if (isNaN(pixelValue)) {
-        return null;
+    const responseJson = JSON.parse(responseText);
+
+    if (responseJson.features && responseJson.features.length > 0) {
+      const feature = responseJson.features[0];
+
+      // Geologic data processing
+      if (feature.properties.FIRST_Un_1 && feature.properties.FIRST_Unit) {
+        const firstUn1 = feature.properties.FIRST_Un_1;
+        const firstUnit = feature.properties.FIRST_Unit;
+        return {firstUn1, firstUnit};
       }
-      return pixelValue;
-    } else {
-      // Missing pixel info detection (eg. other map under)
-      return null;
+
+      // Chemical data processing
+      if (!isNaN(parseFloat(feature.properties.VALUE))) {
+        const pixelValue = parseFloat(feature.properties.VALUE);
+        return pixelValue;
+      }
     }
+
+    return null;
   } catch (error) {
     console.error("Error fetching GetFeatureInfo:", error);
     return null;
   }
-}
+};
 
 /*
   Graph template
