@@ -158,6 +158,29 @@ document.head.appendChild(styleNoneButton);
 */
 
 /*
+    Throttling
+*/
+
+let isRequestInProgress = false;
+let lastInfo = null;
+
+async function getFeatureInfoThrottled(longitude, latitude, geologicLayer, chemicalLayer) {
+  if (isRequestInProgress) {
+    return lastInfo;
+  }
+
+  isRequestInProgress = true;
+
+  lastInfo = await getFeatureInfo(longitude, latitude, geologicLayer, chemicalLayer);
+
+  await new Promise(resolve => setTimeout(resolve, 25));
+
+  isRequestInProgress = false;
+
+  return lastInfo;
+}
+
+/*
     Mouse
 */
 
@@ -197,7 +220,7 @@ handler.setInputAction(async function (movement) {
     entity.position = cartesian;
     entity.label.show = mouseCheckbox.checked;
 
-    const featureInfoPromise = getFeatureInfo(
+    const featureInfoPromise = getFeatureInfoThrottled(
       parseFloat(longitudeString),
       parseFloat(latitudeString),
       geologicLayerName,
