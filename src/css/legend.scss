@@ -1,12 +1,21 @@
 #legend-container {
+
     position: fixed;
     top: 0;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(-50%) translateY(-100%);
     display: flex;
     align-items: center;
     flex-direction: column;
     z-index: 2;
+    opacity: 0;
+    transition: transform 0.5s, opacity 0.5s;
+
+    &.active {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+ 
+    }
 
     #legend-title {
         font-size: 16px;

@@ -379,6 +379,7 @@ function updateLayerStyle() {
   selectedValue = selectedElement ? selectedElement.id : null;
 
   if (selectedValue && selectedValue !== 'BASEMAP') {
+
     const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${selectedValue}`;
 
     activeLayer = viewer.imageryLayers.addImageryProvider(
@@ -407,11 +408,15 @@ function updateLayerStyle() {
 
     chemicalLayerName = selectedValue;
 
+    legendContainer.classList.add('active');
+
   } else {
     minValueLabel.textContent = '';
     maxValueLabel.textContent = '';
 
     chemicalLayerName = null;
+
+    legendContainer.classList.remove('active');
   }
 
   slider.value = 100;
