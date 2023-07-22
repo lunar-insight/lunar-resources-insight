@@ -200,12 +200,21 @@ const entity = viewer.entities.add({
 const coordsDiv = document.getElementById('coords');
 
 const mouseCheckbox = document.getElementById('mouse-data-checkbox');
+
+let mouseOverGlobe = false;
+
+mouseCheckbox.addEventListener('change', function() {
+  entity.label.show = this.checked && mouseOverGlobe;
+});
+
+
 handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
 scene.canvas.setAttribute('willReadFrequently', 'true');
 
 handler.setInputAction(async function (movement) {
   const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, scene.globe.ellipsoid);
   if (cartesian) {
+    mouseOverGlobe = true;
     const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
     const longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
     const latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
@@ -262,6 +271,7 @@ handler.setInputAction(async function (movement) {
   } else {
     coordsDiv.innerText = '';
     entity.label.show = false;
+    mouseOverGlobe = false;
   }
 }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
