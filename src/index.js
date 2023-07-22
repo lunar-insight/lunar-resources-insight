@@ -440,7 +440,7 @@ async function getLayerInfo(longitude, latitude, layerName) {
       styles: "",
       srs: "EPSG:4326",
       format: "image/png",
-      bbox: `${longitude - 0.1},${latitude - 0.1},${longitude + 0.1},${latitude + 0.1}`,
+      bbox: `${longitude - 0.000001},${latitude - 0.000001},${longitude + 0.000001},${latitude + 0.000001}`,
       width: 2,
       height: 2,
       query_layers: 'lunar-resources:' + layerName,
