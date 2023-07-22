@@ -261,6 +261,7 @@ handler.setInputAction(async function (movement) {
 
   } else {
     coordsDiv.innerText = '';
+    entity.label.show = false;
   }
 }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
 
