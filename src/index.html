@@ -32,6 +32,9 @@
     </div>
 
     <div id="right-sidebar">
+      
+      <div class=cesium-viewer-toolbar></div>
+
       <div class="option-container">
         <input type="checkbox" id="mouse-data-checkbox" class="mouse-data-query-checkbox" checked>
         <label for="mouse-data-checkbox" class="label-mouse-data-query-checkbox">Cursor Data Query</label>
@@ -42,28 +45,27 @@
         <button class="icon-btn"><span class="material-symbols-outlined">pen_size_2</span></button>
         <button class="icon-btn"><span class="material-symbols-outlined">activity_zone</span></button>
       </div>
+      
+      <label class="switch">
+        <input type="checkbox" id="toggle-color-switch">
+        <span class="slider round"></span>
+      </label>
+      
+      <div id="opacity-slider-title">Opacity</div>
+
+      <div id="opacity-toolbar">
+        <input type="range" min="0" max="100" value="100" step="1" id="opacity-slider">
+        <span id="opacity-info">100%</span>
+      </div>
+
       <div id="graph-template-container"></div>
-    </div>
-    
-    <div id="top-bar">
-      <div class=cesium-viewer-toolbar></div>
     </div>
 
     <div id="bottom-bar">
       <div id="coords"></div>
     </div>
-      
-    </div>
 
     <div id="cesiumContainer"></div>
-  
-
-    <div id="opacity-slider-title">Opacity</div>
-
-    <div id="opacity-toolbar">
-      <input type="range" min="0" max="100" value="100" step="1" id="opacity-slider">
-      <span id="opacity-info">100%</span>
-    </div>
 
     <div id="legend-container">
       <p id="legend-title">Colorimetry value in weight percent (wt.%)</p>
@@ -77,11 +79,6 @@
         </div>
       </div>
     </div>
-
-    <label class="switch">
-      <input type="checkbox" id="toggle-color-switch">
-      <span class="slider round"></span>
-    </label>
 
   </div>
 

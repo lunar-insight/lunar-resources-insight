@@ -1,22 +1,22 @@
 #opacity-slider-title {
   position: absolute;
-  top: 0px;
-  right: 25%;
+  top: 140px;
+  right: 100px;
   color: bisque;
   z-index: 2;
 }
 
 #opacity-toolbar {
   position: absolute;
-  left: 70%;
-  top: 10px;
+  top: 160px;
+  left: 10px;
   display: flex;
   align-items: center;
   gap: 10px;
   z-index: 2;
 
   #opacity-slider {
-      width: 200px;
+      width: 180px;
       height: 20px;
       -webkit-appearance: none;
       appearance: none;

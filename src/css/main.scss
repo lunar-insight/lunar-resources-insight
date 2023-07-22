@@ -14,25 +14,6 @@ body {
   z-index: 2;
 }
 
-
-#top-bar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 50px;
-  background-color: #21252984;
-  z-index: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.cesium-viewer-toolbar {
-  position: relative; 
-  z-index: 2;
-}
-
 #bottom-bar {
   position: fixed;
   bottom: 0;

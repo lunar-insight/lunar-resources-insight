@@ -1,11 +1,10 @@
 #left-sidebar {
     box-sizing: border-box;
     width: 275px;
-    height: calc(100vh - 50px - 25px);
+    height: calc(100vh - 25px);
     background-color: #21252984;
     overflow: auto;
     z-index: 1;
-    margin-top: 50px;
     margin-bottom: 25px;
     display: flex;
     flex-direction: column;
