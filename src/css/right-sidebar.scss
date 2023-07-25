@@ -1,5 +1,5 @@
 #right-sidebar {
-    width: 250px;
+    width: 15vw;
     height: 100vh;
     height: calc(100vh - 25px);
     background-color: #21252984;
@@ -14,13 +14,14 @@
 }
 
 .cesium-viewer-toolbar {
-    position: relative; 
-    z-index: 2;
+    z-index: 1;
 }
 
 .option-container {
-    order: -1;
+    position: relative;
+    top: 50px;
     width: 100%;
+    height: 10vh;
     text-align: center;
 }
 

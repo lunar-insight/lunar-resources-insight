@@ -1,13 +1,12 @@
 #opacity-slider-title {
-  position: absolute;
+  position: relative;
   top: 140px;
-  right: 100px;
   color: bisque;
   z-index: 2;
 }
 
 #opacity-toolbar {
-  position: absolute;
+  position: relative;
   top: 160px;
   left: 10px;
   display: flex;
