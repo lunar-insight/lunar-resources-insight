@@ -215,9 +215,8 @@ handler.setInputAction(async function (movement) {
   const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, scene.globe.ellipsoid);
   if (cartesian) {
     mouseOverGlobe = true;
-    const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
-    const longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
-    const latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
+
+    const {longitudeString, latitudeString} = convertCoordinates(cartesian);
 
     const longSign = Number(longitudeString) > 0 ? ' ' : '';
     const latSign = Number(latitudeString) > 0 ? ' ' : '';
@@ -274,6 +273,18 @@ handler.setInputAction(async function (movement) {
     mouseOverGlobe = false;
   }
 }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+/*
+    Convert Coordinate
+*/
+
+function convertCoordinates(cartesian) {
+  const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+  const longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
+  const latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
+
+  return {longitudeString, latitudeString};
+}
 
 /*
     MinMax value definition
