@@ -320,8 +320,8 @@ handler.setInputAction((click) => {
         polyline = viewer.entities.add({
           name: 'Polyline',
           polyline: {
-            positions: new Cesium.CallbackProperty(() => polylinePositions, false),
-            width: 1,
+            positions: new Cesium.CallbackProperty(() => [...polylinePositions], false),
+            width: 3,
             material: Cesium.Color.CYAN,
           }
         });
