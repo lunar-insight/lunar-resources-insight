@@ -40,6 +40,7 @@
     display: flex;
     justify-content: space-around;
     width: 100%;
+    z-index: 2;
 
     .icon-btn {
         background: #21252984;
@@ -55,6 +56,10 @@
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
             color: #C3C2BE;
+        }
+
+        &.selected {
+            background: rgb(61, 61, 80);
         }
     }
 }

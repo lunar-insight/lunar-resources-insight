@@ -39,6 +39,7 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   timeline: false,
   animation: false,
   baseLayerPicker: false,
+  infoBox: false,
 });
 
 const scene = viewer.scene;
@@ -285,6 +286,49 @@ function convertCoordinates(cartesian) {
 
   return {longitudeString, latitudeString};
 }
+
+/*
+  Polyline
+*/
+
+const polylineButton = document.getElementById('polyline-button');
+
+let isPolylineDrawing = false;
+let polyline = null;
+let polylinePositions = [];
+
+polylineButton.addEventListener('click', () => {
+  isPolylineDrawing = !isPolylineDrawing;
+
+  if (isPolylineDrawing) {
+    polylineButton.classList.add('selected');
+  } else {
+    polylineButton.classList.remove('selected');
+  }
+});
+
+handler.setInputAction((click) => {
+  if (isPolylineDrawing) {
+    const cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
+
+    if (Cesium.defined(cartesian)) {
+      const {longitudeString, latitudeString} = convertCoordinates(cartesian);
+
+      polylinePositions.push(cartesian);
+
+      if (!polyline) {
+        polyline = viewer.entities.add({
+          name: 'Polyline',
+          polyline: {
+            positions: new Cesium.CallbackProperty(() => polylinePositions, false),
+            width: 1,
+            material: Cesium.Color.CYAN,
+          }
+        });
+      }
+    }
+  }
+}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 /*
     MinMax value definition
