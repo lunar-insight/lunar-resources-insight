@@ -217,7 +217,7 @@ handler.setInputAction(async function (movement) {
   if (cartesian) {
     mouseOverGlobe = true;
 
-    const {longitudeString, latitudeString} = convertCoordinates(cartesian);
+    const {longitudeString, latitudeString} = convertCoordinatesToFixed(cartesian);
 
     const longSign = Number(longitudeString) > 0 ? ' ' : '';
     const latSign = Number(latitudeString) > 0 ? ' ' : '';
@@ -245,7 +245,6 @@ handler.setInputAction(async function (movement) {
 
           if (info.hasOwnProperty('chemical')) {
             labelText += `${info.chemical.toFixed(2)} wt.%`;
-            //console.log(`Chemical: ${info.chemical.toFixed(2)} wt.%`);
           }
 
           if (info.hasOwnProperty('geologic')) {
@@ -253,7 +252,6 @@ handler.setInputAction(async function (movement) {
               labelText += '\n';
             }
             labelText += `${info.geologic.firstUn1} (${info.geologic.firstUnit})`;
-            //console.log(`Geologic: ${info.geologic.firstUn1} (${info.geologic.firstUnit})`);
           }
 
           if (labelText === '') {
@@ -280,6 +278,14 @@ handler.setInputAction(async function (movement) {
 */
 
 function convertCoordinates(cartesian) {
+  const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
+  const longitudeString = Cesium.Math.toDegrees(cartographic.longitude);
+  const latitudeString = Cesium.Math.toDegrees(cartographic.latitude);
+
+  return {longitudeString, latitudeString};
+}
+
+function convertCoordinatesToFixed(cartesian) {
   const cartographic = Cesium.Cartographic.fromCartesian(cartesian);
   const longitudeString = Cesium.Math.toDegrees(cartographic.longitude).toFixed(6);
   const latitudeString = Cesium.Math.toDegrees(cartographic.latitude).toFixed(6);
@@ -313,14 +319,13 @@ handler.setInputAction((click) => {
 
     if (Cesium.defined(cartesian)) {
       const {longitudeString, latitudeString} = convertCoordinates(cartesian);
-
       polylinePositions.push(cartesian);
 
       if (!polyline) {
         polyline = viewer.entities.add({
           name: 'Polyline',
           polyline: {
-            positions: new Cesium.CallbackProperty(() => [...polylinePositions], false),
+            positions: new Cesium.CallbackProperty(() => polylinePositions.slice(), false),
             width: 3,
             material: Cesium.Color.CYAN,
           }
