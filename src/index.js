@@ -40,7 +40,14 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   animation: false,
   baseLayerPicker: false,
   infoBox: false,
+  selectionIndicator: false,
 });
+
+viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+/* var handlerLeftDoubleClick = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+handlerLeftDoubleClick.setInputAction(function(movement) {
+  viewer.trackedEntity = undefined;
+}, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK) */
 
 const scene = viewer.scene;
 if (!scene.pickPositionSupported) {
@@ -318,8 +325,14 @@ handler.setInputAction((click) => {
     const cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
 
     if (Cesium.defined(cartesian)) {
-      const {longitudeString, latitudeString} = convertCoordinates(cartesian);
-      polylinePositions.push(cartesian);
+      const lastPosition = polylinePositions[polylinePositions.length - 1];
+      if (lastPosition && Cesium.Cartesian3.equals(lastPosition, cartesian)) {
+        return;
+      }
+
+      const clonedCartesian = Cesium.Cartesian3.clone(cartesian);
+
+      polylinePositions.push(clonedCartesian);
 
       if (!polyline) {
         polyline = viewer.entities.add({
