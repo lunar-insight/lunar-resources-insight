@@ -5,6 +5,8 @@ export function drawPolyline(Cesium, viewer, handler, isPolylineDrawing) {
     let tempLine = null;
     let polylineCollection = new Cesium.PolylineCollection();
 
+    const event = new Event('polylineDrawn');
+
     isPolylineDrawing = !isPolylineDrawing;
 
     if (isPolylineDrawing) {
@@ -45,6 +47,34 @@ export function drawPolyline(Cesium, viewer, handler, isPolylineDrawing) {
             }
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
+        handler.setInputAction((click) => {
+            handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK)
+            handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+            handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
+            if (tempLine) {
+                polylineCollection.remove(tempLine);
+                tempLine = null;
+            }
+            
+            isPolylineDrawing = false;
+            window.dispatchEvent(event);
+        }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+
+        handler.setInputAction((doubleClick) => {
+            handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+            handler.removeInputAction(Cesium.ScreenSpaceEventType.RIGHT_CLICK);
+            handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+            if (tempLine) {
+                polylineCollection.remove(tempLine);
+                tempLine = null;
+            }
+
+            isPolylineDrawing = false;
+            window.dispatchEvent(event);
+        }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+
         handler.setInputAction((movement) => {
             const cartesian = viewer.camera.pickEllipsoid(movement.endPosition, viewer.scene.globe.ellipsoid);
 
@@ -69,7 +99,9 @@ export function drawPolyline(Cesium, viewer, handler, isPolylineDrawing) {
 
     } else {
         handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        handler.removeInputAction(Cesium.ScreenSpaceEventType.RIGHT_CLICK);
         handler.removeInputAction(Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+        handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
         if (polyline) {
             polylineCollection.remove(polyline);

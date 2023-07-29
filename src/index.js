@@ -319,6 +319,11 @@ polylineButton.addEventListener('click', function() {
   }
 });
 
+window.addEventListener('polylineDrawn', function() {
+  polylineButton.classList.remove('selected');
+  isPolylineDrawing = false;
+})
+
 
 /*
     MinMax value definition
