@@ -18,6 +18,9 @@ module.exports = {
   entry: {
     app: './src/index.js'
   },
+  optimization: {
+    runtimeChunk: 'single',
+  },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
