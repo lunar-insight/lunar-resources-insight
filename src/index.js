@@ -301,17 +301,16 @@ function convertCoordinatesToFixed(cartesian) {
 }
 
 /*
-  Polyline
+  Selection menu
 */
 
+import { drawPolyline } from './menu/selection/polyline';
+
 const polylineButton = document.getElementById('polyline-button');
-
 let isPolylineDrawing = false;
-let polyline = null;
-let polylinePositions = [];
 
-polylineButton.addEventListener('click', () => {
-  isPolylineDrawing = !isPolylineDrawing;
+polylineButton.addEventListener('click', function() {
+  isPolylineDrawing = drawPolyline(Cesium, viewer, handler, isPolylineDrawing);
 
   if (isPolylineDrawing) {
     polylineButton.classList.add('selected');
@@ -320,33 +319,6 @@ polylineButton.addEventListener('click', () => {
   }
 });
 
-handler.setInputAction((click) => {
-  if (isPolylineDrawing) {
-    const cartesian = viewer.camera.pickEllipsoid(click.position, viewer.scene.globe.ellipsoid);
-
-    if (Cesium.defined(cartesian)) {
-      const lastPosition = polylinePositions[polylinePositions.length - 1];
-      if (lastPosition && Cesium.Cartesian3.equals(lastPosition, cartesian)) {
-        return;
-      }
-
-      const clonedCartesian = Cesium.Cartesian3.clone(cartesian);
-
-      polylinePositions.push(clonedCartesian);
-
-      if (!polyline) {
-        polyline = viewer.entities.add({
-          name: 'Polyline',
-          polyline: {
-            positions: new Cesium.CallbackProperty(() => polylinePositions.slice(), false),
-            width: 3,
-            material: Cesium.Color.CYAN,
-          }
-        });
-      }
-    }
-  }
-}, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
 /*
     MinMax value definition
