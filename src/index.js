@@ -574,21 +574,31 @@ function openTabs(evt, tabName) {
   // Declare all variables
   let i, tabcontent, tablinks;
 
-  // Get all elements with class="tabcontent" and hide them
-  tabcontent = document.getElementsByClassName("tabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
-  }
+  // Get the element with the id=tabName
+  let currentTabContent = document.getElementById(tabName);
 
-  // Get all elements with class="tablinks" and remove the class "active"
-  tablinks = document.getElementsByClassName("tablinks");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" active", "");
-  }
+  // Check if the current tabcontent is already displayed
+  if (currentTabContent.style.display === "block") {
+    // If yes, hide it
+    currentTabContent.style.display = "none";
+    evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
+  } else {
+    // Get all elements with class="tabcontent" and hide them
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
 
-  // Show the current tab, and add an "active" class to the link that opened the tab
-  document.getElementById(tabName).style.display = "block";
-  evt.currentTarget.className += " active";
+    // Get all elements with class="tablinks" and remove the class "active"
+    tablinks = document.getElementsByClassName("tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+
+    // Show the current tab, and add an "active" class to the link that opened the tab
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
 }
 
 // Use the DOMContentLoaded event to ensure the DOM is fully loaded before trying to attach event listeners
