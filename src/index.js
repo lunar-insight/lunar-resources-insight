@@ -1,11 +1,9 @@
 const Cesium = require('cesium/Cesium');
-require('./css/main.scss');
-require('./css/opacity.scss');
-require('./css/switch.scss');
-require('./css/legend.scss');
-require('./css/left-sidebar.scss');
-require('./css/right-sidebar.scss')
+
 require('cesium/Widgets/widgets.css');
+
+const requireAll = r => r.keys().forEach(r);
+requireAll(require.context('./css/', true, /\.(scss|css)$/));
 
 import colorRamp from './image/color-ramp.png';
 import grayRamp from './image/gray-ramp.png';
@@ -568,26 +566,48 @@ async function getLayerInfo(longitude, latitude, layerName) {
 };
 
 /*
-  Graph template
+  Tabs
+
+  TODO : see to optimise the code
 */
+function openTabs(evt, tabName) {
+  // Declare all variables
+  let i, tabcontent, tablinks;
 
-import graphTemplate from "./image/graph-template.jpg"
-
-let styleGraphTemplate = document.createElement('style');
-styleGraphTemplate.innerHTML = `
-  #graph-template-container {
-    background-image: url('${graphTemplate}');
-    background-size: cover;
-    background-position: center;
-    position: absolute;
-    bottom: 0;
-    width: calc(100% - 10px);
-    height: calc(200px - 10px);=
-    margin: 5px;
-    opacity: 0.5;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
   }
-`;
-document.head.appendChild(styleGraphTemplate);
 
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
 
+  // Show the current tab, and add an "active" class to the link that opened the tab
+  document.getElementById(tabName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+
+// Use the DOMContentLoaded event to ensure the DOM is fully loaded before trying to attach event listeners
+document.addEventListener('DOMContentLoaded', (event) => {
+  const tablinks = document.getElementsByClassName("tablinks");
+  for (let i = 0; i < tablinks.length; i++) {
+    tablinks[i].addEventListener("click", function(event) {
+      openTabs(event, tablinks[i].dataset.tabname);
+    });
+  }
+
+  // Hide all tabcontents except 'home'
+  const tabcontents = document.getElementsByClassName("tabcontent");
+  for (let i = 0; i < tabcontents.length; i++) {
+    if (tabcontents[i].id !== 'home') {
+      tabcontents[i].style.display = "none";
+    }
+  }
+
+  // Trigger a click on 'home' button to make it active by default
+  document.querySelector('button[data-tabname="home"]').click();
+});

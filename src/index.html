@@ -9,11 +9,35 @@
   <title>Lunar Resources</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 </head>
-
+<!-- https://www.w3schools.com/howto/howto_js_vertical_tabs.asp -->
 <body>
 
   <div id="main">
-    <div id="left-sidebar">
+    
+    <div id="left-tabs" class="tab">
+
+      <button class="tablinks" data-tabname="home">
+        <span class="material-symbols-outlined">home</span> Home
+      </button>
+
+      <button class="tablinks" data-tabname="layers">
+        <span class="material-symbols-outlined">layers</span> Layers
+      </button>
+
+      <button class="tablinks" data-tabname="inspect">
+        <span class="material-symbols-outlined">frame_inspect</span> Inspect
+      </button>
+
+      <button class="tablinks" data-tabname="settings">
+        <span class="material-symbols-outlined">settings</span> Settings
+      </button>
+    </div>
+
+    <div id="home" class="tabcontent">
+
+    </div>
+
+    <div id="layers" class="tabcontent">
       <p id="secondary-layer-group-title">Secondary Layers</p>
       <div id="secondary-layer-button-group">
         <button id="deselect-secondary-layer-button" class="deselect-sec-layer-btn">None</button>
@@ -31,19 +55,18 @@
       <div id="btn-group" class="btn-group"></div>
     </div>
 
-    <div id="right-sidebar">
-      
-      <div class=cesium-viewer-toolbar></div>
-
-      <div class="option-container">
-        <input type="checkbox" id="mouse-data-checkbox" class="mouse-data-query-checkbox" checked>
-        <label for="mouse-data-checkbox" class="label-mouse-data-query-checkbox">Cursor Data Query</label>
-      </div>
-
+    <div id="inspect" class="tabcontent">
       <div id="pointer-selection-group" class="btn-group">
         <button class="icon-btn"><span class="material-symbols-outlined">point_scan</span></button>
         <button id="polyline-button" class="icon-btn"><span class="material-symbols-outlined">pen_size_2</span></button>
         <button class="icon-btn"><span class="material-symbols-outlined">activity_zone</span></button>
+      </div>
+    </div>
+
+    <div id="settings" class="tabcontent">
+      <div class="option-container">
+        <input type="checkbox" id="mouse-data-checkbox" class="mouse-data-query-checkbox" checked>
+        <label for="mouse-data-checkbox" class="label-mouse-data-query-checkbox">Cursor Data Query</label>
       </div>
       
       <label class="switch">
@@ -56,9 +79,13 @@
         <input type="range" min="0" max="100" value="100" step="1" id="opacity-slider">
         <span id="opacity-info">100%</span>
       </div>
-
-      <div id="graph-template-container"></div>
     </div>
+
+<!--     <div id="right-sidebar">
+      
+      <div class=cesium-viewer-toolbar></div>
+
+    </div> -->
 
     <div id="bottom-bar">
       <div id="coords"></div>
