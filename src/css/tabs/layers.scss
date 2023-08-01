@@ -1,15 +1,16 @@
 #secondary-layer-group-title {
     color: white;
     z-index: 2;
+    display: flex;
+    flex: auto;
     margin: 5px;
 }
 
 #secondary-layer-button-group {
     display: flex;
-    flex-direction: row;
+    flex: auto;
     flex-wrap: wrap;
     justify-content: space-between;
-    width: 275px;
     box-sizing: border-box;
     position: relative;
 }
@@ -116,22 +117,6 @@
     animation: unfold 0.5s forwards;
 }
 
-#transparency-container-geo-btn {
-    display: none;
-    z-index: 2;
-    margin-top: 10px;
-    pointer-events: auto;
-}
-
-#transparency-container-geo-btn label {
-    color: white;
-    position: relative;
-    bottom: 5px;
-}
-
-#transparency-geo-btn-value {
-    color: white;
-}
 
 .deselect-btn {
     position: relative;

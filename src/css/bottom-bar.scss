@@ -1,0 +1,17 @@
+#bottom-bar {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 25px;
+    background-color: #21252984;
+    z-index: 1;
+  }
+
+  #coords {
+    padding: 5px;
+    color: white;
+    font-size: 14px;
+    text-align: center;
+    z-index: 2;
+  }

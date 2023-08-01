@@ -1,25 +1,27 @@
 .tab,
 .tablinks,
 .tabcontent {
-    box-sizing: border-box;
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .tab {
     border: 1px solid #ccc;
     background-color: #21252984;
-    width: 115px;
+    width: 90px;
     height: calc(100vh - 25px);
-    margin-bottom: 25px;
 
     button {
         display: flex;
         align-items: center;
         justify-content: start;
-        gap: 5px;
+        gap: 7px;
         background-color: inherit;
         color: white;
         padding: 22px 15px;
+        height: 90px;
         width: 100%;
         border: none;
         outline: none;
@@ -40,9 +42,8 @@
 .tabcontent {
     padding: 0px 12px;
     border: 1px solid #ccc;
-    width: 15vw;
+    width: 16vw;
     min-width: 225px;
     border-left: none;
     height: calc(100vh - 25px);
-    margin-bottom: 25px;
 }

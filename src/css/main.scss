@@ -13,35 +13,10 @@ body {
   z-index: 2;
 }
 
-#bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100vw;
-  height: 25px;
-  background-color: #21252984;
-  z-index: 1;
-}
-
 #cesiumContainer {
-  position: absolute; /* absolute positioning */
-  top: 0; /* set top to 0 */
+  position: absolute;
+  top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-}
-
-
-#layersSelectContainer {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-}
-
-#coords {
-  padding: 5px;
-  color: white;
-  font-size: 14px;
-  text-align: center;
-  z-index: 2;
 }
