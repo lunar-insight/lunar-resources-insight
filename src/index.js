@@ -69,6 +69,64 @@ let geologicLayerName;
 let chemicalLayerName;
 
 /*
+    Nomenclature
+*/
+
+/* let nomenclatureLayer = viewer.imageryLayers.addImageryProvider(
+  new Cesium.WebMapServiceImageryProvider({
+    url: 'http://localhost:8090/geoserver/lunar-resources/wms',
+    layers: 'lunar-resources:Nomenclature',
+    parameters: {
+      transparent: true,
+      format: 'image/png'
+    }
+  })
+);
+ */
+
+let nomenclatureLayer;
+
+fetch('http://localhost:8090/geoserver/lunar-resources/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=lunar-resources:Nomenclature&outputFormat=application%2Fjson')
+  .then(response => response.json())
+  .then(data=> {
+    let dataSourcePromise = Cesium.GeoJsonDataSource.load(data, {
+      clampToGround: false
+    });
+    dataSourcePromise.then(dataSource => {
+      let entities = dataSource.entities.values;
+      for (let i = 0; i < entities.length; i++) {
+        let entity = entities[i];
+        entity.billboard = undefined;
+        let position = entity.position._value;
+        position = Cesium.Cartesian3.fromElements(position.x, position.y, position.z + 5000);
+        entity.position = position;
+        entity.label = new Cesium.LabelGraphics({
+          text: entity.properties.name,
+          // When lunar MNT is implemented, change to RELATIVE_TO_GROUND
+          heightReference: Cesium.HeightReference.NONE,
+          fillColor: Cesium.Color.WHITE,
+          outlineColor: Cesium.Color.BLACK,
+          outlineWidth: 2,
+          style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+          scale: 0.6,
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1000000),
+          //pixelOffset: new Cesium.Cartesian2(-10, -10),
+          //eyeOffset: new Cesium.Cartesian3(0, 0, -20)
+        });
+      }
+      viewer.dataSources.add(dataSource);
+      nomenclatureLayer = dataSource;
+      nomenclatureLayer.show = true;
+    });
+  });
+
+const nomenclatureCheckbox = document.getElementById('nomenclature-checkbox');
+
+nomenclatureCheckbox.addEventListener('change', function() {
+  nomenclatureLayer.show = nomenclatureCheckbox.checked;
+});
+
+/*
 ================
 SECONDARY LAYERS
 ================
@@ -78,7 +136,7 @@ SECONDARY LAYERS
   Geologic layer button selection
 */
 
-import geoButton from './image/geologic-button-background.jpg'
+import geoButton from './image/geologic-button-background.jpg' 
 
 let style = document.createElement('style');
 style.innerHTML = `
