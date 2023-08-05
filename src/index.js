@@ -109,7 +109,7 @@ fetch('http://localhost:8090/geoserver/lunar-resources/ows?service=WFS&version=1
           outlineWidth: 2,
           style: Cesium.LabelStyle.FILL_AND_OUTLINE,
           scale: 0.6,
-          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 1000000),
+          distanceDisplayCondition: new Cesium.DistanceDisplayCondition(0, 2500000),
           //pixelOffset: new Cesium.Cartesian2(-10, -10),
           //eyeOffset: new Cesium.Cartesian3(0, 0, -20)
         });
