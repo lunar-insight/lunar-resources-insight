@@ -116,7 +116,7 @@ fetch('http://localhost:8090/geoserver/lunar-resources/ows?service=WFS&version=1
       }
       viewer.dataSources.add(dataSource);
       nomenclatureLayer = dataSource;
-      nomenclatureLayer.show = true;
+      nomenclatureLayer.show = false;
     });
   });
 
