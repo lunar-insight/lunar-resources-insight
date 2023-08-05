@@ -360,7 +360,7 @@ function convertCoordinatesToFixed(cartesian) {
   Selection menu
 */
 
-import { drawPolyline } from './menu/selection/polyline';
+import { drawPolyline } from './functions/selection/polyline';
 
 const polylineButton = document.getElementById('polyline-button');
 let isPolylineDrawing = false;
