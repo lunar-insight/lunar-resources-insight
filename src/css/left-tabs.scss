@@ -10,18 +10,19 @@
 .tab {
     border: 1px solid #ccc;
     background-color: #21252984;
-    width: 90px;
+    width: 120px;
     height: calc(100vh - 25px);
 
     button {
         display: flex;
+        flex-direction: row;
         align-items: center;
         justify-content: start;
-        gap: 7px;
+        gap: 10px;
         background-color: inherit;
         color: white;
         padding: 22px 15px;
-        height: 90px;
+        height: 80px;
         width: 100%;
         border: none;
         outline: none;
@@ -42,7 +43,7 @@
 .tabcontent {
     padding: 0px 12px;
     border: 1px solid #ccc;
-    width: 16vw;
+    width: 15vw;
     min-width: 225px;
     border-left: none;
     height: calc(100vh - 25px);
