@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config webpack.config.js",
+    "prestart": "npm outdated",
     "start": "webpack serve --config webpack.config.js --open"
   },
   "keywords": [],
