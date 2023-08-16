@@ -6,13 +6,14 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --config webpack.config.js",
+    "prestart": "npm outdated",
     "start": "webpack serve --config webpack.config.js --open"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "cesium": "^1.100.0",
+    "cesium": "^1.108.0",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
     "html-webpack-plugin": "^5.5.0",
