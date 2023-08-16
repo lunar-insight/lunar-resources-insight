@@ -23,9 +23,9 @@ globe.showGroundAtmosphere = false;
 const viewer = new Cesium.Viewer('cesiumContainer', {
   globe: globe,
   mapProjection: mapProjection,
-  imageryProvider: new Cesium.WebMapServiceImageryProvider({
-    url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
-    layers: 'LROC_WAC',
+  baseLayer: new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
+    url: 'http://localhost:8090/geoserver/lunar-resources/wms',
+    layers: 'lunar-resources:WAC_GLOBAL_100M',
     parameters: {
       transparent: false,
       format: 'image/png'
@@ -33,7 +33,7 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
     // Max 4096
     tileWidth: 512,
     tileHeight: 512
-  }),
+  })),
   timeline: false,
   animation: false,
   baseLayerPicker: false,
