@@ -1,14 +1,12 @@
-const Cesium = require('cesium/Cesium');
+export const Cesium = require('cesium/Cesium');
 
 require('cesium/Widgets/widgets.css');
 
 const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./css/', true, /\.(scss|css)$/));
 
-import colorRamp from './image/color-ramp.png';
-import grayRamp from './image/gray-ramp.png';
-
-import { mapServerWmsUrl } from './config';
+import * as config from './config';
+import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js'
 
 Cesium.Ion.defaultAccessToken = undefined;
 
@@ -22,11 +20,11 @@ const globe = new Cesium.Globe(ellipsoid);
 
 globe.showGroundAtmosphere = false;
 
-const viewer = new Cesium.Viewer('cesiumContainer', {
+export const viewer = new Cesium.Viewer('cesiumContainer', {
   globe: globe,
   mapProjection: mapProjection,
   baseLayer: new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
-    url: `${mapServerWmsUrl}`,
+    url: `${config.mapServerWmsUrl}`,
     layers: 'lunar-resources:WAC_GLOBAL_100M',
     parameters: {
       transparent: false,
@@ -63,12 +61,9 @@ viewer.scene.shadowMap.enabled = false;
 
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
-const chemicalLayerNames = ['MAGNESIUM', 'IRON', 'CALCIUM', 'TITANIUM'];
-
 const geologicLayerNames = ['GeoUnits', 'GeoContacts'];
 
 let geologicLayerName;
-let chemicalLayerName;
 
 /*
     Nomenclature
@@ -166,7 +161,7 @@ document.getElementById("geo-button").addEventListener('click', function () {
     geologicLayerNames.forEach(function(layerName) {
       const layer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
-          url: `${mapServerWmsUrl}`,
+          url: `${config.mapServerWmsUrl}`,
           layers: 'lunar-resources:' + layerName,
           parameters: {
             transparent: true,
@@ -298,7 +293,7 @@ handler.setInputAction(async function (movement) {
       parseFloat(longitudeString),
       parseFloat(latitudeString),
       geologicLayerName,
-      chemicalLayerName
+      getChemicalLayerName()
     );
 
     featureInfoPromise.then((info) => {
@@ -382,42 +377,22 @@ window.addEventListener('polylineDrawn', function() {
   isPolylineDrawing = false;
 })
 
-
-/*
-    MinMax value definition
-*/
-const layerMinMaxValues = {
-  'MAGNESIUM': {min: 2.08, max: 9.60},
-  'IRON': {min: 2.69, max: 27.53},
-  'CALCIUM': {min: 7.12, max: 13.38},
-  'TITANIUM': {min: 0.08, max: 18.45},
-};
-
 /*
     Map selection
 */
 
-const layerData = {
-  'MAGNESIUM': {name: 'Magnesium', number: '12', symbol: 'Mg'},
-  'IRON': {name: 'Iron', number: '26', symbol: 'Fe'},
-  'CALCIUM': {name: 'Calcium', number: '20', symbol: 'Ca'},
-  'TITANIUM': {name: 'Titanium', number: '22', symbol: 'Ti'},
-};
-
-const html = chemicalLayerNames.map(name => {
-  const data = layerData[name];
+export const htmlChemicalLayerNames = config.chemicalLayerNames.map(name => {
+  const data = config.chemicalLayerData[name];
   return `
-    <button id="${name}" class="layer-btn">
+      <button id="${name}" class="layer-btn">
       <div class="name">${data ? data.name : name}</div>
       <div class="number">${data ? data.number : ''}</div>
       <div class="symbol">${data ? data.symbol : ''}</div>
       <div class="info-icon material-symbols-outlined">info</div>
-    </button>`;
+      </button>`;
 }).join('');
 
-let selectedValue;
-
-document.getElementById('btn-group').innerHTML = html;
+document.getElementById('btn-group').innerHTML = htmlChemicalLayerNames;
 
 const layerButtons = document.querySelectorAll('.layer-btn');
 
@@ -447,88 +422,6 @@ deselectBtn.addEventListener('click', function() {
 });
 
 deselectBtn.click();
-
-/*
-    Layer color switch
-*/
-
-const toggleColorSwitch = document.getElementById('toggle-color-switch');
-let isColorStyle = false;
-
-toggleColorSwitch.addEventListener('change', function() {
-  isColorStyle = !isColorStyle;
-  updateLayerStyle();
-});
-
-/*
-    Update layer function
-*/
-
-let activeLayer;
-
-function updateLayerStyle() {
-
-  const styleSuffix = isColorStyle ? 'COLOR' : 'GRAY';
-
-  const legendContainer = document.getElementById('legend-container');
-  const legendTitle = document.getElementById('legend-title');
-
-  if (activeLayer) {
-    viewer.imageryLayers.remove(activeLayer);
-  }
-
-  const legendImage = document.getElementById('legend-image');
-  const minValueLabel = document.getElementById('min-value-label');
-  const maxValueLabel = document.getElementById('max-value-label');
-
-  const selectedElement = document.querySelector('.selected');
-  selectedValue = selectedElement ? selectedElement.id : null;
-
-  if (selectedValue && selectedValue !== 'BASEMAP') {
-
-    const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${selectedValue}`;
-
-    activeLayer = viewer.imageryLayers.addImageryProvider(
-      new Cesium.WebMapServiceImageryProvider({
-        url: `${mapServerWmsUrl}`,
-        layers: 'lunar-resources:' + selectedValue,
-        parameters: {
-          transparent: true,
-          format: 'image/png',
-          styles: styleName
-        }
-      })
-    );
-
-    if (styleSuffix === 'COLOR') {
-      legendImage.src = colorRamp;
-    } else if (styleSuffix === 'GRAY') {
-      legendImage.src = grayRamp;
-    }
-
-    const layerValues = layerMinMaxValues[selectedValue];
-    if (layerValues) {
-      minValueLabel.textContent = layerValues.min;
-      maxValueLabel.textContent = layerValues.max;
-    }
-
-    chemicalLayerName = selectedValue;
-
-    legendContainer.classList.add('active');
-
-  } else {
-    minValueLabel.textContent = '';
-    maxValueLabel.textContent = '';
-
-    chemicalLayerName = null;
-
-    legendContainer.classList.remove('active');
-  }
-
-  slider.value = 100;
-  info.textContent = '100%';
-
-}
 
 /*
     opacity slider
@@ -576,7 +469,7 @@ async function getFeatureInfo(longitude, latitude, geologicLayer = null, chemica
 
 async function getLayerInfo(longitude, latitude, layerName) {
   const url = new Cesium.Resource({
-    url: `${mapServerWmsUrl}`,
+    url: `${config.mapServerWmsUrl}`,
     queryParameters: {
       service: "WMS",
       version: "1.1.1",
