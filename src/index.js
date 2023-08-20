@@ -8,6 +8,8 @@ requireAll(require.context('./css/', true, /\.(scss|css)$/));
 import colorRamp from './image/color-ramp.png';
 import grayRamp from './image/gray-ramp.png';
 
+import { mapServerWmsUrl } from './config';
+
 Cesium.Ion.defaultAccessToken = undefined;
 
 //const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400);
@@ -24,7 +26,7 @@ const viewer = new Cesium.Viewer('cesiumContainer', {
   globe: globe,
   mapProjection: mapProjection,
   baseLayer: new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
-    url: 'http://localhost:8090/geoserver/lunar-resources/wms',
+    url: `${mapServerWmsUrl}`,
     layers: 'lunar-resources:WAC_GLOBAL_100M',
     parameters: {
       transparent: false,
@@ -164,7 +166,7 @@ document.getElementById("geo-button").addEventListener('click', function () {
     geologicLayerNames.forEach(function(layerName) {
       const layer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
-          url: 'http://localhost:8090/geoserver/lunar-resources/wms',
+          url: `${mapServerWmsUrl}`,
           layers: 'lunar-resources:' + layerName,
           parameters: {
             transparent: true,
@@ -462,8 +464,6 @@ toggleColorSwitch.addEventListener('change', function() {
     Update layer function
 */
 
-const mapServerWmsUrl = 'http://localhost:8090/geoserver/lunar-resources/wms';
-
 let activeLayer;
 
 function updateLayerStyle() {
@@ -490,7 +490,7 @@ function updateLayerStyle() {
 
     activeLayer = viewer.imageryLayers.addImageryProvider(
       new Cesium.WebMapServiceImageryProvider({
-        url: mapServerWmsUrl,
+        url: `${mapServerWmsUrl}`,
         layers: 'lunar-resources:' + selectedValue,
         parameters: {
           transparent: true,
@@ -576,7 +576,7 @@ async function getFeatureInfo(longitude, latitude, geologicLayer = null, chemica
 
 async function getLayerInfo(longitude, latitude, layerName) {
   const url = new Cesium.Resource({
-    url: mapServerWmsUrl,
+    url: `${mapServerWmsUrl}`,
     queryParameters: {
       service: "WMS",
       version: "1.1.1",
