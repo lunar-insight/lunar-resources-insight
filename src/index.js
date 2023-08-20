@@ -151,10 +151,10 @@ document.getElementById("geo-button").addEventListener('click', function () {
 
     let optionContainer = document.getElementById("geo-button-option-container");
     optionContainer.classList.add('unfold-animation');
-    optionContainer.style.display = "block";
+    optionContainer.style.display = "flex";
 
     let transparencyContainer = document.getElementById("transparency-container-geo-btn");
-    transparencyContainer.style.display = "block";
+    transparencyContainer.style.display = "flex";
 
     document.getElementById('transparency-geo-btn-value').textContent = '25%'
   
@@ -529,7 +529,7 @@ function openTabs(evt, tabName) {
   let currentTabContent = document.getElementById(tabName);
 
   // Check if the current tabcontent is already displayed
-  if (currentTabContent.style.display === "block") {
+  if (currentTabContent.style.display === "flex") {
     // If yes, hide it
     currentTabContent.style.display = "none";
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
@@ -547,7 +547,7 @@ function openTabs(evt, tabName) {
     }
 
     // Show the current tab, and add an "active" class to the link that opened the tab
-    document.getElementById(tabName).style.display = "block";
+    document.getElementById(tabName).style.display = "flex";
     evt.currentTarget.className += " active";
   }
 }
