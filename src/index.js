@@ -416,11 +416,11 @@ layerButtons.forEach(button => {
 const overlay = document.getElementById("periodic-table-overlay");
 
 document.getElementById('selected-element-container').addEventListener('click', function() {
-  overlay.style.display = "block";
+  overlay.classList.add("open");
 });
 
 overlay.addEventListener('click', function() {
-  overlay.style.display = "none";
+  overlay.classList.remove("open");
 })
 
 /*
@@ -565,7 +565,7 @@ function openTabs(evt, tabName) {
 
   if (tabName !== 'elements') {
     const overlay = document.getElementById("periodic-table-overlay");
-    overlay.style.display = "none";
+    overlay.classList.remove("open");
   }
 }
 
