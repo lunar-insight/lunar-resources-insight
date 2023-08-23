@@ -15,7 +15,7 @@
     z-index: 3;
     cursor: pointer;
     opacity: 0;
-    transition: flex-grow 0.5s ease-out, opacity 0.5s linear;
+    transition: opacity 0.5s linear;
 
     &.open {
         opacity: 1;
