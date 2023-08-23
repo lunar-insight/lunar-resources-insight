@@ -532,8 +532,6 @@ async function getLayerInfo(longitude, latitude, layerName) {
 
 /*
   Tabs
-
-  TODO : see to optimise the code
 */
 function openTabs(evt, tabName) {
   // Declare all variables
@@ -563,6 +561,11 @@ function openTabs(evt, tabName) {
     // Show the current tab, and add an "active" class to the link that opened the tab
     document.getElementById(tabName).style.display = "flex";
     evt.currentTarget.className += " active";
+  }
+
+  if (tabName !== 'elements') {
+    const overlay = document.getElementById("periodic-table-overlay");
+    overlay.style.display = "none";
   }
 }
 
