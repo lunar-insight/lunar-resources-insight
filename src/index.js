@@ -410,6 +410,20 @@ layerButtons.forEach(button => {
 });
 
 /*
+    Periodic table opener
+*/
+
+const overlay = document.getElementById("periodic-table-overlay");
+
+document.getElementById('selected-element-container').addEventListener('click', function() {
+  overlay.style.display = "block";
+});
+
+overlay.addEventListener('click', function() {
+  overlay.style.display = "none";
+})
+
+/*
     Deselect button
 */
 
