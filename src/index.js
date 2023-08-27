@@ -42,10 +42,6 @@ export const viewer = new Cesium.Viewer('cesiumContainer', {
 });
 
 viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
-/* var handlerLeftDoubleClick = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
-handlerLeftDoubleClick.setInputAction(function(movement) {
-  viewer.trackedEntity = undefined;
-}, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK) */
 
 const scene = viewer.scene;
 if (!scene.pickPositionSupported) {
@@ -438,7 +434,7 @@ deselectBtn.addEventListener('click', function() {
 deselectBtn.click();
 
 /*
-    opacity slider
+    Opacity slider
 */
 
 const slider = document.getElementById('opacity-slider');
@@ -453,7 +449,7 @@ slider.addEventListener('input', function() {
 
 
 /*
-    Fonction d'appel d'information de pixel du serveur WMS
+    WMS Pixel call
 */
 
 async function getFeatureInfo(longitude, latitude, geologicLayer = null, chemicalLayer = null) {
@@ -534,31 +530,24 @@ async function getLayerInfo(longitude, latitude, layerName) {
   Tabs
 */
 function openTabs(evt, tabName) {
-  // Declare all variables
   let i, tabcontent, tablinks;
 
-  // Get the element with the id=tabName
   let currentTabContent = document.getElementById(tabName);
 
-  // Check if the current tabcontent is already displayed
   if (currentTabContent.style.display === "flex") {
-    // If yes, hide it
     currentTabContent.style.display = "none";
     evt.currentTarget.className = evt.currentTarget.className.replace(" active", "");
   } else {
-    // Get all elements with class="tabcontent" and hide them
     tabcontent = document.getElementsByClassName("tabcontent");
     for (i = 0; i < tabcontent.length; i++) {
       tabcontent[i].style.display = "none";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
     tablinks = document.getElementsByClassName("tablinks");
     for (i = 0; i < tablinks.length; i++) {
       tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
 
-    // Show the current tab, and add an "active" class to the link that opened the tab
     document.getElementById(tabName).style.display = "flex";
     evt.currentTarget.className += " active";
   }
@@ -578,7 +567,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
     });
   }
 
-  // Hide all tabcontents except 'home'
   const tabcontents = document.getElementsByClassName("tabcontent");
   for (let i = 0; i < tabcontents.length; i++) {
     if (tabcontents[i].id !== 'home') {
@@ -586,6 +574,5 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
   }
 
-  // Trigger a click on 'home' button to make it active by default
   document.querySelector('button[data-tabname="home"]').click();
 });
