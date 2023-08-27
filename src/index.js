@@ -558,7 +558,6 @@ function openTabs(evt, tabName) {
   if (tabName !== 'elements') {
     const overlay = document.getElementById("periodic-table-overlay");
     overlay.classList.remove("open");
-    //elementsTabContent.style.display = "flex";
   }
 }
 
