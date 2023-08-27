@@ -410,13 +410,16 @@ layerButtons.forEach(button => {
 */
 
 const overlay = document.getElementById("periodic-table-overlay");
+const elementsTabContent = document.getElementById("elements");
 
 document.getElementById('selected-element-container').addEventListener('click', function() {
   overlay.classList.add("open");
+  elementsTabContent.style.display = "none";
 });
 
 overlay.addEventListener('click', function() {
   overlay.classList.remove("open");
+  elementsTabContent.style.display = "flex";
 })
 
 /*
@@ -555,6 +558,7 @@ function openTabs(evt, tabName) {
   if (tabName !== 'elements') {
     const overlay = document.getElementById("periodic-table-overlay");
     overlay.classList.remove("open");
+    //elementsTabContent.style.display = "flex";
   }
 }
 
