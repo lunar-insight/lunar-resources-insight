@@ -26,7 +26,8 @@
 
 .periodic-group-list {
   display: flex;
-  //gap: 1em;
+  justify-content: center;
+  gap: 1em;
 
   .periodic-group {
     display: flex;
@@ -57,7 +58,8 @@
 .periodic-period-list {
   display: flex;
   flex-direction: column;
-  //gap: 1em;
+  gap: 1em;
+  margin-top: 1em;
 
   .periodic-period {
     display: flex;
