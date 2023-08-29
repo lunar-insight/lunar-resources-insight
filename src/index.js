@@ -412,13 +412,25 @@ layerButtons.forEach(button => {
 const overlay = document.getElementById("periodic-table-overlay");
 const elementsTabContent = document.getElementById("elements");
 
-document.getElementById('selected-element-container').addEventListener('click', function() {
+function showPeriodicTableOverlay() {
+  overlay.style.display = "block";
+  overlay.style.visibility = "visible";
   overlay.classList.add("open");
+}
+
+function hidePeriodicTableOverlay() {
+  overlay.style.display = "none";
+  overlay.style.visibility = "hidden";
+  overlay.classList.remove("open");
+}
+
+document.getElementById('selected-element-container').addEventListener('click', function() {
+  showPeriodicTableOverlay();
   elementsTabContent.style.display = "none";
 });
 
 overlay.addEventListener('click', function() {
-  overlay.classList.remove("open");
+  hidePeriodicTableOverlay();
   elementsTabContent.style.display = "flex";
 })
 
@@ -556,7 +568,7 @@ function openTabs(evt, tabName) {
   }
 
   const overlay = document.getElementById("periodic-table-overlay");
-  overlay.classList.remove("open");
+    hidePeriodicTableOverlay();
 }
 
 // Use the DOMContentLoaded event to ensure the DOM is fully loaded before trying to attach event listeners

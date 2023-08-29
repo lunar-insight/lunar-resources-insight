@@ -1,6 +1,8 @@
 #periodic-table-overlay {
   overflow-x: auto;
   overflow: hidden;
+  display: none;
+  visibility: hidden;
 }
 
 .flex-row-wrap {
