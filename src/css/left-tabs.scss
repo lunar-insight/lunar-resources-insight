@@ -10,7 +10,7 @@
 .tab {
     border: 1px solid #ccc;
     background-color: #21252984;
-    width: 120px;
+    min-width: 120px;
     height: calc(100vh - 25px);
 
     button {

@@ -3,7 +3,7 @@ export const Cesium = require('cesium/Cesium');
 require('cesium/Widgets/widgets.css');
 
 const requireAll = r => r.keys().forEach(r);
-requireAll(require.context('./css/', true, /\.(scss|css)$/));
+requireAll(require.context('./', true, /\.(scss|css)$/));
 
 import * as config from './config';
 import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js'
@@ -555,10 +555,8 @@ function openTabs(evt, tabName) {
     evt.currentTarget.className += " active";
   }
 
-  if (tabName !== 'elements') {
-    const overlay = document.getElementById("periodic-table-overlay");
-    overlay.classList.remove("open");
-  }
+  const overlay = document.getElementById("periodic-table-overlay");
+  overlay.classList.remove("open");
 }
 
 // Use the DOMContentLoaded event to ensure the DOM is fully loaded before trying to attach event listeners

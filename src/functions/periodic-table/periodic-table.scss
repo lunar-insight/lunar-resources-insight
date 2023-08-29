@@ -1,0 +1,74 @@
+#periodic-table-overlay {
+  overflow-x: auto;
+  overflow: hidden;
+}
+
+.flex-row-wrap {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.group-period {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  //gap: 1em;
+}
+
+.periodic-group-list,
+.periodic-period-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.periodic-group-list {
+  display: flex;
+  //gap: 1em;
+
+  .periodic-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border: 1px solid #ccc;
+
+    span {
+      color: #ccc;
+      text-align: center;
+      font-weight: bold;
+    }
+  }
+
+  &::before {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    order: -1;
+  }
+}
+
+.periodic-period-list {
+  display: flex;
+  flex-direction: column;
+  //gap: 1em;
+
+  .periodic-period {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border: 1px solid #ccc;
+
+    span {
+      color: #ccc;
+      text-align: center;
+      font-weight: bold;
+    }
+  }
+}
