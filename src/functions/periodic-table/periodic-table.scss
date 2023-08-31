@@ -1,6 +1,7 @@
+$square-length: 60px;
+
 #periodic-table-overlay {
   overflow-x: auto;
-  overflow: hidden;
   display: none;
   visibility: hidden;
 }
@@ -10,69 +11,63 @@
   flex-flow: row wrap;
 }
 
-.group-period {
+.periodic-group {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   //gap: 1em;
-}
 
-.periodic-group-list,
-.periodic-period-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
+  &__group,
+  &__period {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 
-.periodic-group-list {
-  display: flex;
-  justify-content: center;
-  gap: 1em;
+    &__list {
+      display: flex;
+      justify-content: center;
+      //gap: 1em;
+    }
 
-  .periodic-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 60px;
-    height: 60px;
-    border: 1px solid #ccc;
+    &__item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: $square-length;
+      height: $square-length;
+      min-width: $square-length;
+      min-height: $square-length;
+      border: 1px solid #ccc;
 
-    span {
-      color: #ccc;
-      text-align: center;
-      font-weight: bold;
+      span {
+        color: #ccc;
+        text-align: center;
+        font-weight: bold;
+      }
     }
   }
 
-  &::before {
-    content: "";
-    display: block;
-    width: 60px;
-    height: 60px;
-    flex-shrink: 0;
-    border: 1px solid transparent;
-    order: -1;
+  &__group {
+    &__list {
+      &::before {
+        content: "";
+        display: block;
+        width: $square-length;
+        height: $square-length;
+        min-width: $square-length;
+        min-height: $square-length;
+        flex-shrink: 0;
+        border: 1px solid transparent;
+        order: -1;
+      }
+    }
   }
-}
 
-.periodic-period-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1em;
-  margin-top: 1em;
+  &__period {
 
-  .periodic-period {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 60px;
-    height: 60px;
-    border: 1px solid #ccc;
-
-    span {
-      color: #ccc;
-      text-align: center;
-      font-weight: bold;
+    &__list {
+      flex-direction: column;
+      margin-top: 1em;
     }
   }
 }
