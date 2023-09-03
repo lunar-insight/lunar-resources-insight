@@ -6,6 +6,7 @@ const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./', true, /\.(scss|css)$/));
 
 import * as config from './config';
+import './functions/periodic-table/periodic-table.js';
 import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js'
 
 Cesium.Ion.defaultAccessToken = undefined;
