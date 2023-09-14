@@ -1,4 +1,4 @@
-export const mapServerUrl = 'http://localhost:8090/geoserver/lunar-resources';
+export const mapServerUrl = process.env.MAP_SERVER_URL;
 
 export const mapServerWmsUrl = `${mapServerUrl}/wms`;
 

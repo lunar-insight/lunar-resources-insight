@@ -10,7 +10,8 @@ const fs = require('fs');
 const cesiumSource = 'node_modules/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
 
-const periodicTableHtmlContent = fs.readFileSync('./src/functions/periodic-table/periodic-table.html', 'utf8');
+const periodicTableHtmlContent = fs.readFileSync('./src/components/tabs/elements/periodic-table/periodic-table.html', 'utf8');
+const tabsElementsHtmlContent = fs.readFileSync('./src/components/tabs/elements/elements.html', 'utf-8');
 
 const dotenv = require('dotenv');
 dotenv.config();
@@ -44,8 +45,10 @@ module.exports = {
       http: false,
     },
     alias: {
-      // CesiumJS module name
-      cesium: path.resolve(__dirname, cesiumSource)
+      cesium: path.resolve(__dirname, cesiumSource),
+      index$: path.resolve(__dirname,'src/index.js'),
+      config$: path.resolve(__dirname,'src/config.js'),
+      updateElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/update-element-layer.js'),
     },
   },
   module: {
@@ -85,7 +88,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'src/index.html',
       templateParameters: {
-        periodicTableContent: periodicTableHtmlContent
+        periodicTableContent: periodicTableHtmlContent,
+        tabsElementsContent: tabsElementsHtmlContent
       }
     }),
     // Copy Cesium Assets, Widgets, and Workers to a static directory
@@ -105,7 +109,7 @@ module.exports = {
       minChunks: module => module.context && module.context.indexOf('cesium') !== -1
     }),
     new webpack.DefinePlugin({
-      'process.env.CESIUM_ION_ACCESS_TOKEN': JSON.stringify(process.env.CESIUM_ION_ACCESS_TOKEN),
+      'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
     })
   ]
 };

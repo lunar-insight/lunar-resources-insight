@@ -6,7 +6,8 @@ const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./', true, /\.(scss|css)$/));
 
 import * as config from './config';
-import './functions/periodic-table/periodic-table.js';
+import './components/tabs/elements/periodic-table/periodic-table.js';
+import { hidePeriodicTableOverlay } from './components/tabs/elements/elements.js';
 import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js'
 
 Cesium.Ion.defaultAccessToken = undefined;
@@ -405,35 +406,6 @@ layerButtons.forEach(button => {
     updateLayerStyle();
   });
 });
-
-/*
-    Periodic table opener
-*/
-
-const overlay = document.getElementById("periodic-table-overlay");
-const elementsTabContent = document.getElementById("elements");
-
-function showPeriodicTableOverlay() {
-  overlay.style.display = "block";
-  overlay.style.visibility = "visible";
-  overlay.classList.add("open");
-}
-
-function hidePeriodicTableOverlay() {
-  overlay.style.display = "none";
-  overlay.style.visibility = "hidden";
-  overlay.classList.remove("open");
-}
-
-document.getElementById('selected-element-container').addEventListener('click', function() {
-  showPeriodicTableOverlay();
-  elementsTabContent.style.display = "none";
-});
-
-overlay.addEventListener('click', function() {
-  hidePeriodicTableOverlay();
-  elementsTabContent.style.display = "flex";
-})
 
 /*
     Deselect button
