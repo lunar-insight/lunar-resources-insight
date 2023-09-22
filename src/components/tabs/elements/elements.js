@@ -17,7 +17,7 @@ export function hidePeriodicTableOverlay() {
   overlay.classList.remove("open");
 }
 
-document.getElementById('selected-element-container').addEventListener('click', function() {
+document.querySelector('.element-container__selection').addEventListener('click', function() {
   showPeriodicTableOverlay();
   elementsTabContent.style.display = "none";
 });

@@ -2,7 +2,7 @@ import { updateElementLayer } from 'updateElementLayer';
 
 document.addEventListener("DOMContentLoaded", function() {
     const elements = document.querySelectorAll('.periodic-element');
-    const selectedElementContainer = document.querySelector('#selected-element-container');
+    const selectedElementContainer = document.querySelector('.element-container__selection');
 
     elements.forEach(element => {
         const period = element.getAttribute('data-element-period');

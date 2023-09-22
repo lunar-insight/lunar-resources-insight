@@ -1,14 +1,25 @@
-#selected-element-container {
+.element-container {
     display: flex;
-    height: 16vh;
-    width: 16vh;
-    background-color: rgba(99, 99, 99, 0.5);
-    border: 0.4rem solid black;
-    border-radius: 1rem;
-    margin: auto;
-    justify-content: center;
     align-items: center;
-    cursor: pointer;
+    justify-content: center;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('~images/chemical-background-square.jpg');
+    background-size: cover;
+    border-bottom: #ccc 1px solid;
+    aspect-ratio: 1 / 1;
+
+    &__selection {
+        display: flex;
+        height: 16vh;
+        width: 16vh;
+        background-color: rgb(59, 59, 59);
+        border: 0.4rem solid rgb(46, 46, 46);
+        border-radius: 1rem;
+        margin: auto;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        box-shadow: inset 0 0 1rem 0.5rem black;
+    }
 }
 
 .selected-element-square {
@@ -23,6 +34,7 @@
     border-radius: 10px;
     color: white;
     position: relative;
+    box-shadow: 0 0 0.6rem white;
 
     &__abbreviation,
     &__name {
