@@ -46,6 +46,7 @@ module.exports = {
     },
     alias: {
       cesium: path.resolve(__dirname, cesiumSource),
+      images: path.resolve(__dirname, 'src/image/'),
       index$: path.resolve(__dirname,'src/index.js'),
       config$: path.resolve(__dirname,'src/config.js'),
       updateElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/update-element-layer.js'),
@@ -59,8 +60,8 @@ module.exports = {
       test: /\.scss$/,
       use: ['style-loader', 'css-loader', 'sass-loader']
     }, {
-      test: /\.(png|gif|jpg|jpeg|svg|xml|json)$/,
-      use: ['url-loader']
+      test: /\.(png|jpg|jpeg|gif|svg|xml|json)$/,
+      type: 'asset',
     }, {
       // Strip cesium pragmas
       test: /\.js$/,
