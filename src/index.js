@@ -7,6 +7,7 @@ requireAll(require.context('./', true, /\.(scss|css)$/));
 
 import * as config from './config';
 import './components/tabs/elements/periodic-table/periodic-table.js';
+import { periodicTableInitialisation } from 'elementTab/periodic-table/periodic-table.js';
 import { hidePeriodicTableOverlay } from './components/tabs/elements/elements.js';
 import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js'
 
@@ -544,8 +545,8 @@ function openTabs(evt, tabName) {
     hidePeriodicTableOverlay();
 }
 
-// Use the DOMContentLoaded event to ensure the DOM is fully loaded before trying to attach event listeners
-document.addEventListener('DOMContentLoaded', (event) => {
+function tabInitialisation() {
+
   const tablinks = document.getElementsByClassName("tablinks");
   for (let i = 0; i < tablinks.length; i++) {
     tablinks[i].addEventListener("click", function(event) {
@@ -561,4 +562,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
   }
 
   document.querySelector('button[data-tabname="home"]').click();
-});
+};
+
+/*
+  Global document scale event listener
+*/
+
+document.addEventListener("DOMContentLoaded", function() {
+  tabInitialisation();
+  periodicTableInitialisation();
+})

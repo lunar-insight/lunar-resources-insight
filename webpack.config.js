@@ -49,6 +49,7 @@ module.exports = {
       images: path.resolve(__dirname, 'src/image/'),
       index$: path.resolve(__dirname,'src/index.js'),
       config$: path.resolve(__dirname,'src/config.js'),
+      elementTab: path.resolve(__dirname, 'src/components/tabs/elements/'),
       updateElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/update-element-layer.js'),
     },
   },
