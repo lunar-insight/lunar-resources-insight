@@ -8,7 +8,7 @@ requireAll(require.context('./', true, /\.(scss|css)$/));
 import * as config from './config';
 import './components/tabs/elements/periodic-table/periodic-table.js';
 import { periodicTableInitialisation } from 'elementTab/periodic-table/periodic-table.js';
-import { hidePeriodicTableOverlay } from './components/tabs/elements/elements.js';
+import { hidePeriodicTableOverlay, paletteMenuSelectionElementInitialisation } from './components/tabs/elements/elements.js';
 import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js'
 
 Cesium.Ion.defaultAccessToken = undefined;
@@ -571,4 +571,5 @@ function tabInitialisation() {
 document.addEventListener("DOMContentLoaded", function() {
   tabInitialisation();
   periodicTableInitialisation();
+  paletteMenuSelectionElementInitialisation();
 })

@@ -34,6 +34,38 @@ overlay.addEventListener('click', function() {
 import colorRamp from 'images/color-ramp.png';
 import grayRamp from 'images/gray-ramp.png';
 
+// Selection container click event
+
+
+//const paletteSelectionContainer = document.querySelector('.element-mapgradient-container__palette-container__selection')
+
+//paletteSelectionContainer.addEventListener('click', function() {
+//  paletteMenuSelection.style.visibility = "visible";
+//});
+
+export function paletteMenuSelectionElementInitialisation() {
+  const paletteMenuSelection = document.querySelector('.element-mapgradient-container__palette-container__menu');
+  let isMenuVisible = false;
+
+  document.querySelector('.element-mapgradient-container__palette-container__selection').addEventListener('click', function(event) {
+    if (isMenuVisible) {
+      paletteMenuSelection.style.visibility = "hidden";
+    } else {
+      paletteMenuSelection.style.visibility = "visible";
+    }
+    
+    isMenuVisible = !isMenuVisible;
+    event.stopPropagation();
+  });
+
+  document.addEventListener('click', function(event) {
+    if (!paletteMenuSelection.contains(event.target)) {
+      paletteMenuSelection.style.visibility = "hidden";
+      isMenuVisible = false;
+    }
+  });
+};
+
 // Gradient container
 
 const gradientContainer = document.querySelector('.element-mapgradient-container__palette-container__selection__gradient');
