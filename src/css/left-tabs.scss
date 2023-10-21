@@ -47,4 +47,7 @@
     border-left: none;
     height: calc(100vh - 25px);
     background-color: rgba(0, 0, 0, 0.5);
+    // For outside tooltip
+    position: relative;
+    overflow: visible;
 }

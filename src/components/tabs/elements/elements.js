@@ -31,17 +31,7 @@ overlay.addEventListener('click', function() {
   Color palette
 */
 
-import colorRamp from 'images/color-ramp.png';
-import grayRamp from 'images/gray-ramp.png';
-
 // Selection container click event
-
-
-//const paletteSelectionContainer = document.querySelector('.element-mapgradient-container__palette-container__selection')
-
-//paletteSelectionContainer.addEventListener('click', function() {
-//  paletteMenuSelection.style.visibility = "visible";
-//});
 
 export function paletteMenuSelectionElementInitialisation() {
   const paletteMenuSelection = document.querySelector('.element-mapgradient-container__palette-container__menu');
@@ -67,6 +57,9 @@ export function paletteMenuSelectionElementInitialisation() {
 };
 
 // Gradient container
+
+import colorRamp from 'images/color-ramp.png';
+import grayRamp from 'images/gray-ramp.png';
 
 const gradientContainer = document.querySelector('.element-mapgradient-container__palette-container__selection__gradient');
 const imageGradientContainer = document.createElement('img');
