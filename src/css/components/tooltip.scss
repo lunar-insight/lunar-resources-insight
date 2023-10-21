@@ -1,0 +1,40 @@
+/*
+    Tooltip used outside the tabs
+
+    for tooltip content, use in html:
+    data-tooltip="The text"
+*/
+
+.tab-look-left-tooltip {
+    position: relative;
+    overflow: visible;
+
+    &:hover {
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%) translateX(0.3125rem);
+            border-width: 0.5rem;
+            border-style: solid;
+            border-color: transparent;
+            border-right-color: #333;
+            z-index: 5;
+        }
+    
+        &::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%) translateX(1.3125rem);
+            background-color: #333;
+            color: white;
+            padding: 0.25rem;
+            z-index: 5;
+            white-space: nowrap;
+        }
+    }
+}
