@@ -6,6 +6,7 @@
     background-size: cover;
     border-bottom: #ccc 1px solid;
     aspect-ratio: 1 / 1;
+    position: relative;
 
     &__selection {
         display: flex;
@@ -19,6 +20,22 @@
         align-items: center;
         cursor: pointer;
         box-shadow: inset 0 0 1rem 0.5rem black;
+    }
+
+    &__deselect-icon-box{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 2rem;
+        height: 2rem;
+        background-color: transparent;
+        cursor: pointer;
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        color: white;
+        border-left: white solid 0.0625rem;
+        border-top: white solid 0.0625rem;
     }
 }
 
