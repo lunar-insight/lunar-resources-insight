@@ -6,8 +6,8 @@
 */
 
 .tab-look-left-tooltip {
+
     position: relative;
-    overflow: visible;
 
     &:hover {
 
@@ -15,8 +15,8 @@
             content: '';
             position: absolute;
             top: 50%;
-            left: 100%;
-            transform: translateY(-50%) translateX(0.3125rem);
+            left: calc(18.75rem + 0.3125rem);
+            transform: translateY(-50%);
             border-width: 0.5rem;
             border-style: solid;
             border-color: transparent;
@@ -28,8 +28,8 @@
             content: attr(data-tooltip);
             position: absolute;
             top: 50%;
-            left: 100%;
-            transform: translateY(-50%) translateX(1.3125rem);
+            left: calc(18.75rem + 1.3125rem);
+            transform: translateY(-50%);
             background-color: #333;
             color: white;
             padding: 0.25rem;
