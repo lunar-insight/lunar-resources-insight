@@ -29,5 +29,12 @@ export function updateElementLayer(elementName) {
       }
     })
   );
+}
 
+export function getActiveLayer() {
+  return activeLayer
+}
+
+export function removeActiveLayer() {
+  activeLayer = null;
 }

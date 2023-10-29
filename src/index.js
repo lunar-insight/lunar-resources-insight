@@ -9,7 +9,8 @@ import * as config from './config';
 import './components/tabs/elements/periodic-table/periodic-table.js';
 import { periodicTableInitialisation } from 'elementTab/periodic-table/periodic-table.js';
 import { hidePeriodicTableOverlay, paletteMenuSelectionElementInitialisation } from './components/tabs/elements/elements.js';
-import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js'
+import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js';
+import { initialisationDeselectElementLayer } from 'deselectElementLayer';
 
 Cesium.Ion.defaultAccessToken = undefined;
 
@@ -572,4 +573,5 @@ document.addEventListener("DOMContentLoaded", function() {
   tabInitialisation();
   periodicTableInitialisation();
   paletteMenuSelectionElementInitialisation();
+  initialisationDeselectElementLayer();
 })
