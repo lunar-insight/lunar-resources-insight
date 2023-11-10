@@ -37,7 +37,7 @@ const getMapServerAuthHeader = () => {
 // Create the primary imagery layer
 const baseLayer = new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
   url: `${config.mapServerWmsUrl}`,
-  layers: 'lunar-resources:WAC_GLOBAL_100M',
+  layers: `${config.mapServerWorkspaceName}:${config.layersConfig.baseLayer.map_server_name}`,
   parameters: {
     transparent: false,
     format: 'image/png'
@@ -90,10 +90,32 @@ viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidge
 const geologicLayerNames = ['GeoUnits', 'GeoContacts'];
 
 let geologicLayerName;
-let nomenclatureLayer;
+
 let isUsingBackupImagery = false;
 
-fetch('http://localhost:8090/geoserver/lunar-resources/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=lunar-resources:Nomenclature&outputFormat=application%2Fjson')
+/*
+    Nomenclature layer
+*/
+
+let nomenclatureLayer;
+
+const nomenclatureLayerUrl = `${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows`;
+const nomenclatureQueryParams = new URLSearchParams({
+  service: 'WFS',
+  version: '1.0.0',
+  request: 'GetFeature',
+  typeName: `${config.mapServerWorkspaceName}:${config.layersConfig.nomenclature.map_server_name}`,
+  outputFormat: 'application/json'
+}).toString();
+
+const nomenclatureFullUrl = `${nomenclatureLayerUrl}?${nomenclatureQueryParams}`;
+
+/*
+fetch(`${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${config.mapServerWorkspaceName}:${config.layersConfig.nomenclature.map_server_name
+}&outputFormat=application%2Fjson`)
+*/
+
+fetch(nomenclatureFullUrl)
   .then(response => {
     if (!response.ok) {
       throw new Error('Network response failed');
@@ -192,7 +214,7 @@ document.getElementById("geo-button").addEventListener('click', function () {
       const layer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: `${config.mapServerWmsUrl}`,
-          layers: 'lunar-resources:' + layerName,
+          layers: `${config.mapServerWorkspaceName}:${layerName}`,
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -504,14 +526,14 @@ async function getLayerInfo(longitude, latitude, layerName) {
       service: "WMS",
       version: "1.1.1",
       request: "GetFeatureInfo",
-      layers: 'lunar-resources:' + layerName,
+      layers: `${config.mapServerWorkspaceName}:${layerName}`,
       styles: "",
       srs: "EPSG:4326",
       format: "image/png",
       bbox: `${longitude - 0.000001},${latitude - 0.000001},${longitude + 0.000001},${latitude + 0.000001}`,
       width: 2,
       height: 2,
-      query_layers: 'lunar-resources:' + layerName,
+      query_layers: `${config.mapServerWorkspaceName}:${layerName}`,
       info_format: "application/json",
       x: 1,
       y: 1,

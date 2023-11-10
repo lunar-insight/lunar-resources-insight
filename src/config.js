@@ -19,6 +19,19 @@ export const mapServerPassword = mapServerRequireAuthentification ? process.env.
     EDITABLE PART CONFIGURATION
 */
 
+// The layer in geoserver is always in the format <WORKSPACE>:<LAYER_NAME>
+// Workspace name used in your map server (eg. a geoserver workspace)
+export const mapServerWorkspaceName = 'lunar-resources';
+
+export const layersConfig = {
+    baseLayer: {
+        map_server_name: 'wac_global_100m' // Name of the base layer in GeoServer
+    },
+    nomenclatureLayer: {
+        map_server_name: 'nomenclature' // Name of the nomenclature layer in GeoServer
+    },
+}
+
 export const layerMinMaxValues = {
     'MAGNESIUM': {min: 2.08, max: 9.60},
     'IRON': {min: 2.69, max: 27.53},
