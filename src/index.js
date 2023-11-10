@@ -104,7 +104,7 @@ const nomenclatureQueryParams = new URLSearchParams({
   service: 'WFS',
   version: '1.0.0',
   request: 'GetFeature',
-  typeName: `${config.mapServerWorkspaceName}:${config.layersConfig.nomenclature.map_server_name}`,
+  typeName: `${config.mapServerWorkspaceName}:${config.layersConfig.nomenclatureLayer.map_server_name}`,
   outputFormat: 'application/json'
 }).toString();
 
