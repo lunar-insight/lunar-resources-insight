@@ -24,26 +24,52 @@ const globe = new Cesium.Globe(ellipsoid);
 
 globe.showGroundAtmosphere = false;
 
+// Function to add authentication header related to the map server if required - encoding data into base-64 with 'btoa' from Unicode string
+const getMapServerAuthHeader = () => {
+  if (config.mapServerRequireAuthentification) {
+    return {
+      Authorization: 'Basic ' + btoa(`${config.mapServerUsername}:${config.mapServerPassword}`)
+    };
+  }
+  return {};
+};
+
+// Create the primary imagery layer
+const baseLayer = new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
+  url: `${config.mapServerWmsUrl}`,
+  layers: 'lunar-resources:WAC_GLOBAL_100M',
+  parameters: {
+    transparent: false,
+    format: 'image/png'
+  },
+  // Max 4096
+  tileWidth: 512,
+  tileHeight: 512,
+  // Add headers for authentication if required
+  additionalHeaders: getMapServerAuthHeader()
+}));
+
+// Error handling for the primary layer
+baseLayer.imageryProvider.errorEvent.addEventListener(() => {
+  if (!isUsingBackupImagery) {
+    console.error('Error loading primary imagery layer.');
+  }
+});
+
+// Viewer creation
 export const viewer = new Cesium.Viewer('cesiumContainer', {
   globe: globe,
   mapProjection: mapProjection,
-  baseLayer: new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
-    url: `${config.mapServerWmsUrl}`,
-    layers: 'lunar-resources:WAC_GLOBAL_100M',
-    parameters: {
-      transparent: false,
-      format: 'image/png'
-    },
-    // Max 4096
-    tileWidth: 512,
-    tileHeight: 512
-  })),
   timeline: false,
   animation: false,
   baseLayerPicker: false,
   infoBox: false,
   selectionIndicator: false,
 });
+
+// Add the primary imagery layer to the viewer
+viewer.imageryLayers.add(baseLayer)
+
 
 viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
@@ -64,27 +90,16 @@ viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidge
 const geologicLayerNames = ['GeoUnits', 'GeoContacts'];
 
 let geologicLayerName;
-
-/*
-    Nomenclature
-*/
-
-/* let nomenclatureLayer = viewer.imageryLayers.addImageryProvider(
-  new Cesium.WebMapServiceImageryProvider({
-    url: 'http://localhost:8090/geoserver/lunar-resources/wms',
-    layers: 'lunar-resources:Nomenclature',
-    parameters: {
-      transparent: true,
-      format: 'image/png'
-    }
-  })
-);
- */
-
 let nomenclatureLayer;
+let isUsingBackupImagery = false;
 
 fetch('http://localhost:8090/geoserver/lunar-resources/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=lunar-resources:Nomenclature&outputFormat=application%2Fjson')
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response failed');
+    }
+    return response.json();
+  })
   .then(data=> {
     let dataSourcePromise = Cesium.GeoJsonDataSource.load(data, {
       clampToGround: false
@@ -115,6 +130,21 @@ fetch('http://localhost:8090/geoserver/lunar-resources/ows?service=WFS&version=1
       nomenclatureLayer = dataSource;
       nomenclatureLayer.show = false;
     });
+  })
+  .catch(error => {
+    console.error('There has been a problem with the fetch operation:', error);
+
+    // Backup fetching mechanism in case of fetch failure - using USGS server
+    isUsingBackupImagery = true;
+
+    viewer.imageryLayers.addImageryProvider(new Cesium.WebMapServiceImageryProvider({
+      url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
+      layers: 'LROC_WAC',
+      parameters: {
+        tranparent: true,
+        format: 'image/png'
+      }
+    }));
   });
 
 const nomenclatureCheckbox = document.getElementById('nomenclature-checkbox');

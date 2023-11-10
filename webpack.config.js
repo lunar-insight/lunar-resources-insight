@@ -119,6 +119,9 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
+      'process.env.MAP_SERVER_REQUIRE_AUTHENTIFICATION': JSON.stringify(process.env.MAP_SERVER_REQUIRE_AUTHENTIFICATION),
+      'process.env.MAP_SERVER_USERNAME': JSON.stringify(process.env.MAP_SERVER_USERNAME),
+      'process.env.MAP_SERVER_PASSWORD': JSON.stringify(process.env.MAP_SERVER_PASSWORD),
     })
   ]
 };
