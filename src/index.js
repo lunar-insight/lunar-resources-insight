@@ -5,7 +5,7 @@ require('cesium/Widgets/widgets.css');
 const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./', true, /\.(scss|css)$/));
 
-import * as config from './config';
+import * as config from 'config';
 import './components/tabs/elements/periodic-table/periodic-table.js';
 import { periodicTableInitialisation } from 'elementTab/periodic-table/periodic-table.js';
 import { hidePeriodicTableOverlay, paletteMenuSelectionElementInitialisation } from './components/tabs/elements/elements.js';
@@ -27,7 +27,7 @@ globe.showGroundAtmosphere = false;
 // Create the primary imagery layer
 const baseLayer = new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
   url: `${config.mapServerWmsUrl}`,
-  layers: `${config.mapServerWorkspaceName}:${config.layersConfig.baseLayer.map_server_name}`,
+  layers: `${config.mapServerWorkspaceName}:${config.layersConfig.baseLayer.mapServerName}`,
   parameters: {
     transparent: false,
     format: 'image/png'
@@ -75,7 +75,10 @@ viewer.scene.shadowMap.enabled = false;
 
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
-const geologicLayerNames = ['GeoUnits', 'GeoContacts'];
+const geologicLayerNames = [
+  `${config.layersConfig.geologicLayer.GeoUnitsName}`,
+  `${config.layersConfig.geologicLayer.geoContactName}`
+];
 
 let geologicLayerName;
 
@@ -92,14 +95,14 @@ const nomenclatureQueryParams = new URLSearchParams({
   service: 'WFS',
   version: '1.0.0',
   request: 'GetFeature',
-  typeName: `${config.mapServerWorkspaceName}:${config.layersConfig.nomenclatureLayer.map_server_name}`,
+  typeName: `${config.mapServerWorkspaceName}:${config.layersConfig.nomenclatureLayer.mapServerName}`,
   outputFormat: 'application/json'
 }).toString();
 
 const nomenclatureFullUrl = `${nomenclatureLayerUrl}?${nomenclatureQueryParams}`;
 
 /*
-fetch(`${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${config.mapServerWorkspaceName}:${config.layersConfig.nomenclature.map_server_name
+fetch(`${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${config.mapServerWorkspaceName}:${config.layersConfig.nomenclature.mapServerName
 }&outputFormat=application%2Fjson`)
 */
 

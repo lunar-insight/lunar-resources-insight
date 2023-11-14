@@ -4,7 +4,7 @@
 
 const Cesium = require('cesium/Cesium');
 import { viewer } from 'index';
-import { mapServerWmsUrl } from 'config';
+import { mapServerWorkspaceName, mapServerWmsUrl } from 'config';
 
 let activeLayer;
 
@@ -21,7 +21,7 @@ export function updateElementLayer(elementName) {
   activeLayer = viewer.imageryLayers.addImageryProvider(
     new Cesium.WebMapServiceImageryProvider({
       url: `${mapServerWmsUrl}`,
-      layers: 'lunar-resources:' + selectedValue,
+      layers: `${mapServerWorkspaceName}:` + selectedValue,
       parameters: {
         transparent: true,
         format: 'image/png',

@@ -18,25 +18,28 @@ export const mapServerWorkspaceName = 'lunar-resources';
 
 export const layersConfig = {
     baseLayer: {
-        map_server_name: 'wac_global_100m' // Name of the base layer in GeoServer
+        mapServerName: 'wac_global_100m' // Name of the base layer in GeoServer
     },
     nomenclatureLayer: {
-        map_server_name: 'nomenclature' // Name of the nomenclature layer in GeoServer, from the IAU
+        mapServerName: 'nomenclature' // Name of the nomenclature layer in GeoServer, from the IAU
     },
     geologicLayer: {
-        map_server_name: 'unified_geologic_v2' // Usually the UnifiedGeologicMapMoon_V2 from USGS
+        mapServerName: 'unified_geologic_v2', // Usually the UnifiedGeologicMapMoon_V2 from USGS
+        geoContactName: 'geo_contacts', // The geoContact name layer in the geopackage
+        GeoUnitsName: 'geo_units' // The geoUnits name layer in the geopackage
+
     },
     calciumLayer: {
-        map_server_name: 'calcium'
+        mapServerName: 'calcium'
     },
     ironLayer: {
-        map_server_name: 'iron'
+        mapServerName: 'iron'
     },
     magnesiumLayer: {
-        map_server_name: 'magnesium'
+        mapServerName: 'magnesium'
     },
     titaniumLayer: {
-        map_server_name: 'titanium'
+        mapServerName: 'titanium'
     }
 }
 
