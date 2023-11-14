@@ -27,7 +27,7 @@ globe.showGroundAtmosphere = false;
 // Create the primary imagery layer
 const baseLayer = new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
   url: `${config.mapServerWmsUrl}`,
-  layers: `${config.mapServerWorkspaceName}:${config.layersConfig.baseLayer.mapServerName}`,
+  layers: `${config.mapServerWorkspaceName}:${config.layersConfig.baseLayer.mapName}`,
   parameters: {
     transparent: false,
     format: 'image/png'
@@ -53,6 +53,7 @@ export const viewer = new Cesium.Viewer('cesiumContainer', {
   baseLayerPicker: false,
   infoBox: false,
   selectionIndicator: false,
+  imageryProvider: false,
 });
 
 // Add the primary imagery layer to the viewer
@@ -89,20 +90,19 @@ let isUsingBackupImagery = false;
 */
 
 let nomenclatureLayer;
-
 const nomenclatureLayerUrl = `${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows`;
 const nomenclatureQueryParams = new URLSearchParams({
   service: 'WFS',
   version: '1.0.0',
   request: 'GetFeature',
-  typeName: `${config.mapServerWorkspaceName}:${config.layersConfig.nomenclatureLayer.mapServerName}`,
+  typeName: `${config.mapServerWorkspaceName}:${config.layersConfig.nomenclatureLayer.mapName}`,
   outputFormat: 'application/json'
 }).toString();
 
 const nomenclatureFullUrl = `${nomenclatureLayerUrl}?${nomenclatureQueryParams}`;
 
 /*
-fetch(`${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${config.mapServerWorkspaceName}:${config.layersConfig.nomenclature.mapServerName
+fetch(`${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${config.mapServerWorkspaceName}:${config.layersConfig.nomenclature.mapName
 }&outputFormat=application%2Fjson`)
 */
 

@@ -46,7 +46,7 @@ To pull the image locally:
 docker run -it -p {{LOCAL_PORT}}:8080 --env INSTALL_EXTENSIONS=true --env STABLE_EXTENSIONS="vectortiles,geopkg-output,gdal,jp2k,iau"  --env CORS_ENABLED=true --mount src="C:/Your/Local/Geoserver/Directory",target=/opt/geoserver_data/,type=bind docker.osgeo.org/geoserver:{{VERSION}}
 ```
 
-When geoserver is running, you need to create a workspace, eg. ``lunar-resources``. On the **Stores** category, connect to a layer and publish it. The layer will appear in the **Layers** category. For the layer publication, the default names in the config.js of the Lunar Resources Insight project can be used.
+When geoserver is running, you need to create a workspace, eg. ``lunar-resources``, the different service on the workspace need to be activated (WMS, WCS, WMTS and WFS). On the **Stores** category, connect to a layer and publish it. The layer will appear in the **Layers** category. For the layer publication, the default names in the config.js of the Lunar Resources Insight project can be used.
 
 If the downloaded dataset has a style with it, you can add it in the **Styles** category in GeoServer.
 
@@ -64,6 +64,21 @@ The **Layers** page in GeoServer should look like this:
 | WAC_GLOBAL_100M                       | lunar-resources:wac_global_100m | wac_global_morphologic_100m |
 
 The *Name* category is related to the Lunar Resources Insight ``config.js`` file. The *Title* and *Store* can be any names.
+
+### Style
+
+The name of each chemical element style should be in this format:
+- ``STYLE_{{COLOR/GRAY}}_GLOBAL20PPD_{{ELEMENT_NAME}}``
+
+Example:
+- STYLE_COLOR_GLOBAL20PPD_TITANIUM
+- STYLE_GRAY_GLOBAL20PPD_CALCIUM
+
+You just need to import the SLD file and put it in the right GeoServer workspace in the *Styles* page. Then the Style should be linked with the layer, as *GRAY* as the default one for each layer.
+- *GRAY* should be a *Default* style.
+- *COLOR* should be an *Associated* style.
+
+For the *Nomenclature* and the *Geologic* data, the style should be configured as default.
 
 ### Data
 
