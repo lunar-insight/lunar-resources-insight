@@ -12,15 +12,6 @@ Create a private .env config file in your project at the same level
 ```
 # The map server url, where the geographical data are located, can be localhost, an ip or a specific adress (without the slash / at the end)
 MAP_SERVER_URL=http://example.com/geoserver
-
-# Use a boolean true or false if your map server has an authentication
-MAP_SERVER_REQUIRE_AUTHENTIFICATION=false
-
-# If your map server has an authentication, this is the username
-MAP_SERVER_USERNAME=
-
-# If your map server has an authentication, this is the password
-MAP_SERVER_PASSWORD=""
 ```
 
 Edit the config.js file with your map server configuration with your workspace name and layer name assuming you are using GeoServer.
@@ -28,7 +19,7 @@ Edit the config.js file with your map server configuration with your workspace n
 ### Installation
 
 1. Install [Node.js](https://nodejs.org/) on your computer.
-2. Install [GeoServer](https://geoserver.org/) on your computer, assuming via docker in this case.
+2. Install [GeoServer](https://geoserver.org/) on your computer, assuming via [docker](https://github.com/geoserver/docker) in this case.
 
 ### Data
 

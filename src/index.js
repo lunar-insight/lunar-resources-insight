@@ -24,16 +24,6 @@ const globe = new Cesium.Globe(ellipsoid);
 
 globe.showGroundAtmosphere = false;
 
-// Function to add authentication header related to the map server if required - encoding data into base-64 with 'btoa' from Unicode string
-const getMapServerAuthHeader = () => {
-  if (config.mapServerRequireAuthentification) {
-    return {
-      Authorization: 'Basic ' + btoa(`${config.mapServerUsername}:${config.mapServerPassword}`)
-    };
-  }
-  return {};
-};
-
 // Create the primary imagery layer
 const baseLayer = new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
   url: `${config.mapServerWmsUrl}`,
@@ -45,8 +35,6 @@ const baseLayer = new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvid
   // Max 4096
   tileWidth: 512,
   tileHeight: 512,
-  // Add headers for authentication if required
-  additionalHeaders: getMapServerAuthHeader()
 }));
 
 // Error handling for the primary layer

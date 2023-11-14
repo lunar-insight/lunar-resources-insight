@@ -8,13 +8,6 @@ export const mapServerUrl = process.env.MAP_SERVER_URL;
 // WMS version of the geographical server link
 export const mapServerWmsUrl = `${mapServerUrl}/wms`;
 
-// Check if authentication is required to fetch the data from the geographical server
-export const mapServerRequireAuthentification = process.env.MAP_SERVER_REQUIRE_AUTHENTIFICATION === 'true';
-
-// Set up authentication credentials from the .env file if required
-export const mapServerUsername = mapServerRequireAuthentification ? process.env.MAP_SERVER_USERNAME : null;
-export const mapServerPassword = mapServerRequireAuthentification ? process.env.MAP_SERVER_PASSWORD : null;
-
 /*
     EDITABLE PART CONFIGURATION
 */
@@ -28,8 +21,23 @@ export const layersConfig = {
         map_server_name: 'wac_global_100m' // Name of the base layer in GeoServer
     },
     nomenclatureLayer: {
-        map_server_name: 'nomenclature' // Name of the nomenclature layer in GeoServer
+        map_server_name: 'nomenclature' // Name of the nomenclature layer in GeoServer, from the IAU
     },
+    geologicLayer: {
+        map_server_name: 'unified_geologic_v2' // Usually the UnifiedGeologicMapMoon_V2 from USGS
+    },
+    calciumLayer: {
+        map_server_name: 'calcium'
+    },
+    ironLayer: {
+        map_server_name: 'iron'
+    },
+    magnesiumLayer: {
+        map_server_name: 'magnesium'
+    },
+    titaniumLayer: {
+        map_server_name: 'titanium'
+    }
 }
 
 export const layerMinMaxValues = {
