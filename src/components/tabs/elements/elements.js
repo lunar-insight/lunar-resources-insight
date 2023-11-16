@@ -56,9 +56,39 @@ export function paletteMenuSelectionElementInitialisation() {
   });
 };
 
+import { colorbrewer } from 'colorbrewer';
+
+function createPaletteGradient(name, colors) {
+  const gradient = `linear-gradient(to right, ${colors.join(', ')})`;
+  const paletteElement = document.createElement('div');
+  paletteElement.className = 'element-mapgradient-container__palette-container__menu__item look-left-tooltip-trigger';
+  paletteElement.setAttribute('data-tooltip', name) // Set the name of the palette automatically in the tooltip
+  paletteElement.style.background = gradient; // Use the linear-gradient()
+  return paletteElement;
+}
+
+export function populatePaletteMenu() {
+  const menuContainer = document.querySelector('.element-mapgradient-container__palette-container__menu');
+
+  // Clear existing content
+  while (menuContainer.firstChild) {
+    menuContainer.removeChild(menuContainer.firstChild)
+  }
+
+  Object.entries(colorbrewer).forEach(([name, palette]) => {
+    const maxColors = palette[Object.keys(palette).sort((a, b) => b - a)[0]]; // Find the largest number in an array of numbers, by sorting the array in descending order
+    const paletteElement = createPaletteGradient(name, maxColors); // Pass the palette name and the colors values
+    menuContainer.appendChild(paletteElement);
+  });
+}
+
+
+// TODO : change the container selection gradient to the selected gradient
+
+
 // Gradient container
 
-import colorRamp from 'images/color-ramp.png';
+/* import colorRamp from 'images/color-ramp.png';
 import grayRamp from 'images/gray-ramp.png';
 
 const gradientContainer = document.querySelector('.element-mapgradient-container__palette-container__selection__gradient');
@@ -66,11 +96,11 @@ const imageGradientContainer = document.createElement('img');
 
 imageGradientContainer.src = colorRamp;
 
-gradientContainer.appendChild(imageGradientContainer);
+gradientContainer.appendChild(imageGradientContainer); */
 
 // Gradient menu selector
 
-function createElementPaletteSelectionMenuItem(imageSrc) {
+/* function createElementPaletteSelectionMenuItem(imageSrc) {
   const menuItem = document.createElement('div');
   menuItem.className = 'element-mapgradient-container__palette-container__menu__item';
   
@@ -88,4 +118,4 @@ const images = [colorRamp, grayRamp];
 
 images.forEach(image => {
   menuContainer.appendChild(createElementPaletteSelectionMenuItem(image));
-});
+}); */

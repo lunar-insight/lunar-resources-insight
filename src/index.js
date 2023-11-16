@@ -8,9 +8,10 @@ requireAll(require.context('./', true, /\.(scss|css)$/));
 import * as config from 'config';
 import './components/tabs/elements/periodic-table/periodic-table.js';
 import { periodicTableInitialisation } from 'elementTab/periodic-table/periodic-table.js';
-import { hidePeriodicTableOverlay, paletteMenuSelectionElementInitialisation } from './components/tabs/elements/elements.js';
+import { hidePeriodicTableOverlay, paletteMenuSelectionElementInitialisation, populatePaletteMenu } from './components/tabs/elements/elements.js';
 import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js';
 import { initialisationDeselectElementLayer } from 'deselectElementLayer';
+import { initializeTooltips } from 'tooltip';
 
 Cesium.Ion.defaultAccessToken = undefined;
 
@@ -617,4 +618,6 @@ document.addEventListener("DOMContentLoaded", function() {
   periodicTableInitialisation();
   paletteMenuSelectionElementInitialisation();
   initialisationDeselectElementLayer();
+  populatePaletteMenu();
+  initializeTooltips(); // Should be always called after populatePaletteMenu()
 })
