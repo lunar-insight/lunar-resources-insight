@@ -64,6 +64,13 @@ function createPaletteGradient(name, colors) {
   paletteElement.className = 'element-mapgradient-container__palette-container__menu__item look-left-tooltip-trigger';
   paletteElement.setAttribute('data-tooltip', name) // Set the name of the palette automatically in the tooltip
   paletteElement.style.background = gradient; // Use the linear-gradient()
+
+  // Add click event listener to each palette element
+  paletteElement.addEventListener('click', function() {
+    const selectionGradient = document.querySelector('.element-mapgradient-container__palette-container__selection__gradient');
+    selectionGradient.style.background = gradient;
+  })
+
   return paletteElement;
 }
 
