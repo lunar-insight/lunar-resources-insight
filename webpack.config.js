@@ -52,7 +52,7 @@ module.exports = {
       index$: path.resolve(__dirname,'src/index.js'),
       config$: path.resolve(__dirname,'src/config.js'),
       colorbrewer$: path.resolve(__dirname, 'src/constants/colorbrewer.js'),
-      tooltip$: path.resolve(__dirname, 'src/functions/tooltip.js'),
+      tooltip$: path.resolve(__dirname, 'src/functions/tooltip/tooltip.js'),
 
       // Tabs
       elementTab: path.resolve(__dirname, 'src/components/tabs/elements/'),
