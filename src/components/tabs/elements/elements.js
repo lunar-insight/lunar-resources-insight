@@ -76,6 +76,7 @@ function createPaletteGradient(name, colors) {
 
 export function populatePaletteMenu() {
   const menuContainer = document.querySelector('.element-mapgradient-container__palette-container__menu');
+  const selectionGradient = document.querySelector('.element-mapgradient-container__palette-container__selection__gradient');
 
   // Clear existing content
   while (menuContainer.firstChild) {
@@ -86,5 +87,11 @@ export function populatePaletteMenu() {
     const maxColors = palette[Object.keys(palette).sort((a, b) => b - a)[0]]; // Find the largest number in an array of numbers, by sorting the array in descending order
     const paletteElement = createPaletteGradient(name, maxColors); // Pass the palette name and the colors values
     menuContainer.appendChild(paletteElement);
+
+    // Set the 'Spectral' gradient as the default background
+    if (name === 'Spectral') {
+      const spectralGradient = `linear-gradient(to right, ${maxColors.join(', ')})`;
+      selectionGradient.style.background = spectralGradient;
+    }
   });
 }
