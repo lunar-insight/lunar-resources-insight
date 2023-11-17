@@ -13,6 +13,19 @@ import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-
 import { initialisationDeselectElementLayer } from 'deselectElementLayer';
 import { initializeTooltips } from 'tooltip';
 
+/*
+  Global document scale event listener
+*/
+
+document.addEventListener("DOMContentLoaded", function() {
+  tabInitialisation();
+  periodicTableInitialisation();
+  paletteMenuSelectionElementInitialisation();
+  initialisationDeselectElementLayer();
+  populatePaletteMenu();
+  initializeTooltips(); // Should be always called after populatePaletteMenu()
+})
+
 Cesium.Ion.defaultAccessToken = undefined;
 
 //const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400);
@@ -608,16 +621,3 @@ function tabInitialisation() {
 
   document.querySelector('button[data-tabname="home"]').click();
 };
-
-/*
-  Global document scale event listener
-*/
-
-document.addEventListener("DOMContentLoaded", function() {
-  tabInitialisation();
-  periodicTableInitialisation();
-  paletteMenuSelectionElementInitialisation();
-  initialisationDeselectElementLayer();
-  populatePaletteMenu();
-  initializeTooltips(); // Should be always called after populatePaletteMenu()
-})
