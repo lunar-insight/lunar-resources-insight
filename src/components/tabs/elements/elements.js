@@ -57,6 +57,11 @@ export function paletteMenuSelectionElementInitialisation() {
 };
 
 import { colorbrewer } from 'colorbrewer';
+import { createSldStringForPalette } from 'dynamicSldStyle';
+import { updateElementLayer, getActiveLayer, getActiveLayerName } from 'updateElementLayer';
+
+// Variable to store the currently selected palette color
+let currentPaletteColors = [];
 
 function createPaletteGradient(name, colors) {
   const gradient = `linear-gradient(to right, ${colors.join(', ')})`;
@@ -65,14 +70,35 @@ function createPaletteGradient(name, colors) {
   paletteElement.setAttribute('data-tooltip', name) // Set the name of the palette automatically in the tooltip
   paletteElement.style.background = gradient; // Use the linear-gradient()
 
+  // Store the color in the global variable
+  currentPaletteColors = colors;
+
   // Add click event listener to each palette element
   paletteElement.addEventListener('click', function() {
+
+    // Update the gradient in the UI
     const selectionGradient = document.querySelector('.element-mapgradient-container__palette-container__selection__gradient');
     selectionGradient.style.background = gradient;
-  })
+
+    // Verify if activeLayer is not null here before sending the request
+    const activeLayer = getActiveLayer();
+    if (activeLayer) {
+
+      // Generate the SLD string for the selected palette
+      const elementName = getActiveLayerName();
+      const sldString = createSldStringForPalette(elementName, colors);
+
+      // Update the element layer with the new SLD
+      updateElementLayer(elementName, sldString)
+    }
+  });
 
   return paletteElement;
 }
+
+/*
+  This function put all the colorbrewer's palette in the palette selection menu
+*/
 
 export function populatePaletteMenu() {
   const menuContainer = document.querySelector('.element-mapgradient-container__palette-container__menu');
@@ -92,6 +118,15 @@ export function populatePaletteMenu() {
     if (name === 'Spectral') {
       const spectralGradient = `linear-gradient(to right, ${maxColors.join(', ')})`;
       selectionGradient.style.background = spectralGradient;
+      currentPaletteColors = maxColors; // Set the global variable with default palette colors
     }
   });
+}
+
+/*
+  Function to get the current palette colors
+*/
+
+export function getCurrentPaletteColors() {
+  return currentPaletteColors;
 }

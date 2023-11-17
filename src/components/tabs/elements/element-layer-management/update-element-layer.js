@@ -7,8 +7,9 @@ import { viewer } from 'index';
 import { mapServerWorkspaceName, mapServerWmsUrl, layersConfig } from 'config';
 
 let activeLayer;
+let activeLayerName;
 
-export function updateElementLayer(elementName) {
+export function updateElementLayer(elementName, sldString) {
   
   if (activeLayer) {
     viewer.imageryLayers.remove(activeLayer);
@@ -24,8 +25,10 @@ export function updateElementLayer(elementName) {
 
   const layerMapName = elementLayerConfig.mapName;
 
-  const styleSuffix = 'COLOR'; // OR 'GRAY todo change'
-  const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${layerMapName.toUpperCase()}`; // Temporary before creating the dynamic SLD
+  activeLayerName = layerMapName;
+
+  //const styleSuffix = 'COLOR'; // OR 'GRAY todo change'
+  //const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${layerMapName.toUpperCase()}`; // Temporary before creating the dynamic SLD
 
   activeLayer = viewer.imageryLayers.addImageryProvider(
     new Cesium.WebMapServiceImageryProvider({
@@ -34,18 +37,24 @@ export function updateElementLayer(elementName) {
       parameters: {
         transparent: true,
         format: 'image/png',
-        styles: styleName
+        //styles: styleName
+        SLD_BODY: encodeURIComponent(sldString)
       }
     })
   );
 }
 
 export function getActiveLayer() {
-  return activeLayer
+  return activeLayer;
+}
+
+export function getActiveLayerName() {
+  return activeLayerName;
 }
 
 export function removeActiveLayer() {
   activeLayer = null;
+  activeLayerName = null;
 }
 
 // This function take into account the map name and link the config.js file

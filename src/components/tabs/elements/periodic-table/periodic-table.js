@@ -1,4 +1,6 @@
 import { updateElementLayer } from 'updateElementLayer';
+import { getCurrentPaletteColors } from 'elementTab/elements.js'
+import { createSldStringForPalette } from 'dynamicSldStyle';
 
 export function periodicTableInitialisation() {
 
@@ -50,7 +52,13 @@ export function periodicTableInitialisation() {
 
         selectedElementContainer.appendChild(newElementSquare);
 
-        updateElementLayer(elementName);
+        // Getting the actual selected color palette
+        const colors = getCurrentPaletteColors();
+
+        // Create a dynamic SLD
+        const sldString = createSldStringForPalette(elementName, colors);
+        
+        updateElementLayer(elementName, sldString);
       }
     })
   });

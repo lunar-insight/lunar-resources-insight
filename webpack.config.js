@@ -60,6 +60,7 @@ module.exports = {
       // Element layer management
       updateElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/update-element-layer.js'),
       deselectElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/layer-deselection.js'),
+      dynamicSldStyle$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/dynamic-sld-style.js'),
     },
   },
   module: {
