@@ -9,13 +9,11 @@ import { mapServerWorkspaceName, mapServerWmsUrl, layersConfig } from 'config';
 let activeLayer;
 let activeLayerName;
 
-export function updateElementLayer(elementName, sldString) {
+export function updateElementLayer(elementName, sldString, minValue, maxValue) {
   
   if (activeLayer) {
     viewer.imageryLayers.remove(activeLayer);
   }
-
-  //const selectedValue = elementName.toUpperCase();
 
   const elementLayerConfig = getLayerConfigForElement(elementName); // Use the config.js file to map the correct chemical element layer name
   if (!elementLayerConfig) { 
@@ -24,11 +22,18 @@ export function updateElementLayer(elementName, sldString) {
   }
 
   const layerMapName = elementLayerConfig.mapName;
-
   activeLayerName = layerMapName;
 
-  //const styleSuffix = 'COLOR'; // OR 'GRAY todo change'
-  //const styleName = `STYLE_${styleSuffix}_GLOBAL20PPD_${layerMapName.toUpperCase()}`; // Temporary before creating the dynamic SLD
+  /*
+      Constructing the 'env' parameter for CQL expressions,
+      only if 'min' and 'max' values parameters are provided to the function,
+      This is used for dynamic style update from the WMS request.
+      (Unrelated to the .ENV file)
+  */
+  let envParams = '';
+  if (minValue !== undefined && maxValue !== undefined) {
+    envParams = `&ENV=minValue:${minValue};maxValue:${maxValue}`;
+  }
 
   activeLayer = viewer.imageryLayers.addImageryProvider(
     new Cesium.WebMapServiceImageryProvider({
@@ -37,11 +42,12 @@ export function updateElementLayer(elementName, sldString) {
       parameters: {
         transparent: true,
         format: 'image/png',
-        //styles: styleName
-        SLD_BODY: encodeURIComponent(sldString)
+        SLD_BODY: encodeURIComponent(sldString),
+        ENV: envParams
       }
     })
   );
+  console.log(sldString);
 }
 
 export function getActiveLayer() {
