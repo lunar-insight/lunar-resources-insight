@@ -24,7 +24,7 @@ export function updateElementLayer(elementName, sldString, minValue, maxValue) {
   const layerMapName = elementLayerConfig.mapName;
   activeLayerName = layerMapName;
 
-  /*
+  /* TODO:
       Constructing the 'env' parameter for CQL expressions,
       only if 'min' and 'max' values parameters are provided to the function,
       This is used for dynamic style update from the WMS request.
@@ -33,7 +33,22 @@ export function updateElementLayer(elementName, sldString, minValue, maxValue) {
   let envParams = '';
   if (minValue !== undefined && maxValue !== undefined) {
     envParams = `&ENV=minValue:${minValue};maxValue:${maxValue}`;
+  } else {
+    envParams = 'minValue:0;maxValue:100';
   }
+
+/*   // Construct the request URL manually for testing purpose:
+  const requestUrl = `${mapServerWmsUrl}?` +
+  `service=WMS&` +
+  `request=GetMap&` +
+  `layers=${encodeURIComponent(`${mapServerWorkspaceName}:${layerMapName}`)}&` +
+  `transparent=${encodeURIComponent('true')}&` +
+  `format=${encodeURIComponent('image/png')}&` +
+  `SLD_BODY=${encodeURIComponent(sldString)}&` +
+  `ENV=${encodeURIComponent(envParams)}`;
+
+  // Log the request URL
+  console.log("Request URL:", requestUrl); */
 
   activeLayer = viewer.imageryLayers.addImageryProvider(
     new Cesium.WebMapServiceImageryProvider({
@@ -42,12 +57,11 @@ export function updateElementLayer(elementName, sldString, minValue, maxValue) {
       parameters: {
         transparent: true,
         format: 'image/png',
-        SLD_BODY: encodeURIComponent(sldString),
-        ENV: envParams
+        SLD_BODY: sldString,
+        //ENV: envParams
       }
     })
   );
-  console.log(sldString);
 }
 
 export function getActiveLayer() {

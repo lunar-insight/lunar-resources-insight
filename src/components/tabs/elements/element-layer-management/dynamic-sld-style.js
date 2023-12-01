@@ -18,6 +18,8 @@ export function createSldStringForPalette(elementName, paletteColors) {
         return '';
     }
 
+    const stepSize = (layerMinMax.max - layerMinMax.min) / (paletteColors.length - 1);
+
     let sld = '<?xml version="1.0" encoding="UTF-8"?>';
     sld += '<StyledLayerDescriptor xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc" xmlns:gml="http://www.opengis.net/gml" xmlns:sld="http://www.opengis.net/sld" version="1.0.0">';
     sld += '  <NamedLayer>';
@@ -28,7 +30,7 @@ export function createSldStringForPalette(elementName, paletteColors) {
     sld += '          <sld:RasterSymbolizer>';
     sld += '            <sld:ColorMap type="ramp">';
 
-    /*
+    /* TODO:
         Using CQL expression if provided by using the 'env' function to get value,
         it default to classic value from the config.js file is not provided.
 
@@ -40,11 +42,29 @@ export function createSldStringForPalette(elementName, paletteColors) {
         interpreted by GeoServer, not by JavaScript.
     */
 
+    // paletteColors.forEach((color, index) => {
+    //     const stepSize = `((${`env('maxValue', ${layerMinMax.max})`} - ${`env('minValue', ${layerMinMax.min})`}) / (${paletteColors.length - 1}))`;
+    //     const quantity = `${`env('minValue', ${layerMinMax.min})`} + ${index} * ${stepSize}`;
+    //     sld += `<sld:ColorMapEntry color="${color}" quantity="${quantity}"/>`;
+    // })
+
+    // paletteColors.forEach((color, index) => {
+    //     const stepSize = `((${`env('maxValue', ${layerMinMax.max})`} - ${`env('minValue', ${layerMinMax.min})`}) / (${paletteColors.length - 1}))`;
+    //     const quantity = `${`env('minValue', ${layerMinMax.min})`} + ${index} * ${stepSize}`;
+    //     sld += `<sld:ColorMapEntry color="${color}" quantity="${quantity.replace(/`/g, '')}"/>`;
+    // })
+
+    // Used for dynamic min max change with env
+    // paletteColors.forEach((color, index) => {
+    //     const stepSize = `((${`\${env('maxValue', ${layerMinMax.max})`} - ${`\${env('minValue', ${layerMinMax.min})`}) / (${paletteColors.length - 1}))`;
+    //     const quantity = `${`\${env('minValue', ${layerMinMax.min})`} + ${index} * ${stepSize}`;
+    //     sld += `<sld:ColorMapEntry color="${color}" quantity="${quantity}"/>`;
+    // })
+
     paletteColors.forEach((color, index) => {
-        const stepSize = `((${`env('maxValue', ${layerMinMax.max})`} - ${`env('minValue', ${layerMinMax.min})`}) / (${paletteColors.length - 1}))`;
-        const quantity = `${`env('minValue', ${layerMinMax.min})`} + ${index} * ${stepSize}`;
-        sld += `<sld:ColorMapEntry color="${color}" quantity="${quantity}"/>`;
-    })
+        const quantity = layerMinMax.min + index * stepSize;
+        sld += `<sld:ColorMapEntry color="${color}" quantity="${quantity}"/>`
+    });
 
     sld += '            </sld:ColorMap>';
     sld += '          </sld:RasterSymbolizer>';

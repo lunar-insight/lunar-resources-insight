@@ -67,18 +67,9 @@ The *Name* category is related to the Lunar Resources Insight ``config.js`` file
 
 ### Style
 
-The name of each chemical element style should be in this format:
-- ``STYLE_{{COLOR/GRAY}}_GLOBAL20PPD_{{ELEMENT_NAME}}``
-
-Example:
-- STYLE_COLOR_GLOBAL20PPD_TITANIUM
-- STYLE_GRAY_GLOBAL20PPD_CALCIUM
-
-You just need to import the SLD file and put it in the right GeoServer workspace in the *Styles* page. Then the Style should be linked with the layer, as *GRAY* as the default one for each layer.
-- *GRAY* should be a *Default* style.
-- *COLOR* should be an *Associated* style.
-
-For the *Nomenclature* and the *Geologic* data, the style should be configured as default.
+- The chemical element styling is done automatically via the interface, they don't need styling files on GeoServer.
+- For the *Nomenclature* and the *Geologic* data, the style should be configured as default by using the provided styles from the required test data link.
+- About the 'WAC Global 100m' file, you need to generate a default 'raster' style, by creating a new one directly on GeoServer in the Style category.
 
 ### Data
 
