@@ -65,10 +65,16 @@ export function updateElementLayer(elementName, sldString, minValue, maxValue) {
 }
 
 export function getActiveLayer() {
+  if (!activeLayer) {
+    return null;
+  }
   return activeLayer;
 }
 
 export function getActiveLayerName() {
+  if (!activeLayerName) {
+    return null;
+  }
   return activeLayerName;
 }
 

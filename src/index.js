@@ -9,7 +9,6 @@ import * as config from 'config';
 import './components/tabs/elements/periodic-table/periodic-table.js';
 import { periodicTableInitialisation } from 'elementTab/periodic-table/periodic-table.js';
 import { hidePeriodicTableOverlay, paletteMenuSelectionElementInitialisation, populatePaletteMenu } from './components/tabs/elements/elements.js';
-import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js';
 import { initialisationDeselectElementLayer } from 'deselectElementLayer';
 import { initializeTooltips } from 'tooltip';
 
@@ -91,7 +90,7 @@ viewer.scene.shadowMap.enabled = false;
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
 const geologicLayerNames = [
-  `${config.layersConfig.geologicLayer.GeoUnitsName}`,
+  `${config.layersConfig.geologicLayer.geoUnitsName}`,
   `${config.layersConfig.geologicLayer.geoContactName}`
 ];
 
@@ -346,11 +345,13 @@ handler.setInputAction(async function (movement) {
     entity.position = cartesian;
     entity.label.show = mouseCheckbox.checked;
 
+    const activeElementLayerName = getActiveLayerName(); // Getting active chemical element layer name from dedicated function
+
     const featureInfoPromise = getFeatureInfoThrottled(
       parseFloat(longitudeString),
       parseFloat(latitudeString),
       geologicLayerName,
-      getChemicalLayerName()
+      activeElementLayerName
     );
 
     featureInfoPromise.then((info) => {
@@ -415,6 +416,7 @@ function convertCoordinatesToFixed(cartesian) {
 */
 
 import { drawPolyline } from './functions/selection/polyline';
+import { getActiveLayerName } from './components/tabs/elements/element-layer-management/update-element-layer.js';
 
 const polylineButton = document.getElementById('polyline-button');
 let isPolylineDrawing = false;
@@ -435,46 +437,11 @@ window.addEventListener('polylineDrawn', function() {
 })
 
 /*
-    Map selection
-*/
-
-export const htmlChemicalLayerNames = config.chemicalLayerNames.map(name => {
-  const data = config.chemicalLayerData[name];
-  return `
-      <button id="${name}" class="layer-btn">
-      <div class="name">${data ? data.name : name}</div>
-      <div class="number">${data ? data.number : ''}</div>
-      <div class="symbol">${data ? data.symbol : ''}</div>
-      <div class="info-icon material-symbols-outlined">info</div>
-      </button>`;
-}).join('');
-
-document.getElementById('btn-group').innerHTML = htmlChemicalLayerNames;
-
-const layerButtons = document.querySelectorAll('.layer-btn');
-
-layerButtons.forEach(button => {
-  button.addEventListener('click', function() {
-    if(this.classList.contains('selected')) {
-      return;
-    }
-    layerButtons.forEach(btn => {
-      btn.classList.remove('selected');
-    });
-    this.classList.add('selected');
-    updateLayerStyle();
-  });
-});
-
-/*
     Deselect button
 */
 
 const deselectBtn = document.getElementById('basemap');
 deselectBtn.addEventListener('click', function() {
-  layerButtons.forEach(btn => {
-    btn.classList.remove('selected');
-  });
   updateLayerStyle();
 });
 
@@ -506,7 +473,6 @@ async function getFeatureInfo(longitude, latitude, geologicLayer = null, chemica
   if (geologicLayer) {
     const geologicInfo = await getLayerInfo(longitude, latitude, geologicLayer);
     if (geologicInfo) {
-      results.geologic = geologicInfo;
     }
   }
 
@@ -559,9 +525,9 @@ async function getLayerInfo(longitude, latitude, layerName) {
         return {firstUn1, firstUnit};
       }
 
-      // Chemical data processing
-      if (!isNaN(parseFloat(feature.properties.VALUE))) {
-        const pixelValue = parseFloat(feature.properties.VALUE);
+      // Chemical data processing (GRAY_INDEX is the default name in a GeoServer layer for the "Coverage Band Details")
+      if (!isNaN(parseFloat(feature.properties.GRAY_INDEX))) {
+        const pixelValue = parseFloat(feature.properties.GRAY_INDEX);
         return pixelValue;
       }
     }

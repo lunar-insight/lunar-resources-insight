@@ -26,7 +26,7 @@ export const layersConfig = {
     geologicLayer: {
         mapName: 'unified_geologic_v2', // Usually the UnifiedGeologicMapMoon_V2 from USGS
         geoContactName: 'geo_contacts', // The geoContact name layer in the geopackage
-        GeoUnitsName: 'geo_units' // The geoUnits name layer in the geopackage
+        geoUnitsName: 'geo_units' // The geoUnits name layer in the geopackage
 
     },
     calciumLayer: {

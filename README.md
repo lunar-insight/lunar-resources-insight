@@ -67,7 +67,9 @@ The *Name* category is related to the Lunar Resources Insight ``config.js`` file
 
 ### Style
 
-- The chemical element styling is done automatically via the interface, they don't need styling files on GeoServer.
+Styles are in SLD format that can be incorporated into GeoServer via Data > Styles option.
+
+- The chemical element styling is done automatically via the interface, but they also need a default styling file (eg. gray) to be present in the "GetCapabilities", as default.
 - For the *Nomenclature* and the *Geologic* data, the style should be configured as default by using the provided styles from the required test data link.
 - About the 'WAC Global 100m' file, you need to generate a default 'raster' style, by creating a new one directly on GeoServer in the Style category.
 
@@ -79,7 +81,7 @@ Download and add the [required test data](https://offworldhorizon-my.sharepoint.
 - Geologic map from USGS
 - Global20ppd Titanium, Calcium, Magnesium and Iron
 
-Starting the 2.24.0 version of GeoServer, planetary CRS support was added. The data can be now in lunar coordinate system with the [GeoServer IAU planetary CRS extension](https://docs.geoserver.org/stable/en/user/extensions/iau/index.html). The data will be changed in the future to reflect this changes. You will need to [download](https://sourceforge.net/projects/geoserver/files/GeoServer/) and install the extension in GeoServer.
+Starting the 2.24.0 version of GeoServer, planetary CRS support was added. The data can be now in lunar coordinate system with the [GeoServer IAU planetary CRS extension](https://docs.geoserver.org/stable/en/user/extensions/iau/index.html). The data will be changed in the future to reflect this changes (Globally to IAU2015:30100 projection and related code), the Cesium globe ellipsoid will be modified to take into account the lunar ellipsoid. You will need to [download](https://sourceforge.net/projects/geoserver/files/GeoServer/) and install the extension in GeoServer.
 
 ### Launch
 
