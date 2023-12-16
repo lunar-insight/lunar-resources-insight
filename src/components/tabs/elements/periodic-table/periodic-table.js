@@ -1,56 +1,65 @@
 import { updateElementLayer } from 'updateElementLayer';
+import { getCurrentPaletteColors } from 'elementTab/elements.js'
+import { createSldStringForPalette } from 'dynamicSldStyle';
 
-document.addEventListener("DOMContentLoaded", function() {
-    const elements = document.querySelectorAll('.periodic-element');
-    const selectedElementContainer = document.querySelector('.element-container__selection');
+export function periodicTableInitialisation() {
 
-    elements.forEach(element => {
-        const period = element.getAttribute('data-element-period');
-        const group = element.getAttribute('data-element-group');
-        const elementId = element.getAttribute('data-element-name');
+  const elements = document.querySelectorAll('.periodic-element');
+  const selectedElementContainer = document.querySelector('.element-container__selection');
 
-        element.style.gridArea = `${period} / ${group}`;
+  elements.forEach(element => {
+    const period = element.getAttribute('data-element-period');
+    const group = element.getAttribute('data-element-group');
+    const elementId = element.getAttribute('data-element-name');
 
-        element.addEventListener('click', function() {
-            
-            const elementAbbreviation = element.querySelector('.periodic-element__abbreviation').innerText;
-            const elementName = element.querySelector('.periodic-element__name').innerText;
-            const elementAtomicNumber = element.querySelector('.periodic-element__atomic-number').innerText;
-            const elementAtomicMass = element.querySelector('.periodic-element__atomic-mass').innerText;
+    element.style.gridArea = `${period} / ${group}`;
 
-            if (!document.getElementById(elementId)) {
+    element.addEventListener('click', function() {
+        
+      const elementAbbreviation = element.querySelector('.periodic-element__abbreviation').innerText;
+      const elementName = element.querySelector('.periodic-element__name').innerText;
+      const elementAtomicNumber = element.querySelector('.periodic-element__atomic-number').innerText;
+      const elementAtomicMass = element.querySelector('.periodic-element__atomic-mass').innerText;
 
-                selectedElementContainer.textContent = "";
+      if (!document.getElementById(elementId)) {
 
-                const newElementSquare = document.createElement('div');
-                newElementSquare.id = elementId;
-                newElementSquare.classList.add('selected-element-square');
+        selectedElementContainer.textContent = "";
 
-                const newElementAbbr = document.createElement('abbr');
-                newElementAbbr.classList.add('selected-element-square__abbreviation');
-                newElementAbbr.textContent = elementAbbreviation;
+        const newElementSquare = document.createElement('div');
+        newElementSquare.id = elementId;
+        newElementSquare.classList.add('selected-element-square');
 
-                const newElementName = document.createElement('span');
-                newElementName.classList.add('selected-element-square__name');
-                newElementName.textContent = elementName;
+        const newElementAbbr = document.createElement('abbr');
+        newElementAbbr.classList.add('selected-element-square__abbreviation');
+        newElementAbbr.textContent = elementAbbreviation;
 
-                const newElementAtomicNumber = document.createElement('span');
-                newElementAtomicNumber.classList.add('selected-element-square__atomic-number');
-                newElementAtomicNumber.textContent = elementAtomicNumber;
+        const newElementName = document.createElement('span');
+        newElementName.classList.add('selected-element-square__name');
+        newElementName.textContent = elementName;
 
-                const newElementAtomicMass = document.createElement('span');
-                newElementAtomicMass.classList.add('selected-element-square__atomic-mass');
-                newElementAtomicMass.textContent = elementAtomicMass;
+        const newElementAtomicNumber = document.createElement('span');
+        newElementAtomicNumber.classList.add('selected-element-square__atomic-number');
+        newElementAtomicNumber.textContent = elementAtomicNumber;
 
-                newElementSquare.appendChild(newElementAbbr);
-                newElementSquare.appendChild(newElementName);
-                newElementSquare.appendChild(newElementAtomicNumber);
-                newElementSquare.appendChild(newElementAtomicMass);
+        const newElementAtomicMass = document.createElement('span');
+        newElementAtomicMass.classList.add('selected-element-square__atomic-mass');
+        newElementAtomicMass.textContent = elementAtomicMass;
 
-                selectedElementContainer.appendChild(newElementSquare);
+        newElementSquare.appendChild(newElementAbbr);
+        newElementSquare.appendChild(newElementName);
+        newElementSquare.appendChild(newElementAtomicNumber);
+        newElementSquare.appendChild(newElementAtomicMass);
 
-                updateElementLayer(elementName);
-            }
-        })
-    });
-});
+        selectedElementContainer.appendChild(newElementSquare);
+
+        // Getting the actual selected color palette
+        const colors = getCurrentPaletteColors();
+
+        // Create a dynamic SLD
+        const sldString = createSldStringForPalette(elementName, colors);
+        
+        updateElementLayer(elementName, sldString);
+      }
+    })
+  });
+};

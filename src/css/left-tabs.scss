@@ -9,7 +9,7 @@
 
 .tab {
     border: 1px solid #ccc;
-    background-color: #21252984;
+    background-color: rgba(0, 0, 0, 0.5);
     min-width: 120px;
     height: calc(100vh - 25px);
 
@@ -43,7 +43,11 @@
 .tabcontent {
     //padding: 0px 12px;
     border: 1px solid #ccc;
-    width: 300px;
+    width: 18.75rem;
     border-left: none;
     height: calc(100vh - 25px);
+    background-color: rgba(0, 0, 0, 0.5);
+    // For outside tooltip
+    position: relative;
+    overflow: visible;
 }

@@ -45,11 +45,22 @@ module.exports = {
       http: false,
     },
     alias: {
+
+      // Main
       cesium: path.resolve(__dirname, cesiumSource),
       images: path.resolve(__dirname, 'src/image/'),
       index$: path.resolve(__dirname,'src/index.js'),
       config$: path.resolve(__dirname,'src/config.js'),
+      colorbrewer$: path.resolve(__dirname, 'src/constants/colorbrewer.js'),
+      tooltip$: path.resolve(__dirname, 'src/functions/tooltip/tooltip.js'),
+
+      // Tabs
+      elementTab: path.resolve(__dirname, 'src/components/tabs/elements/'),
+
+      // Element layer management
       updateElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/update-element-layer.js'),
+      deselectElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/layer-deselection.js'),
+      dynamicSldStyle$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/dynamic-sld-style.js'),
     },
   },
   module: {

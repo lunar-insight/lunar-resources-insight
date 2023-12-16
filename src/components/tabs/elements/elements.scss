@@ -1,11 +1,13 @@
 .element-container {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('~images/chemical-background-square.jpg');
     background-size: cover;
     border-bottom: #ccc 1px solid;
     aspect-ratio: 1 / 1;
+    position: relative;
 
     &__selection {
         display: flex;
@@ -19,6 +21,35 @@
         align-items: center;
         cursor: pointer;
         box-shadow: inset 0 0 1rem 0.5rem black;
+    }
+
+    &__deselect-icon-box {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: auto;
+        height: 2rem;
+        padding-left: 0.25rem;
+        background-color: transparent;
+        cursor: pointer;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        color: white;
+        border-top: white solid 0.0625rem;
+        border-right: white solid 0.0625rem;
+
+        &__text {
+            align-self: stretch;
+            border-left: dashed 0.0625rem rgba(255, 255, 255, 0.75);
+            margin-left: 0.25rem;
+            padding-left: 0.5rem;
+            margin-right: 0.5rem;
+            color: white;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
     }
 }
 
@@ -76,5 +107,73 @@
     &.open {
         opacity: 1;
         flex-grow: 1;
+    }
+}
+
+.element-mapgradient-container {
+
+    &__gradient-text {
+        margin-bottom: 0.3125rem;
+        color: white;
+        text-align: center;
+    }
+
+    &__palette-container {
+        display: flex;
+        flex-direction: column;
+        height: 2rem;
+        border: solid 0.0625rem white;
+        margin: 0.25rem;
+
+
+        &__selection {
+            display: flex;
+            flex-direction: row;
+            cursor: pointer;
+
+            &__gradient {
+                flex-grow: 1;
+                height: 100%;
+            }
+    
+            &__dropdown {
+                width: 2rem;
+                height: 2rem;
+                flex-grow: 0;
+                flex-shrink: 0;
+                border-left: dashed 0.0625rem white;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: rgba(0, 0, 0, 0.5);
+
+                span {
+                    color: white;
+                }
+            }
+        }
+
+        &__menu {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-height: 25rem;
+            overflow-y: auto;
+            visibility: hidden;
+            z-index: 4;
+            border: solid 0.0625rem white;
+            margin-top: 0.25rem;
+
+            &__item {
+                display: flex;
+                flex-shrink: 0;
+                height: 1.5625rem;
+                width: 100%;
+
+                &:not(:last-child) {
+                    border-bottom: dashed 0.0625rem white;
+                }
+            }
+        }
     }
 }

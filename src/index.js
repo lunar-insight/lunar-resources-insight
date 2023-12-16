@@ -5,14 +5,29 @@ require('cesium/Widgets/widgets.css');
 const requireAll = r => r.keys().forEach(r);
 requireAll(require.context('./', true, /\.(scss|css)$/));
 
-import * as config from './config';
+import * as config from 'config';
 import './components/tabs/elements/periodic-table/periodic-table.js';
-import { hidePeriodicTableOverlay } from './components/tabs/elements/elements.js';
-import { updateLayerStyle, getChemicalLayerName } from './functions/layer-style-update.js'
+import { periodicTableInitialisation } from 'elementTab/periodic-table/periodic-table.js';
+import { hidePeriodicTableOverlay, paletteMenuSelectionElementInitialisation, populatePaletteMenu } from './components/tabs/elements/elements.js';
+import { initialisationDeselectElementLayer } from 'deselectElementLayer';
+import { initializeTooltips } from 'tooltip';
+
+/*
+  Global document scale event listener
+*/
+
+document.addEventListener("DOMContentLoaded", function() {
+  tabInitialisation();
+  periodicTableInitialisation();
+  paletteMenuSelectionElementInitialisation();
+  initialisationDeselectElementLayer();
+  populatePaletteMenu();
+  initializeTooltips(); // Should be always called after populatePaletteMenu()
+})
 
 Cesium.Ion.defaultAccessToken = undefined;
 
-//const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400);
+//const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400); // Moon ellipsoid
 const ellipsoid = new Cesium.Ellipsoid(6378137.0, 6378137.0, 6356752.3142);
 
 Cesium.Ellipsoid.WGS84 = ellipsoid;
@@ -22,26 +37,41 @@ const globe = new Cesium.Globe(ellipsoid);
 
 globe.showGroundAtmosphere = false;
 
+// Create the primary imagery layer
+const baseLayer = new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
+  url: `${config.mapServerWmsUrl}`,
+  layers: `${config.mapServerWorkspaceName}:${config.layersConfig.baseLayer.mapName}`,
+  parameters: {
+    transparent: false,
+    format: 'image/png'
+  },
+  // Max 4096
+  tileWidth: 512,
+  tileHeight: 512,
+}));
+
+// Error handling for the primary layer
+baseLayer.imageryProvider.errorEvent.addEventListener(() => {
+  if (!isUsingBackupImagery) {
+    console.error('Error loading primary imagery layer.');
+  }
+});
+
+// Viewer creation
 export const viewer = new Cesium.Viewer('cesiumContainer', {
   globe: globe,
   mapProjection: mapProjection,
-  baseLayer: new Cesium.ImageryLayer (new Cesium.WebMapServiceImageryProvider({
-    url: `${config.mapServerWmsUrl}`,
-    layers: 'lunar-resources:WAC_GLOBAL_100M',
-    parameters: {
-      transparent: false,
-      format: 'image/png'
-    },
-    // Max 4096
-    tileWidth: 512,
-    tileHeight: 512
-  })),
   timeline: false,
   animation: false,
   baseLayerPicker: false,
   infoBox: false,
   selectionIndicator: false,
+  imageryProvider: false,
 });
+
+// Add the primary imagery layer to the viewer
+viewer.imageryLayers.add(baseLayer)
+
 
 viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
@@ -59,30 +89,43 @@ viewer.scene.shadowMap.enabled = false;
 
 viewer._cesiumWidget._creditContainer.parentNode.removeChild(viewer._cesiumWidget._creditContainer);
 
-const geologicLayerNames = ['GeoUnits', 'GeoContacts'];
+const geologicLayerNames = [
+  `${config.layersConfig.geologicLayer.geoUnitsName}`,
+  `${config.layersConfig.geologicLayer.geoContactName}`
+];
 
 let geologicLayerName;
 
+let isUsingBackupImagery = false;
+
 /*
-    Nomenclature
+    Nomenclature layer
 */
 
-/* let nomenclatureLayer = viewer.imageryLayers.addImageryProvider(
-  new Cesium.WebMapServiceImageryProvider({
-    url: 'http://localhost:8090/geoserver/lunar-resources/wms',
-    layers: 'lunar-resources:Nomenclature',
-    parameters: {
-      transparent: true,
-      format: 'image/png'
-    }
-  })
-);
- */
-
 let nomenclatureLayer;
+const nomenclatureLayerUrl = `${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows`;
+const nomenclatureQueryParams = new URLSearchParams({
+  service: 'WFS',
+  version: '1.0.0',
+  request: 'GetFeature',
+  typeName: `${config.mapServerWorkspaceName}:${config.layersConfig.nomenclatureLayer.mapName}`,
+  outputFormat: 'application/json'
+}).toString();
 
-fetch('http://localhost:8090/geoserver/lunar-resources/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=lunar-resources:Nomenclature&outputFormat=application%2Fjson')
-  .then(response => response.json())
+const nomenclatureFullUrl = `${nomenclatureLayerUrl}?${nomenclatureQueryParams}`;
+
+/*
+fetch(`${config.mapServerUrl}/${config.mapServerWorkspaceName}/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=${config.mapServerWorkspaceName}:${config.layersConfig.nomenclature.mapName
+}&outputFormat=application%2Fjson`)
+*/
+
+fetch(nomenclatureFullUrl)
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response failed');
+    }
+    return response.json();
+  })
   .then(data=> {
     let dataSourcePromise = Cesium.GeoJsonDataSource.load(data, {
       clampToGround: false
@@ -113,6 +156,21 @@ fetch('http://localhost:8090/geoserver/lunar-resources/ows?service=WFS&version=1
       nomenclatureLayer = dataSource;
       nomenclatureLayer.show = false;
     });
+  })
+  .catch(error => {
+    console.error('There has been a problem with the fetch operation:', error);
+
+    // Backup fetching mechanism in case of fetch failure - using USGS server
+    isUsingBackupImagery = true;
+
+    viewer.imageryLayers.addImageryProvider(new Cesium.WebMapServiceImageryProvider({
+      url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
+      layers: 'LROC_WAC',
+      parameters: {
+        tranparent: true,
+        format: 'image/png'
+      }
+    }));
   });
 
 const nomenclatureCheckbox = document.getElementById('nomenclature-checkbox');
@@ -160,7 +218,7 @@ document.getElementById("geo-button").addEventListener('click', function () {
       const layer = viewer.imageryLayers.addImageryProvider(
         new Cesium.WebMapServiceImageryProvider({
           url: `${config.mapServerWmsUrl}`,
-          layers: 'lunar-resources:' + layerName,
+          layers: `${config.mapServerWorkspaceName}:${layerName}`,
           parameters: {
             transparent: true,
             format: 'image/png'
@@ -287,11 +345,13 @@ handler.setInputAction(async function (movement) {
     entity.position = cartesian;
     entity.label.show = mouseCheckbox.checked;
 
+    const activeElementLayerName = getActiveLayerName(); // Getting active chemical element layer name from dedicated function
+
     const featureInfoPromise = getFeatureInfoThrottled(
       parseFloat(longitudeString),
       parseFloat(latitudeString),
       geologicLayerName,
-      getChemicalLayerName()
+      activeElementLayerName
     );
 
     featureInfoPromise.then((info) => {
@@ -356,6 +416,7 @@ function convertCoordinatesToFixed(cartesian) {
 */
 
 import { drawPolyline } from './functions/selection/polyline';
+import { getActiveLayerName } from './components/tabs/elements/element-layer-management/update-element-layer.js';
 
 const polylineButton = document.getElementById('polyline-button');
 let isPolylineDrawing = false;
@@ -376,46 +437,11 @@ window.addEventListener('polylineDrawn', function() {
 })
 
 /*
-    Map selection
-*/
-
-export const htmlChemicalLayerNames = config.chemicalLayerNames.map(name => {
-  const data = config.chemicalLayerData[name];
-  return `
-      <button id="${name}" class="layer-btn">
-      <div class="name">${data ? data.name : name}</div>
-      <div class="number">${data ? data.number : ''}</div>
-      <div class="symbol">${data ? data.symbol : ''}</div>
-      <div class="info-icon material-symbols-outlined">info</div>
-      </button>`;
-}).join('');
-
-document.getElementById('btn-group').innerHTML = htmlChemicalLayerNames;
-
-const layerButtons = document.querySelectorAll('.layer-btn');
-
-layerButtons.forEach(button => {
-  button.addEventListener('click', function() {
-    if(this.classList.contains('selected')) {
-      return;
-    }
-    layerButtons.forEach(btn => {
-      btn.classList.remove('selected');
-    });
-    this.classList.add('selected');
-    updateLayerStyle();
-  });
-});
-
-/*
     Deselect button
 */
 
 const deselectBtn = document.getElementById('basemap');
 deselectBtn.addEventListener('click', function() {
-  layerButtons.forEach(btn => {
-    btn.classList.remove('selected');
-  });
   updateLayerStyle();
 });
 
@@ -447,7 +473,6 @@ async function getFeatureInfo(longitude, latitude, geologicLayer = null, chemica
   if (geologicLayer) {
     const geologicInfo = await getLayerInfo(longitude, latitude, geologicLayer);
     if (geologicInfo) {
-      results.geologic = geologicInfo;
     }
   }
 
@@ -472,14 +497,14 @@ async function getLayerInfo(longitude, latitude, layerName) {
       service: "WMS",
       version: "1.1.1",
       request: "GetFeatureInfo",
-      layers: 'lunar-resources:' + layerName,
+      layers: `${config.mapServerWorkspaceName}:${layerName}`,
       styles: "",
       srs: "EPSG:4326",
       format: "image/png",
       bbox: `${longitude - 0.000001},${latitude - 0.000001},${longitude + 0.000001},${latitude + 0.000001}`,
       width: 2,
       height: 2,
-      query_layers: 'lunar-resources:' + layerName,
+      query_layers: `${config.mapServerWorkspaceName}:${layerName}`,
       info_format: "application/json",
       x: 1,
       y: 1,
@@ -500,9 +525,9 @@ async function getLayerInfo(longitude, latitude, layerName) {
         return {firstUn1, firstUnit};
       }
 
-      // Chemical data processing
-      if (!isNaN(parseFloat(feature.properties.VALUE))) {
-        const pixelValue = parseFloat(feature.properties.VALUE);
+      // Chemical data processing (GRAY_INDEX is the default name in a GeoServer layer for the "Coverage Band Details")
+      if (!isNaN(parseFloat(feature.properties.GRAY_INDEX))) {
+        const pixelValue = parseFloat(feature.properties.GRAY_INDEX);
         return pixelValue;
       }
     }
@@ -544,8 +569,8 @@ function openTabs(evt, tabName) {
     hidePeriodicTableOverlay();
 }
 
-// Use the DOMContentLoaded event to ensure the DOM is fully loaded before trying to attach event listeners
-document.addEventListener('DOMContentLoaded', (event) => {
+function tabInitialisation() {
+
   const tablinks = document.getElementsByClassName("tablinks");
   for (let i = 0; i < tablinks.length; i++) {
     tablinks[i].addEventListener("click", function(event) {
@@ -561,4 +586,4 @@ document.addEventListener('DOMContentLoaded', (event) => {
   }
 
   document.querySelector('button[data-tabname="home"]').click();
-});
+};
