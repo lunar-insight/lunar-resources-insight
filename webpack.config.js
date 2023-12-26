@@ -29,6 +29,7 @@ module.exports = {
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
+    publicPath: '/dist/',
 
     // Needed to compile multiline strings in Cesium
     sourcePrefix: ''
@@ -62,6 +63,7 @@ module.exports = {
       deselectElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/layer-deselection.js'),
       dynamicSldStyle$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/dynamic-sld-style.js'),
     },
+    extensions: ['*', '.js', '.jsx'],
   },
   module: {
     rules: [{
@@ -73,6 +75,10 @@ module.exports = {
     }, {
       test: /\.(png|jpg|jpeg|gif|svg|xml|json)$/,
       type: 'asset',
+    }, {
+      test: /\.(js|jsx)$/,
+      exclude: /node_modules/,
+      use: ['babel-loader'],
     }, {
       // Strip cesium pragmas
       test: /\.js$/,
