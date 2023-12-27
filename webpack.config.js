@@ -29,7 +29,7 @@ module.exports = {
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
-    publicPath: '/dist/',
+    publicPath: '/',
 
     // Needed to compile multiline strings in Cesium
     sourcePrefix: ''
@@ -46,24 +46,14 @@ module.exports = {
       http: false,
     },
     alias: {
-
-      // Main
-      cesium: path.resolve(__dirname, cesiumSource),
-      images: path.resolve(__dirname, 'src/image/'),
-      index$: path.resolve(__dirname,'src/index.js'),
-      config$: path.resolve(__dirname,'src/config.js'),
-      colorbrewer$: path.resolve(__dirname, 'src/constants/colorbrewer.js'),
-      tooltip$: path.resolve(__dirname, 'src/functions/tooltip/tooltip.js'),
-
-      // Tabs
-      elementTab: path.resolve(__dirname, 'src/components/tabs/elements/'),
-
-      // Element layer management
-      updateElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/update-element-layer.js'),
-      deselectElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/layer-deselection.js'),
-      dynamicSldStyle$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/dynamic-sld-style.js'),
+      '@': path.resolve(__dirname, 'src'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      '@utils': path.resolve(__dirname, 'src/utils'),
+      '@types': path.resolve(__dirname, 'src/types'),
+      '@views': path.resolve(__dirname, 'src/views'),
     },
-    extensions: ['*', '.js', '.jsx'],
+    extensions: ['*', '.js', '.jsx', '.ts'],
   },
   module: {
     rules: [{
@@ -95,7 +85,8 @@ module.exports = {
     }]
   },
   devServer: {
-    static: './dist'
+    static: './dist',
+    hot: true
   },
   node: {
     global: false,
@@ -128,6 +119,7 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
-    })
+    }),
+    new webpack.HotModuleReplacementPlugin(),
   ]
 };
