@@ -6,11 +6,16 @@ Lunar Resources Insight is a easy-to use web application dedicated to lunar reso
 
 ## Technology
 
-Lunar Resources Insight use different technologies to work properly:
+Lunar Resources Insight use different technologies on top of Javascript/HTML/CSS to work properly:
 
 - [Node.js](https://nodejs.org/) - Javascript runtime environment.
+- [Typescript](https://www.typescriptlang.org/) - Superset of Javascript that adds static types definitions.
+- [React](https://react.dev/) - Javascript library for user interfaces using components.
+- [Storybook](https://storybook.js.org/) - UI development tool for building and testing components in isolation.
 - [Webpack](https://webpack.js.org/) - Static module bundler for javascript.
 - [GeoServer](https://geoserver.org/) - Geographical data backend.
+
+The complete list of dependencies can be seen in ``package.json``.
 
 ## Get Started
 
@@ -83,7 +88,11 @@ Download and add the [required test data](https://offworldhorizon-my.sharepoint.
 
 Starting the 2.24.0 version of GeoServer, planetary CRS support was added. The data can be now in lunar coordinate system with the [GeoServer IAU planetary CRS extension](https://docs.geoserver.org/stable/en/user/extensions/iau/index.html). The data will be changed in the future to reflect this changes (Globally to IAU2015:30100 projection and related code), the Cesium globe ellipsoid will be modified to take into account the lunar ellipsoid. You will need to [download](https://sourceforge.net/projects/geoserver/files/GeoServer/) and install the extension in GeoServer.
 
+### Using UI components
+
+The project use [Storybook](https://storybook.js.org/) for components library. To launch the local library storybook interface, the command is ``npm start storybook``. Components can be created to be used in the project.
+
 ### Launch
 
-2. Open the project in your code editor and do `npm install`
-3. Start the project with `npm start`
+1. Open the project in your code editor and do `npm install`
+2. Start the project with `npm start`
