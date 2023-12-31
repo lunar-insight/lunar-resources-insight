@@ -14,7 +14,7 @@ const icons: Icon[] = [
   { name: 'home', label: 'Home' },
   { name: 'layers', label: 'Layers' },
   { name: 'atr', label: 'Minerals' },
-  { name: 'lab', label: 'Elements' },
+  { name: 'lab_research', label: 'Elements' },
   { name: 'frame_inspect', label: 'Inspect' },
   { name: 'settings', label: 'Settings' },
   { name: 'extension', label: 'Plugins' }
