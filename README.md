@@ -90,7 +90,7 @@ Starting the 2.24.0 version of GeoServer, planetary CRS support was added. The d
 
 ### Using UI components
 
-The project use [Storybook](https://storybook.js.org/) for components library. To launch the local library storybook interface, the command is ``npm start storybook``. Components can be created to be used in the project.
+The project use [Storybook](https://storybook.js.org/) for components library. To launch the local library storybook interface, the command is ``npm run storybook``. Components can be created to be used in the project.
 
 ### Launch
 

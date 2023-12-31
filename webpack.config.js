@@ -10,9 +10,6 @@ const fs = require('fs');
 const cesiumSource = 'node_modules/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
 
-const periodicTableHtmlContent = fs.readFileSync('./src/components/tabs/elements/periodic-table/periodic-table.html', 'utf8');
-const tabsElementsHtmlContent = fs.readFileSync('./src/components/tabs/elements/elements.html', 'utf-8');
-
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -96,10 +93,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: 'src/index.html',
-      templateParameters: {
-        periodicTableContent: periodicTableHtmlContent,
-        tabsElementsContent: tabsElementsHtmlContent
-      }
     }),
     // Copy Cesium Assets, Widgets, and Workers to a static directory
     new CopywebpackPlugin({
