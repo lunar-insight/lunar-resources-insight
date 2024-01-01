@@ -7,14 +7,22 @@
   align-items: center;
   padding-top: 1rem;
 
-  .icon {
-    margin: 1rem 0;
-    font-size: 1.5rem; // Icon size
+  .icon-container {
+    width: 5rem;
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
     cursor: pointer;
-    transition: color 0.3s;
 
     &:hover {
-      color: #666;
+      background-color: var(--hover-color);
+    }
+
+    .icon {
+      margin: 0;
+      font-size: 1.5rem;
     }
   }
 }
