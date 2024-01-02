@@ -19,6 +19,9 @@ const meta: Meta = {
     gradientColor1: { control: 'color', description: 'Used when useGradient is true' },
     gradientColor2: { control: 'color', description: 'Used when useGradient is true' },
     gradientColorDegreeDirection: { control: { type: 'range', min: 0, max: 360, step: 1 }, description: 'Used when useGradient is true' },
+    useInsetShadow: { control: 'boolean' },
+    insetShadowColor: { control: 'color', description: 'Used when useInsetShadow is true' },
+    insetShadowBlur: { control: { type: 'range', min: 0, max: 100, step: 1 }, description: 'Used when useInsetShadow is true' },
   },
 };
 
@@ -30,5 +33,11 @@ export const Default: StoryObj<typeof SidebarNavigation> = {
     iconColor: theme.color.secondary,
     hoverColor: theme.color.neutral,
     useGradient: false,
+    gradientColor1: undefined,
+    gradientColor2: undefined,
+    gradientColorDegreeDirection: 0,
+    useInsetShadow: true,
+    insetShadowColor: '#000',
+    insetShadowBlur: 12, // In pixels
   },
 };

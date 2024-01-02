@@ -15,10 +15,15 @@ interface SidebarNavigationProps {
   gradientColor1?: string;
   gradientColor2?: string;
   gradientColorDegreeDirection?: number;
+  useInsetShadow?: boolean;
+  insetShadowColor?: string;
+  insetShadowBlur?: number;
 }
 
 type ExtendedCSSProperties = React.CSSProperties & {
   '--hover-color'?: string;
+  '--inset-shadow-color'?: string;
+  '--inset-shadow-blur'?: string;
 }
 
 const icons: Icon[] = [
@@ -39,12 +44,18 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   gradientColor1 = '#000',
   gradientColor2 = '#fff',
   gradientColorDegreeDirection = 0,
+  useInsetShadow = true,
+  insetShadowColor = '#000',
+  insetShadowBlur = '0.625rem',
 }) => {
   const containerStyle: ExtendedCSSProperties = {
     '--hover-color': hoverColor,
+    '--inset-shadow-color': insetShadowColor,
+    '--inset-shadow-blur': `${insetShadowBlur}px`,
   };
   const sidebarStyle: React.CSSProperties = {
-    background: useGradient ? `linear-gradient(${gradientColorDegreeDirection}deg, ${gradientColor1}, ${gradientColor2})` : backgroundColor
+    background: useGradient ? `linear-gradient(${gradientColorDegreeDirection}deg, ${gradientColor1}, ${gradientColor2})` : backgroundColor,
+    boxShadow: useInsetShadow ? `inset 0 0 ${insetShadowBlur} ${insetShadowColor}` : undefined,
   }
 
 
