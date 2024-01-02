@@ -1,5 +1,6 @@
 import React from 'react';
 import './SidebarNavigation.scss';
+import { theme } from './themeColor';
 
 interface Icon {
   name: string;
@@ -31,9 +32,9 @@ const icons: Icon[] = [
 ];
 
 const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
-  backgroundColor = 'initial',
-  iconColor = '#000',
-  hoverColor = '#666',
+  backgroundColor = theme.color.primary,
+  iconColor = theme.color.secondary,
+  hoverColor = theme.color.neutral,
   useGradient = false,
   gradientColor1 = '#000',
   gradientColor2 = '#fff',

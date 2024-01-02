@@ -2,6 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import SidebarNavigation from './SidebarNavigation';
 import './SidebarNavigation.scss';
+import { theme } from './themeColor';
 
 const meta: Meta = {
   title: 'Components/SidebarNavigation',
@@ -25,9 +26,9 @@ export default meta;
 
 export const Default: StoryObj<typeof SidebarNavigation> = {
   args: {
-    backgroundColor: '#ffffff',
-    iconColor: '#000',
-    hoverColor: '#666',
+    backgroundColor: theme.color.primary,
+    iconColor: theme.color.secondary,
+    hoverColor: theme.color.neutral,
     useGradient: false,
   },
 };
