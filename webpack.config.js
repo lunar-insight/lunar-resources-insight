@@ -18,7 +18,7 @@ module.exports = {
   mode: 'development',
   devtool: 'eval',
   entry: {
-    app: './src/index.js'
+    app: './src/index.tsx'
   },
   optimization: {
     runtimeChunk: 'single',
@@ -50,7 +50,7 @@ module.exports = {
       '@types': path.resolve(__dirname, 'src/types'),
       '@views': path.resolve(__dirname, 'src/views'),
     },
-    extensions: ['*', '.js', '.jsx', '.ts'],
+    extensions: ['*', '.js', '.jsx', '.ts', '.tsx'],
   },
   module: {
     rules: [{
@@ -62,6 +62,19 @@ module.exports = {
     }, {
       test: /\.(png|jpg|jpeg|gif|svg|xml|json)$/,
       type: 'asset',
+    }, {
+      test: /\.(ts|tsx)$/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            '@babel/preset-env',
+            '@babel/react',
+            '@babel/preset-typescript'
+          ],
+        },
+      },
+      exclude: /node_modules/,
     }, {
       test: /\.(js|jsx)$/,
       exclude: /node_modules/,

@@ -15,9 +15,12 @@
     transition: background-color 0.1s, box-shadow 0.1s;
     cursor: pointer;
 
+    &.use-inset-shadow:hover {
+      box-shadow: inset 0 0 var(--inset-shadow-blur) var(--inset-shadow-color);
+    }
+
     &:hover {
       background-color: var(--hover-color);
-      box-shadow: inset 0 0 var(--inset-shadow-blur) var(--inset-shadow-color);
     }
 
     .icon {

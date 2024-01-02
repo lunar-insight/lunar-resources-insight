@@ -1,6 +1,6 @@
 import React from 'react';
 import './SidebarNavigation.scss';
-import { theme } from './themeColor';
+import { theme } from '../../../../utils/constants/theme.constants';
 
 interface Icon {
   name: string;
@@ -46,23 +46,23 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   gradientColorDegreeDirection = 0,
   useInsetShadow = true,
   insetShadowColor = '#000',
-  insetShadowBlur = '0.625rem',
+  insetShadowBlur = 12,
 }) => {
   const containerStyle: ExtendedCSSProperties = {
     '--hover-color': hoverColor,
     '--inset-shadow-color': insetShadowColor,
     '--inset-shadow-blur': `${insetShadowBlur}px`,
+    //boxShadow: useInsetShadow ? `inset 0 0 ${insetShadowColor} ${insetShadowBlur}` : undefined,
   };
   const sidebarStyle: React.CSSProperties = {
     background: useGradient ? `linear-gradient(${gradientColorDegreeDirection}deg, ${gradientColor1}, ${gradientColor2})` : backgroundColor,
-    boxShadow: useInsetShadow ? `inset 0 0 ${insetShadowBlur} ${insetShadowColor}` : undefined,
   }
 
 
   return (
     <div className="sidebar" style={sidebarStyle}>
       {icons.map(icon => (
-        <div key={icon.label} className="icon-container" style={containerStyle}>
+        <div key={icon.label} className={`icon-container ${useInsetShadow ? 'use-inset-shadow' : ''}`} style={containerStyle}>
           <div className="icon material-symbols-outlined" style={{ color: iconColor }}>
             {icon.name}
           </div>
