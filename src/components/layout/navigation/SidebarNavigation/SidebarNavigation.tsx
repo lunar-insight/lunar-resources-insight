@@ -52,7 +52,6 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
     '--hover-color': hoverColor,
     '--inset-shadow-color': insetShadowColor,
     '--inset-shadow-blur': `${insetShadowBlur}px`,
-    //boxShadow: useInsetShadow ? `inset 0 0 ${insetShadowColor} ${insetShadowBlur}` : undefined,
   };
   const sidebarStyle: React.CSSProperties = {
     background: useGradient ? `linear-gradient(${gradientColorDegreeDirection}deg, ${gradientColor1}, ${gradientColor2})` : backgroundColor,
