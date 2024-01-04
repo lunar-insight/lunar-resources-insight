@@ -18,6 +18,8 @@ interface SidebarNavigationProps {
   useInsetShadow?: boolean;
   insetShadowColor?: string;
   insetShadowBlur?: number;
+  withText?: boolean;
+  textColor?: string;
 }
 
 type ExtendedCSSProperties = React.CSSProperties & {
@@ -47,6 +49,8 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   useInsetShadow = true,
   insetShadowColor = '#000',
   insetShadowBlur = 12,
+  withText,
+  textColor,
 }) => {
   const containerStyle: ExtendedCSSProperties = {
     '--hover-color': hoverColor,
@@ -65,6 +69,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
           <div className="icon material-symbols-outlined" style={{ color: iconColor }}>
             {icon.name}
           </div>
+          {withText && <span className="icon-label" style={{ color: textColor }}>{icon.label}</span>}
         </div>
       ))}
     </div>

@@ -41,3 +41,14 @@ export const Default: StoryObj<typeof SidebarNavigation> = {
     insetShadowBlur: 12, // In pixels
   },
 };
+
+export const WithText: StoryObj<typeof SidebarNavigation> = {
+  args: {
+    ...Default.args,
+    withText: true,
+    textColor: theme.color.tertiary,
+  },
+  argTypes: {
+    textColor: { control: 'color' },
+  },
+};

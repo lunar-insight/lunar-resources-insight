@@ -10,6 +10,7 @@
     width: 5rem;
     height: 5rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     transition: background-color 0.1s, box-shadow 0.1s;
@@ -26,6 +27,11 @@
     .icon {
       margin: 0;
       font-size: 1.5rem;
+    }
+
+    .icon-label {
+      margin-top: 5px;
+      font-size: 14px;
     }
   }
 }
