@@ -46,7 +46,7 @@ export const WithText: StoryObj<typeof SidebarNavigation> = {
   args: {
     ...Default.args,
     withText: true,
-    textColor: theme.color.tertiary,
+    textColor: theme.color.neutralVariant,
   },
   argTypes: {
     textColor: { control: 'color' },
