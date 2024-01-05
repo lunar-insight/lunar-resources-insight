@@ -1,4 +1,5 @@
 // TODO : gradient, inner shadow hover, gradient direction ..
+import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import SidebarNavigation from './SidebarNavigation';
 import './SidebarNavigation.scss';
@@ -22,6 +23,9 @@ const meta: Meta = {
     useInsetShadow: { control: 'boolean' },
     insetShadowColor: { control: 'color', description: 'Used when useInsetShadow is true' },
     insetShadowBlur: { control: { type: 'range', min: 0, max: 100, step: 1 }, description: 'Used when useInsetShadow is true' },
+    withText: { control: 'boolean', description: 'Show text with the icon' },
+    textColor: { control: 'color', description: 'Text color for the WithText version' },
+    fontSize: { control: { type: 'range', min: 1, max: 30, step: 1 }, description: 'Font size for the WithText version' },
   },
 };
 
@@ -39,6 +43,9 @@ export const Default: StoryObj<typeof SidebarNavigation> = {
     useInsetShadow: true,
     insetShadowColor: '#000',
     insetShadowBlur: 12, // In pixels
+    withText: false,
+    textColor: theme.color.neutralVariant,
+    fontSize: 12,
   },
 };
 
@@ -46,9 +53,17 @@ export const WithText: StoryObj<typeof SidebarNavigation> = {
   args: {
     ...Default.args,
     withText: true,
-    textColor: theme.color.neutralVariant,
   },
-  argTypes: {
-    textColor: { control: 'color' },
-  },
+  decorators: [
+    (Story, context) => {
+      return React.createElement(
+        'div',
+        {
+          className : 'font-light',
+          style: { fontSize: `${context.args.fontSize}px`}
+        },
+        Story()
+      );
+    }
+  ]
 };
