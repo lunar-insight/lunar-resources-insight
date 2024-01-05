@@ -46,6 +46,7 @@ export const Default: StoryObj<typeof SidebarNavigation> = {
     withText: false,
     textColor: theme.color.neutralVariant,
     fontSize: 12,
+    height: '100vh',
   },
 };
 

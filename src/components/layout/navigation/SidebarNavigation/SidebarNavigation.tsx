@@ -8,6 +8,7 @@ interface Icon {
 }
 
 interface SidebarNavigationProps {
+  height?: string;
   backgroundColor?: string;
   iconColor?: string;
   hoverColor?: string;
@@ -40,6 +41,7 @@ const icons: Icon[] = [
 ];
 
 const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
+  height,
   backgroundColor = theme.color.primary,
   iconColor = theme.color.secondary,
   hoverColor = theme.color.neutral,
@@ -60,6 +62,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
     '--inset-shadow-blur': `${insetShadowBlur}px`,
   };
   const sidebarStyle: React.CSSProperties = {
+    height,
     background: useGradient ? `linear-gradient(${gradientColorDegreeDirection}deg, ${gradientColor1}, ${gradientColor2})` : backgroundColor,
   }
 
