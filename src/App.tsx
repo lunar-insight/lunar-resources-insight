@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
-import SidebarNavigation from './components/layout/navigation/SidebarNavigation/SidebarNavigation';
-import './components/layout/navigation/SidebarNavigation/SidebarNavigation.scss'
+import MainPage from './components/layout/pages/MainPage/MainPage';
+import './components/layout/pages/MainPage/MainPage.scss'
 // TODO: add storybook page directly
 const App: FC = () => (
   <div style={{ 
@@ -8,8 +8,7 @@ const App: FC = () => (
     alignItems: 'center',
     justifyContent: 'flex-start'
   }}>
-    <SidebarNavigation />
-    <h1>Lunar Resources Insight</h1>
+    <MainPage />
   </div>
 );
 
