@@ -49,6 +49,8 @@ module.exports = {
       '@utils': path.resolve(__dirname, 'src/utils'),
       '@types': path.resolve(__dirname, 'src/types'),
       '@views': path.resolve(__dirname, 'src/views'),
+
+      'geoconfig': path.resolve(__dirname, 'src/geoconfig.ts'),
     },
     extensions: ['*', '.js', '.jsx', '.ts', '.tsx'],
   },

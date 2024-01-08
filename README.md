@@ -31,7 +31,7 @@ Create a private .env config file in your project at the same level
 MAP_SERVER_URL=http://example.com/geoserver
 ```
 
-Edit the config.js file with your map server configuration with your workspace name and layer name assuming you are using GeoServer.
+Edit the geoconfig.ts file with your map server configuration with your workspace name and layer name assuming you are using GeoServer.
 
 ### Installation
 
