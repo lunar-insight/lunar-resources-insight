@@ -3,6 +3,15 @@ import * as Cesium from 'cesium';
 import 'cesium/Source/Widgets/widgets.css'
 import * as geoconfig from 'geoconfig'
 
+// Skybox images
+import positiveX from '@assets/images/skybox/px.jpg';
+import negativeX from '@assets/images/skybox/nx.jpg';
+import positiveY from '@assets/images/skybox/py.jpg';
+import negativeY from '@assets/images/skybox/ny.jpg';
+import positiveZ from '@assets/images/skybox/pz.jpg';
+import negativeZ from '@assets/images/skybox/nz.jpg';
+
+
 // The Cesium css is edited on the MainPage component
 
 const CesiumComponent = ({ className }: { className?: string }) => {
@@ -30,6 +39,7 @@ const CesiumComponent = ({ className }: { className?: string }) => {
       new Cesium.WebMapServiceImageryProvider({
         url: `${geoconfig.mapServerWmsUrl}`,
         layers: `${geoconfig.mapServerWorkspaceName}:${geoconfig.layersConfig.baseLayer.mapName}`,
+        // Testing purpose:
         //url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
         //layers: 'LROC_WAC',
         parameters: {
@@ -64,6 +74,17 @@ const CesiumComponent = ({ className }: { className?: string }) => {
     // Remove Ion credit
     viewer.cesiumWidget.creditContainer.parentNode.removeChild(viewer.cesiumWidget.creditContainer);
 
+    // Skybox creation
+    viewer.scene.skyBox = new Cesium.SkyBox({
+      sources: {
+        positiveX: positiveX,
+        negativeX: negativeX,
+        positiveY: positiveY,
+        negativeY: negativeY,
+        positiveZ: positiveZ,
+        negativeZ: negativeZ,
+      }
+    });
   }, []);
 
   return (
