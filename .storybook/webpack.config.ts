@@ -15,6 +15,17 @@ module.exports = ({ config }) => {
       https: false,
       http: false,
     },
+    alias: {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, '../src'),
+      '@assets': path.resolve(__dirname, '../src/assets'),
+      '@components': path.resolve(__dirname, '../src/components'),
+      '@utils': path.resolve(__dirname, '../src/utils'),
+      '@types': path.resolve(__dirname, '../src/types'),
+
+      'geoconfig': path.resolve(__dirname, '../src/geoconfig.ts'),
+    },
+    extensions: ['.*', '.js', '.jsx', '.ts', '.tsx'],
   };
 
   config.module = {
