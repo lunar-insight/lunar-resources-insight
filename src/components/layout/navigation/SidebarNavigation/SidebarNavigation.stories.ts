@@ -6,7 +6,7 @@ import './SidebarNavigation.scss';
 import { theme } from '../../../../utils/constants/theme.constants';
 
 const meta: Meta = {
-  title: 'Components/SidebarNavigation',
+  title: 'Components/Layout/Navigation/SidebarNavigation',
   tags: ['autodocs'],
   parameters: {
     zoom: '50%'
@@ -46,7 +46,6 @@ export const Default: StoryObj<typeof SidebarNavigation> = {
     withText: false,
     textColor: theme.color.neutralVariant,
     fontSize: 12,
-    height: '100vh',
   },
 };
 

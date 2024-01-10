@@ -52,9 +52,9 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   useInsetShadow = true,
   insetShadowColor = '#000',
   insetShadowBlur = 12,
-  withText,
-  textColor,
-  fontSize,
+  withText = true,
+  textColor = theme.color.neutralVariant,
+  fontSize = 12,
 }) => {
   const containerStyle: ExtendedCSSProperties = {
     '--hover-color': hoverColor,
