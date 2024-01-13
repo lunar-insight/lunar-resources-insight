@@ -2,12 +2,12 @@ import React from 'react';
 import './SidebarSectionContainer.scss';
 import { theme } from 'theme';
 
-interface SidebarSectionContainerProps {
+export interface SidebarSectionContainerProps {
   height?: string;
   backgroundColor?: string;
 }
 
-const SidebarSectionContainer: React.FC<SidebarSectionContainerProps> = ({
+export const SidebarSectionContainer: React.FC<SidebarSectionContainerProps> = ({
   height,
   backgroundColor = theme.color.primary,
 }) => {
