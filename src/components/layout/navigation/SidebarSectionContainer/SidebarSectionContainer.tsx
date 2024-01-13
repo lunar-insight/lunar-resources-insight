@@ -1,6 +1,6 @@
 import React from 'react';
 import './SidebarSectionContainer.scss';
-import { theme } from '../../../../utils/constants/theme.constants';
+import { theme } from 'theme';
 
 interface SidebarSectionContainerProps {
   height?: string;

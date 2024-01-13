@@ -5,6 +5,7 @@
     "baseUrl": ".",
     "paths": {
       "geoconfig": ["./geoconfig.ts"],
-    }
+      "theme": ["./utils/constants/theme.constants.ts"],
+    },
   },
 }

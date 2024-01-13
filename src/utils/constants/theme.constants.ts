@@ -1,4 +1,13 @@
-export const theme = {
+interface Color {
+  primary: string;
+  secondary: string;
+  tertiary: string;
+  error: string;
+  neutral: string;
+  neutralVariant: string;
+}
+
+export const theme: { color: Color } = {
   color: {
     primary: '#232935', // dark color
     secondary: '#85a2af', // light color

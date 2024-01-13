@@ -3,7 +3,7 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import SidebarNavigation from './SidebarNavigation';
 import './SidebarNavigation.scss';
-import { theme } from '../../../../utils/constants/theme.constants';
+import { theme } from 'theme';
 
 const meta: Meta = {
   title: 'Components/Layout/Navigation/SidebarNavigation',

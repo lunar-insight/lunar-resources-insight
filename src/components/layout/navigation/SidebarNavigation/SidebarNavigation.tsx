@@ -1,6 +1,6 @@
 import React from 'react';
 import './SidebarNavigation.scss';
-import { theme } from '../../../../utils/constants/theme.constants';
+import { theme } from 'theme';
 
 interface Icon {
   name: string;
