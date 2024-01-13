@@ -1,4 +1,3 @@
-// TODO : gradient, inner shadow hover, gradient direction ..
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import SidebarNavigation from './SidebarNavigation';
