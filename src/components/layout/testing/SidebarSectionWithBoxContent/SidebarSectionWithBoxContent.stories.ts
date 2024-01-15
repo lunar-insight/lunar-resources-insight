@@ -3,24 +3,36 @@ import type { Meta, StoryObj } from '@storybook/react';
 import SidebarSectionWithBoxContent from './SidebarSectionWithBoxContent';
 import './SidebarSectionWithBoxContent.scss';
 import { theme } from 'theme';
-import { SidebarSectionContainer } from '../../navigation/SidebarSectionContainer/SidebarSectionContainer';
+import { SidebarSectionContainerProps } from '../../navigation/SidebarSectionContainer/SidebarSectionContainer';
+import { BoxContentContainerProps } from  '../../BoxContentContainer/BoxContentContainer';
+
+interface SidebarSectionWithBoxContentStoryProps {
+  sidebarProps: SidebarSectionContainerProps;
+  boxContentProps: BoxContentContainerProps;
+}
 
 const meta: Meta = {
-  title: 'Components/Layout/Navigation/SidebarSectionWithBoxContent',
+  title: 'Components/Layout/Testing/SidebarSectionWithBoxContent',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
   },
   component: SidebarSectionWithBoxContent,
   argTypes: {
-    backgroundColor: { control: 'color' },
+    'sidebarProps.backgroundColor': { control: 'color' },
+    'boxContentProps.backgroundColor': { control: 'color' },
   },
 };
 
 export default meta;
 
-export const Default: StoryObj<typeof SidebarSectionWithBoxContent> = {
+export const Default: StoryObj<SidebarSectionWithBoxContentStoryProps> = {
   args: {
-    ...SidebarSectionContainer.defaultProps,
-  }
+    sidebarProps: {
+      backgroundColor: theme.color.primary,
+    },
+    boxContentProps: {
+      backgroundColor: theme.color.secondary,
+    },
+  },
 };

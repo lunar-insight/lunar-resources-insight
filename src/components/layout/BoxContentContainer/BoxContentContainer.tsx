@@ -2,13 +2,13 @@ import React from 'react';
 import './BoxContentContainer.scss';
 import { theme } from 'theme';
 
-interface BoxContentContainerProps {
+export interface BoxContentContainerProps {
   backgroundColor?: string;
   width?: number;
   height?: number;
 }
 
-const BoxContentContainer: React.FC<BoxContentContainerProps> = ({
+export const BoxContentContainer: React.FC<BoxContentContainerProps> = ({
   backgroundColor = theme.color.secondary,
   width,
   height,

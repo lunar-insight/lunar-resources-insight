@@ -2,13 +2,21 @@ import React from 'react'
 import './SidebarSectionWithBoxContent.scss';
 import { theme } from 'theme';
 import SidebarSectionContainer, { SidebarSectionContainerProps } from '../../navigation/SidebarSectionContainer/SidebarSectionContainer';
+import BoxContentContainer, { BoxContentContainerProps } from '../../BoxContentContainer/BoxContentContainer';
 
-const SidebarSectionWithBoxContent: React.FC<SidebarSectionContainerProps> = (props) => {
+interface SidebarSectionWithBoxContentProps {
+  sidebarProps: SidebarSectionContainerProps;
+  boxContentProps: BoxContentContainerProps;
+}
+
+const SidebarSectionWithBoxContent: React.FC<SidebarSectionWithBoxContentProps> = ({ sidebarProps, boxContentProps }) => {
 
   return (
-    <SidebarSectionContainer {...props}>
-      
-    </SidebarSectionContainer>
+    <div className="sidebar-section-with-box-content">
+      <SidebarSectionContainer {...sidebarProps}>
+        <BoxContentContainer {...boxContentProps}/>
+      </SidebarSectionContainer>
+    </div>
   )
 
 };

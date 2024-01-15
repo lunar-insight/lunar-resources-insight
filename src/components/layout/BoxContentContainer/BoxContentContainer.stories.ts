@@ -1,3 +1,11 @@
+/* TODO:
+- add transparency boolean
+- add transparency slider
+- add rounded corner boolean
+- add rounded corner slider
+- add acrylic material on top of sidebarSectionContainer boolean?
+*/
+
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import BoxContentContainer from './BoxContentContainer';
