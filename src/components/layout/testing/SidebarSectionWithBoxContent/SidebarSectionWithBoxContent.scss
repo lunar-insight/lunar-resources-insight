@@ -1,4 +1,8 @@
 .sidebar-section-with-box-content {
   display: flex;
   flex-direction: column;
+
+  .box-content-container-in-sidebar {
+    flex: 1;
+  }
 }

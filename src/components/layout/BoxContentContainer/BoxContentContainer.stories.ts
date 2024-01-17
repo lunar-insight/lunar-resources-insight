@@ -31,7 +31,7 @@ export default meta;
 export const Default: StoryObj<typeof BoxContentContainer> = {
   args: {
     backgroundColor: theme.color.secondary,
-    width: 200,
-    height: 400,
+    height: 8,
+    width: 8,
   }
 };

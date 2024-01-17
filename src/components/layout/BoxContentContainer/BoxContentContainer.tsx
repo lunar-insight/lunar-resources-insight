@@ -4,24 +4,29 @@ import { theme } from 'theme';
 
 export interface BoxContentContainerProps {
   backgroundColor?: string;
-  width?: number;
+  minWidth?: number;
+  minHeight?: number;
   height?: number;
+  width?: number;
+  className?: string;
+  flexible?: boolean;
 }
 
 export const BoxContentContainer: React.FC<BoxContentContainerProps> = ({
   backgroundColor = theme.color.secondary,
-  width,
-  height,
-
+  width = 8,
+  height = 8,
+  className = '',
+  flexible = false,
 }) => {
   const boxContentContainer: React.CSSProperties = {
     backgroundColor,
-    width,
-    height,
+    width: flexible ? '100%' : `${width}px`,
+    height: flexible ? '100%' : `${height}px`,
   }
 
   return (
-    <div className="box-content-container" style={boxContentContainer}></div>
+    <div className={`box-content-container ${className}`} style={boxContentContainer}></div>
   )
 }
 

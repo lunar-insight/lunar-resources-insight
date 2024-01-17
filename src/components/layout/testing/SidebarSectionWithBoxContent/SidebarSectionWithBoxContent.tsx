@@ -1,24 +1,18 @@
 import React from 'react'
 import './SidebarSectionWithBoxContent.scss';
 import { theme } from 'theme';
-import SidebarSectionContainer, { SidebarSectionContainerProps } from '../../navigation/SidebarSectionContainer/SidebarSectionContainer';
-import BoxContentContainer, { BoxContentContainerProps } from '../../BoxContentContainer/BoxContentContainer';
+import SidebarSectionContainer from '../../navigation/SidebarSectionContainer/SidebarSectionContainer';
+import BoxContentContainer from '../../BoxContentContainer/BoxContentContainer';
 
-interface SidebarSectionWithBoxContentProps {
-  sidebarProps: SidebarSectionContainerProps;
-  boxContentProps: BoxContentContainerProps;
-}
-
-const SidebarSectionWithBoxContent: React.FC<SidebarSectionWithBoxContentProps> = ({ sidebarProps, boxContentProps }) => {
+const SidebarSectionWithBoxContent: React.FC = () => {
 
   return (
     <div className="sidebar-section-with-box-content">
-      <SidebarSectionContainer {...sidebarProps}>
-        <BoxContentContainer {...boxContentProps}/>
+      <SidebarSectionContainer>
+        <BoxContentContainer flexible className="box-content-container-in-sidebar"/>
       </SidebarSectionContainer>
     </div>
   )
-
 };
 
 export default SidebarSectionWithBoxContent;

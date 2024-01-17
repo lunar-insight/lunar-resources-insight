@@ -1,3 +1,5 @@
-box-content-container {
+.box-content-container {
   display: flex;
+  min-width: 1rem;
+  min-height: 1rem;
 }
