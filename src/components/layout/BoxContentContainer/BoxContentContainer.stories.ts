@@ -23,6 +23,7 @@ const meta: Meta = {
     backgroundColor: { control: 'color' },
     height: { control: { type: 'range', min: 0, max: 1000, step: 1 } },
     width: { control: { type: 'range', min: 0, max: 1000, step: 1 } },
+    flexible: { control: 'boolean', description: 'The "flexible" props can be used directly for the BoxContentContainer to fill 100% width and height of the parent container.'},
   },
 };
 
@@ -33,5 +34,6 @@ export const Default: StoryObj<typeof BoxContentContainer> = {
     backgroundColor: theme.color.secondary,
     height: 8,
     width: 8,
+    flexible: false,
   }
 };
