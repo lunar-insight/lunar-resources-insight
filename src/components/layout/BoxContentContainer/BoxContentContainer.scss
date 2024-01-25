@@ -1,5 +1,9 @@
 .box-content-container {
   display: flex;
+  justify-content: center;
+  flex-direction: column;
   min-width: 1rem;
   min-height: 1rem;
+  //flex: 1;
+  border-radius: 20px;
 }
