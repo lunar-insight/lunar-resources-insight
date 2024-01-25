@@ -9,7 +9,7 @@ const SidebarSectionWithBoxContent: React.FC = () => {
   return (
     <div className="sidebar-section-with-box-content">
       <SidebarSectionContainer>
-        <BoxContentContainer flexible className="box-content-container-in-sidebar"/>
+        <BoxContentContainer flexible className="sidebar-section-with-box-content__box"/>
       </SidebarSectionContainer>
     </div>
   )
