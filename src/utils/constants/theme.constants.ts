@@ -17,3 +17,10 @@ export const theme: { color: Color } = {
     neutralVariant: '#b6bbc1', // light color
   },
 };
+
+/*
+    Color code:
+  
+    #232935 , #2b353e (dark color)
+    #85a2af , #97a5ab , #b6bbc1 (light color) - darker to lighter
+*/

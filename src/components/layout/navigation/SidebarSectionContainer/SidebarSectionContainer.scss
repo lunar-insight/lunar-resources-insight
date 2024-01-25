@@ -1,5 +1,9 @@
 .sidebar-section-container {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
   width: 20rem;
   height: 100vh;
-  display: flex;
+  gap: 15px;
+  padding: 15px;
 }

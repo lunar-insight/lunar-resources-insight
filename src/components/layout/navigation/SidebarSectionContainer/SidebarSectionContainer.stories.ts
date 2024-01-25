@@ -18,6 +18,10 @@ const meta: Meta = {
   component: SidebarSectionContainer,
   argTypes: {
     backgroundColor: { control: 'color' },
+    useGradient: { control: 'boolean' },
+    gradientColor1: { control: 'color' },
+    gradientColor2: { control: 'color' },
+    gradientAngle: { control: { type: 'range', min: 0, max: 360, step: 1 } },
   },
 };
 
@@ -26,5 +30,9 @@ export default meta;
 export const Default: StoryObj<typeof SidebarSectionContainer> = {
   args: {
     backgroundColor: theme.color.primary,
+    useGradient: true,
+    gradientColor1: theme.color.primary,
+    gradientColor2: theme.color.neutral,
+    gradientAngle: 90,
   },
 };
