@@ -13,7 +13,7 @@ import './BoxContentContainer.scss';
 import { theme } from 'theme';
 
 const meta: Meta = {
-  title: 'Components/Layout/BoxContentContainer',
+  title: 'Layout/BoxContentContainer',
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
