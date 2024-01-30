@@ -1,7 +1,7 @@
 import React from 'react';
-import SidebarNavigation from '../../navigation/SidebarNavigation/SidebarNavigation';
+import SidebarNavigation from '../navigation/SidebarNavigation/SidebarNavigation';
 import './MainPage.scss'
-import CesiumComponent from '../../../viewer/CesiumComponent/CesiumComponent';
+import CesiumComponent from '../viewer/CesiumComponent/CesiumComponent';
 
 const MainPage = () => {
 

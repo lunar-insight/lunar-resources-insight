@@ -5,7 +5,7 @@ import './SidebarNavigation.scss';
 import { theme } from 'theme';
 
 const meta: Meta = {
-  title: 'Components/Layout/Navigation/SidebarNavigation',
+  title: 'Navigation/SidebarNavigation',
   tags: ['autodocs'],
   parameters: {
     zoom: '50%'
@@ -25,6 +25,13 @@ const meta: Meta = {
     withText: { control: 'boolean', description: 'Show text with the icon' },
     textColor: { control: 'color', description: 'Text color for the WithText version' },
     fontSize: { control: { type: 'range', min: 1, max: 30, step: 1 }, description: 'Font size for the WithText version' },
+
+    // sectionContainer argsTypes
+    sectionContainerBackgroundColor: { control: 'color' },
+    sectionContainerUseGradient: { control: 'boolean' },
+    sectionContainerGradientColor1: { control: 'color' },
+    sectionContainerGradientColor2: { control: 'color' },
+    sectionContainerGradientAngle: { control: { type: 'range', min: 0, max: 360, step: 1 } },
   },
 };
 
@@ -45,6 +52,13 @@ export const Default: StoryObj<typeof SidebarNavigation> = {
     withText: false,
     textColor: theme.color.neutralVariant,
     fontSize: 12,
+
+    // sectionContainer args
+    sectionContainerBackgroundColor: theme.color.primary,
+    sectionContainerUseGradient: true,
+    sectionContainerGradientColor1: theme.color.primary,
+    sectionContainerGradientColor2: theme.color.neutral,
+    sectionContainerGradientAngle: 90,
   },
 };
 
