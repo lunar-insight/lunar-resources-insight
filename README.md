@@ -4,6 +4,12 @@
 
 Lunar Resources Insight is a easy-to use web application dedicated to lunar resources.
 
+## Important information
+
+```diff
+@@ New version development ongoing in other branch @@
+```
+
 ## Technology
 
 Lunar Resources Insight use different technologies to work properly:
