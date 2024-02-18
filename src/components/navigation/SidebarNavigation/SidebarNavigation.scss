@@ -15,26 +15,28 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: background-color 0.1s, box-shadow 0.1s;
       cursor: pointer;
 
       &:hover {
         background-color: var(--hover-color);
+      }
 
-        &.use-inset-shadow {
+      &.use-inset-shadow {
+
+        &:hover {
           box-shadow: inset 0 0 calc(var(--inset-shadow-blur) / 2) var(--inset-shadow-color);
-        }
-
-        &.selected-and-visible {
-          box-shadow: inset 0 0 var(--inset-shadow-blur) var(--inset-shadow-color);
         }
       }
 
       &.selected-and-visible {
         background-color: var(--selection-color);
         box-shadow: inset 0 0 var(--inset-shadow-blur) var(--inset-shadow-color);
-      }
+        transition: background-color 0.2s, box-shadow 0.2s;
 
+        &:hover {
+          box-shadow: inset 0 0 var(--inset-shadow-blur) var(--inset-shadow-color);
+        }
+      }
 
       &__click-handler {
         height: 100%;
