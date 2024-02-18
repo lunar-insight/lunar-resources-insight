@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
-import MainPage from './components/pages/MainPage';
-import './components/layout/pages/MainPage/MainPage.scss'
+import MainPage from './components/pages/MainPage/MainPage';
+import './components/pages/MainPage/MainPage.scss'
 // TODO: add storybook page directly
 const App: FC = () => (
   <div style={{ 
