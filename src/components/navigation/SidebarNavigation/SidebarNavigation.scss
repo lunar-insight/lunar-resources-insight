@@ -22,12 +22,16 @@
         background-color: var(--hover-color);
 
         &.use-inset-shadow {
+          box-shadow: inset 0 0 calc(var(--inset-shadow-blur) / 2) var(--inset-shadow-color);
+        }
+
+        &.selected-and-visible {
           box-shadow: inset 0 0 var(--inset-shadow-blur) var(--inset-shadow-color);
         }
       }
 
       &.selected-and-visible {
-        background-color: var(--hover-color);
+        background-color: var(--selection-color);
         box-shadow: inset 0 0 var(--inset-shadow-blur) var(--inset-shadow-color);
       }
 

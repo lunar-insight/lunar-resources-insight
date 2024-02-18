@@ -15,6 +15,7 @@ const meta: Meta = {
     backgroundColor: { control: 'color' },
     iconColor: { control: 'color' },
     hoverColor: { control: 'color' },
+    selectionColor: { control: 'color' },
     useGradient: { control: 'boolean' },
     gradientColor1: { control: 'color', description: 'Used when useGradient is true' },
     gradientColor2: { control: 'color', description: 'Used when useGradient is true' },
@@ -41,7 +42,8 @@ export const Default: StoryObj<typeof SidebarNavigation> = {
   args: {
     backgroundColor: theme.color.primary,
     iconColor: theme.color.secondary,
-    hoverColor: theme.color.neutral,
+    hoverColor: theme.color.quartenary,
+    selectionColor: theme.color.neutral,
     useGradient: false,
     gradientColor1: undefined,
     gradientColor2: undefined,

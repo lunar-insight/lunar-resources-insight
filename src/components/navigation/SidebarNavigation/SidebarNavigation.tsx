@@ -15,6 +15,7 @@ interface SidebarNavigationProps {
   backgroundColor?: string;
   iconColor?: string;
   hoverColor?: string;
+  selectionColor?: string;
   useGradient?: boolean;
   gradientColor1?: string;
   gradientColor2?: string;
@@ -38,6 +39,7 @@ interface SidebarNavigationProps {
 
 type ExtendedCSSProperties = React.CSSProperties & {
   '--hover-color'?: string;
+  '--selection-color'?: string;
   '--inset-shadow-color'?: string;
   '--inset-shadow-blur'?: string;
 }
@@ -56,7 +58,8 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   height,
   backgroundColor = theme.color.primary,
   iconColor = theme.color.secondary,
-  hoverColor = theme.color.neutral,
+  hoverColor = theme.color.quartenary,
+  selectionColor = theme.color.neutral,
   useGradient = false,
   gradientColor1 = '#000',
   gradientColor2 = '#fff',
@@ -106,6 +109,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
 
   const containerStyle: ExtendedCSSProperties = {
     '--hover-color': hoverColor,
+    '--selection-color': selectionColor,
     '--inset-shadow-color': insetShadowColor,
     '--inset-shadow-blur': `${insetShadowBlur}px`,
   };
