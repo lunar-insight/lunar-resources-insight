@@ -134,7 +134,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
             <Tab
               key={icon.id}
               id={icon.id}
-              className={`sidebar-navigation__tablist__icon-container ${useInsetShadow ? 'use-inset-shadow' : ''}`}
+              className={`sidebar-navigation__tablist__icon-container ${useInsetShadow ? 'use-inset-shadow' : ''} ${activeTab === icon.id && visiblePanels[icon.id] ? 'selected-and-visible' : ''}`}
               style={containerStyle}
             >
               <div
