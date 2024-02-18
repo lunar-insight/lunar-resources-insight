@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './SidebarNavigation.scss';
 import { theme } from 'theme';
-import { Tabs, TabList, Tab, TabPanel } from 'react-aria-components';
+import { Tabs, TabList, Tab, TabPanel, Button } from 'react-aria-components';
 //import ChemicalElementsSection from './../section/ChemicalElementsSection/ChemicalElementsSection';
 
 interface Icon {
@@ -52,18 +52,6 @@ const icons: Icon[] = [
   { id: 'PluginsTab', name: 'extension', label: 'Plugins' }
 ];
 
-/*
-const renderTabContent = (iconId: string) => {
-  switch (iconId) {
-    case 'ElementsTab':
-      return <div>elementTab</div>;
-    default:
-      return <div>No content available.</div>;
-  }
-}
-*/
-
-
 const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   height,
   backgroundColor = theme.color.primary,
@@ -90,6 +78,32 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   //children,
 }) => {
 
+  const [visiblePanels, setVisiblePanels] = useState<{ [key: string]: boolean }>(
+    icons.reduce((acc, icon) => {
+      acc[icon.id] = true; // Initially, all TabPanel are visible
+      return acc;
+    }, {})
+  );
+
+  const [activeTab, setActiveTab] = useState<string>(icons[0].id); // Init with first TabPanel open as default
+
+  const handleSelectionChange = (key: string) => {
+    // Update active TabPanel
+    setActiveTab(key);
+    // Visibility reinitialization of every TabPanel except the active TabPanel
+    setVisiblePanels({
+      ...icons.reduce((acc, icon) => ({ ...acc, [icon.id]: false }), {}),
+      [key]: true,
+    });
+  };
+
+  const togglePanelVisibility = (id: string) => {
+    setVisiblePanels(prevState => ({
+      ...prevState,
+      [id]: !prevState[id]
+    }));
+  };
+
   const containerStyle: ExtendedCSSProperties = {
     '--hover-color': hoverColor,
     '--inset-shadow-color': insetShadowColor,
@@ -109,42 +123,71 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   }
 
   return (
-    <Tabs orientation="vertical" className="sidebar-navigation">
+    <Tabs 
+      orientation="vertical" 
+      className="sidebar-navigation"
+      selectedKey={activeTab}
+      onSelectionChange={handleSelectionChange}
+    >
       <TabList className="sidebar-navigation__tablist" style={sidebarStyle}>
         {icons.map((icon) => (
-          <Tab
-            key={icon.id}
-            id={icon.id}
-            className={`sidebar-navigation__tablist__icon-container ${useInsetShadow ? 'use-inset-shadow' : ''}`}
-            style={containerStyle}
-          >
-            <div className="sidebar-navigation__tablist__icon-container__icon">
-              <i
-                className="icon material-symbols-outlined"
-                style={{ color: iconColor }}
+            <Tab
+              key={icon.id}
+              id={icon.id}
+              className={`sidebar-navigation__tablist__icon-container ${useInsetShadow ? 'use-inset-shadow' : ''}`}
+              style={containerStyle}
+            >
+              <div
+                key={icon.id}
+                className="sidebar-navigation__tablist__icon-container__click-handler"
               >
-                {icon.name}
-              </i>
-            </div>
-            {withText && (
-              <span 
-                className={`sidebar-navigation__tablist__icon-container__label ${withText ? 'font-light' : ''}`}
-                style={{ ...fontSizeStyle, color: textColor }}
-              >
-                {icon.label}
-              </span>
-            )}
-          </Tab>
+                <div className="sidebar-navigation__tablist__icon-container__click-handler__icon">
+                  <i
+                    className="icon material-symbols-outlined"
+                    style={{ color: iconColor }}
+                  >
+                    {icon.name}
+                  </i>
+                </div>
+                {withText && (
+                  <span 
+                    className={`sidebar-navigation__tablist__icon-container__click-handler__label ${withText ? 'font-light' : ''}`}
+                    style={{ ...fontSizeStyle, color: textColor }}
+                  >
+                    {icon.label}
+                  </span>
+                )}
+              </div>
+            </Tab>
         ))}
       </TabList>
 
       {icons.map((icon) => (
-        <TabPanel key={icon.id} id={icon.id} className="sidebar-navigation__section-container" style={sectionContainerStyle}>
-          {/* The Gap and Padding in the div are for the automatic spacing when adding BoxContentContainer inside the TabPanel */}
-          <div style={{ padding: '15px', gap: '15px' }}>
-            {/* {renderTabContent(icon.id)} */}
-          </div>
-        </TabPanel>
+          <TabPanel 
+            key={icon.id} 
+            id={icon.id} 
+            className="sidebar-navigation__section-container" 
+            style={{
+              ...sectionContainerStyle,
+              display: visiblePanels[icon.id] ? 'flex' : 'none',
+            }}
+          >
+            <div className="sidebar-navigation__section-container__header">
+              <Button 
+                className="sidebar-navigation__section-container__header__back-button"
+                onPress={() => togglePanelVisibility(icon.id)}
+                >
+                <i
+                  className="icon material-symbols-outlined"
+                >
+                  left_panel_close
+                </i>
+              </Button>
+            </div>
+            {/* The Gap and Padding in the div are for the automatic spacing when adding BoxContentContainer inside the TabPanel */}
+            <div style={{ padding: '1rem', gap: '1rem' }}>
+            </div>
+          </TabPanel>
       ))}
     </Tabs>
   )

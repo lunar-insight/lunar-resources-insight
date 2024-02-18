@@ -26,14 +26,24 @@
         background-color: var(--hover-color);
       }
 
-      &__icon {
-        margin: 0;
-        font-size: 1.5rem;
-      }
+      &__click-handler {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
 
-      &__label {
-        margin-top: 5px;
-        font-size: var(--font-size);
+        &__icon {
+          display: flex;
+          margin: 0;
+          font-size: 1.5rem;
+        }
+  
+        &__label {
+          margin-top: 5px;
+          font-size: var(--font-size);
+        }
       }
     }
   }
@@ -43,5 +53,16 @@
     flex-direction: column;
     width: 20rem;
     height: 100%;
+
+    &__header {
+      display: flex;
+      justify-content: flex-end;
+      width: 100%;
+      height: 2.5rem;
+
+      &__back-button {
+        height: 100%;
+      }
+    }
   }
 }
