@@ -37,11 +37,12 @@ const CesiumComponent = ({ className }: { className?: string }) => {
     // Primary imagery layer creation
     const baseLayer = new Cesium.ImageryLayer(
       new Cesium.WebMapServiceImageryProvider({
-        url: `${geoconfig.mapServerWmsUrl}`,
-        layers: `${geoconfig.mapServerWorkspaceName}:${geoconfig.layersConfig.baseLayer.mapName}`,
-        // Testing purpose:
-        //url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
-        //layers: 'LROC_WAC',
+        // Non-testing purpose:
+        //url: `${geoconfig.mapServerWmsUrl}`,
+        //layers: `${geoconfig.mapServerWorkspaceName}:${geoconfig.layersConfig.baseLayer.mapName}`,
+        // Production purpose:
+        url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
+        layers: 'LROC_WAC',
         parameters: {
           transparent: false,
           format: 'image/png'
