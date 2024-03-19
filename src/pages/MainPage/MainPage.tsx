@@ -1,14 +1,19 @@
-import React from 'react';
-import SidebarNavigation from '../../components/navigation/SidebarNavigation/SidebarNavigation';
+import React, { useRef } from 'react';
+import SectionNavigation from '../../components/navigation/SectionNavigation/SectionNavigation';
 import './MainPage.scss'
 import CesiumComponent from '../../components/viewer/CesiumComponent/CesiumComponent';
 
 const MainPage = () => {
 
+  const viewerContainerRef = useRef<HTMLDivElement>(null);
+  
   return (
     <div className="main-page">
-      <SidebarNavigation />
-      <CesiumComponent className="cesium-component" />
+      <SectionNavigation boundaryRef={viewerContainerRef}/>
+      <div className="viewer-container" ref={viewerContainerRef}>
+        <CesiumComponent className="cesium-component" />
+      </div>
+      
       {/* Content */}
     </div>
   );
