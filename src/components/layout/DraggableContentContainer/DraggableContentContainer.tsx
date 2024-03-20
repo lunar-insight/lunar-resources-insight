@@ -99,7 +99,9 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
         <h3 {...titleProps} className="draggable-content-container__move-area__title">{title}</h3>
         <Button onPress={onClose}>Close</Button>
       </div>
-      {children}
+      <div className="draggable-content-container__content-area">
+        {children}
+      </div>
     </div>
   )
 }

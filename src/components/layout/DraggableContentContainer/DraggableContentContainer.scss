@@ -1,20 +1,26 @@
 .draggable-content-container {
-  border-radius: 5px;
+  border-radius: 0.25rem;
   position: absolute;
   z-index: 100;
   background-color: whitesmoke;
   height: auto;
+  width: auto;
 
   &__move-area {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     cursor: grab;
     background-color: gray;
+    height: 3rem;
 
     &__title {
-      margin-top: 0;
+      display: flex;
+      justify-content: center;
       flex-grow: 1;
     }
+  }
+
+  &__content-area {
+    padding: 0.25rem;
   }
 }
