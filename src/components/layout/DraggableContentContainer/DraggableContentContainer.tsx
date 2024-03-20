@@ -56,6 +56,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const clampX = (posX: number) => Math.min(Math.max(posX, viewerContainerSize.x), viewerContainerSize.x + viewerContainerSize.width - draggableContainerSize.width);
   const clampY = (posY: number) => Math.min(Math.max(posY, viewerContainerSize.y), viewerContainerSize.y + viewerContainerSize.height - draggableContainerSize.height);
 
+  // TODO: check edge case when the container go out of the screen on the right
   const { moveProps } = useMove({
     
     onMoveStart: () => {
@@ -64,13 +65,15 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
 
     onMove: (moveEvent) => {
       setPosition(({ x, y }) => {
-        if (moveEvent.pointerType === 'keyboard') { // Dragging outside the container and using arrow keys
-          x = clampX(x);
-          y = clampY(y);
-        }
+        
 
         x += moveEvent.deltaX;
         y += moveEvent.deltaY;
+
+        //if (moveEvent.pointerType === 'keyboard') { // Dragging outside the container and using arrow keys
+        x = clampX(x);
+        y = clampY(y);
+
         return { x, y };
       });
     },
