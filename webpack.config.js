@@ -128,6 +128,6 @@ module.exports = {
     new webpack.DefinePlugin({
       'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
     }),
-    new webpack.HotModuleReplacementPlugin(),
+    //new webpack.HotModuleReplacementPlugin(),
   ]
 };
