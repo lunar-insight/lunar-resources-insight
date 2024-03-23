@@ -1,0 +1,71 @@
+$background-color: var(--color-tertiary);
+$text-color: var(--color-primary);
+
+.button-tooltip {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  background-color: $background-color;
+  color: $text-color;
+  outline: none;
+  padding: 2px 8px;
+  max-width: 150px;
+  transform: translate3d(0, 0, 0); // fixes FF gap
+
+  &[data-placement=top] {
+    margin-bottom: 8px;
+    --origin: translateY(4px);
+  }
+
+  &[data-placement=bottom] {
+    margin-top: 8px;
+    --origin: translateY(-4px);
+
+    .button-tooltip__overlay-arrow svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  &[data-placement=right] {
+    margin-left: 8px;
+    --origin: translateX(-4px);
+
+    .button-tooltip__overlay-arrow svg {
+      transform: rotate(90deg);
+    }
+  }
+
+  &[data-placement=left] {
+    margin-right: 8px;
+    --origin: translateX(4px);
+
+    .button-tooltip__overlay-arrow svg {
+      transform: rotate(-90deg);
+    }
+  }
+
+  &[data-entering] {
+    animation: slide 200ms;
+  }
+
+  &[data-exiting] {
+    animation: slide 200ms reverse ease-in;
+  }
+
+  &__overlay-arrow svg {
+    display: block;
+    fill: $background-color;
+  }
+
+}
+
+@keyframes slide {
+  from {
+    transform: var(--origin);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
