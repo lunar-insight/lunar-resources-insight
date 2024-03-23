@@ -1,3 +1,6 @@
+$border-radius: 0.5rem;
+$margin: 0.75rem;
+
 .draggable-content-container {
   border-radius: 0.25rem;
   position: absolute;
@@ -5,22 +8,60 @@
   background-color: whitesmoke;
   height: auto;
   width: auto;
+  border-radius: $border-radius;
+  box-shadow: 0px 0px 3px black;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(to right, rgba(35, 41, 53, 0.75), rgba(43, 53, 62, 0.75));
+  //background: linear-gradient(to top right, rgba(133, 162, 175, 0.65), rgba(182, 187, 193, 0.65));
+  border: 1px solid rgba(35, 41, 53, 0.85);
+  //border: 1px solid rgba(151, 165, 171, 0.65);
 
   &__move-area {
+    color: var(--color-secondary);
     display: flex;
     align-items: center;
     cursor: grab;
-    background-color: gray;
+    background: var(--color-primary);
     height: 3rem;
+    border-radius: $border-radius $border-radius 0 0;
+    border-bottom: 1px solid var(--color-tertiary);
 
     &__title {
       display: flex;
-      justify-content: center;
+      justify-content: left;
+      margin-left: $margin;
       flex-grow: 1;
     }
+
+      &__close-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: $margin;
+        background-color: var(--color-primary);
+        height: 1.75rem;
+        width: 1.75rem;
+        border-radius: 0.25rem;
+        border: 1px solid var(--color-tertiary);
+
+        &[data-hovered] {
+          background-color: var(--color-quartenary);
+        }
+
+        &[data-pressed] {
+          background-color: var(--color-neutral);
+        }
+
+        &__icon {
+          font-size: x-large;
+          color: var(--color-tertiary);
+        }
+      }
   }
 
   &__content-area {
-    padding: 0.25rem;
+    color: var(--color-neutralVariant);
+    padding: $margin;
   }
 }

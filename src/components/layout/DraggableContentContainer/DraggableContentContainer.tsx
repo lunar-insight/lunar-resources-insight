@@ -2,7 +2,9 @@ import './DraggableContentContainer.scss';
 import React, { useRef, useState, useEffect } from 'react';
 import { useDialog } from '@react-aria/dialog';
 import { useMove } from '@react-aria/interactions';
-import { Button } from 'react-aria-components';
+import { Button, TooltipTrigger } from 'react-aria-components';
+import { theme } from 'theme';
+import { ButtonTooltip } from '../Tooltip/ButtonTooltip';
 
 export interface DraggableContentContainerProps {
   title?: React.ReactNode;
@@ -57,6 +59,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const clampY = (posY: number) => Math.min(Math.max(posY, viewerContainerSize.y), viewerContainerSize.y + viewerContainerSize.height - draggableContainerSize.height);
 
   // TODO: check edge case when the container go out of the screen on the right
+  // happen after resizing the window, need to rezise the bounding div too
   const { moveProps } = useMove({
     
     onMoveStart: () => {
@@ -70,7 +73,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
         x += moveEvent.deltaX;
         y += moveEvent.deltaY;
 
-        //if (moveEvent.pointerType === 'keyboard') { // Dragging outside the container and using arrow keys
+        //if (moveEvent.pointerType === 'keyboard') { // Dragging outside the container and using arrow keys (need testing to confirm)
         x = clampX(x);
         y = clampY(y);
 
@@ -89,18 +92,42 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
 
   });
 
+  const containerStyle: React.CSSProperties & { [key: string]: string } = {
+    '--color-primary': theme.color.primary,
+    '--color-secondary': theme.color.secondary,
+    '--color-tertiary': theme.color.tertiary,
+    '--color-quartenary': theme.color.quartenary,
+    '--color-neutral': theme.color.neutral,
+    '--color-neutralVariant': theme.color.neutralVariant,
+    left: `${clampX(position.x)}px`,
+    top: `${clampY(position.y)}px`,
+  }
+
   if (!isOpen) return null; // Linked to the SectionNavigation code
 
   return (
-    <div {...dialogProps} ref={dialogRef} className="draggable-content-container"
-      style={{ 
-        left: clampX(position.x),
-        top: clampY(position.y),
-      }}            
+    <div 
+      {...dialogProps} 
+      ref={dialogRef} 
+      className="draggable-content-container"
+      style={containerStyle}       
     >
       <div {...moveProps} className="draggable-content-container__move-area">
         <h3 {...titleProps} className="draggable-content-container__move-area__title">{title}</h3>
-        <Button onPress={onClose}>Close</Button>
+
+        <TooltipTrigger>
+          <Button onPress={onClose} aria-label='Close' className="draggable-content-container__move-area__close-button">
+            <span className='material-symbols-outlined draggable-content-container__move-area__close-button__icon'>
+              close
+            </span>
+          </Button>
+          <ButtonTooltip placement='top'>
+            Close
+          </ButtonTooltip>
+        </TooltipTrigger>
+
+
+
       </div>
       <div className="draggable-content-container__content-area">
         {children}
