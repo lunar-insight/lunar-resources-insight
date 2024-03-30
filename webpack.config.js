@@ -1,15 +1,10 @@
 const path = require('path');
-
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-
 const CopywebpackPlugin = require('copy-webpack-plugin');
-
 const fs = require('fs');
-
 const cesiumSource = 'node_modules/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
-
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -63,6 +58,9 @@ module.exports = {
     }, {
       test: /\.(png|jpg|jpeg|gif|svg|xml|json)$/,
       type: 'asset',
+    }, {
+      test: /\.workers\.js$/,           // Cesium >1.100 workers files is now integrated in the main js bundle,
+      use: { loader: 'worker-loader '}  // This transform the worker files into a web worker object to ensure correct loading
     }, {
       test: /\.(ts|tsx)$/,
       use: {
