@@ -36,9 +36,9 @@ const SectionNavigation = ({ boundaryRef }) => {
   ]
 
   const IconButton = ({ icon, label, onPress }) => (
-    <Button onPress={onPress}>
-      <i className="material-symbols-outlined section-navigation__icon">{icon}</i>
-      {label}
+    <Button onPress={onPress} className="section-navigation__icon-container">
+      <i className="material-symbols-outlined section-navigation__icon-container__icon">{icon}</i>
+      <span className="section-navigation__icon-container__label">{label}</span>
     </Button>
   );
 
