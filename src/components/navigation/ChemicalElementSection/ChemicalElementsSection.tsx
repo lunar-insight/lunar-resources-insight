@@ -1,6 +1,5 @@
 import React from 'react'
 import './ChemicalElementsSection.scss';
-import { theme } from 'theme';
 
 interface ChemicalElementsSectionProps {
 

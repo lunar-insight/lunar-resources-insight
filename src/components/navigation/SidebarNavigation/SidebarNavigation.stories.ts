@@ -2,7 +2,6 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import SidebarNavigation from './SidebarNavigation';
 import './SidebarNavigation.scss';
-import { theme } from 'theme';
 
 const meta: Meta = {
   title: 'Navigation/SidebarNavigation',
@@ -40,10 +39,10 @@ export default meta;
 
 export const Default: StoryObj<typeof SidebarNavigation> = {
   args: {
-    backgroundColor: theme.color.primary,
-    iconColor: theme.color.secondary,
-    hoverColor: theme.color.quartenary,
-    selectionColor: theme.color.neutral,
+    backgroundColor: '#232935',
+    iconColor: '#85a2af',
+    hoverColor: '#324049',
+    selectionColor: '#2b353e',
     useGradient: false,
     gradientColor1: undefined,
     gradientColor2: undefined,
@@ -52,14 +51,14 @@ export const Default: StoryObj<typeof SidebarNavigation> = {
     insetShadowColor: '#000',
     insetShadowBlur: 12, // In pixels
     withText: false,
-    textColor: theme.color.neutralVariant,
+    textColor: '#b6bbc1',
     fontSize: 12,
 
     // sectionContainer args
-    sectionContainerBackgroundColor: theme.color.primary,
+    sectionContainerBackgroundColor: '#232935',
     sectionContainerUseGradient: true,
-    sectionContainerGradientColor1: theme.color.primary,
-    sectionContainerGradientColor2: theme.color.neutral,
+    sectionContainerGradientColor1: '#232935',
+    sectionContainerGradientColor2: '#2b353e',
     sectionContainerGradientAngle: 90,
   },
 };

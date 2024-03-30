@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import './SidebarNavigation.scss';
-import { theme } from 'theme';
 import { Tabs, TabList, Tab, TabPanel, Button } from 'react-aria-components';
 //import ChemicalElementsSection from './../section/ChemicalElementsSection/ChemicalElementsSection';
 
@@ -56,10 +55,10 @@ const icons: Icon[] = [
 
 const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   height,
-  backgroundColor = theme.color.primary,
-  iconColor = theme.color.secondary,
-  hoverColor = theme.color.quartenary,
-  selectionColor = theme.color.neutral,
+  backgroundColor = '#232935',
+  iconColor = '#85a2af',
+  hoverColor = '#324049',
+  selectionColor = '#2b353e',
   useGradient = false,
   gradientColor1 = '#000',
   gradientColor2 = '#fff',
@@ -68,15 +67,15 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({
   insetShadowColor = '#000',
   insetShadowBlur = 12,
   withText = true,
-  textColor = theme.color.neutralVariant,
+  textColor = '#b6bbc1',
   fontSize = 12,
 
   // SectionContainer props
   sectionContainerHeight,
-  sectionContainerBackgroundColor = theme.color.primary,
+  sectionContainerBackgroundColor = '#232935',
   sectionContainerUseGradient = true,
-  sectionContainerGradientColor1 = theme.color.primary,
-  sectionContainerGradientColor2 = theme.color.neutral,
+  sectionContainerGradientColor1 = '#232935',
+  sectionContainerGradientColor2 = '#2b353e',
   sectionContainerGradientAngle = 90,
   //children,
 }) => {

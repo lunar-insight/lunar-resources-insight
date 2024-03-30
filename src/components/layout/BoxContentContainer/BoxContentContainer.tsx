@@ -1,6 +1,5 @@
 import React from 'react';
 import './BoxContentContainer.scss';
-import { theme } from 'theme';
 
 export interface BoxContentContainerProps {
   minWidth?: number;
@@ -27,10 +26,10 @@ export const BoxContentContainer: React.FC<BoxContentContainerProps> = ({
   height = 20,
   borderRadius = 20,
   flexible = false,
-  backgroundColor = theme.color.secondary,
+  backgroundColor = '#85a2af',
   useGradient = true,
-  gradientColor1 = theme.color.secondary,
-  gradientColor2 = theme.color.neutralVariant,
+  gradientColor1 = '#85a2af',
+  gradientColor2 = '#b6bbc1',
   gradientAngle = 45,
   useShadow = true,
   shadowValues = '0px 0px',

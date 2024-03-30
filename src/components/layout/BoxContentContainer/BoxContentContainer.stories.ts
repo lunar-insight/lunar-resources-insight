@@ -10,7 +10,6 @@ import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import BoxContentContainer from './BoxContentContainer';
 import './BoxContentContainer.scss';
-import { theme } from 'theme';
 
 const meta: Meta = {
   title: 'Layout/BoxContentContainer',
@@ -44,10 +43,10 @@ export const Default: StoryObj<typeof BoxContentContainer> = {
     width: 250,
     borderRadius: 20,
     flexible: false,
-    backgroundColor: theme.color.secondary,
+    backgroundColor: '#85a2af',
     useGradient: true,
-    gradientColor1: theme.color.secondary,
-    gradientColor2: theme.color.neutralVariant,
+    gradientColor1: '#85a2af',
+    gradientColor2: '#b6bbc1',
     gradientAngle: 45,
     useShadow: true,
     shadowValues: '0px 0px',

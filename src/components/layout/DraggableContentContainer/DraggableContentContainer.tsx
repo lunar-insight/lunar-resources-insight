@@ -3,7 +3,6 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useDialog } from '@react-aria/dialog';
 import { useMove } from '@react-aria/interactions';
 import { Button, TooltipTrigger } from 'react-aria-components';
-import { theme } from 'theme';
 import { ButtonTooltip } from '../Tooltip/ButtonTooltip';
 
 export interface DraggableContentContainerProps {
@@ -93,12 +92,6 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   });
 
   const containerStyle: React.CSSProperties & { [key: string]: string } = {
-    '--color-primary': theme.color.primary,
-    '--color-secondary': theme.color.secondary,
-    '--color-tertiary': theme.color.tertiary,
-    '--color-quartenary': theme.color.quartenary,
-    '--color-neutral': theme.color.neutral,
-    '--color-neutralVariant': theme.color.neutralVariant,
     left: `${clampX(position.x)}px`,
     top: `${clampY(position.y)}px`,
   }
