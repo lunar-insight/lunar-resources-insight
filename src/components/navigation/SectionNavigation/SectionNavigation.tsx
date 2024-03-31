@@ -1,4 +1,4 @@
-import React, { useState, CSSProperties, Fragment } from 'react';
+import React, { useState, Fragment } from 'react';
 import { DraggableContentContainer } from './../../layout/DraggableContentContainer/DraggableContentContainer';
 import { Button } from 'react-aria-components';
 import './SectionNavigation.scss';
@@ -35,8 +35,11 @@ const SectionNavigation = ({ boundaryRef }) => {
     }
   ]
 
-  const IconButton = ({ icon, label, onPress }) => (
-    <Button onPress={onPress} className="section-navigation__icon-container">
+  const IconButton = ({ icon, label, onPress, onClose, isActive }) => (
+    <Button 
+      onPress={isActive ? onClose : onPress} 
+      className={`section-navigation__icon-container ${isActive ? 'section-navigation__icon-container__is-active' : ''}`}
+    >  
       <i className="material-symbols-outlined section-navigation__icon-container__icon">{icon}</i>
       <span className="section-navigation__icon-container__label">{label}</span>
     </Button>
@@ -66,6 +69,8 @@ const SectionNavigation = ({ boundaryRef }) => {
             icon={icon.name}
             label={icon.label}
             onPress={() => openDialog(index)}
+            onClose={() => closeDialog(index)}
+            isActive={dialogs[index].isOpen}
           />
           <DraggableContentContainer
             title={dialogs[index].title}
