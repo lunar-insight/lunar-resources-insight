@@ -19,6 +19,13 @@ const SectionNavigation = ({ boundaryRef }) => {
   });
 
   const icons: (Icon & { dialogTitle: string; dialogContent: React.ReactNode })[] = [
+    /*
+      id: Code-related selector.
+      name: icon name on the icon library.
+      label: text on the sidebar navigation.
+      dialogTitle: Title of the dialog.
+      dialogContent: related imported React element.
+    */
     { 
       id: 'HomeDialog', 
       name: 'home', 
@@ -30,8 +37,62 @@ const SectionNavigation = ({ boundaryRef }) => {
       id: 'LayersDialog', 
       name: 'layers', 
       label: 'Layers',
-      dialogTitle: 'Layers Dialog', 
+      dialogTitle: 'Spatial Layers', 
       dialogContent: 'Layers dialog content goes here.'
+    },
+    { 
+      id: 'MineralsDialog', 
+      name: 'landslide', 
+      label: 'Minerals',
+      dialogTitle: 'Minerals Dialog', 
+      dialogContent: 'Minerals dialog content goes here.'
+    },
+    { 
+      id: 'ElementsDialog', 
+      name: 'lab_research', 
+      label: 'Elements',
+      dialogTitle: 'Chemical Elements', 
+      dialogContent: 'Elements dialog content goes here.'
+    },
+    /*
+    { 
+      id: 'ReactionDialog', 
+      name: 'experiment', 
+      label: 'Reaction',
+      dialogTitle: 'Reaction Dialog', 
+      dialogContent: 'Reaction dialog content goes here.'
+    },
+    */
+    { 
+      id: 'AnalysisDialog', 
+      name: 'frame_inspect', 
+      label: 'Analysis',
+      dialogTitle: 'Analysis Dialog', 
+      dialogContent: 'Analysis dialog content goes here.'
+    }
+    ,
+    /*
+    { 
+      id: 'PluginsDialog', 
+      name: 'extension', 
+      label: 'Plugins',
+      dialogTitle: 'Plugins Dialog', 
+      dialogContent: 'Plugins dialog content goes here.'
+    },
+    */
+    { 
+      id: 'ViewerOptionDialog', 
+      name: 'tune', 
+      label: 'Viewer',
+      dialogTitle: 'Viewer Option', 
+      dialogContent: 'Viewer Option dialog content goes here.'
+    },
+    { 
+      id: 'SettingsDialog', 
+      name: 'settings', 
+      label: 'Settings',
+      dialogTitle: 'App Settings', 
+      dialogContent: 'Settings dialog content goes here.'
     }
   ]
 
