@@ -12,13 +12,13 @@ interface Icon {
 const SectionNavigation = ({ boundaryRef }) => {
 
   // TODO: change content type "string" to other type when specific components will be made
-  const createDialog = (title: string, content: string) => ({
+  const createDialog = (title: string, content: React.ReactNode) => ({
     isOpen: false,
     title,
     content
   });
 
-  const icons: (Icon & { dialogTitle: string; dialogContent: string })[] = [
+  const icons: (Icon & { dialogTitle: string; dialogContent: React.ReactNode })[] = [
     { 
       id: 'HomeDialog', 
       name: 'home', 
