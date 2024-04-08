@@ -2,6 +2,7 @@ import React, { useState, Fragment } from 'react';
 import { DraggableContentContainer } from './../../layout/DraggableContentContainer/DraggableContentContainer';
 import { Button } from 'react-aria-components';
 import './SectionNavigation.scss';
+import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
 
 interface Icon {
   id: string;
@@ -52,7 +53,7 @@ const SectionNavigation = ({ boundaryRef }) => {
       name: 'lab_research', 
       label: 'Elements',
       dialogTitle: 'Chemical Elements', 
-      dialogContent: 'Elements dialog content goes here.'
+      dialogContent: <ChemicalElementsSection />
     },
     /*
     { 

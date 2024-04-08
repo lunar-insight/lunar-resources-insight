@@ -1,5 +1,6 @@
 import React from 'react'
 import './ChemicalElementsSection.scss';
+import { Button } from 'react-aria-components';
 
 interface ChemicalElementsSectionProps {
 
@@ -8,7 +9,7 @@ interface ChemicalElementsSectionProps {
 const ChemicalElementsSection: React.FC<ChemicalElementsSectionProps> = () => {
 
   return (
-    null
+    <Button>Test</Button>
   )
 
 };
