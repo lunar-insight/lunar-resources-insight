@@ -4,6 +4,7 @@
   --color-tertiary: #97a5ab; /* light color */
   --color-quartenary: #324049; /* dark color #2f3c46 */
   --color-error: #ff5449; /* red */
+  --color-dark-intermediary: #2d3a42; /* dark color, used for sidebar for "is-active + pressed" state */
   --color-neutral: #2b353e; /* dark color */
   --color-neutralVariant: #b6bbc1; /* light color */
 }
