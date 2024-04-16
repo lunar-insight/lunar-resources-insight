@@ -9,7 +9,7 @@ interface ChemicalElementsSectionProps {
 const ChemicalElementsSection: React.FC<ChemicalElementsSectionProps> = () => {
 
   return (
-    <Button>Test</Button>
+    <Button className="chemical-section__open-periodic-table-button">Periodic Table</Button>
   )
 
 };
