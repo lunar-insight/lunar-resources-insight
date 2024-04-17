@@ -3,6 +3,7 @@ import { DraggableContentContainer } from './../../layout/DraggableContentContai
 import { Button } from 'react-aria-components';
 import './SectionNavigation.scss';
 import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
+import { useDialogWindowManagement } from '../../../utils/DialogWindowManagement';
 
 interface Icon {
   id: string;
@@ -11,13 +12,6 @@ interface Icon {
 }
 
 const SectionNavigation = ({ boundaryRef }) => {
-
-  // TODO: change content type "string" to other type when specific components will be made
-  const createDialog = (title: string, content: React.ReactNode) => ({
-    isOpen: false,
-    title,
-    content
-  });
 
   const icons: (Icon & { dialogTitle: string; dialogContent: React.ReactNode })[] = [
     /*
@@ -97,6 +91,17 @@ const SectionNavigation = ({ boundaryRef }) => {
     }
   ]
 
+  const initialDialogs = icons.map(({ dialogTitle, dialogContent }) => ({
+    isOpen: false,
+    title: dialogTitle,
+    content: dialogContent,
+  }));
+
+  const { dialogs, openDialog, closeDialog, renderDialog } = useDialogWindowManagement(
+    initialDialogs,
+    boundaryRef
+  );
+
   const IconButton = ({ icon, label, onPress, onClose, isActive }) => (
     <Button 
       onPress={isActive ? onClose : onPress} 
@@ -106,22 +111,6 @@ const SectionNavigation = ({ boundaryRef }) => {
       <span className="section-navigation__icon-container__label">{label}</span>
     </Button>
   );
-
-  const [dialogs, setDialogs] = useState(
-    icons.map(({ dialogTitle, dialogContent }) => createDialog(dialogTitle, dialogContent))
-  );
-
-  const openDialog = (index: number) => {
-    const newDialogs = [...dialogs];
-    newDialogs[index].isOpen = true;
-    setDialogs(newDialogs);
-  }
-
-  const closeDialog = (index: number) => {
-    const newDialogs = [...dialogs];
-    newDialogs[index].isOpen = false;
-    setDialogs(newDialogs);
-  }
 
   return (
     <div className='section-navigation'>
@@ -134,14 +123,7 @@ const SectionNavigation = ({ boundaryRef }) => {
             onClose={() => closeDialog(index)}
             isActive={dialogs[index].isOpen}
           />
-          <DraggableContentContainer
-            title={dialogs[index].title}
-            isOpen={dialogs[index].isOpen}
-            onClose={() => closeDialog(index)}
-            boundaryRef={boundaryRef}
-          >
-            {dialogs[index].content}
-          </DraggableContentContainer>
+          {renderDialog(dialogs[index], index)}
         </Fragment>
       ))}
     </div>
