@@ -97,13 +97,18 @@ const SectionNavigation = () => {
     content: dialogContent,
   }));
 
-  const { dialogs, openDialog, closeDialog, renderDialog } = useDialogWindowManagement(
+  const { dialogs, openDialog, closeDialog, renderDialog, isDialogOpen } = useDialogWindowManagement(
     initialDialogs,
   );
 
-  const IconButton = ({ icon, label, onPress, onClose, isActive }) => (
+  const dialogMap = dialogs.reduce((map, dialog) => {
+    map[dialog.title] = dialog;
+    return map;
+  }, {});
+
+  const IconButton = ({ icon, label, title, content, onClose, isActive }) => (
     <Button 
-      onPress={isActive ? onClose : onPress} 
+      onPress={isActive ? onClose : () => openDialog(title)} 
       className={`section-navigation__icon-container ${isActive ? 'section-navigation__icon-container__is-active' : ''}`}
     >  
       <i className="material-symbols-outlined section-navigation__icon-container__icon">{icon}</i>
@@ -113,16 +118,17 @@ const SectionNavigation = () => {
 
   return (
     <div className='section-navigation'>
-      {icons.map((icon, index) => (
+      {icons.map((icon) => (
         <Fragment key={icon.id}>
           <IconButton
             icon={icon.name}
             label={icon.label}
-            onPress={() => openDialog(index)}
-            onClose={() => closeDialog(index)}
-            isActive={dialogs[index].isOpen}
+            title={icon.dialogTitle}
+            content={icon.dialogContent}
+            onClose={() => closeDialog(icon.dialogTitle)}
+            isActive={isDialogOpen(icon.dialogTitle)}
           />
-          {renderDialog(dialogs[index], index)}
+          {isDialogOpen(icon.dialogTitle) && renderDialog(dialogMap[icon.dialogTitle])}
         </Fragment>
       ))}
     </div>
