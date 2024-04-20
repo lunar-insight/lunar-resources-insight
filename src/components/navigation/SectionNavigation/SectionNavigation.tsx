@@ -11,7 +11,7 @@ interface Icon {
   label: string;
 }
 
-const SectionNavigation = ({ boundaryRef }) => {
+const SectionNavigation = () => {
 
   const icons: (Icon & { dialogTitle: string; dialogContent: React.ReactNode })[] = [
     /*
@@ -99,7 +99,6 @@ const SectionNavigation = ({ boundaryRef }) => {
 
   const { dialogs, openDialog, closeDialog, renderDialog } = useDialogWindowManagement(
     initialDialogs,
-    boundaryRef
   );
 
   const IconButton = ({ icon, label, onPress, onClose, isActive }) => (

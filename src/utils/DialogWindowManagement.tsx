@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DraggableContentContainer } from '../components/layout/DraggableContentContainer/DraggableContentContainer';
+import { useBoundaryRef } from '../components/reference/BoundaryRefProvider';
 
 interface Dialog {
   isOpen: boolean;
@@ -7,11 +8,9 @@ interface Dialog {
   content: React.ReactNode;
 }
 
-export const useDialogWindowManagement = ( // Hook
-  initialDialogs: Dialog[],
-  boundaryRef: React.RefObject<HTMLDivElement>, // TODO: see to obtain this ref in different way (not via sidebar)
-) => {
+export const useDialogWindowManagement = ( initialDialogs: Dialog[]) => {
   const [dialogs, setDialogs] = useState(initialDialogs);
+  const boundaryRef = useBoundaryRef();
 
   const createDialog = (title: string, content: React.ReactNode): Dialog => ({
     isOpen: false,
