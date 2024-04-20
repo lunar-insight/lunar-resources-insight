@@ -34,23 +34,39 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const [draggableContainerSize, setDraggableContainerSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
-    if (boundaryRef.current && dialogRef.current) {
-      const viewerBounds = boundaryRef.current?.getBoundingClientRect();
-      const viewerOffset = {
-        x: viewerBounds.left + window.scrollX,
-        y: viewerBounds.top + window.scrollY,
-      };
-      setViewerContainerSize({ 
-        width: viewerBounds.width, 
-        height: viewerBounds.height, 
-        ...viewerOffset
-      });
+    const updateSizes = () => {
+      if (boundaryRef.current && dialogRef.current) {
+        const viewerBounds = boundaryRef.current?.getBoundingClientRect();
+        const viewerOffset = {
+          x: viewerBounds.left + window.scrollX,
+          y: viewerBounds.top + window.scrollY,
+        };
+        setViewerContainerSize({ 
+          width: viewerBounds.width, 
+          height: viewerBounds.height, 
+          ...viewerOffset
+        });
+  
+        const dialogRefBounds = dialogRef.current.getBoundingClientRect();
+        setDraggableContainerSize({ 
+          width: dialogRefBounds.width, 
+          height: dialogRefBounds.height
+        });
+      }
+    };
 
-      const dialogRefBounds = dialogRef.current.getBoundingClientRect();
-      setDraggableContainerSize({ 
-        width: dialogRefBounds.width, 
-        height: dialogRefBounds.height });
-    }
+    updateSizes();
+    // Handle internet explorer windows resizing for bounding box
+    const handleResize = () => {
+      updateSizes();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+
   }, [boundaryRef.current, dialogRef.current]);
 
   // Obtain dimension and position from Viewer Div
