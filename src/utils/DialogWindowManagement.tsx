@@ -13,26 +13,21 @@ export const useDialogWindowManagement = ( initialDialogs: Dialog[]) => {
   const boundaryRef = useBoundaryRef();
 
   /**
-   * Creates a new dialog object with the given title and content.
-   * @param {string} title - The title of the dialog
-   * @param {React.ReactNode} content - The content of the dialog.
-   * @returns {Dialog} - The created dialog object. 
+   * Opens the dialog with the specified title, or creates a new one if it doesn't exist.
+   * @param {string} title - The title of the dialog to open.
+   * @param {React.ReactNode} content - The content of the dialog (only used when creating a new dialog).
    */
-  const createDialog = (title: string, content: React.ReactNode): Dialog => ({
-    isOpen: false,
-    title,
-    content,
-  });
-
-  /**
-   * Opens the dialog with the specified title.
-   * @param {string} title - The title of the dialog to open. 
-   */
-  const openDialog = (title: string) => {
-    const newDialogs = dialogs.map(dialog =>
-      dialog.title === title ? { ...dialog, isOpen: true } : dialog
-    );
-    setDialogs(newDialogs);
+  const openDialog = (title: string, content?: React.ReactNode) => {
+    setDialogs(prevDialogs => {
+      const existingDialogs = prevDialogs.find(dialog => dialog.title === title);
+      if (existingDialogs) {
+        return prevDialogs.map(dialog =>
+          dialog.title === title ? { ...dialog, isOpen: true } : dialog
+        );
+      } else {
+        return [...prevDialogs, { isOpen: true, title, content }];
+      }
+    });
   };
 
   /**
@@ -40,10 +35,11 @@ export const useDialogWindowManagement = ( initialDialogs: Dialog[]) => {
    * @param {string} title - The title of the dialog to close.
    */
   const closeDialog = (title: string) => {
-    const newDialogs = dialogs.map(dialog =>
-      dialog.title === title ? { ...dialog, isOpen: false } : dialog
+    setDialogs(prevDialogs =>
+      prevDialogs.map(dialog =>
+        dialog.title === title ? { ...dialog, isOpen: false } : dialog
+      )
     );
-    setDialogs(newDialogs);
   };
 
   /**
@@ -74,7 +70,6 @@ export const useDialogWindowManagement = ( initialDialogs: Dialog[]) => {
 
   return {
     dialogs,
-    createDialog,
     openDialog,
     closeDialog,
     renderDialog,
