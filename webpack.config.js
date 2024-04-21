@@ -11,7 +11,7 @@ dotenv.config();
 module.exports = {
   context: __dirname,
   mode: 'development',
-  devtool: 'eval',
+  devtool: 'source-map',
   entry: {
     app: './src/index.tsx'
   },
