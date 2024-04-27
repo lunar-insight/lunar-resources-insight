@@ -1,78 +1,102 @@
-import React, { useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { DraggableContentContainer } from '../components/layout/DraggableContentContainer/DraggableContentContainer';
 import { useBoundaryRef } from '../components/reference/BoundaryRefProvider';
 
 interface Dialog {
+  id: string;
   isOpen: boolean;
   title: string;
-  content: React.ReactNode;
+  content: React.ReactNode | (() => React.ReactNode);
 }
 
-export const useDialogWindowManagement = ( initialDialogs: Dialog[]) => {
-  const [dialogs, setDialogs] = useState(initialDialogs);
+interface DialogContextValue {
+  dialogsState: Dialog[];
+  openDialog: (id: string, content?: React.ReactNode) => void;
+  closeDialog: (id: string) => void;
+  isDialogOpen: (id: string) => boolean;
+  renderDialog: (dialog: Dialog) => JSX.Element;
+  addDialog: (dialog: Dialog) => void;
+}
+
+const DialogContext = createContext<DialogContextValue | undefined>(undefined);
+
+const useDialogContext = () => {
+  const context = useContext(DialogContext);
+  if (!context) {
+    throw new Error('useDialogContext must be used within a DialogProvider');
+  }
+  return context;
+}
+
+// This keep the same position in DOM for every dialog
+const DialogRenderer: React.FC = () => {
+  const { dialogsState, isDialogOpen, renderDialog } = useDialogContext();
+
+  return (
+    <>
+       {dialogsState.map((dialog) => isDialogOpen(dialog.id) && renderDialog(dialog))}
+    </>
+  );
+};
+
+const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }> = ({ children, dialogs }) => {
+  const [dialogsState, setDialogsState] = useState<Dialog[]>(dialogs);
   const boundaryRef = useBoundaryRef();
 
-  /**
-   * Opens the dialog with the specified title, or creates a new one if it doesn't exist.
-   * @param {string} title - The title of the dialog to open.
-   * @param {React.ReactNode} content - The content of the dialog (only used when creating a new dialog).
-   */
-  const openDialog = (title: string, content?: React.ReactNode) => {
-    setDialogs(prevDialogs => {
-      const existingDialogs = prevDialogs.find(dialog => dialog.title === title);
+  const openDialog = (id: string, content?: React.ReactNode) => {
+    setDialogsState(prevDialogs => {
+      const existingDialogs = prevDialogs.find(dialog => dialog.id === id);
       if (existingDialogs) {
         return prevDialogs.map(dialog =>
-          dialog.title === title ? { ...dialog, isOpen: true } : dialog
+          dialog.id === id ? { ...dialog, isOpen: true } : dialog
         );
       } else {
-        return [...prevDialogs, { isOpen: true, title, content }];
+        const newDialog: Dialog = { id, isOpen: true, title: '', content: content || ''};
+        return [...prevDialogs, newDialog];
       }
     });
   };
 
-  /**
-   * Closes the dialog with the specified title.
-   * @param {string} title - The title of the dialog to close.
-   */
-  const closeDialog = (title: string) => {
-    setDialogs(prevDialogs =>
+  const closeDialog = (id: string) => {
+    setDialogsState(prevDialogs =>
       prevDialogs.map(dialog =>
-        dialog.title === title ? { ...dialog, isOpen: false } : dialog
+        dialog.id === id ? { ...dialog, isOpen: false } : dialog
       )
     );
   };
 
-  /**
-   * Checks if the dialog with the specified title is currently open.
-   * @param {string} title - The title of the dialog to check. 
-   * @returns {boolean} - True if the dialog is open, false otherwise.
-   */
-  const isDialogOpen = (title: string) => {
-    return dialogs.some(dialog => dialog.title === title && dialog.isOpen);
+  const isDialogOpen = (id: string) => {
+    return dialogsState.some(dialog => dialog.id === id && dialog.isOpen);
   };
 
-  /**
-   * Renders the given dialog component.
-   * @param {Dialog} dialog - The dialog object to render.
-   * @returns {JSX.Element} - The rendered dialog component.
-   */
-  const renderDialog = (dialog: Dialog) => (
+  const renderDialog = (dialog: Dialog): JSX.Element => (
     <DraggableContentContainer
-      key={dialog.title}
+      key={dialog.id}
       title={dialog.title}
       isOpen={dialog.isOpen}
-      onClose={() => closeDialog(dialog.title)}
+      onClose={() => closeDialog(dialog.id)}
       boundaryRef={boundaryRef}
     >
-      {dialog.content}
+      {typeof dialog.content === 'function' ? dialog.content() : dialog.content}
     </DraggableContentContainer>
   );
 
-  return {
-    dialogs,
-    openDialog,
-    closeDialog,
-    renderDialog,
-    isDialogOpen,
+  const addDialog = (dialog: Dialog) => {
+    setDialogsState(prevDialogs => {
+      const existingDialog = prevDialogs.find(d => d.id === dialog.id);
+      if (existingDialog) {
+        return prevDialogs;
+      } else {
+        return [...prevDialogs, { ...dialog, isOpen: false }];
+      }
+    });
   };
+
+  return (
+    <DialogContext.Provider value={{ dialogsState, openDialog, closeDialog, isDialogOpen, renderDialog, addDialog }}>
+      {children}
+    </DialogContext.Provider>
+  );
 };
+
+export { useDialogContext, DialogProvider, DialogRenderer };

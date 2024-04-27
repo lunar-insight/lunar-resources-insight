@@ -1,30 +1,35 @@
 import React from 'react'
 import './ChemicalElementsSection.scss';
 import { Button } from 'react-aria-components';
-import { useDialogWindowManagement } from '../../../utils/DialogWindowManagement';
+import { useDialogContext } from '../../../utils/DialogWindowManagement';
 import PeriodicTable from '../submenu/PeriodicTable/PeriodicTable'
 
 const ChemicalElementsSection: React.FC = () => {
-  const { openDialog, renderDialog, isDialogOpen } = useDialogWindowManagement([]);
+  const { openDialog, addDialog, dialogsState } = useDialogContext();
 
   const handleOpenPeriodicTable = () => {
-    openDialog('Periodic Table', <PeriodicTable />);
+    const dialogId = 'periodic-table-dialog';
+    const dialogExists = dialogsState.some(d => d.id === dialogId);
+
+    if (!dialogExists) { // Necessary check
+      addDialog({
+        id: dialogId,
+        isOpen: false,
+        title: 'Periodic Table',
+        content: <PeriodicTable />,
+      });
+    }
+    openDialog(dialogId)
   };
 
   return (
-    <>
+    
       <Button 
         className="chemical-section__open-periodic-table-button"
         onPress={handleOpenPeriodicTable}  
       >
         Periodic Table
       </Button>
-      {isDialogOpen('Periodic Table') && renderDialog({
-        isOpen: true,
-        title: 'Periodic Table',
-        content: <PeriodicTable />,
-      })}
-    </>
   );
 };
 

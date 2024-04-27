@@ -1,8 +1,9 @@
 import React, { useRef } from 'react';
-import SectionNavigation from '../../components/navigation/SectionNavigation/SectionNavigation';
+import SectionNavigation, { dialogs } from '../../components/navigation/SectionNavigation/SectionNavigation';
 import './MainPage.scss'
 import CesiumComponent from '../../components/viewer/CesiumComponent/CesiumComponent';
 import { BoundaryRefProvider } from '../../components/reference/BoundaryRefProvider';
+import { DialogProvider, DialogRenderer } from '../../utils/DialogWindowManagement'
 
 const MainPage = () => {
 
@@ -10,14 +11,15 @@ const MainPage = () => {
   
   return (
     <BoundaryRefProvider value={viewerContainerRef}>
-      <div className="main-page">
-        <SectionNavigation />
-        <div className="viewer-container" ref={viewerContainerRef}>
-          <CesiumComponent className="cesium-component" />
+      <DialogProvider dialogs={dialogs}>
+        <div className="main-page">
+          <SectionNavigation />
+          <div className="viewer-container" ref={viewerContainerRef}>
+            <CesiumComponent className="cesium-component" />
+          </div>
+          <DialogRenderer />
         </div>
-        
-        {/* Content */}
-      </div>
+      </DialogProvider>
     </BoundaryRefProvider>
   );
 };
