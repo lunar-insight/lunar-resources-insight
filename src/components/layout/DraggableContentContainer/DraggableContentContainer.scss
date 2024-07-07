@@ -8,6 +8,9 @@ $margin: 0.75rem;
   height: auto;
   min-width: 16rem;
   width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
   border-radius: $border-radius;
   box-shadow: 0px 0px 3px black;
   backdrop-filter: blur(8px);
@@ -64,7 +67,9 @@ $margin: 0.75rem;
   &__content-area {
     color: var(--color-neutralVariant);
     padding: $margin;
-    display: flex;
-    justify-content: center;
+    overflow-x: auto;
+    overflow-y: auto;
+    flex-grow: 1;
+    max-height: calc(100% - 3rem); // Substracting the height of the move area
   }
 }

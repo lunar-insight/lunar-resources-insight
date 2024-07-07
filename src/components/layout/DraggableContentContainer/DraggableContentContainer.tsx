@@ -28,45 +28,40 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   boundaryRef,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [viewerContainerSize, setViewerContainerSize] = useState<ViewerContainerSize>({ x: 0, y: 0, width: 0, height: 0 });
   const [draggableContainerSize, setDraggableContainerSize] = useState({ width: 0, height: 0 });
 
+  const updateSizes = () => {
+    if (boundaryRef.current && dialogRef.current) {
+      const viewerBounds = boundaryRef.current.getBoundingClientRect();
+      const viewerOffset = {
+        x: viewerBounds.left + window.scrollX,
+        y: viewerBounds.top + window.scrollY,
+      };
+      setViewerContainerSize({
+        width: viewerBounds.width,
+        height: viewerBounds.height,
+        ...viewerOffset
+      });
+
+      const dialogRefBounds = dialogRef.current.getBoundingClientRect();
+      setDraggableContainerSize({
+        width: dialogRefBounds.width,
+        height: dialogRefBounds.height
+      });
+    }
+  };
+
   useEffect(() => {
-    const updateSizes = () => {
-      if (boundaryRef.current && dialogRef.current) {
-        const viewerBounds = boundaryRef.current?.getBoundingClientRect();
-        const viewerOffset = {
-          x: viewerBounds.left + window.scrollX,
-          y: viewerBounds.top + window.scrollY,
-        };
-        setViewerContainerSize({ 
-          width: viewerBounds.width, 
-          height: viewerBounds.height, 
-          ...viewerOffset
-        });
-  
-        const dialogRefBounds = dialogRef.current.getBoundingClientRect();
-        setDraggableContainerSize({ 
-          width: dialogRefBounds.width, 
-          height: dialogRefBounds.height
-        });
-      }
-    };
-
     updateSizes();
-    // Handle internet explorer windows resizing for bounding box
-    const handleResize = () => {
-      updateSizes();
-    };
-
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', updateSizes);
 
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', updateSizes);
     };
-
   }, [boundaryRef.current, dialogRef.current]);
 
   // Obtain dimension and position from Viewer Div
@@ -76,18 +71,11 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   // TODO: check edge case when the container go out of the screen on the right
   // happen after resizing the window, need to rezise the bounding div too
   const { moveProps } = useMove({
-    
-    onMoveStart: () => {
-      // Can be used to prepare something when the move starts
-    },
-
+  
     onMove: (moveEvent) => {
       setPosition(({ x, y }) => {
-        
-
         x += moveEvent.deltaX;
         y += moveEvent.deltaY;
-
         //if (moveEvent.pointerType === 'keyboard') { // Dragging outside the container and using arrow keys (need testing to confirm)
         x = clampX(x);
         y = clampY(y);
@@ -104,13 +92,14 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
         return { x, y };
       })
     },
-
   });
-
-  const containerStyle: React.CSSProperties & { [key: string]: string } = {
+//const containerStyle: React.CSSProperties & { [key: string]: string } = {
+  const containerStyle: React.CSSProperties = {
     left: `${clampX(position.x)}px`,
     top: `${clampY(position.y)}px`,
-  }
+    maxWidth: `${viewerContainerSize.width * 0.9}px`,
+    maxHeight: `${viewerContainerSize.height * 0.9}px`,
+  };
 
   if (!isOpen) return null; // Linked to the SectionNavigation code
 
