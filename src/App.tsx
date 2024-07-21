@@ -6,7 +6,11 @@ const App: FC = () => (
   <div style={{ 
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'flex-start'
+    justifyContent: 'flex-start',
+    width: '100%',
+    height: '100%',
+    overflow: 'hidden',
+    position: 'relative',
   }}>
     <MainPage />
   </div>

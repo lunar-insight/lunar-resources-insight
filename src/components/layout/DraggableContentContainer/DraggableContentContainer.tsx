@@ -37,39 +37,52 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
       const viewerBounds = boundaryRef.current.getBoundingClientRect();
-      const viewerOffset = {
-        x: viewerBounds.left + window.scrollX,
-        y: viewerBounds.top + window.scrollY,
-      };
+      const dialogBounds = dialogRef.current.getBoundingClientRect();
+
       setViewerContainerSize({
+        x: viewerBounds.left,
+        y: viewerBounds.top,
         width: viewerBounds.width,
         height: viewerBounds.height,
-        ...viewerOffset
       });
 
-      const dialogRefBounds = dialogRef.current.getBoundingClientRect();
       setDraggableContainerSize({
-        width: dialogRefBounds.width,
-        height: dialogRefBounds.height
+        width: dialogBounds.width,
+        height: dialogBounds.height
       });
     }
   };
 
   useEffect(() => {
-    updateSizes();
+    const resizeObserver = new ResizeObserver(() => {
+      setTimeout(updateSizes, 0);
+    });
+
+    if (boundaryRef.current) {
+      resizeObserver.observe(boundaryRef.current);
+    }
+
     window.addEventListener('resize', updateSizes);
 
     return () => {
+      resizeObserver.disconnect();
       window.removeEventListener('resize', updateSizes);
     };
   }, [boundaryRef.current, dialogRef.current]);
 
   // Obtain dimension and position from Viewer Div
-  const clampX = (posX: number) => Math.min(Math.max(posX, viewerContainerSize.x), viewerContainerSize.x + viewerContainerSize.width - draggableContainerSize.width);
-  const clampY = (posY: number) => Math.min(Math.max(posY, viewerContainerSize.y), viewerContainerSize.y + viewerContainerSize.height - draggableContainerSize.height);
+  const clampX = (posX: number) => {
+    const minX = viewerContainerSize.x;
+    const maxX = viewerContainerSize.x + viewerContainerSize.width - draggableContainerSize.width;
+    return Math.max(minX, Math.min(posX, maxX));
+  };
+        
+  const clampY = (posY: number) => {
+    const minY = viewerContainerSize.y;
+    const maxY = viewerContainerSize.y + viewerContainerSize.height - draggableContainerSize.height;
+    return Math.max(minY, Math.min(posY, maxY));
+  };
 
-  // TODO: check edge case when the container go out of the screen on the right
-  // happen after resizing the window, need to rezise the bounding div too
   const { moveProps } = useMove({
   
     onMove: (moveEvent) => {
@@ -97,8 +110,12 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const containerStyle: React.CSSProperties = {
     left: `${clampX(position.x)}px`,
     top: `${clampY(position.y)}px`,
-    maxWidth: `${viewerContainerSize.width * 0.9}px`,
-    maxHeight: `${viewerContainerSize.height * 0.9}px`,
+    //
+    //maxWidth: `${viewerContainerSize.width * 0.9}px`,
+    //maxHeight: `${viewerContainerSize.height * 0.9}px`,
+    //
+    maxWidth: `${viewerContainerSize.width}px`,
+    maxHeight: `${viewerContainerSize.height}px`,
   };
 
   if (!isOpen) return null; // Linked to the SectionNavigation code
