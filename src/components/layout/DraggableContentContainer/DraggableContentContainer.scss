@@ -2,6 +2,13 @@ $border-radius: 0.5rem;
 $margin: 0.75rem;
 
 .draggable-content-container {
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+
+  &__visible {
+    opacity: 1;
+  }
+
   border-radius: 0.25rem;
   position: absolute;
   z-index: 100;

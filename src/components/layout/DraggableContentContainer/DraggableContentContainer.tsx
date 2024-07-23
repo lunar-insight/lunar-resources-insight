@@ -36,6 +36,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const [viewerContainerSize, setViewerContainerSize] = useState<ViewerContainerSize>({ x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 });
   const [draggableContainerSize, setDraggableContainerSize] = useState({ width: 0, height: 0 });
   const [translation, setTranslation] = useState({ x: 0, y: 0});
+  const [isVisible, setIsVisible] = useState(false);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -124,7 +125,28 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     maxHeight: `${viewerContainerSize.height}px`,
   };
 
-  if (!isOpen) return null; // Linked to the SectionNavigation code
+  
+  useEffect(() => {
+    if (isOpen) {
+      setIsVisible(true);
+
+      const timer = setTimeout(() => {
+        dialogRef.current?.classList.add('draggable-content-container__visible');
+      }, 50);
+
+      return () => clearTimeout(timer);
+    } else {
+      dialogRef.current?.classList.remove('draggable-content-container__visible');
+
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 200);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
+  if (!isVisible) return null; // Linked to the SectionNavigation code
 
   return (
     <div 
