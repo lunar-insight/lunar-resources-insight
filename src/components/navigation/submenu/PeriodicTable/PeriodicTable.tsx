@@ -29,7 +29,6 @@ const PeriodicTable: React.FC = () => {
 
   return (
     <div className='periodic-table'>
-      <h2>Periodic Table of Elements</h2>
       <Table aria-label="Periodic Table of Elements" className='periodic-table__table'>
         <TableHeader>
           <Row>

@@ -1,35 +1,36 @@
-import React from 'react'
+import React, { useState } from 'react'
 import './ChemicalElementsSection.scss';
 import { Button } from 'react-aria-components';
-import { useDialogContext } from '../../../utils/DialogWindowManagement';
+import ModalOverlayContainer from './../../layout/ModalOverlayContainer/ModalOverlayContainer';
 import PeriodicTable from '../submenu/PeriodicTable/PeriodicTable'
 
 const ChemicalElementsSection: React.FC = () => {
-  const { openDialog, addDialog, dialogsState } = useDialogContext();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleOpenPeriodicTable = () => {
-    const dialogId = 'periodic-table-dialog';
-    const dialogExists = dialogsState.some(d => d.id === dialogId);
+    setIsModalOpen(true);
+  };
 
-    if (!dialogExists) { // Necessary check
-      addDialog({
-        id: dialogId,
-        isOpen: false,
-        title: 'Periodic Table',
-        content: <PeriodicTable />,
-      });
-    }
-    openDialog(dialogId)
+  const handleClosePeriodicTable = () => {
+    setIsModalOpen(false);
   };
 
   return (
-    
+    <>
       <Button 
         className="chemical-section__open-periodic-table-button"
         onPress={handleOpenPeriodicTable}  
       >
         Periodic Table
       </Button>
+      <ModalOverlayContainer
+        isOpen={isModalOpen}
+        onOpenChange={handleClosePeriodicTable}
+        title="Periodic Table of Elements"
+      >
+        <PeriodicTable />
+      </ModalOverlayContainer>
+    </>
   );
 };
 
