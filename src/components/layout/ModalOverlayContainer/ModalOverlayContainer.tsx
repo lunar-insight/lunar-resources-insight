@@ -28,7 +28,7 @@ const ModalOverlayContainer: React.FC<ModalOverlayContainerProps> = ({
          
         className="modal-overlay-container__modal"
       >
-        <Dialog ref={modalRef}>
+        <Dialog ref={modalRef} className='modal-overlay-container__modal__dialog'>
           <Heading slot="title">{title}</Heading>
           {children}
         </Dialog>

@@ -48,7 +48,9 @@ const PeriodicTable: React.FC = () => {
                   <Cell key={`${row}-${column}`} textValue={element ? element.name : ''} className='periodic-table__table__cell'>
                     {element ? (
                       <div className='periodic-table__table__cell__element'>
-                        <div className='periodic-table__table__cell__element__atomic-number'>{element.atomicNumber}</div>
+                        <div className='periodic-table__table__cell__element__top'>
+                          <div className='periodic-table__table__cell__element__top__atomic-number'>{element.atomicNumber}</div>
+                        </div>
                         <div className='periodic-table__table__cell__element__symbol'>{element.symbol}</div>
                         <div className='periodic-table__table__cell__element__name'>{element.name}</div>
                       </div>

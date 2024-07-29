@@ -21,10 +21,17 @@
   &__modal {
     box-shadow: 0 8 20px rgba(0 0 0 / 0.1);
     border-radius: 2px;
-    background: gray;
+    background: rgba(0 0 0 / 0.5);
     color: darkgray;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0px 0px 3px black;
     border: 1px solid white;
     outline: none;
+
+    &__dialog {
+      text-align: center;
+    }
   }
 }
 
