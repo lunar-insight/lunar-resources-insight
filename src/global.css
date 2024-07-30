@@ -1,12 +1,15 @@
 :root {
-  --color-primary: #232935; /* dark color */
+  --color-primary: #232935; /* dark color 35 41 53*/
   --color-secondary: #85a2af; /* light color */
   --color-tertiary: #97a5ab; /* light color */
-  --color-quartenary: #324049; /* dark color #2f3c46 */
+  --color-quartenary: #324049; /* dark color 50 64 73*/
   --color-error: #ff5449; /* red */
-  --color-dark-intermediary: #2d3a42; /* dark color, used for sidebar for "is-active + pressed" state */
-  --color-neutral: #2b353e; /* dark color */
+  --color-dark-intermediary: #2d3a42; /* 45 58 66 dark color, used for sidebar for "is-active + pressed" state */
+  --color-neutral: #2b353e; /* dark color 43 53 62 */
   --color-neutralVariant: #b6bbc1; /* light color */
+  /* Or #2f3c46 */
+  /* Other color */
+  /* 25, 29, 37, 0.75 --> Used for the modal background */
 }
 
 /*
