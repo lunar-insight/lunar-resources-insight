@@ -2,6 +2,10 @@ $cell-size: 75px;
 
 .periodic-table {
 
+  &__column {
+    color: var(--color-neutralVariant);
+  }
+
   &__table {
     //display: grid;
     //grid-template-columns: repeat(18, minmax(50px, 1fr));
@@ -9,7 +13,10 @@ $cell-size: 75px;
     //border-collapse: separate;
     border-spacing: 4px;
     border-collapse: separate;
-    
+
+    &__first-column-cell {
+      color: var(--color-neutralVariant);
+    }
 
     &__cell {
       border: 1px solid #ccc;
@@ -41,6 +48,7 @@ $cell-size: 75px;
             text-align: left;
             font-weight: bold;
             font-size: x-small;
+            color: var(--color-neutralVariant);
           }
         }
 
@@ -51,6 +59,7 @@ $cell-size: 75px;
           justify-content: center;
           font-size: xx-large;
           font-weight: bold;
+          color: var(--color-secondary);
         }
 
         &__name {
@@ -60,6 +69,7 @@ $cell-size: 75px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          color: var(--color-neutralVariant);
         }
       }
 

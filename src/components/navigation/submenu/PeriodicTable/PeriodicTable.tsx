@@ -34,7 +34,7 @@ const PeriodicTable: React.FC = () => {
           <Row>
             <Column isRowHeader></Column>
             {columns.map((column) => (
-              <Column key={column}>{column + 1}</Column>
+              <Column className='periodic-table__column' key={column}>{column + 1}</Column>
             ))}
           </Row>
         </TableHeader>
