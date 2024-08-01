@@ -1,4 +1,6 @@
-$cell-size: 75px;
+$min-cell-size: 50px;
+$max-cell-size: 75px;
+$cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
 
 .periodic-table {
 
@@ -13,6 +15,7 @@ $cell-size: 75px;
     //border-collapse: separate;
     border-spacing: 4px;
     border-collapse: separate;
+    width: 100%;
 
     &__first-column-cell {
       color: var(--color-neutralVariant);
@@ -23,59 +26,62 @@ $cell-size: 75px;
       padding: 0;
       width: $cell-size;
       height: $cell-size;
-      max-width: $cell-size;
-      max-height: $cell-size;
-      min-width: $cell-size;
-      min-width: $cell-size;
+      aspect-ratio: 1 / 1;
+      position: relative;
       box-sizing: border-box;
+      min-height: $min-cell-size;
+      min-width: $min-cell-size;
+      max-height: $max-cell-size;
+      max-width: $max-cell-size;
+      font-size: calc($cell-size / 10);
+
+      &__element,
+      &__empty-cell {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
 
       &__element {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         align-items: stretch;
-        height: 100%;
-        width: 100%;
         box-sizing: border-box;
-        padding: 5px;
+        padding: 3px;
 
         &__top {
-          flex: 0 0 auto;
-          align-self: flex-start;
-          width: 100%;
-
           &__atomic-number {
             text-align: left;
             font-weight: bold;
-            font-size: x-small;
+            font-size: 1.4em;
             color: var(--color-neutralVariant);
           }
         }
 
         &__symbol {
-          flex: 1 1 auto;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: xx-large;
+          font-size: 4.2em;
           font-weight: bold;
           color: var(--color-secondary);
         }
 
-        &__name {
-          flex: 0 0 auto;
-          text-align: center;
-          font-size: small;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          color: var(--color-neutralVariant);
+        &__bottom {
+          &__name {
+            text-align: center;
+            font-size: 1.6em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--color-neutralVariant);
+          }
         }
-      }
 
-      &__empty-cell {
-        width: 100%;
-        height: 100%
+
       }
     }
   }

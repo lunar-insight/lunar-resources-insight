@@ -52,7 +52,9 @@ const PeriodicTable: React.FC = () => {
                           <div className='periodic-table__table__cell__element__top__atomic-number'>{element.atomicNumber}</div>
                         </div>
                         <div className='periodic-table__table__cell__element__symbol'>{element.symbol}</div>
-                        <div className='periodic-table__table__cell__element__name'>{element.name}</div>
+                        <div className='periodic-table__table__cell__element__bottom'>
+                          <div className='periodic-table__table__cell__element__bottom__name'>{element.name}</div>
+                        </div>
                       </div>
                   //) : null }
                     ) : (
