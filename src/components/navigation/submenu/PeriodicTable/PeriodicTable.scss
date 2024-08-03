@@ -1,9 +1,12 @@
-$min-cell-size: 50px;
+$min-cell-size: 0px;
 $max-cell-size: 75px;
 $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
 
 .periodic-table {
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
   &__column {
     color: var(--color-neutralVariant);
   }

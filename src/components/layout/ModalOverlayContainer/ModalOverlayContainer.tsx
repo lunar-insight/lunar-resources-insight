@@ -19,18 +19,16 @@ const ModalOverlayContainer: React.FC<ModalOverlayContainerProps> = ({
 
   return (
     <ModalOverlay 
-      isDismissable
       isOpen={isOpen} 
       onOpenChange={onOpenChange}
       className="modal-overlay-container"
     >
       <Modal 
-         
         className="modal-overlay-container__modal"
       >
         <Dialog ref={modalRef} className='modal-overlay-container__modal__dialog'>
           <Heading slot="title" className='modal-overlay-container__modal__dialog__title'>{title}</Heading>
-          {children}
+            {children}
         </Dialog>
       </Modal>
     </ModalOverlay>
