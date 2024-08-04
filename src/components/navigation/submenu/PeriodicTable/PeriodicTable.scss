@@ -3,9 +3,9 @@ $max-cell-size: 75px;
 $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
 
 .periodic-table {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  //display: flex;
+  //justify-content: center;
+  //align-items: center;
   
   &__column {
     color: var(--color-neutralVariant);
@@ -59,7 +59,7 @@ $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
           &__atomic-number {
             text-align: left;
             font-weight: bold;
-            font-size: 1.4em;
+            font-size: 1.2em;
             color: var(--color-neutralVariant);
           }
         }
@@ -76,7 +76,7 @@ $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
         &__bottom {
           &__name {
             text-align: center;
-            font-size: 1.6em;
+            font-size: 1.35em;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

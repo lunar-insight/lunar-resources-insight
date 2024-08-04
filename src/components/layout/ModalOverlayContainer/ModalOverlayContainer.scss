@@ -1,4 +1,5 @@
 $heading-height: 3rem;
+$min-modal-height: 20rem;
 
 .modal-overlay-container {
   position: fixed;
@@ -22,13 +23,21 @@ $heading-height: 3rem;
   &__modal {
     width: 100%;
     height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     &__dialog {
       width: 100%;
       height: 100%;
-      
+      max-height: 100vh;
+      min-height: $min-modal-height;
+      display: flex;
+      flex-direction: column;
+
       &__heading {
         height: $heading-height;
+        min-height: $heading-height;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -41,11 +50,14 @@ $heading-height: 3rem;
 
       &__content {
         width: 100%;
-        max-height: calc(100% - $heading-height);
-        height: 100%;
+        flex-grow: 1;
+        overflow-y: auto;
+        //max-height: calc(100% - $heading-height);
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: flex-start;
+        //padding: 1rem;
+        //overflow: auto;
       }
     }
   }
