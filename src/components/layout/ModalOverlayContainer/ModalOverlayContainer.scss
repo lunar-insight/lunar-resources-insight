@@ -1,3 +1,5 @@
+$heading-height: 3rem;
+
 .modal-overlay-container {
   position: fixed;
   top: 0;
@@ -24,15 +26,26 @@
     &__dialog {
       width: 100%;
       height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      //overflow: auto;
+      
+      &__heading {
+        height: $heading-height;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-bottom: 1px solid var(--color-tertiary);
+        
+        &__title {
+          color: var(--color-tertiary)
+        }
+      }
 
-      &__title {
-        align-self: center;
-        color: var(--color-tertiary)
+      &__content {
+        width: 100%;
+        max-height: calc(100% - $heading-height);
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
     }
   }
