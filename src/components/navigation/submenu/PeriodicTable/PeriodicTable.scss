@@ -3,9 +3,64 @@ $max-cell-size: 75px;
 $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
 
 .periodic-table {
-  //display: flex;
-  //justify-content: center;
-  //align-items: center;
+
+  &__state-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+
+    margin: 2rem 2rem; // Top and bottom, will be removed in favor of .periodic-table flex layout 
+
+    &__item {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      color: var(--color-neutralVariant);
+      font-size: 1rem;
+      border-radius: 1rem;
+      border-style: solid;
+      border-width: 2px;
+      height: 1.3125rem;
+      width: 7.25rem;
+
+      &-rectangle {
+        width: 1em;
+        height: 0.25em;
+      }
+
+      &--selectable {
+        border-color: gray;
+        background-color: rgba($color: rgb(158, 158, 158), $alpha: 0.20);
+  
+        .periodic-table__state-info__item-rectangle {
+          margin-right: 0.25rem;
+          background-color: gray;
+        }
+      }
+  
+      &--chosen {
+        border-color: rgba(255, 166, 0, 0.6);
+        background-color: rgba($color: rgb(224, 154, 89), $alpha: 0.20);
+  
+        .periodic-table__state-info__item-rectangle {
+          margin-right: 0.75rem;
+          background-color: rgba(255, 166, 0, 0.6);
+        }
+      }
+  
+      &--unavailable {
+        border-color: darkslategray;
+        background-color: rgba($color: rgb(47, 79, 79), $alpha: 0.20);
+  
+        .periodic-table__state-info__item-rectangle {
+          background-color: darkslategray;
+        }
+      }
+    }
+  }
   
   &__column {
     color: var(--color-neutralVariant);

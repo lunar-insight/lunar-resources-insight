@@ -137,6 +137,20 @@ const PeriodicTable: React.FC = () => {
 
   return (
     <div className='periodic-table'>
+      <div className='periodic-table__state-info'>
+        <span className='periodic-table__state-info__item periodic-table__state-info__item--selectable'>
+          <span className='periodic-table__state-info__item-rectangle'></span>
+          Selectable
+        </span>
+        <span className='periodic-table__state-info__item periodic-table__state-info__item--chosen'>
+          <span className='periodic-table__state-info__item-rectangle'></span>
+          Chosen
+        </span>
+        <span className='periodic-table__state-info__item periodic-table__state-info__item--unavailable'>
+          <span className='periodic-table__state-info__item-rectangle'></span>
+          Unavailable
+        </span>
+      </div>
       <Table aria-label="Periodic Table of Elements" className='periodic-table__table'>
         <TableHeader>
           <Row>
