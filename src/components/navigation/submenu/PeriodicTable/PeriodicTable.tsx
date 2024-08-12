@@ -1,6 +1,6 @@
 import React from 'react';
 import './PeriodicTable.scss';
-import { Table, TableHeader, Column, TableBody, Row, Cell } from 'react-aria-components';
+import { Table, TableHeader, Column, TableBody, Row, Cell, Tab } from 'react-aria-components';
 
 interface Element {
   group: number;
@@ -88,7 +88,7 @@ const elements: Element[] = [
   { atomicNumber: 54, group: 9, name: 'Xenon', symbol: 'Xe', column: 18, row: 5 },
   { atomicNumber: 55, group: 1, name: 'Cesium', symbol: 'Cs', column: 1, row: 6 },
   { atomicNumber: 56, group: 2, name: 'Barium', symbol: 'Ba', column: 2, row: 6 },
-  { atomicNumber: 71, group: 5, name: 'Lanthadines', symbol: '-', column: 3, row: 6 },
+  //{ atomicNumber: 71, group: 5, name: 'Lanthadines', symbol: '-', column: 3, row: 6 },
   { atomicNumber: 72, group: 5, name: 'Hafnium', symbol: 'Hf', column: 4, row: 6 },
   { atomicNumber: 73, group: 5, name: 'Tantalum', symbol: 'Ta', column: 5, row: 6 },
   { atomicNumber: 74, group: 5, name: 'Tungsten', symbol: 'W', column: 6, row: 6 },
@@ -106,7 +106,7 @@ const elements: Element[] = [
   { atomicNumber: 86, group: 9, name: 'Radon', symbol: 'Rn', column: 18, row: 6 },
   { atomicNumber: 87, group: 1, name: 'Francium', symbol: 'Fr', column: 1, row: 7 },
   { atomicNumber: 88, group: 2, name: 'Radium', symbol: 'Ra', column: 2, row: 7 },
-  { atomicNumber: 103, group: 5, name: 'Actanides', symbol: '-', column: 3, row: 7 },
+  //{ atomicNumber: 103, group: 5, name: 'Actanides', symbol: '-', column: 3, row: 7 },
   { atomicNumber: 104, group: 5, name: 'Rutherfordium', symbol: 'Rf', column: 4, row: 7 },
   { atomicNumber: 105, group: 5, name: 'Dubnium', symbol: 'Db', column: 5, row: 7 },
   { atomicNumber: 106, group: 5, name: 'Seaborgium', symbol: 'Sg', column: 6, row: 7 },
@@ -122,6 +122,42 @@ const elements: Element[] = [
   { atomicNumber: 116, group: 6, name: 'Livermorium', symbol: 'Lv', column: 16, row: 7 },
   { atomicNumber: 117, group: 8, name: 'Tennessine', symbol: 'Ts', column: 17, row: 7 },
   { atomicNumber: 118, group: 9, name: 'Oganesson', symbol: 'Og', column: 18, row: 7 },
+];
+
+const lanthanides: Element[] = [
+  { atomicNumber: 57, group: 3, name: 'Lanthanum', symbol: 'La', column: 3, row: 8 },
+  { atomicNumber: 58, group: 3, name: 'Cerium', symbol: 'Ce', column: 4, row: 8 },
+  { atomicNumber: 59, group: 3, name: 'Praseodymium', symbol: 'Pr', column: 5, row: 8 },
+  { atomicNumber: 60, group: 3, name: 'Neodymium', symbol: 'Nd', column: 6, row: 8 },
+  { atomicNumber: 61, group: 3, name: 'Promethium', symbol: 'Pm', column: 7, row: 8 },
+  { atomicNumber: 62, group: 3, name: 'Samarium', symbol: 'Sm', column: 8, row: 8 },
+  { atomicNumber: 63, group: 3, name: 'Europium', symbol: 'Eu', column: 9, row: 8 },
+  { atomicNumber: 64, group: 3, name: 'Gadolinium', symbol: 'Gd', column: 10, row: 8 },
+  { atomicNumber: 65, group: 3, name: 'Terbium', symbol: 'Tb', column: 11, row: 8 },
+  { atomicNumber: 66, group: 3, name: 'Dysprosium', symbol: 'Dy', column: 12, row: 8 },
+  { atomicNumber: 67, group: 3, name: 'Holmium', symbol: 'Ho', column: 13, row: 8 },
+  { atomicNumber: 68, group: 3, name: 'Erbium', symbol: 'Er', column: 14, row: 8 },
+  { atomicNumber: 69, group: 3, name: 'Thulium', symbol: 'Tm', column: 15, row: 8 },
+  { atomicNumber: 70, group: 3, name: 'Ytterbium', symbol: 'Yb', column: 16, row: 8 },
+  { atomicNumber: 71, group: 3, name: 'Lutetium', symbol: 'Lu', column: 17, row: 8 },
+];
+
+const actinides: Element[] = [
+  { atomicNumber: 89, group: 4, name: 'Actinium', symbol: 'Ac', column: 3, row: 9 },
+  { atomicNumber: 90, group: 4, name: 'Thorium', symbol: 'Th', column: 4, row: 9 },
+  { atomicNumber: 91, group: 4, name: 'Protactinium', symbol: 'Pa', column: 5, row: 9 },
+  { atomicNumber: 92, group: 4, name: 'Uranium', symbol: 'U', column: 6, row: 9 },
+  { atomicNumber: 93, group: 4, name: 'Neptunium', symbol: 'Np', column: 7, row: 9 },
+  { atomicNumber: 94, group: 4, name: 'Plutonium', symbol: 'Pu', column: 8, row: 9 },
+  { atomicNumber: 95, group: 4, name: 'Americium', symbol: 'Am', column: 9, row: 9 },
+  { atomicNumber: 96, group: 4, name: 'Curium', symbol: 'Cm', column: 10, row: 9 },
+  { atomicNumber: 97, group: 4, name: 'Berkelium', symbol: 'Bk', column: 11, row: 9 },
+  { atomicNumber: 98, group: 4, name: 'Californium', symbol: 'Cf', column: 12, row: 9 },
+  { atomicNumber: 99, group: 4, name: 'Einsteinium', symbol: 'Es', column: 13, row: 9 },
+  { atomicNumber: 100, group: 4, name: 'Fermium', symbol: 'Fm', column: 14, row: 9 },
+  { atomicNumber: 101, group: 4, name: 'Mendelevium', symbol: 'Md', column: 15, row: 9 },
+  { atomicNumber: 102, group: 4, name: 'Nobelium', symbol: 'No', column: 16, row: 9 },
+  { atomicNumber: 103, group: 4, name: 'Lawrencium', symbol: 'Lr', column: 17, row: 9 },
 ];
 
 const PeriodicTable: React.FC = () => {
@@ -187,6 +223,52 @@ const PeriodicTable: React.FC = () => {
               })}
             </Row>
           ))}
+        </TableBody>
+      </Table>
+
+      {/* Lanthanides and Actinides */}
+      <Table aria-label="Lanthanides and Actinides" className='periodic-table__table periodic-table__table--lanthanides-actinides'>
+        <TableHeader>
+          <Row>
+            <Column isRowHeader></Column>
+            {Array.from({ length: 15 }, (_, i) => (
+              <Column key={i} className='periodic-table__column'></Column>
+            ))}
+          </Row>
+        </TableHeader>
+        <TableBody>
+            <Row>
+              <Cell className='periodic-table__table__first-column-cell'>6</Cell>
+              {lanthanides.map((element) => (
+                <Cell key={element.atomicNumber} textValue={element.name} className='periodic-table__table__cell'>
+                  <div className='periodic-table__table__cell__element'>
+                    <div className='periodic-table__table__cell__element__top'>
+                      <div className='periodic-table__table__cell__element__top__atomic-number'>{element.atomicNumber}</div>
+                    </div>
+                    <div className='periodic-table__table__cell__element__symbol'>{element.symbol}</div>
+                    <div className='periodic-table__table__cell__element__bottom'>
+                      <div className='periodic-table__table__cell__element__bottom__name'>{element.name}</div>
+                    </div>
+                  </div>
+                </Cell>
+              ))}
+            </Row>
+            <Row>
+              <Cell className='periodic-table__table__first-column-cell'>7</Cell>
+              {actinides.map((element) => (
+              <Cell key={element.atomicNumber} textValue={element.name} className='periodic-table__table__cell'>
+                <div className='periodic-table__table__cell__element'>
+                  <div className='periodic-table__table__cell__element__top'>
+                    <div className='periodic-table__table__cell__element__top__atomic-number'>{element.atomicNumber}</div>
+                  </div>
+                  <div className='periodic-table__table__cell__element__symbol'>{element.symbol}</div>
+                  <div className='periodic-table__table__cell__element__bottom'>
+                    <div className='periodic-table__table__cell__element__bottom__name'>{element.name}</div>
+                  </div>
+                </div>
+              </Cell>
+            ))}
+            </Row>
         </TableBody>
       </Table>
     </div>

@@ -142,5 +142,16 @@ $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
 
       }
     }
+    &--lanthanides-actinides {
+      margin-top: 20px;
+      width: calc(15 * #{$cell-size} + 14 * 4px); // 15 columns + 14 gaps
+      margin-left: calc(3 * #{$cell-size} + 12px); // Align with the 3rd column of the main table
+
+      .react-aria-TableHeader {
+        visibility: hidden;
+        height: 0;
+        overflow: hidden;
+      }
+    }
   }
 }
