@@ -1,6 +1,7 @@
 $min-cell-size: 0px;
 $max-cell-size: 75px;
 $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
+$cell-spacing: 4px;
 
 .periodic-table {
 
@@ -71,9 +72,9 @@ $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
     //grid-template-columns: repeat(18, minmax(50px, 1fr));
     //gap: 4px;
     //border-collapse: separate;
-    border-spacing: 4px;
+    border-spacing: $cell-spacing;
     border-collapse: separate;
-    width: 100%;
+    width: calc(18 * #{$cell-size} + 17 * #{$cell-spacing});
 
     &__first-column-cell {
       color: var(--color-neutralVariant);
@@ -144,8 +145,8 @@ $cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
     }
     &--lanthanides-actinides {
       margin-top: 20px;
-      width: calc(15 * #{$cell-size} + 14 * 4px); // 15 columns + 14 gaps
-      margin-left: calc(3 * #{$cell-size} + 12px); // Align with the 3rd column of the main table
+      width: calc(15 * #{$cell-size} + 14 * #{$cell-spacing}); // 15 columns + 14 gaps
+      margin-left: calc(3 * #{$cell-size} + 3 * #{$cell-spacing}); // Align with the 3rd column of the main table
 
       .react-aria-TableHeader {
         visibility: hidden;
