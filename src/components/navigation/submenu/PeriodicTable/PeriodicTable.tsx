@@ -1,6 +1,16 @@
-import React from 'react';
+// Need to use absolutely: useGridList
+// or this
+// import {useGridList, useGridListItem, useGridListSelectionCheckbox} from 'react-aria'
+// or this
+// 	import {useListBox, useOption, useListBoxSection} from 'react-aria'
+//
+// https://react-spectrum.adobe.com/react-aria/useGridList.html
+
+
+import React, { useState, useRef } from 'react';
+import { useGridList } from 'react-aria';
+import { useListState } from 'react-stately';
 import './PeriodicTable.scss';
-import { Table, TableHeader, Column, TableBody, Row, Cell, Tab } from 'react-aria-components';
 
 interface Element {
   group: number;
@@ -11,25 +21,7 @@ interface Element {
   row: number;
 }
 
-/* Chemical Group Block:
-
-=== Metal ===
-- Alkali metals --> Group 1
-- Alkaline earth metal --> Group 2
-- Lanthanoids --> Group 3
-- Actinoids --> Group 4
-- Transition metals --> Group 5
-- Post-transition metals --> Group 6
-
-(in-between)
-- Metalloids --> Group 7
-
-=== Nonmetals ===
-- Reactive nonmetals --> Group 8
-- Noble gases --> Group 9
-
-
-*/
+type GridItem = Element | null;
 
 const elements: Element[] = [
   { atomicNumber: 1, group: 8, name: 'Hydrogen', symbol: 'H', column: 1, row: 1 },
@@ -125,51 +117,69 @@ const elements: Element[] = [
 ];
 
 const lanthanides: Element[] = [
-  { atomicNumber: 57, group: 3, name: 'Lanthanum', symbol: 'La', column: 3, row: 8 },
-  { atomicNumber: 58, group: 3, name: 'Cerium', symbol: 'Ce', column: 4, row: 8 },
-  { atomicNumber: 59, group: 3, name: 'Praseodymium', symbol: 'Pr', column: 5, row: 8 },
-  { atomicNumber: 60, group: 3, name: 'Neodymium', symbol: 'Nd', column: 6, row: 8 },
-  { atomicNumber: 61, group: 3, name: 'Promethium', symbol: 'Pm', column: 7, row: 8 },
-  { atomicNumber: 62, group: 3, name: 'Samarium', symbol: 'Sm', column: 8, row: 8 },
-  { atomicNumber: 63, group: 3, name: 'Europium', symbol: 'Eu', column: 9, row: 8 },
-  { atomicNumber: 64, group: 3, name: 'Gadolinium', symbol: 'Gd', column: 10, row: 8 },
-  { atomicNumber: 65, group: 3, name: 'Terbium', symbol: 'Tb', column: 11, row: 8 },
-  { atomicNumber: 66, group: 3, name: 'Dysprosium', symbol: 'Dy', column: 12, row: 8 },
-  { atomicNumber: 67, group: 3, name: 'Holmium', symbol: 'Ho', column: 13, row: 8 },
-  { atomicNumber: 68, group: 3, name: 'Erbium', symbol: 'Er', column: 14, row: 8 },
-  { atomicNumber: 69, group: 3, name: 'Thulium', symbol: 'Tm', column: 15, row: 8 },
-  { atomicNumber: 70, group: 3, name: 'Ytterbium', symbol: 'Yb', column: 16, row: 8 },
-  { atomicNumber: 71, group: 3, name: 'Lutetium', symbol: 'Lu', column: 17, row: 8 },
+  { atomicNumber: 57, group: 3, name: 'Lanthanum', symbol: 'La', column: 3, row: 9 },
+  { atomicNumber: 58, group: 3, name: 'Cerium', symbol: 'Ce', column: 4, row: 9 },
+  { atomicNumber: 59, group: 3, name: 'Praseodymium', symbol: 'Pr', column: 5, row: 9 },
+  { atomicNumber: 60, group: 3, name: 'Neodymium', symbol: 'Nd', column: 6, row: 9 },
+  { atomicNumber: 61, group: 3, name: 'Promethium', symbol: 'Pm', column: 7, row: 9 },
+  { atomicNumber: 62, group: 3, name: 'Samarium', symbol: 'Sm', column: 8, row: 9 },
+  { atomicNumber: 63, group: 3, name: 'Europium', symbol: 'Eu', column: 9, row: 9 },
+  { atomicNumber: 64, group: 3, name: 'Gadolinium', symbol: 'Gd', column: 10, row: 9 },
+  { atomicNumber: 65, group: 3, name: 'Terbium', symbol: 'Tb', column: 11, row: 9 },
+  { atomicNumber: 66, group: 3, name: 'Dysprosium', symbol: 'Dy', column: 12, row: 9 },
+  { atomicNumber: 67, group: 3, name: 'Holmium', symbol: 'Ho', column: 13, row: 9 },
+  { atomicNumber: 68, group: 3, name: 'Erbium', symbol: 'Er', column: 14, row: 9 },
+  { atomicNumber: 69, group: 3, name: 'Thulium', symbol: 'Tm', column: 15, row: 9 },
+  { atomicNumber: 70, group: 3, name: 'Ytterbium', symbol: 'Yb', column: 16, row: 9 },
+  { atomicNumber: 71, group: 3, name: 'Lutetium', symbol: 'Lu', column: 17, row: 9 },
 ];
 
 const actinides: Element[] = [
-  { atomicNumber: 89, group: 4, name: 'Actinium', symbol: 'Ac', column: 3, row: 9 },
-  { atomicNumber: 90, group: 4, name: 'Thorium', symbol: 'Th', column: 4, row: 9 },
-  { atomicNumber: 91, group: 4, name: 'Protactinium', symbol: 'Pa', column: 5, row: 9 },
-  { atomicNumber: 92, group: 4, name: 'Uranium', symbol: 'U', column: 6, row: 9 },
-  { atomicNumber: 93, group: 4, name: 'Neptunium', symbol: 'Np', column: 7, row: 9 },
-  { atomicNumber: 94, group: 4, name: 'Plutonium', symbol: 'Pu', column: 8, row: 9 },
-  { atomicNumber: 95, group: 4, name: 'Americium', symbol: 'Am', column: 9, row: 9 },
-  { atomicNumber: 96, group: 4, name: 'Curium', symbol: 'Cm', column: 10, row: 9 },
-  { atomicNumber: 97, group: 4, name: 'Berkelium', symbol: 'Bk', column: 11, row: 9 },
-  { atomicNumber: 98, group: 4, name: 'Californium', symbol: 'Cf', column: 12, row: 9 },
-  { atomicNumber: 99, group: 4, name: 'Einsteinium', symbol: 'Es', column: 13, row: 9 },
-  { atomicNumber: 100, group: 4, name: 'Fermium', symbol: 'Fm', column: 14, row: 9 },
-  { atomicNumber: 101, group: 4, name: 'Mendelevium', symbol: 'Md', column: 15, row: 9 },
-  { atomicNumber: 102, group: 4, name: 'Nobelium', symbol: 'No', column: 16, row: 9 },
-  { atomicNumber: 103, group: 4, name: 'Lawrencium', symbol: 'Lr', column: 17, row: 9 },
+  { atomicNumber: 89, group: 4, name: 'Actinium', symbol: 'Ac', column: 3, row: 10 },
+  { atomicNumber: 90, group: 4, name: 'Thorium', symbol: 'Th', column: 4, row: 10 },
+  { atomicNumber: 91, group: 4, name: 'Protactinium', symbol: 'Pa', column: 5, row: 10 },
+  { atomicNumber: 92, group: 4, name: 'Uranium', symbol: 'U', column: 6, row: 10 },
+  { atomicNumber: 93, group: 4, name: 'Neptunium', symbol: 'Np', column: 7, row: 10 },
+  { atomicNumber: 94, group: 4, name: 'Plutonium', symbol: 'Pu', column: 8, row: 10 },
+  { atomicNumber: 95, group: 4, name: 'Americium', symbol: 'Am', column: 9, row: 10 },
+  { atomicNumber: 96, group: 4, name: 'Curium', symbol: 'Cm', column: 10, row: 10 },
+  { atomicNumber: 97, group: 4, name: 'Berkelium', symbol: 'Bk', column: 11, row: 10 },
+  { atomicNumber: 98, group: 4, name: 'Californium', symbol: 'Cf', column: 12, row: 10 },
+  { atomicNumber: 99, group: 4, name: 'Einsteinium', symbol: 'Es', column: 13, row: 10 },
+  { atomicNumber: 100, group: 4, name: 'Fermium', symbol: 'Fm', column: 14, row: 10 },
+  { atomicNumber: 101, group: 4, name: 'Mendelevium', symbol: 'Md', column: 15, row: 10 },
+  { atomicNumber: 102, group: 4, name: 'Nobelium', symbol: 'No', column: 16, row: 10 },
+  { atomicNumber: 103, group: 4, name: 'Lawrencium', symbol: 'Lr', column: 17, row: 10 },
 ];
 
 const PeriodicTable: React.FC = () => {
-  const rowCount = 7;
-  const columnCount = 18;
+  const allElements = [...elements, ...lanthanides, ...actinides];
 
-  const rows = Array.from({ length: rowCount }, (_, i) => i + 1);
-  const columns = Array.from({ length: columnCount }, (_, i) => i);
+  const grid: GridItem[][] = Array(10).fill(null).map(() => Array(18).fill(null));
 
-  const getElement = (row: number, column: number) => {
-    return elements.find((element) => element.row === row && element.column === column);
-  };
+  allElements.forEach(element => {
+    grid[element.row - 1][element.column - 1] = element;
+  });
+
+  const flatGrid = grid.flat();
+
+  const ref = useRef<HTMLDivElement>(null);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  
+  const list = useListState({
+    selectionMode: 'single',
+    onSelectionChange: (selection) => {
+      if (selection === 'all') {
+        setSelectedIndex(null);
+      } else {
+        setSelectedIndex(selection.size > 0 ? Array.from(selection)[0] as number : null);
+      }
+    }
+  })
+
+  const { gridProps } = useGridList({
+    'aria-label': 'Periodic Table of Elements',
+  }, list, ref);
 
   return (
     <div className='periodic-table'>
@@ -187,90 +197,38 @@ const PeriodicTable: React.FC = () => {
           Unavailable
         </span>
       </div>
-      <Table aria-label="Periodic Table of Elements" className='periodic-table__table'>
-        <TableHeader>
-          <Row>
-            <Column isRowHeader></Column>
-            {columns.map((column) => (
-              <Column className='periodic-table__column' key={column}>{column + 1}</Column>
-            ))}
-          </Row>
-        </TableHeader>
-        <TableBody>
-          {rows.map((row) => (
-            <Row key={row}>
-              <Cell className='periodic-table__table__first-column-cell'>{row}</Cell>
-              {columns.map((column) => {
-                const element = getElement(row, column + 1);
-                return (
-                  <Cell key={`${row}-${column}`} textValue={element ? element.name : ''} className='periodic-table__table__cell'>
-                    {element ? (
-                      <div className='periodic-table__table__cell__element'>
-                        <div className='periodic-table__table__cell__element__top'>
-                          <div className='periodic-table__table__cell__element__top__atomic-number'>{element.atomicNumber}</div>
-                        </div>
-                        <div className='periodic-table__table__cell__element__symbol'>{element.symbol}</div>
-                        <div className='periodic-table__table__cell__element__bottom'>
-                          <div className='periodic-table__table__cell__element__bottom__name'>{element.name}</div>
-                        </div>
-                      </div>
-                  //) : null }
-                    ) : (
-                      <div className='periodic-table__cell__empty-cell'></div>
-                    )}
-                  </Cell>
-                );
-              })}
-            </Row>
-          ))}
-        </TableBody>
-      </Table>
 
-      {/* Lanthanides and Actinides */}
-      <Table aria-label="Lanthanides and Actinides" className='periodic-table__table periodic-table__table--lanthanides-actinides'>
-        <TableHeader>
-          <Row>
-            <Column isRowHeader></Column>
-            {Array.from({ length: 15 }, (_, i) => (
-              <Column key={i} className='periodic-table__column'></Column>
-            ))}
-          </Row>
-        </TableHeader>
-        <TableBody>
-            <Row>
-              <Cell className='periodic-table__table__first-column-cell'>6</Cell>
-              {lanthanides.map((element) => (
-                <Cell key={element.atomicNumber} textValue={element.name} className='periodic-table__table__cell'>
-                  <div className='periodic-table__table__cell__element'>
-                    <div className='periodic-table__table__cell__element__top'>
-                      <div className='periodic-table__table__cell__element__top__atomic-number'>{element.atomicNumber}</div>
-                    </div>
-                    <div className='periodic-table__table__cell__element__symbol'>{element.symbol}</div>
-                    <div className='periodic-table__table__cell__element__bottom'>
-                      <div className='periodic-table__table__cell__element__bottom__name'>{element.name}</div>
-                    </div>
-                  </div>
-                </Cell>
-              ))}
-            </Row>
-            <Row>
-              <Cell className='periodic-table__table__first-column-cell'>7</Cell>
-              {actinides.map((element) => (
-              <Cell key={element.atomicNumber} textValue={element.name} className='periodic-table__table__cell'>
-                <div className='periodic-table__table__cell__element'>
-                  <div className='periodic-table__table__cell__element__top'>
-                    <div className='periodic-table__table__cell__element__top__atomic-number'>{element.atomicNumber}</div>
-                  </div>
-                  <div className='periodic-table__table__cell__element__symbol'>{element.symbol}</div>
-                  <div className='periodic-table__table__cell__element__bottom'>
-                    <div className='periodic-table__table__cell__element__bottom__name'>{element.name}</div>
+      <div {...gridProps} ref={ref} className='periodic-table__grid'>
+        {flatGrid.map((element, index) => (
+          <div 
+            key={index}
+            role="gridcell"
+            tabIndex={0}
+            aria-selected={selectedIndex === index}
+            onClick={() => list.selectionManager.select(index)}
+          >
+            {element ? (
+              <div className={`periodic-table__grid__cell__element ${selectedIndex === index ? 'selected' : ''}`}>
+                <div className='periodic-table__grid__cell__element__top'>
+                  <div className='periodic-table__grid__cell__element__top__atomic-number'>
+                    {element.atomicNumber}
                   </div>
                 </div>
-              </Cell>
-            ))}
-            </Row>
-        </TableBody>
-      </Table>
+                <div className='periodic-table__grid__cell__element__symbol'>
+                  {element.symbol}
+                </div>
+                <div className='periodic-table__grid__cell__element__bottom'>
+                  <div className='periodic-table__grid__cell__element__bottom__name'>
+                    {element.name}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className='periodic-table__grid__cell__empty-cell'></div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
