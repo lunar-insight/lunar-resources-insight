@@ -1,12 +1,3 @@
-// Need to use absolutely: useGridList
-// or this
-// import {useGridList, useGridListItem, useGridListSelectionCheckbox} from 'react-aria'
-// or this
-// 	import {useListBox, useOption, useListBoxSection} from 'react-aria'
-//
-// https://react-spectrum.adobe.com/react-aria/useGridList.html
-
-
 import React, { useState, useRef } from 'react';
 import { useGridList } from 'react-aria';
 import { useListState } from 'react-stately';

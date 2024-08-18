@@ -15,8 +15,6 @@ $cell-spacing: 4px;
     gap: 1rem;
     margin-bottom: 1.5rem;
 
-    //margin: 2rem 2rem; // Top and bottom, will be removed in favor of .periodic-table flex layout 
-
     &__item {
       display: flex;
       align-items: center;
@@ -83,8 +81,6 @@ $cell-spacing: 4px;
     }
 
     &__cell {
-      //border: 1px solid #ccc;
-      //background-color: #f0f0f0;
       padding: 0;
       width: $cell-size;
       height: $cell-size;
@@ -145,8 +141,6 @@ $cell-spacing: 4px;
             color: var(--color-neutralVariant);
           }
         }
-
-
       }
     }
   }
