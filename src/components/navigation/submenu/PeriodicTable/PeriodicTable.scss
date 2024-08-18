@@ -1,13 +1,11 @@
-$min-cell-size: 0px;
-$max-cell-size: 75px;
-$cell-size: clamp($min-cell-size, calc(100vw / 18 - 4px), $max-cell-size);
+$min-cell-size: 35px;
+$max-cell-size: 70px;
+$cell-size: clamp($min-cell-size, calc(100vw / 20), $max-cell-size);
 $cell-spacing: 4px;
 
 .periodic-table {
   width: 100%;
-  //max-width: 1400px;
-  margin: 2rem;
-  overflow-x: auto;
+  margin: 1.5rem;
 
   &__state-info {
     display: flex;
@@ -15,6 +13,7 @@ $cell-spacing: 4px;
     justify-content: center;
     align-items: center;
     gap: 1rem;
+    margin-bottom: 1.5rem;
 
     //margin: 2rem 2rem; // Top and bottom, will be removed in favor of .periodic-table flex layout 
 
@@ -84,8 +83,8 @@ $cell-spacing: 4px;
     }
 
     &__cell {
-      border: 1px solid #ccc;
-      background-color: #f0f0f0;
+      //border: 1px solid #ccc;
+      //background-color: #f0f0f0;
       padding: 0;
       width: $cell-size;
       height: $cell-size;
@@ -116,6 +115,7 @@ $cell-spacing: 4px;
         align-items: stretch;
         box-sizing: border-box;
         padding: 3px;
+        border: 1px solid #ccc;
 
         &__top {
           &__atomic-number {
@@ -138,7 +138,7 @@ $cell-spacing: 4px;
         &__bottom {
           &__name {
             text-align: center;
-            font-size: 1.35em;
+            font-size: 1.30em;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;

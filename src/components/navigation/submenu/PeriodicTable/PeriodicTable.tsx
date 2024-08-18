@@ -206,6 +206,7 @@ const PeriodicTable: React.FC = () => {
             tabIndex={0}
             aria-selected={selectedIndex === index}
             onClick={() => list.selectionManager.select(index)}
+            className='periodic-table__grid__cell'
           >
             {element ? (
               <div className={`periodic-table__grid__cell__element ${selectedIndex === index ? 'selected' : ''}`}>

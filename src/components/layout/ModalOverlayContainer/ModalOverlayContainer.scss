@@ -51,7 +51,7 @@ $min-modal-height: 20rem;
       &__content {
         width: 100%;
         flex-grow: 1;
-        overflow-y: auto;
+        overflow: auto;
         //max-height: calc(100% - $heading-height);
         display: flex;
         justify-content: center;
