@@ -70,9 +70,6 @@ $cell-spacing: 4px;
 
   &__grid {
     display: grid;
-    //grid-template-columns: repeat(18, minmax($min-cell-size, $max-cell-size));
-    //grid-template-columns: repeat(18, minmax($min-cell-size, $max-cell-size));
-    //grid-template-rows: repeat(10, minmax($min-cell-size, $max-cell-size));
     grid-template-columns: repeat(18, 1fr);
     grid-template-rows: repeat(10, 1fr);
     gap: $cell-spacing;
