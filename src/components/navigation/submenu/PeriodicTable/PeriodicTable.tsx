@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { useGridList } from 'react-aria';
-import { useListState } from 'react-stately';
+import React from 'react';
+import { ListBox, ListBoxItem, Text } from 'react-aria-components';
 import './PeriodicTable.scss';
 
 interface Element {
@@ -11,8 +10,6 @@ interface Element {
   column: number;
   row: number;
 }
-
-type GridItem = Element | null;
 
 const elements: Element[] = [
   { atomicNumber: 1, group: 8, name: 'Hydrogen', symbol: 'H', column: 1, row: 1 },
@@ -146,31 +143,21 @@ const actinides: Element[] = [
 const PeriodicTable: React.FC = () => {
   const allElements = [...elements, ...lanthanides, ...actinides];
 
-  const grid: GridItem[][] = Array(10).fill(null).map(() => Array(18).fill(null));
+  const grid: (Element | null)[][] = Array(10).fill(null).map(() => Array(18).fill(null));
 
   allElements.forEach(element => {
     grid[element.row - 1][element.column - 1] = element;
   });
 
-  const flatGrid = grid.flat();
-
-  const ref = useRef<HTMLDivElement>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  
-  const list = useListState({
-    selectionMode: 'single',
-    onSelectionChange: (selection) => {
-      if (selection === 'all') {
-        setSelectedIndex(null);
-      } else {
-        setSelectedIndex(selection.size > 0 ? Array.from(selection)[0] as number : null);
+  // TODO memo (calculate only once)
+  const disabledKeys = new Set<string>();
+  grid.forEach((row, rowIndex) => {
+    row.forEach((element, colIndex) => {
+      if (element === null) {
+        disabledKeys.add(`${rowIndex + 1}-${colIndex + 1}`);
       }
-    }
-  })
-
-  const { gridProps } = useGridList({
-    'aria-label': 'Periodic Table of Elements',
-  }, list, ref);
+    });
+  });
 
   return (
     <div className='periodic-table'>
@@ -189,38 +176,52 @@ const PeriodicTable: React.FC = () => {
         </span>
       </div>
 
-      <div {...gridProps} ref={ref} className='periodic-table__grid'>
-        {flatGrid.map((element, index) => (
-          <div 
-            key={index}
-            role="gridcell"
-            tabIndex={0}
-            aria-selected={selectedIndex === index}
-            onClick={() => list.selectionManager.select(index)}
-            className='periodic-table__grid__cell'
-          >
-            {element ? (
-              <div className={`periodic-table__grid__cell__element ${selectedIndex === index ? 'selected' : ''}`}>
-                <div className='periodic-table__grid__cell__element__top'>
-                  <div className='periodic-table__grid__cell__element__top__atomic-number'>
-                    {element.atomicNumber}
-                  </div>
-                </div>
-                <div className='periodic-table__grid__cell__element__symbol'>
-                  {element.symbol}
-                </div>
-                <div className='periodic-table__grid__cell__element__bottom'>
-                  <div className='periodic-table__grid__cell__element__bottom__name'>
-                    {element.name}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className='periodic-table__grid__cell__empty-cell'></div>
-            )}
-          </div>
+      <ListBox
+        aria-label="Periodic Table of Element"
+        layout="grid"
+        items={allElements}
+        selectionMode="multiple"
+        className="periodic-table__grid"
+        disabledKeys={disabledKeys}
+        aria-rowcount={10}
+        aria-colcount={18}
+      >
+        {grid.map((row, rowIndex) => (
+          <React.Fragment key={rowIndex}>
+            {row.map((item, colIndex) => {
+              const cellKey = `${rowIndex + 1}-${colIndex + 1}`;
+              return (
+                <ListBoxItem
+                  key={cellKey}
+                  id={cellKey}    
+                  textValue={item?.name || ''}
+                  className='periodic-table__grid__cell'
+                >
+                  {item ? (
+                    <div className={"periodic-table__grid__cell__element"}>
+                      <div className='periodic-table__grid__cell__element__top'>
+                        <Text slot='description' className='periodic-table__grid__cell__element__top__atomic-number'>
+                          {item.atomicNumber}
+                        </Text>
+                      </div>
+                      <Text slot="label" className='periodic-table__grid__cell__element__symbol'>
+                        {item.symbol}
+                      </Text>
+                      <div className='periodic-table__grid__cell__element__bottom'>
+                        <Text slot="description" className='periodic-table__grid__cell__element__bottom__name'>
+                          {item.name}
+                        </Text>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className='periodic-table__grid__cell__empty-cell'></div>
+                  )}
+                </ListBoxItem>
+              );
+            })}
+          </React.Fragment>
         ))}
-      </div>
+      </ListBox>
     </div>
   );
 };
