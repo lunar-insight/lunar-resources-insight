@@ -140,25 +140,24 @@ const actinides: Element[] = [
   { atomicNumber: 103, group: 4, name: 'Lawrencium', symbol: 'Lr', column: 17, row: 10 },
 ];
 
+const ALL_ELEMENTS = [...elements, ...lanthanides, ...actinides];
+
+const GRID: (Element | null)[][] = Array(10).fill(null).map(() => Array(18).fill(null));
+
+ALL_ELEMENTS.forEach(element => {
+  GRID[element.row - 1][element.column - 1] = element;
+});
+
+const DISABLED_KEYS = new Set<string>();
+GRID.forEach((row, rowIndex) => {
+  row.forEach((element, colIndex) => {
+    if (element === null) {
+      DISABLED_KEYS.add(`${rowIndex + 1}-${colIndex + 1}`);
+    }
+  });
+});
+
 const PeriodicTable: React.FC = () => {
-  const allElements = [...elements, ...lanthanides, ...actinides];
-
-  const grid: (Element | null)[][] = Array(10).fill(null).map(() => Array(18).fill(null));
-
-  allElements.forEach(element => {
-    grid[element.row - 1][element.column - 1] = element;
-  });
-
-  // TODO memo (calculate only once)
-  const disabledKeys = new Set<string>();
-  grid.forEach((row, rowIndex) => {
-    row.forEach((element, colIndex) => {
-      if (element === null) {
-        disabledKeys.add(`${rowIndex + 1}-${colIndex + 1}`);
-      }
-    });
-  });
-
   return (
     <div className='periodic-table'>
       <div className='periodic-table__state-info'>
@@ -179,14 +178,14 @@ const PeriodicTable: React.FC = () => {
       <ListBox
         aria-label="Periodic Table of Element"
         layout="grid"
-        items={allElements}
+        items={ALL_ELEMENTS}
         selectionMode="multiple"
         className="periodic-table__grid"
-        disabledKeys={disabledKeys}
+        disabledKeys={DISABLED_KEYS}
         aria-rowcount={10}
         aria-colcount={18}
       >
-        {grid.map((row, rowIndex) => (
+        {GRID.map((row, rowIndex) => (
           <React.Fragment key={rowIndex}>
             {row.map((item, colIndex) => {
               const cellKey = `${rowIndex + 1}-${colIndex + 1}`;
