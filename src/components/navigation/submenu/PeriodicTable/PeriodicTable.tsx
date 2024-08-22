@@ -193,7 +193,7 @@ const PeriodicTable: React.FC = () => {
                 <ListBoxItem
                   key={cellKey}
                   id={cellKey}    
-                  textValue={item?.name || ''}
+                  textValue={item?.name || 'Empty'}
                   className='periodic-table__grid__cell'
                 >
                   {item ? (
