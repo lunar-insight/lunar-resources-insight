@@ -112,7 +112,8 @@ $cell-spacing: 4px;
         align-items: stretch;
         box-sizing: border-box;
         padding: 3px;
-        border: 1px solid #ccc;
+        border: 2px solid rgba(128, 128, 128, 0.5);
+        transition: all 0.2s ease-out;
 
         &__top {
           &__atomic-number {
@@ -142,6 +143,13 @@ $cell-spacing: 4px;
             text-overflow: ellipsis;
             color: var(--color-neutralVariant);
           }
+        }
+      }
+
+      &[data-selected] {
+        .periodic-table__grid__cell__element {
+          background-color: rgba($color: rgb(224, 154, 89), $alpha: 0.10);
+          border-color: rgba(255, 166, 0, 0.6);
         }
       }
     }
