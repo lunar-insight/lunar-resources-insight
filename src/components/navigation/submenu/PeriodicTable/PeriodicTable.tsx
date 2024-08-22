@@ -182,8 +182,6 @@ const PeriodicTable: React.FC = () => {
         selectionMode="multiple"
         className="periodic-table__grid"
         disabledKeys={DISABLED_KEYS}
-        aria-rowcount={10}
-        aria-colcount={18}
       >
         {GRID.map((row, rowIndex) => (
           <React.Fragment key={rowIndex}>
