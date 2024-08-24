@@ -2,8 +2,7 @@ import './DraggableContentContainer.scss';
 import React, { useRef, useState, useEffect } from 'react';
 import { useDialog } from '@react-aria/dialog';
 import { useMove } from '@react-aria/interactions';
-import { Button, TooltipTrigger } from 'react-aria-components';
-import { ButtonTooltip } from '../Tooltip/ButtonTooltip';
+import CloseButton from '../CloseButton/CloseButton';
 
 export interface DraggableContentContainerProps {
   title?: React.ReactNode;
@@ -158,18 +157,10 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       <div {...moveProps} className="draggable-content-container__move-area">
         <h3 {...titleProps} className="draggable-content-container__move-area__title">{title}</h3>
 
-        <TooltipTrigger>
-          <Button onPress={onClose} aria-label='Close' className="draggable-content-container__move-area__close-button">
-            <span className='material-symbols-outlined draggable-content-container__move-area__close-button__icon'>
-              close
-            </span>
-          </Button>
-          <ButtonTooltip placement='top'>
-            Close
-          </ButtonTooltip>
-        </TooltipTrigger>
-
-
+        <CloseButton
+          onPress={onClose}
+          className="draggable-content-container__move-area__close-button"
+        />
 
       </div>
       <div className="draggable-content-container__content-area">
