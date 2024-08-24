@@ -1,0 +1,24 @@
+.close-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: var(--color-primary);
+  height: 1.75rem;
+  width: 1.75rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-tertiary);
+
+  &[data-hovered] {
+    background-color: var(--color-quartenary);
+  }
+
+  &[data-pressed] {
+    background-color: var(--color-neutral);
+  }
+
+  &__icon {
+    font-size: x-large;
+    color: var(--color-tertiary)
+  }
+}
