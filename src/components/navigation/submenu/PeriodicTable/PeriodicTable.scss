@@ -3,6 +3,17 @@ $max-cell-size: 70px;
 $cell-size: clamp($min-cell-size, calc(100vw / 20), $max-cell-size);
 $cell-spacing: 4px;
 
+$color-border-selectable: rgba(128, 128, 128, 0.5);
+$color-border-selectable-lighten-factor: 40%; // Used for the "info" only to differentiate with unavailable
+
+$color-border-chosen: rgba(255, 166, 0, 0.6);
+$color-background-chosen: rgba(224, 154, 89, 0.10);
+
+$color-border-unavailable: rgb(26, 26, 26);
+$color-background-unavailable: rgba(25, 29, 37, 0.50);
+$color-border-unavailable-lighten-factor: 10%; // Used for the "info" only to see the border
+$unavailable-opacity-on-text: 0.25;
+
 .periodic-table {
   width: 100%;
   margin: 1.5rem;
@@ -34,31 +45,30 @@ $cell-spacing: 4px;
       }
 
       &--selectable {
-        border-color: gray;
-        background-color: rgba($color: rgb(158, 158, 158), $alpha: 0.20);
+        border-color: lighten($color-border-selectable, $color-border-selectable-lighten-factor);
   
         .periodic-table__state-info__item-rectangle {
           margin-right: 0.25rem;
-          background-color: gray;
+          background-color: lighten($color-border-selectable, $color-border-selectable-lighten-factor);
         }
       }
   
       &--chosen {
-        border-color: rgba(255, 166, 0, 0.6);
-        background-color: rgba($color: rgb(224, 154, 89), $alpha: 0.20);
+        border-color: $color-border-chosen;
+        background-color: $color-background-chosen;
   
         .periodic-table__state-info__item-rectangle {
           margin-right: 0.75rem;
-          background-color: rgba(255, 166, 0, 0.6);
+          background-color: $color-border-chosen;
         }
       }
   
       &--unavailable {
-        border-color: darkslategray;
-        background-color: rgba($color: rgb(47, 79, 79), $alpha: 0.20);
+        border-color: lighten($color-border-unavailable, $color-border-unavailable-lighten-factor);
+        background-color: $color-background-unavailable;
   
         .periodic-table__state-info__item-rectangle {
-          background-color: darkslategray;
+          background-color: lighten($color-border-unavailable, $color-border-unavailable-lighten-factor);
         }
       }
     }
@@ -112,8 +122,10 @@ $cell-spacing: 4px;
         align-items: stretch;
         box-sizing: border-box;
         padding: 3px;
-        border: 2px solid rgba(128, 128, 128, 0.5);
+        border: 2px solid $color-border-selectable;
         transition: all 0.2s ease-out;
+        position: relative;
+        cursor: pointer;
 
         &__top {
           &__atomic-number {
@@ -144,12 +156,24 @@ $cell-spacing: 4px;
             color: var(--color-neutralVariant);
           }
         }
+
+        &--unavailable {
+          border-color: $color-border-unavailable;
+          background: $color-background-unavailable;
+          cursor: default;
+
+          .periodic-table__grid__cell__element__top__atomic-number,
+          .periodic-table__grid__cell__element__symbol,
+          .periodic-table__grid__cell__element__bottom__name {
+            opacity: $unavailable-opacity-on-text;
+          }
+        }
       }
 
       &[data-selected] {
         .periodic-table__grid__cell__element {
-          background-color: rgba($color: rgb(224, 154, 89), $alpha: 0.10);
-          border-color: rgba(255, 166, 0, 0.6);
+          background-color: $color-background-chosen;
+          border-color: $color-border-chosen;
         }
       }
     }
