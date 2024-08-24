@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import {Modal, ModalOverlay, Dialog, Heading} from 'react-aria-components';
+import CloseButton from '../CloseButton/CloseButton';
 import './ModalOverlayContainer.scss';
 
 interface ModalOverlayContainerProps {
@@ -17,6 +18,10 @@ const ModalOverlayContainer: React.FC<ModalOverlayContainerProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
   return (
     <ModalOverlay 
       isOpen={isOpen} 
@@ -29,6 +34,10 @@ const ModalOverlayContainer: React.FC<ModalOverlayContainerProps> = ({
         <Dialog ref={modalRef} className='modal-overlay-container__modal__dialog'>
           <div className='modal-overlay-container__modal__dialog__heading'>
             <Heading slot="title" className='modal-overlay-container__modal__dialog__heading__title'>{title}</Heading>
+            <CloseButton 
+              onPress={handleClose} 
+              className='modal-overlay-container__modal__dialog__heading__close-button'
+            />
           </div>
           <div className='modal-overlay-container__modal__dialog__content'>
             {children}

@@ -1,5 +1,6 @@
 $heading-height: 3rem;
 $min-modal-height: 20rem;
+$close-button-margin-right: 0.75rem;
 
 .modal-overlay-container {
   position: fixed;
@@ -39,12 +40,18 @@ $min-modal-height: 20rem;
         height: $heading-height;
         min-height: $heading-height;
         display: flex;
-        justify-content: center;
         align-items: center;
+        justify-content: center;
         border-bottom: 1px solid var(--color-tertiary);
-        
+        position: relative;
+
         &__title {
-          color: var(--color-tertiary)
+          color: var(--color-tertiary);
+        }
+
+        &__close-button {
+          position: absolute;
+          right: $close-button-margin-right;
         }
       }
 
@@ -52,12 +59,9 @@ $min-modal-height: 20rem;
         width: 100%;
         flex-grow: 1;
         overflow: auto;
-        //max-height: calc(100% - $heading-height);
         display: flex;
         justify-content: center;
         align-items: flex-start;
-        //padding: 1rem;
-        //overflow: auto;
       }
     }
   }
