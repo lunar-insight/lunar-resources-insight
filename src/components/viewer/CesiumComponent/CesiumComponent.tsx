@@ -27,9 +27,10 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
 
       Cesium.Ion.defaultAccessToken = ''; // No Cesium Key (to remove the message)
 
-      const ellipsoid = new Cesium.Ellipsoid(1737400, 1737400, 1737400); // Moon ellipsoid
-      const mapProjection = new Cesium.GeographicProjection(ellipsoid);
-      const globe = new Cesium.Globe(ellipsoid);
+      Cesium.Ellipsoid.default = Cesium.Ellipsoid.MOON
+
+      const mapProjection = new Cesium.GeographicProjection(Cesium.Ellipsoid.default);
+      const globe = new Cesium.Globe(Cesium.Ellipsoid.default);
 
       // Viewer creation
       const viewer = new Cesium.Viewer(cesiumContainerRef.current, {
@@ -74,13 +75,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       /*
           More Cesium option
       */
-      globe.showGroundAtmosphere = false;
-      globe.baseColor = Cesium.Color.BLACK;
-      viewer.scene.fog.enabled = false;
-      viewer.scene.moon.show = false;
-      viewer.scene.sun.show = false;
-      viewer.scene.skyAtmosphere.show = false;
-      viewer.scene.shadowMap.enabled = false;
+      globe.baseColor = Cesium.Color.GRAY;
       
       // Remove Ion credit
       viewer.cesiumWidget.creditContainer.parentNode.removeChild(viewer.cesiumWidget.creditContainer);
