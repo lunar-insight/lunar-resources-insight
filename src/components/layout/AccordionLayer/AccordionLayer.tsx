@@ -50,11 +50,9 @@ const AccordionItem: React.FC<AccordionItemProps> = ({ title, children }) => {
           {title}
         </Button>
       </h3>
-      {isExpanded && (
-        <div className="accordion-content">
-          {children}
-        </div>
-      )}
+      <div className="accordion-content" style={{ display: isExpanded ? 'block' : 'none' }}>
+        {children}
+      </div>
     </div>
   );
 };

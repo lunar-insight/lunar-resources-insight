@@ -2,7 +2,7 @@ import React from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
 import './PeriodicTable.scss';
 
-interface Element {
+export interface Element {
   group: number;
   name: string;
   symbol: string;
@@ -139,6 +139,11 @@ const actinides: Element[] = [
   { atomicNumber: 103, group: 4, name: 'Lawrencium', symbol: 'Lr', column: 17, row: 10, dataExist: false },
 ];
 
+export interface PeriodicTableProps {
+  onElementSelect: (element: Element) => void;
+  selectedElements: Element[];
+}
+
 const ALL_ELEMENTS = [...elements, ...lanthanides, ...actinides];
 
 const GRID: (Element | null)[][] = Array(10).fill(null).map(() => Array(18).fill(null));
@@ -156,7 +161,9 @@ GRID.forEach((row, rowIndex) => {
   });
 });
 
-const PeriodicTable: React.FC = () => {
+const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selectedElements }) => {
+  const selectedKeys = new Set(selectedElements.map(el => `${el.row}-${el.column}`));
+
   return (
     <div className='periodic-table'>
       <div className='periodic-table__state-info'>
@@ -181,6 +188,18 @@ const PeriodicTable: React.FC = () => {
         selectionMode="multiple"
         className="periodic-table__grid"
         disabledKeys={DISABLED_KEYS}
+        selectedKeys={selectedKeys}
+        onSelectionChange={(keys) => {
+          const newKeys = new Set(keys);
+          ALL_ELEMENTS.forEach(element => {
+            const elementKey = `${element.row}-${element.column}`;
+            if (newKeys.has(elementKey) && !selectedKeys.has(elementKey)) {
+              onElementSelect(element);
+            } else if (!newKeys.has(elementKey) && selectedKeys.has(elementKey)) {
+              onElementSelect(element);
+            }
+          });
+        }}
       >
         {GRID.map((row, rowIndex) => (
           <React.Fragment key={rowIndex}>

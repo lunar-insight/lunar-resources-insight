@@ -1,28 +1,31 @@
-.chemical-section__open-periodic-table-button {
-  height: 3rem;
-  width: 100%;
-  background-image: url('../../../assets/images/button/periodic-table-element.jpg');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: var(--color-neutral);
-  background-blend-mode: overlay;
-  border-radius: 0.25rem;
-  border-width: 0.0625rem;
-  border-color: var(--color-tertiary);
-  cursor: pointer;
-  color: var(--color-neutralVariant);
-  font-size: 1rem;
-  transition: background-size 0.3s ease-out, box-shadow 0.3s ease-out, font-size 0.3s ease-out;
-  
-  &[data-hovered] {
-    background-color: var(--color-quartenary);
-    background-size: 110% 110%;
-    box-shadow: inset 0 0 10px 1px var(--color-tertiary);
-    font-size: 1.0625rem;
-  }
+.chemical-section {
 
-  &[data-pressed] {
-    background-color: var(--color-dark-intermediary);
+  &__open-periodic-table-button {
+    height: 3rem;
+    width: 100%;
+    background-image: url('../../../assets/images/button/periodic-table-element.jpg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: var(--color-neutral);
+    background-blend-mode: overlay;
+    border-radius: 0.25rem;
+    border-width: 0.0625rem;
+    border-color: var(--color-tertiary);
+    cursor: pointer;
+    color: var(--color-neutralVariant);
+    font-size: 1rem;
+    transition: background-size 0.3s ease-out, box-shadow 0.3s ease-out, font-size 0.3s ease-out;
+    
+    &[data-hovered] {
+      background-color: var(--color-quartenary);
+      background-size: 110% 110%;
+      box-shadow: inset 0 0 10px 1px var(--color-tertiary);
+      font-size: 1.0625rem;
+    }
+
+    &[data-pressed] {
+      background-color: var(--color-dark-intermediary);
+    }
   }
 }
