@@ -3,6 +3,7 @@ import {
   CheckboxProps, GridListItemProps, GridListProps,
   Button, Checkbox, GridList, GridListItem, useDragAndDrop 
 } from 'react-aria-components';
+import { AccordionItem } from '../AccordionLayer/AccordionLayer';
 import './GridListLayerComponent.scss';
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
@@ -10,6 +11,11 @@ interface GridListLayerProps<T extends { id: string | number }> extends Omit<Gri
   children: ((item: T) => ReactNode) | ReactNode;
   onReorder?: (newItems: T[]) => void;
   centerText?: string;
+}
+
+interface GridListLayerItemProps<T> extends Omit<GridListItemProps, 'children'> {
+  children: ReactNode;
+  accordionContent?: ReactNode;
 }
 
 export function GridListLayer<T extends { id: string | number }>({
@@ -64,7 +70,6 @@ export function GridListLayer<T extends { id: string | number }>({
     <div className='grid-list-layer-component'>
 
       <GridList 
-        //className='grid-list-layer-component__grid-list' 
         {...props} 
         items={items}
         {...dragAndDropHooks}
@@ -78,7 +83,11 @@ export function GridListLayer<T extends { id: string | number }>({
   );
 }
 
-export function GridListLayerItem({ children, ...props }: GridListItemProps) {
+export function GridListLayerItem<T extends { id: string | number }>({ 
+  children, 
+  accordionContent, 
+  ...props 
+}: GridListLayerItemProps<T>) {
   let textValue = typeof children === 'string' ? children : undefined;
   return (
     <GridListItem textValue={textValue} className='grid-list-layer-component__grid-list-item' {...props}>
@@ -86,9 +95,14 @@ export function GridListLayerItem({ children, ...props }: GridListItemProps) {
         <>
           <Button slot="drag">≡</Button>
           {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-            <MyCheckbox slot="selection" />
+            <MyCheckbox slot="selection"  className='grid-list-layer-component__grid-list-item__checkbox' />
           )}
-          {children}
+          <div className="grid-list-layer-component__grid-list-item__item-text">
+            {children}
+          </div>
+          <AccordionItem title="Expand">
+            {accordionContent}
+          </AccordionItem>
         </>
       )}
     </GridListItem>
@@ -97,7 +111,7 @@ export function GridListLayerItem({ children, ...props }: GridListItemProps) {
 
 function MyCheckbox({ children, ...props }: CheckboxProps) {
   return (
-    <Checkbox className='grid-list-layer-component__grid-list-item__checkbox' {...props}>
+    <Checkbox {...props}>
       {({ isIndeterminate }) => (
         <>
           <div className="checkbox">

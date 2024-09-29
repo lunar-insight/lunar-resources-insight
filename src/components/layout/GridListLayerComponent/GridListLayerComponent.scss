@@ -35,29 +35,14 @@
     align-items: center;
     gap: 0.5rem;
 
-    &[data-allows-dragging] {
-      padding-left: 4px;
-    }
-
-    &[data-dragging] {
-      opacity: 0.6;
-    }
-
-    &[data-drop-target] {
-      outline: 1px solid red;
-    }
-
-    [slot=drag] {
-      all: unset;
-      width: 30px;
-      text-align: center;
+    &__item-text {
+      flex: 1;
     }
 
     &__checkbox {
       width: 1.5rem;
       height: 1.5rem;
       border: 1px solid var(--color-tertiary);
-      margin-left: 0.75rem;
       cursor: pointer;
 
       .checkbox {
@@ -86,5 +71,24 @@
         background-color: rgba(128, 128, 128, 0.192);
       }
     }
+
+    &[data-allows-dragging] {
+      padding-left: 4px;
+    }
+
+    &[data-dragging] {
+      opacity: 0.6;
+    }
+
+    &[data-drop-target] {
+      outline: 1px solid red;
+    }
+
+    [slot=drag] {
+      all: unset;
+      width: 30px;
+      text-align: center;
+    }
+
   }
 }

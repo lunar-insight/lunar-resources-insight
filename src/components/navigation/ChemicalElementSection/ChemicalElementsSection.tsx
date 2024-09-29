@@ -60,7 +60,14 @@ const ChemicalElementsSection: React.FC = () => {
         centerText='No geographic layer selected, choose one or multiple above.'
       >
         {(item: Element & { id: number }) => (
-          <GridListLayerItem key={item.id}>
+          <GridListLayerItem 
+            key={item.id}
+            accordionContent={
+              <div>
+                Description: {item.atomicNumber}
+              </div>
+            }  
+          >
             {item.name} ({item.symbol})
           </GridListLayerItem>
         )}
