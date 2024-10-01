@@ -1,13 +1,16 @@
+$scroll-bar-handler-width: 1rem;
+
 .grid-list-layer-component {
   width: auto;
-  height: auto;
+  height: 15rem;
   border: 0.0625rem solid var(--color-tertiary);
   border-radius: 0.25rem;
-  min-height: 15rem;
+  min-height: 16rem;
   box-shadow: inset 0 0 25px black;
   background-color: rgba(35, 41, 53, 0.5);
-  max-width: 17rem;
   position: relative;
+  overflow-y: auto;
+  overflow-x: hidden;
 
   &__center-text {
     position: absolute;
@@ -26,54 +29,108 @@
 
   &__grid-list-item {
     width: auto;
-    height: 2.5rem;
+    height: auto;
     border-bottom: 1px solid var(--color-secondary);
     box-sizing: border-box;
     background-color: rgba(25, 29, 37, 0.50);
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+    padding-right: $scroll-bar-handler-width;
 
-    &__item-text {
-      flex: 1;
-    }
+    &__header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 0.75rem;
+      height: 2.5rem;
+      width: auto;
 
-    &__checkbox {
-      width: 1.5rem;
-      height: 1.5rem;
-      border: 1px solid var(--color-tertiary);
-      cursor: pointer;
+      &__drag {
+        pointer-events: none;
+        color: var(--color-tertiary);
+        background-color: transparent;
+        border: none;
+        width: 1.5rem;
+        height: 1.5rem;
+        flex-shrink: 0;
+        text-align: center;
+        z-index: 100;
+        padding-left: 0.5rem;
+      }
 
-      .checkbox {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
+      &__checkbox {
+        width: 1.5rem;
+        height: 1.5rem;
+        border: 1px solid var(--color-tertiary);
+        cursor: pointer;
+        flex-shrink: 0;
 
-        svg {
-          width: 1rem;
-          height: 1rem;
-          display: none;
+        .checkbox {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          height: 100%;
+
+          svg {
+            width: 1rem;
+            height: 1rem;
+            display: none;
+          }
+        }
+
+        &[data-selected] .checkbox svg {
+          display: block;
+        }
+
+        &[data-hovered] {
+          background-color: rgba(255, 255, 255, 0.151);
+        }
+
+        &[data-selected] {
+          background-color: rgba(128, 128, 128, 0.192);
         }
       }
 
-      &[data-selected] .checkbox svg {
-        display: block;
+      &__item-text {
+        flex-shrink: 0;
+        min-width: 8rem;
       }
 
-      &[data-hovered] {
-        background-color: rgba(255, 255, 255, 0.151);
+      &__accordion-header {
+        background: none;
+        border-top: none;
+        border-bottom: none;
+        border-left: 1px solid var(--color-tertiary);
+        border-right: 1px solid var(--color-tertiary);
+        color: lightseagreen;
+        cursor: pointer;
+        width: 5rem;
+        height: 100%;
       }
 
-      &[data-selected] {
-        background-color: rgba(128, 128, 128, 0.192);
+      &__remove-layer-wrapper {
+        width: 1.5rem;
+        height: 1.5rem;
+        flex-shrink: 0;
       }
     }
 
-    &[data-allows-dragging] {
-      padding-left: 4px;
+    &__accordion-content-wrapper {
+      border-top: 1px solid var(--color-secondary);
+      width: 100%;
+      height: auto;
+      padding-left: $scroll-bar-handler-width;
+
+      &__main {
+        padding: 0.75rem 0;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+        height: 100%;
+        width: auto;
+      }
     }
 
     &[data-dragging] {
@@ -83,12 +140,5 @@
     &[data-drop-target] {
       outline: 1px solid red;
     }
-
-    [slot=drag] {
-      all: unset;
-      width: 30px;
-      text-align: center;
-    }
-
   }
 }

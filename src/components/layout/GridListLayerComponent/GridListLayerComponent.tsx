@@ -1,9 +1,8 @@
-import React, {ReactNode, useEffect } from 'react';
+import React, {ReactNode, useState } from 'react';
 import {
   CheckboxProps, GridListItemProps, GridListProps,
   Button, Checkbox, GridList, GridListItem, useDragAndDrop 
 } from 'react-aria-components';
-import { AccordionItem } from '../AccordionLayer/AccordionLayer';
 import './GridListLayerComponent.scss';
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
@@ -88,21 +87,43 @@ export function GridListLayerItem<T extends { id: string | number }>({
   accordionContent, 
   ...props 
 }: GridListLayerItemProps<T>) {
+  const [isExpanded, setIsExpanded] = useState(false);
   let textValue = typeof children === 'string' ? children : undefined;
+  
+  const toggleAccordion = () => {
+    setIsExpanded(!isExpanded);
+  };
+  
   return (
     <GridListItem textValue={textValue} className='grid-list-layer-component__grid-list-item' {...props}>
       {({ selectionMode, selectionBehavior }) => (
         <>
-          <Button slot="drag">≡</Button>
-          {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-            <MyCheckbox slot="selection"  className='grid-list-layer-component__grid-list-item__checkbox' />
-          )}
-          <div className="grid-list-layer-component__grid-list-item__item-text">
-            {children}
+          <div className='grid-list-layer-component__grid-list-item__header'>
+            <Button slot="drag" className='grid-list-layer-component__grid-list-item__header__drag'>≡</Button>
+            {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
+              <MyCheckbox slot="selection"  className='grid-list-layer-component__grid-list-item__header__checkbox' />
+            )}
+            <div className="grid-list-layer-component__grid-list-item__header__item-text">
+              {children}
+            </div>
+            {accordionContent && (
+              <Button
+                onPress={toggleAccordion}
+                aria-expanded={isExpanded}
+                className='grid-list-layer-component__grid-list-item__header__accordion-header'
+              >
+                {isExpanded ? 'Hide options' : 'Show options'}
+              </Button>
+            )}
+            <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper' />
           </div>
-          <AccordionItem title="Expand">
-            {accordionContent}
-          </AccordionItem>
+          {isExpanded && (
+            <div className='grid-list-layer-component__grid-list-item__accordion-content-wrapper'>
+              <div className='grid-list-layer-component__grid-list-item__accordion-content-wrapper__main'>
+                {accordionContent}
+              </div>
+            </div>
+          )}
         </>
       )}
     </GridListItem>
