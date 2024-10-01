@@ -38,6 +38,7 @@ $scroll-bar-handler-width: 1rem;
     flex-grow: 1;
     padding-right: $scroll-bar-handler-width;
     position: relative;
+    overflow: hidden; // For keeping shadow inside
   
     &::after {
       content: '';
@@ -113,12 +114,23 @@ $scroll-bar-handler-width: 1rem;
         background: none;
         border-top: none;
         border-bottom: none;
-        border-left: 1px solid var(--color-tertiary);
-        border-right: 1px solid var(--color-tertiary);
-        color: lightseagreen;
+        border-left: 1px solid var(--color-quartenary);
+        border-right: 1px solid var(--color-quartenary);
+        box-shadow: 
+        -2px 0 4px rgba(0, 0, 0, 0.25),
+        2px 0 4px rgba(0, 0, 0, 0.25);
+        color: var(--color-secondary);
         cursor: pointer;
-        width: 5rem;
+        width: 4.5625rem;
         height: 100%;
+        font-size: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        &__text {
+          color: var(--color-tertiary)
+        }
       }
 
       &__remove-layer-wrapper {
@@ -132,7 +144,7 @@ $scroll-bar-handler-width: 1rem;
       max-height: 0;
       opacity: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease, opacity 0.6s ease;
+      transition: max-height 0.4s ease, opacity 1.2s ease;
       padding-left: $scroll-bar-handler-width;
 
       &.expanded {

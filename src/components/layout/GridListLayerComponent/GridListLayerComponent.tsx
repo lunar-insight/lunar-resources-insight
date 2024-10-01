@@ -112,7 +112,12 @@ export function GridListLayerItem<T extends { id: string | number }>({
                 aria-expanded={isExpanded}
                 className='grid-list-layer-component__grid-list-item__header__accordion-header'
               >
-                {isExpanded ? 'Hide options' : 'Show options'}
+                <i className='grid-list-layer-component__grid-list-item__header__accordion-header__icon material-symbols-outlined'>
+                  {isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'}
+                </i>
+                <span className='grid-list-layer-component__grid-list-item__header__accordion-header__text'>
+                  {isExpanded ? 'Hide' : 'Show'}
+                </span>                
               </Button>
             )}
             <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper' />
