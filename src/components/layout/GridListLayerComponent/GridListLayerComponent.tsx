@@ -117,8 +117,11 @@ export function GridListLayerItem<T extends { id: string | number }>({
             )}
             <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper' />
           </div>
-          {isExpanded && (
-            <div className='grid-list-layer-component__grid-list-item__accordion-content-wrapper'>
+          {/* Always render accordion content */}
+          {accordionContent && (
+            <div 
+              className={`grid-list-layer-component__grid-list-item__accordion-content-wrapper ${isExpanded ? 'expanded' : ''}`}
+            >
               <div className='grid-list-layer-component__grid-list-item__accordion-content-wrapper__main'>
                 {accordionContent}
               </div>
