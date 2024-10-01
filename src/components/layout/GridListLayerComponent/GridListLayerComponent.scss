@@ -132,7 +132,7 @@ $scroll-bar-handler-width: 1rem;
       max-height: 0;
       opacity: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease, opacity 0.3s ease;
+      transition: max-height 0.3s ease, opacity 0.6s ease;
       padding-left: $scroll-bar-handler-width;
 
       &.expanded {
