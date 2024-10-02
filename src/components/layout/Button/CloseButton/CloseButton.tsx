@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import './CloseButton.scss';
-import { ButtonTooltip } from '../Tooltip/ButtonTooltip';
+import { ButtonTooltip } from '../../Tooltip/ButtonTooltip';
 
 interface CloseButtonProps {
   onPress: () => void;

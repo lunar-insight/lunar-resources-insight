@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import {Modal, ModalOverlay, Dialog, Heading} from 'react-aria-components';
-import CloseButton from '../CloseButton/CloseButton';
+import CloseButton from '../Button/CloseButton/CloseButton';
 import './ModalOverlayContainer.scss';
 
 interface ModalOverlayContainerProps {

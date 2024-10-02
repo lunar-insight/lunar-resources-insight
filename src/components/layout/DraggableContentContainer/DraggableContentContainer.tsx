@@ -2,7 +2,7 @@ import './DraggableContentContainer.scss';
 import React, { useRef, useState, useEffect } from 'react';
 import { useDialog } from '@react-aria/dialog';
 import { useMove } from '@react-aria/interactions';
-import CloseButton from '../CloseButton/CloseButton';
+import CloseButton from '../Button/CloseButton/CloseButton';
 
 export interface DraggableContentContainerProps {
   title?: React.ReactNode;
