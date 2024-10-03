@@ -4,6 +4,7 @@ import {
   Button, Checkbox, GridList, GridListItem, useDragAndDrop 
 } from 'react-aria-components';
 import './GridListLayerComponent.scss';
+import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
   items: T[];
@@ -15,6 +16,7 @@ interface GridListLayerProps<T extends { id: string | number }> extends Omit<Gri
 interface GridListLayerItemProps<T> extends Omit<GridListItemProps, 'children'> {
   children: ReactNode;
   accordionContent?: ReactNode;
+  onRemove?: () => void;
 }
 
 export function GridListLayer<T extends { id: string | number }>({
@@ -84,7 +86,8 @@ export function GridListLayer<T extends { id: string | number }>({
 
 export function GridListLayerItem<T extends { id: string | number }>({ 
   children, 
-  accordionContent, 
+  accordionContent,
+  onRemove, 
   ...props 
 }: GridListLayerItemProps<T>) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -120,7 +123,11 @@ export function GridListLayerItem<T extends { id: string | number }>({
                 </span>                
               </Button>
             )}
-            <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper' />
+            <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper'>
+              <RemoveLayerButton
+                onPress={onRemove}
+              />
+            </div>
           </div>
           {/* Always render accordion content */}
           {accordionContent && (

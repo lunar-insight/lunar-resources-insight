@@ -34,6 +34,10 @@ const ChemicalElementsSection: React.FC = () => {
     setSelectedElements(newItems);
   }
 
+  const handleRemoveElement = (id: number) => {
+    setSelectedElements(prev => prev.filter(e => e.id != id));
+  }
+
   return (
     <>
       <Button 
@@ -62,6 +66,7 @@ const ChemicalElementsSection: React.FC = () => {
         {(item: Element & { id: number }) => (
           <GridListLayerItem 
             key={item.id}
+            onRemove={() => handleRemoveElement(item.id)}
             accordionContent={
               <div>
                 Description: {item.atomicNumber}
