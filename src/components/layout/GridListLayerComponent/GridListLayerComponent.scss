@@ -1,4 +1,5 @@
 $scroll-bar-handler-width: 1rem;
+$heading-item-min-height: 3rem;
 
 .grid-list-layer-component {
   width: auto;
@@ -6,6 +7,7 @@ $scroll-bar-handler-width: 1rem;
   border: 0.0625rem solid var(--color-tertiary);
   border-radius: 0.25rem;
   min-height: 16rem;
+  min-width: 22rem;
   box-shadow: inset 0 0 25px black;
   background-color: rgba(35, 41, 53, 0.5);
   position: relative;
@@ -24,16 +26,18 @@ $scroll-bar-handler-width: 1rem;
     word-break: break-word;
     max-width: 60%;
     text-align: center;    
-    text-shadow: 1px 1px 2px black;
+    text-shadow: 1px 1px 1px black;
   }
 
   &__grid-list-item {
     width: auto;
     height: auto;
+    min-height: $heading-item-min-height;
     box-sizing: border-box;
     background-color: rgba(25, 29, 37, 0.50);
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: flex-start;
     flex-grow: 1;
     padding-right: $scroll-bar-handler-width;
@@ -55,8 +59,9 @@ $scroll-bar-handler-width: 1rem;
       flex-direction: row;
       align-items: center;
       gap: 0.75rem;
-      height: 2.5rem;
+      height: auto;
       width: auto;
+      min-height: $heading-item-min-height;
 
       &__drag {
         pointer-events: none;
@@ -121,12 +126,12 @@ $scroll-bar-handler-width: 1rem;
         2px 0 4px rgba(0, 0, 0, 0.25);
         color: var(--color-secondary);
         cursor: pointer;
-        width: 4.5625rem;
-        height: 100%;
-        font-size: 0.75rem;
+        width: 4.75rem;
+        height: $heading-item-min-height;
         display: flex;
         align-items: center;
         gap: 0.25rem;
+        flex-shrink: 0;
 
         &__text {
           color: var(--color-tertiary)
@@ -134,9 +139,8 @@ $scroll-bar-handler-width: 1rem;
       }
 
       &__remove-layer-wrapper {
-        width: 1.5rem;
-        height: 1.5rem;
-        flex-shrink: 0;
+        width: auto;
+        height: auto;
       }
     }
 
