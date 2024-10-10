@@ -166,13 +166,5 @@ $heading-item-min-height: 3rem;
         width: auto;
       }
     }
-
-    &[data-dragging] {
-      opacity: 0.6;
-    }
-
-    &[data-drop-target] {
-      outline: 1px solid red;
-    }
   }
 }

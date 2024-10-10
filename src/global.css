@@ -43,3 +43,9 @@ body {
 ::-webkit-scrollbar-thumb {
   background-color: var(--color-primary)
 }
+
+.react-aria-DropIndicator[data-drop-target] {
+  outline: 2px solid var(--color-secondary);
+  z-index: 2; /* Z-index Should be higher than the ::after of GridListItems */
+  position: relative;
+}
