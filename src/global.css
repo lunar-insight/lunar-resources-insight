@@ -3,7 +3,8 @@
   --color-secondary: #85a2af; /* light color */
   --color-tertiary: #97a5ab; /* light color */
   --color-quartenary: #324049; /* dark color 50 64 73*/
-  --color-error: #ff5449; /* red */
+  --color-red: #ff5449; /* red for error or cancel */
+  --color-green: #2eaf2e; /* green for validation */
   --color-dark-intermediary: #2d3a42; /* 45 58 66 dark color, used for sidebar for "is-active + pressed" state */
   --color-neutral: #2b353e; /* dark color 43 53 62 */
   --color-neutralVariant: #b6bbc1; /* light color */
