@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import * as Cesium from 'cesium';
-import 'cesium/Source/Widgets/widgets.css'
-import * as geoconfig from 'geoconfig'
+import 'cesium/Source/Widgets/widgets.css';
+import { mapServerWmsUrl } from '../../../geoConfigExporter';
+import { useLayerContext } from '../../../utils/context/LayerContext';
 
 // Skybox images
 import positiveX from '@assets/images/skybox/px.jpg';
@@ -20,8 +21,11 @@ interface CesiumComponentProps {
 
 const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
-  const viewerRef = useRef<Cesium.Viewer | null>(null); // If necessary in the future
+  const viewerRef = useRef<Cesium.Viewer | null>(null);
+  const { selectedLayers } = useLayerContext();
+  const addedLayersRef = useRef<Map<string, Cesium.ImageryLayer>>(new Map());
 
+  // For Cesium initialisation
   useEffect(() => {
     if (cesiumContainerRef.current && !viewerRef.current) {
 
@@ -48,10 +52,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       // Primary imagery layer creation
       const baseLayer = new Cesium.ImageryLayer(
         new Cesium.WebMapServiceImageryProvider({
-          // Production purpose:
-          //url: `${geoconfig.mapServerWmsUrl}`,
-          //layers: `${geoconfig.mapServerWorkspaceName}:${geoconfig.layersConfig.baseLayer.mapName}`,
-          // Dev purpose:
+          // Dev only:
           url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
           layers: 'LROC_WAC',
           parameters: {
@@ -61,9 +62,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
           tileWidth: 512,
           tileHeight: 512,
         }),
-        {
-          show: true
-        }
+        { show: true }
       );
 
       // Add the primary layer to the viewer
@@ -78,7 +77,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       globe.baseColor = Cesium.Color.GRAY;
       
       // Remove Ion credit
-      viewer.cesiumWidget.creditContainer.parentNode.removeChild(viewer.cesiumWidget.creditContainer);
+      viewer.cesiumWidget.creditContainer.parentNode?.removeChild(viewer.cesiumWidget.creditContainer);
 
       // Skybox creation
       viewer.scene.skyBox = new Cesium.SkyBox({
@@ -91,16 +90,67 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
           negativeZ: negativeZ,
         }
       });
-    }
-    
-    return () => {
-      if (viewerRef.current && !viewerRef.current.isDestroyed()) {
-        viewerRef.current.destroy();
-        viewerRef.current = null; // Reference reinitialized after destruction
-      }
-    };
 
+      // Error handling for the base layer
+      baseLayer.imageryProvider.errorEvent.addEventListener((error) => {
+        console.error('Error loading base imagery layer:', error);
+      });
+    }
   }, []);
+
+  // For layer changes
+  useEffect(() => {
+    if (!viewerRef.current) return;
+
+    const viewer = viewerRef.current;
+
+    // Add selected layers
+    selectedLayers.forEach(layerName => {
+      if (!addedLayersRef.current.has(layerName)) {
+        const imageryProvider = new Cesium.WebMapServiceImageryProvider({
+          url: mapServerWmsUrl,
+          layers: layerName,
+          parameters: {
+            service: 'WMS',
+            version: '1.1.1',
+            request: 'GetMap',
+            format: 'image/png',
+            transparent: true,
+            styles: '',
+            srs: 'IAU:30100'
+          },
+          tileWidth: 256,
+          tileHeight: 256,
+        });
+
+        // Error handling for the imagery provider
+        imageryProvider.errorEvent.addEventListener((error) => {
+          console.error(`Error loading imagery layer '${layerName}':`, error);
+        })
+
+        const imageryLayer = new Cesium.ImageryLayer(imageryProvider, { show: true });
+        viewer.imageryLayers.add(imageryLayer);
+        addedLayersRef.current.set(layerName, imageryLayer);
+      }
+    });
+
+    // Remove the layer that are not selected anymore
+    Array.from(addedLayersRef.current.keys()).forEach(layerName => {
+      if (!selectedLayers.includes(layerName)) {
+        const imageryLayer = addedLayersRef.current.get(layerName);
+        if (imageryLayer) {
+          try {
+            if (!imageryLayer.isDestroyed()) {
+              viewer.imageryLayers.remove(imageryLayer, true); // Also destroy() with the boolean
+            }
+          } catch (error) {
+            console.warn(`Error removing layer ${layerName}:`, error);
+          }
+          addedLayersRef.current.delete(layerName);
+        }
+      }
+    });
+  }, [selectedLayers])
 
   return (
     <div ref={cesiumContainerRef} className={className} />

@@ -89,8 +89,9 @@ export function GridListLayerItem<T extends { id: string | number }>({
   accordionContent,
   onRemove, 
   ...props 
-}: GridListLayerItemProps<T>) {
+}: GridListLayerItemProps<T> & { textValue: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  
   let textValue = typeof children === 'string' ? children : undefined;
   
   const toggleAccordion = () => {

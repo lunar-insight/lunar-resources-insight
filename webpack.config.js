@@ -43,8 +43,6 @@ module.exports = {
       '@components': path.resolve(__dirname, 'src/components'),
       'utils': path.resolve(__dirname, 'src/utils'),
       '@types': path.resolve(__dirname, 'src/types'),
-
-      'geoconfig': path.resolve(__dirname, 'src/geoconfig.ts'),
     },
     extensions: ['.*', '.js', '.jsx', '.ts', '.tsx'],
   },
@@ -56,7 +54,7 @@ module.exports = {
       test: /\.scss$/,
       use: ['style-loader', 'css-loader', 'sass-loader']
     }, {
-      test: /\.(png|jpg|jpeg|gif|svg|xml|json)$/,
+      test: /\.(png|jpg|jpeg|gif|svg|xml)$/,
       type: 'asset',
     }, {
       test: /\.workers\.js$/,           // Cesium >1.100 workers files is now integrated in the main js bundle,
@@ -123,7 +121,11 @@ module.exports = {
       minChunks: module => module.context && module.context.indexOf('cesium') !== -1
     }),
     new webpack.DefinePlugin({
-      'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
+      ...Object.keys(process.env).reduce((env, key) => {
+        env[`process.env.${key}`] = JSON.stringify(process.env[key]);
+        return env;
+      }, {})
+      //'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
     }),
     //new webpack.HotModuleReplacementPlugin(),
   ]

@@ -1,0 +1,16 @@
+{
+  "chemicalElementLayer": {
+    "calcium": {
+      "1": "global20ppd_calcium"
+    },
+    "iron": {
+      "1": "global20ppd_iron"
+    },
+    "magnesium": {
+      "1": "global20ppd_magnesium"
+    },
+    "titanium": {
+      "1": "global20ppd_titanium"
+    }
+  }
+}
