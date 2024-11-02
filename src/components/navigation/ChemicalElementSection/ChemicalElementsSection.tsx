@@ -11,7 +11,7 @@ import { layersConfig, mapServerWorkspaceName } from '../../../geoConfigExporter
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
-  const { addLayer, removeLayer } = useLayerContext();
+  const { addLayer, removeLayer, reorderLayers } = useLayerContext();
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -46,6 +46,15 @@ const ChemicalElementsSection: React.FC = () => {
 
   const handleReorder = (newItems: (Element & { id: number })[]) => {
     setSelectedElements(newItems);
+
+    // Map the new selected elements into layer names
+    const newSelectedLayers = newItems.map(item => {
+      const layerName = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
+      return `${mapServerWorkspaceName}:${layerName}`;
+    });
+
+    // Update the layers order in the context
+    reorderLayers(newSelectedLayers);
   }
 
   const handleRemoveElement = (id: number) => {
