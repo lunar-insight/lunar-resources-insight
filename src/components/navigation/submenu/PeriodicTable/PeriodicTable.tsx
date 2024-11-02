@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
 import './PeriodicTable.scss';
 
@@ -161,8 +161,49 @@ GRID.forEach((row, rowIndex) => {
   });
 });
 
+const ElementCell = React.memo(({
+  item,
+  cellKey
+}: {
+  item: Element | null,
+  cellKey: string,
+}) => {
+  return (
+    <ListBoxItem
+      key={cellKey}
+      id={cellKey}    
+      textValue={item?.name || 'Empty'}
+      className={`periodic-table__grid__cell ${item && !item.dataExist ? 'periodic-table__grid__cell--unavailable' : ''}`}
+    >
+      {item ? (
+        <div className={`periodic-table__grid__cell__element ${!item.dataExist ? 'periodic-table__grid__cell__element--unavailable' : ''}`}>
+          <div className='periodic-table__grid__cell__element__top'>
+            <Text slot='description' className='periodic-table__grid__cell__element__top__atomic-number'>
+              {item.atomicNumber}
+            </Text>
+          </div>
+          <Text slot="label" className='periodic-table__grid__cell__element__symbol'>
+            {item.symbol}
+          </Text>
+          <div className='periodic-table__grid__cell__element__bottom'>
+            <Text slot="description" className='periodic-table__grid__cell__element__bottom__name'>
+              {item.name}
+            </Text>
+          </div>
+        </div>
+      ) : (
+        <div className='periodic-table__grid__cell__empty-cell'></div>
+      )}
+    </ListBoxItem>
+  )
+})
+
+
 const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selectedElements }) => {
-  const selectedKeys = new Set(selectedElements.map(el => `${el.row}-${el.column}`));
+  const selectedKeys = useMemo(() =>
+    new Set(selectedElements.map(el => `${el.row}-${el.column}`)),
+    [selectedElements]
+  );
 
   return (
     <div className='periodic-table'>
@@ -193,9 +234,8 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
           const newKeys = new Set(keys);
           ALL_ELEMENTS.forEach(element => {
             const elementKey = `${element.row}-${element.column}`;
-            if (newKeys.has(elementKey) && !selectedKeys.has(elementKey)) {
-              onElementSelect(element);
-            } else if (!newKeys.has(elementKey) && selectedKeys.has(elementKey)) {
+
+            if (newKeys.has(elementKey) !== selectedKeys.has(elementKey)) {
               onElementSelect(element);
             }
           });
@@ -206,32 +246,11 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
             {row.map((item, colIndex) => {
               const cellKey = `${rowIndex + 1}-${colIndex + 1}`;
               return (
-                <ListBoxItem
+                <ElementCell
                   key={cellKey}
-                  id={cellKey}    
-                  textValue={item?.name || 'Empty'}
-                  className={`periodic-table__grid__cell ${item && !item.dataExist ? 'periodic-table__grid__cell--unavailable' : ''}`}
-                >
-                  {item ? (
-                    <div className={`periodic-table__grid__cell__element ${!item.dataExist ? 'periodic-table__grid__cell__element--unavailable' : ''}`}>
-                      <div className='periodic-table__grid__cell__element__top'>
-                        <Text slot='description' className='periodic-table__grid__cell__element__top__atomic-number'>
-                          {item.atomicNumber}
-                        </Text>
-                      </div>
-                      <Text slot="label" className='periodic-table__grid__cell__element__symbol'>
-                        {item.symbol}
-                      </Text>
-                      <div className='periodic-table__grid__cell__element__bottom'>
-                        <Text slot="description" className='periodic-table__grid__cell__element__bottom__name'>
-                          {item.name}
-                        </Text>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className='periodic-table__grid__cell__empty-cell'></div>
-                  )}
-                </ListBoxItem>
+                  item={item}
+                  cellKey={cellKey}
+                />
               );
             })}
           </React.Fragment>
