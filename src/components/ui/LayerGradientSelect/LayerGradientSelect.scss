@@ -1,0 +1,48 @@
+.layer-gradient-select {
+  position: relative;
+  width: 100%;
+
+  &__button {
+    background: var(--selected-layer-gradient);
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: auto;
+    color: #fff;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  &__popover {
+    width: var(--button-width);
+  }
+
+  &__list {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: var(--color-primary);
+  }
+
+  &__section-header {
+    padding: 8px 12px;
+    font-weight: bold;
+    color: var(--color-neutralVariant);
+
+    section:last-child & {
+      margin-top: 1rem;
+    }
+  }
+
+  &__list-box-item {
+    padding: 8px 12px;
+    margin: 4px;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    width: auto;
+  }
+}

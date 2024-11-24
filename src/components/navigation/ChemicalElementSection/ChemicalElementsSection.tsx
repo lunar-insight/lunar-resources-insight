@@ -6,7 +6,7 @@ import PeriodicTable, { Element } from '../submenu/PeriodicTable/PeriodicTable'
 import { GridListLayer, GridListLayerItem } from '../../layout/GridListLayerComponent/GridListLayerComponent';
 import { useLayerContext } from '../../../utils/context/LayerContext';
 import { layersConfig, mapServerWorkspaceName } from '../../../geoConfigExporter';
-
+import LayerGradientSelect from '../../ui/LayerGradientSelect/LayerGradientSelect'
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -102,6 +102,7 @@ const ChemicalElementsSection: React.FC = () => {
             accordionContent={
               <div>
                 Description: {item.atomicNumber}
+                <LayerGradientSelect />
               </div>
             }  
           >
