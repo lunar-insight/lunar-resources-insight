@@ -6,6 +6,7 @@
     background: var(--selected-layer-gradient);
     padding: 8px 12px;
     border-radius: 6px;
+    border: 1px solid var(--color-neutralVariant);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -13,10 +14,22 @@
     color: #fff;
     cursor: pointer;
     width: 100%;
+    position: relative;
+  }
+
+  &__selected-value-wrapper {
+    flex-grow: 1;
+    text-align: center;
+  }
+
+  &__button-icon {
+    flex-shrink: 0;
+    margin-left: auto;
   }
 
   &__popover {
     width: var(--button-width);
+    box-shadow: 0px 0px 3px black;
   }
 
   &__list {
@@ -24,6 +37,8 @@
     max-height: 400px;
     overflow-y: auto;
     background-color: var(--color-primary);
+    border: 1px solid var(--color-quartenary);
+    border-radius: 6px;
   }
 
   &__section-header {
@@ -44,5 +59,6 @@
     cursor: pointer;
     text-overflow: ellipsis;
     width: auto;
+    text-align: center;
   }
 }

@@ -109,8 +109,10 @@ const LayerGradientSelect = () => {
           '--selected-layer-gradient': selectedLayerGradient,
         } as React.CSSProperties}
       >
-        <SelectValue />
-        <span aria-hidden="true">▼</span>
+        <div className="layer-gradient-select__selected-value-wrapper">
+          <SelectValue />  
+        </div>
+        <span className="layer-gradient-select__button-icon" aria-hidden="true">▼</span>
       </Button>
       <Popover 
         className="layer-gradient-select__popover"
