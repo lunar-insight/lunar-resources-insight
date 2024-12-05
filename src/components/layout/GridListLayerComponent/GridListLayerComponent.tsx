@@ -1,10 +1,11 @@
 import React, {ReactNode, useState } from 'react';
 import {
-  CheckboxProps, GridListItemProps, GridListProps,
-  Button, Checkbox, GridList, GridListItem, useDragAndDrop 
+  GridListItemProps, GridListProps,
+  Button, GridList, GridListItem, useDragAndDrop 
 } from 'react-aria-components';
 import './GridListLayerComponent.scss';
 import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
+import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox';
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
   items: T[];
@@ -105,7 +106,7 @@ export function GridListLayerItem<T extends { id: string | number }>({
           <div className='grid-list-layer-component__grid-list-item__header'>
             <Button slot="drag" className='grid-list-layer-component__grid-list-item__header__drag'>≡</Button>
             {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-              <MyCheckbox slot="selection"  className='grid-list-layer-component__grid-list-item__header__checkbox' />
+              <LayerVisibilityCheckbox slot="selection"/>
             )}
             <div className="grid-list-layer-component__grid-list-item__header__item-text">
               {children}
@@ -145,23 +146,3 @@ export function GridListLayerItem<T extends { id: string | number }>({
     </GridListItem>
   );
 }
-
-function MyCheckbox({ children, ...props }: CheckboxProps) {
-  return (
-    <Checkbox {...props}>
-      {({ isIndeterminate }) => (
-        <>
-          <div className="checkbox">
-            <svg viewBox="0 0 18 18" aria-hidden="true">
-              {isIndeterminate
-                ? <rect x={1} y={7.5} width={15} height={3} />
-                : <polyline points="1 9 7 14 15 4" />}
-            </svg>
-          </div>
-          {children}
-        </>
-      )}
-    </Checkbox>
-  );
-}
-
