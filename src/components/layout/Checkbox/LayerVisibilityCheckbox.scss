@@ -22,14 +22,15 @@
     width: 100%;
     height: 100%;
 
-    &__icon {
+    .layer-checkbox__box__icon {
       font-size: 1.3125rem;
-      color: rgba(224, 83, 83, 0.5);
+      color: rgba(224, 83, 83, 0.5);  // Default red color
     }
+  }
 
-    [data-selected] & &__icon {
-      color: rgba(66, 191, 66, 0.5);
-    }
+  &[data-selected] .layer-checkbox__box__icon {
+    font-size: 1.3125rem;
+    color: rgba(66, 191, 66, 0.5);  // Override with green when selected
   }
 
   &[data-hovered] {

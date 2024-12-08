@@ -6,6 +6,7 @@ import {
 import './GridListLayerComponent.scss';
 import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
 import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox';
+import { useLayerContext } from 'utils/context/LayerContext';
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
   items: T[];
@@ -89,9 +90,11 @@ export function GridListLayerItem<T extends { id: string | number }>({
   children, 
   accordionContent,
   onRemove, 
+  layerId,
   ...props 
-}: GridListLayerItemProps<T> & { textValue: string }) {
+}: GridListLayerItemProps<T> & { textValue: string; layerId: string }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const { visibleLayers, toggleLayerVisibility } = useLayerContext();
   
   let textValue = typeof children === 'string' ? children : undefined;
   
@@ -106,7 +109,11 @@ export function GridListLayerItem<T extends { id: string | number }>({
           <div className='grid-list-layer-component__grid-list-item__header'>
             <Button slot="drag" className='grid-list-layer-component__grid-list-item__header__drag'>≡</Button>
             {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-              <LayerVisibilityCheckbox slot="selection"/>
+              <LayerVisibilityCheckbox 
+                slot="selection"
+                isSelected={visibleLayers.has(layerId)}
+                onChange={() => toggleLayerVisibility(layerId)}
+              />
             )}
             <div className="grid-list-layer-component__grid-list-item__header__item-text">
               {children}

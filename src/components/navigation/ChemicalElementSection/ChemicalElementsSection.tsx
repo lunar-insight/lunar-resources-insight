@@ -94,11 +94,16 @@ const ChemicalElementsSection: React.FC = () => {
         onReorder={handleReorder}
         centerText='No geographic layer selected, choose one or multiple above.'
       >
-        {(item: Element & { id: number }) => (
-          <GridListLayerItem 
+        {(item: Element & { id: number }) => {
+          const layerName = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
+          const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+
+          return (
+            <GridListLayerItem 
             key={item.id}
             textValue={`${item.name} (${item.symbol})`}
             onRemove={() => handleRemoveElement(item.id)}
+            layerId={fullLayerName}
             accordionContent={
               <div>
                 Description: {item.atomicNumber}
@@ -108,7 +113,8 @@ const ChemicalElementsSection: React.FC = () => {
           >
             {item.name} ({item.symbol})
           </GridListLayerItem>
-        )}
+          );
+        }}
       </GridListLayer>
     </>
   );

@@ -22,10 +22,11 @@ interface CesiumComponentProps {
 const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Cesium.Viewer | null>(null);
-  const { selectedLayers } = useLayerContext();
+  const { selectedLayers, visibleLayers } = useLayerContext();
   const addedLayersRef = useRef<Map<string, Cesium.ImageryLayer>>(new Map());
   const previousLayerRef = useRef<string[]>([]);
   const baseLayerRef = useRef<Cesium.ImageryLayer | null>(null);
+  const previousVisibleLayersRef = useRef<Set<string>>(new Set());
 
   // For Cesium initialisation
   useEffect(() => {
@@ -193,6 +194,36 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
 
     previousLayerRef.current = [...selectedLayers]; // Save the new order
   }, [selectedLayers]);
+
+  // Handle layer visibility change
+  useEffect(() => {
+    if (!viewerRef.current) return;
+
+    const currentVisibleLayers = new Set(visibleLayers);
+    const previousVisibleLayers = previousVisibleLayersRef.current;
+
+    // Check for newly hidden layers
+    Array.from(previousVisibleLayers).forEach(layerName => {
+      if (!currentVisibleLayers.has(layerName)) {
+        const layer = addedLayersRef.current.get(layerName);
+        if (layer && !layer.isDestroyed()) {
+          layer.show = false;
+        }
+      }
+    })
+
+    // Check for newly visible layers
+    Array.from(currentVisibleLayers).forEach(layerName => {
+      if (!previousVisibleLayers.has(layerName)) {
+        const layer = addedLayersRef.current.get(layerName);
+        if (layer && !layer.isDestroyed()) {
+          layer.show = true;
+        }
+      }
+    });
+
+    previousVisibleLayersRef.current = new Set(visibleLayers);
+  }, [visibleLayers]);
 
 
   return (
