@@ -5,23 +5,26 @@ import CesiumComponent from '../../components/viewer/CesiumComponent/CesiumCompo
 import { BoundaryRefProvider } from '../../components/reference/BoundaryRefProvider';
 import { DialogProvider, DialogRenderer } from '../../utils/DialogWindowManagement';
 import { LayerProvider } from '../../utils/context/LayerContext';
+import { StyleProvider } from 'utils/context/StyleContext';
 
 const MainPage = () => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
   
   return (
     <BoundaryRefProvider value={viewerContainerRef}>
-      <DialogProvider dialogs={dialogs}>
-        <LayerProvider>
-          <div className="main-page">
-            <SectionNavigation />
-            <div className="viewer-container" ref={viewerContainerRef}>
-              <CesiumComponent className="cesium-component" />
+      <StyleProvider>
+        <DialogProvider dialogs={dialogs}>
+          <LayerProvider>
+            <div className="main-page">
+              <SectionNavigation />
+              <div className="viewer-container" ref={viewerContainerRef}>
+                <CesiumComponent className="cesium-component" />
+              </div>
+              <DialogRenderer />
             </div>
-            <DialogRenderer />
-          </div>
-        </LayerProvider>
-      </DialogProvider>
+          </LayerProvider>
+        </DialogProvider>
+      </StyleProvider>
     </BoundaryRefProvider>
   );
 };

@@ -2,6 +2,8 @@ import './LayerGradientSelect.scss'
 import React, { useState, useEffect, useRef } from 'react'
 import { Select, Button, Label, ListBox, ListBoxItem, Popover, SelectValue, Section, Header } from "react-aria-components";
 import { colorbrewer } from '../../../utils/constants/colorbrewer.constants.js'
+import { extractColorBrewerGradient } from 'utils/style.utils';
+import { useStyle } from 'utils/context/StyleContext';
 
 interface Gradient {
   category: string;
@@ -10,7 +12,12 @@ interface Gradient {
   dataClasses: number;
 }
 
-const LayerGradientSelect = () => {
+interface LayerGradientSelectProps {
+  layerId: string;
+}
+
+const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) => {
+  const { updateLayerStyle } = useStyle();
 
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [buttonWidth, setButtonWidth] = useState<number>(0);
@@ -43,6 +50,23 @@ const LayerGradientSelect = () => {
       'BuGn', 'BuPu', 'GnBu', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'RdPu', 'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd'
     ]
   } as const;
+  
+  const handleGradientChange = (selectedValue: string) => {
+    try {
+      const selectedGradient = gradients.find(g => g.value === selectedValue);
+
+      if (!selectedGradient) {
+        throw new Error(`Gradient ${selectedValue} not found`);
+      }
+
+      const { colors, type } = extractColorBrewerGradient(selectedGradient.label);
+      updateLayerStyle(layerId, { colors, type });
+
+      setSelectedLayerGradient(selectedValue);
+    } catch (error) {
+      console.error('Error when loading gradient:', error);
+    }
+  };
 
   const createGradient = (colors: string[]) => `linear-gradient(to right, ${colors.join(', ')})`;
 
@@ -98,7 +122,7 @@ const LayerGradientSelect = () => {
   return (
     <Select
       className="layer-gradient-select"
-      onSelectionChange={(value) => setSelectedLayerGradient(value.toString())}
+      onSelectionChange={(value) => handleGradientChange(value.toString())}
       defaultSelectedKey={gradients[0].value}
     >
       <Label>Select a gradient</Label>
