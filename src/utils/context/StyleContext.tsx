@@ -1,6 +1,8 @@
 import React, { createContext, useContext } from 'react';
 import { StyleConfig } from 'types/style.types';
 import { mapServerWmsUrl } from '../../geoConfigExporter';
+import * as Cesium from 'cesium';
+import { useViewer } from './ViewerContext';
 
 interface StyleError {
   message: string;
@@ -14,8 +16,13 @@ interface StyleContextType {
 
 const StyleContext = createContext<StyleContextType | undefined>(undefined);
 
+
 export const StyleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { viewer } = useViewer();
+
   const updateLayerStyle = async (layerId: string, styleConfig: StyleConfig) => {
+
+    if (!viewer) return;
 
     try {
 
@@ -33,25 +40,47 @@ export const StyleProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })
         .join(';');
 
-      const params = {
-        service: 'WMS',
-        version: '1.3.0',
-        request: 'GetMap',
-        format: 'image/png',
-        transparent: 'true',
+      // New provider creation
+      const newProvider = new Cesium.WebMapServiceImageryProvider({
+        url: mapServerWmsUrl,
         layers: layerId,
-        env: envParams,
-        styles: `chemical_element_${type}`,
-        width: '256',
-        height: '256',
-        srs: 'IAU:30100',
-        bbox: '-180, -90, 180, 90',
-      };
+        parameters: {
+          service: 'WMS',
+          version: '1.1.1',
+          request: 'GetMap',
+          format: 'image/png',
+          transparent: true,
+          styles: `chemical_element_${type}`,
+          env: envParams,
+          srs: 'IAU:30100'
+        },
+        tileWidth: 256,
+        tileHeight: 256
+      });
 
-      const response = await fetch(`${mapServerWmsUrl}?${new URLSearchParams(params)}`);
+      // Search and update layer
+      const imageryLayers = viewer.imageryLayers;
+      let index = -1;
 
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
+      for (let i = 0; i < imageryLayers.length; i++) {
+        const layer = imageryLayers.get(i);
+        if (layer && layer.imageryProvider) {
+          const provider = layer.imageryProvider;
+          if (provider instanceof Cesium.WebMapServiceImageryProvider &&
+              provider.layers === layerId) {
+            index = i;
+            imageryLayers.remove(layer);
+            break;
+          }
+        }
+      }
+
+      // Add new layer
+      const newLayer = new Cesium.ImageryLayer(newProvider);
+      if (index >= 0) {
+        imageryLayers.add(newLayer, index);
+      } else {
+        imageryLayers.add(newLayer);
       }
 
     } catch (error) {

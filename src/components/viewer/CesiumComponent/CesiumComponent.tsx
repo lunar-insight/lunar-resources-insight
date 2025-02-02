@@ -11,6 +11,7 @@ import positiveY from '@assets/images/skybox/py.jpg';
 import negativeY from '@assets/images/skybox/ny.jpg';
 import positiveZ from '@assets/images/skybox/pz.jpg';
 import negativeZ from '@assets/images/skybox/nz.jpg';
+import { useViewer } from 'utils/context/ViewerContext';
 
 
 // Info: The Cesium CSS is edited on the MainPage component
@@ -27,6 +28,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const previousLayerRef = useRef<string[]>([]);
   const baseLayerRef = useRef<Cesium.ImageryLayer | null>(null);
   const previousVisibleLayersRef = useRef<Set<string>>(new Set());
+  const { setViewer } = useViewer();
 
   // For Cesium initialisation
   useEffect(() => {
@@ -52,6 +54,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       });
 
       viewerRef.current = viewer; // Stock the viewer instance in the reference
+      setViewer(viewer) // Share viewer via context
 
       // Primary imagery layer creation
       const baseLayer = new Cesium.ImageryLayer(
@@ -103,7 +106,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         console.error('Error loading base imagery layer:', error);
       });
     }
-  }, []);
+  }, [setViewer]);
 
   // For layer management
   useEffect(() => {

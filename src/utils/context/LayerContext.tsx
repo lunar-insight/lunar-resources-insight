@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
+import { StyleConfig } from 'types/style.types';
+import { useStyle } from './StyleContext';
 
 interface LayerContextType {
   selectedLayers: string[];
@@ -7,6 +9,7 @@ interface LayerContextType {
   removeLayer: (layer: string) => void;
   reorderLayers: (layers: string[]) => void;
   toggleLayerVisibility: (layer: string) => void;
+  updateStyle: (layer: string, styleConfig: StyleConfig) => Promise<void>;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -14,6 +17,7 @@ const LayerContext = createContext<LayerContextType | undefined>(undefined);
 export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedLayers, setSelectedLayers] = useState<string[]>([]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
+  const styleContext = useStyle();
 
   const addLayer = (layer: string) => {
     setSelectedLayers(prev => [...prev, layer]);
@@ -45,8 +49,26 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setSelectedLayers(layers);
   }
 
+  const updateStyle = async (layer: string, styleConfig: StyleConfig) => {
+    try {
+      await styleContext.updateLayerStyle(layer, styleConfig);
+    } catch (error) {
+      console.error(`Error updating style for layer ${layer}:`, error);
+    }
+  };
+
   return (
-    <LayerContext.Provider value={{ selectedLayers, visibleLayers, addLayer, removeLayer, reorderLayers, toggleLayerVisibility }}>
+    <LayerContext.Provider 
+      value={{ 
+        selectedLayers, 
+        visibleLayers, 
+        addLayer, 
+        removeLayer, 
+        reorderLayers, 
+        toggleLayerVisibility,
+        updateStyle
+      }}
+    >
       {children}
     </LayerContext.Provider>
   );
