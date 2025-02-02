@@ -107,7 +107,7 @@ const ChemicalElementsSection: React.FC = () => {
             accordionContent={
               <div>
                 Description: {item.atomicNumber}
-                <LayerGradientSelect />
+                <LayerGradientSelect layerId={fullLayerName}/>
               </div>
             }  
           >
