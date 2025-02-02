@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Select, Button, Label, ListBox, ListBoxItem, Popover, SelectValue, Section, Header } from "react-aria-components";
 import { colorbrewer } from '../../../utils/constants/colorbrewer.constants.js'
 import { extractColorBrewerGradient } from 'utils/style.utils';
-import { useStyle } from 'utils/context/StyleContext';
+import { useLayerContext } from 'utils/context/LayerContext';
 
 interface Gradient {
   category: string;
@@ -17,7 +17,7 @@ interface LayerGradientSelectProps {
 }
 
 const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) => {
-  const { updateLayerStyle } = useStyle();
+  const { updateStyle } = useLayerContext();
 
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [buttonWidth, setButtonWidth] = useState<number>(0);
@@ -60,7 +60,7 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
       }
 
       const { colors, type } = extractColorBrewerGradient(selectedGradient.label);
-      updateLayerStyle(layerId, { colors, type });
+      updateStyle(layerId, { colors, type });
 
       setSelectedLayerGradient(selectedValue);
     } catch (error) {
@@ -113,11 +113,6 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
     acc[gradient.category].push(gradient);
     return acc;
   }, {});
-
-  // TODO move to SCSS file
-  // TODO only show the max gradient
-  // TODO add two categories name in the dropdown list : "Single hue" and "Multi-hue"
-  // TODO add a dynamic text on the left or right to know what we have selected (react aria components?)
 
   return (
     <Select

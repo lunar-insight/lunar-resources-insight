@@ -5,7 +5,6 @@ import CesiumComponent from '../../components/viewer/CesiumComponent/CesiumCompo
 import { BoundaryRefProvider } from '../../components/reference/BoundaryRefProvider';
 import { DialogProvider, DialogRenderer } from '../../utils/DialogWindowManagement';
 import { LayerProvider } from '../../utils/context/LayerContext';
-import { StyleProvider } from 'utils/context/StyleContext';
 import { ViewerProvider } from 'utils/context/ViewerContext';
 
 const MainPage = () => {
@@ -14,19 +13,17 @@ const MainPage = () => {
   return (
     <BoundaryRefProvider value={viewerContainerRef}>
       <ViewerProvider>
-        <StyleProvider>
-          <LayerProvider>
-            <DialogProvider dialogs={dialogs}>
-              <div className="main-page">
-                <SectionNavigation />
-                <div className="viewer-container" ref={viewerContainerRef}>
-                  <CesiumComponent className="cesium-component" />
-                </div>
-                <DialogRenderer />
+        <LayerProvider>
+          <DialogProvider dialogs={dialogs}>
+            <div className="main-page">
+              <SectionNavigation />
+              <div className="viewer-container" ref={viewerContainerRef}>
+                <CesiumComponent className="cesium-component" />
               </div>
-            </DialogProvider>
-          </LayerProvider>
-        </StyleProvider>
+              <DialogRenderer />
+            </div>
+          </DialogProvider>
+        </LayerProvider>
       </ViewerProvider>
     </BoundaryRefProvider>
   );
