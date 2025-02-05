@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $min-cell-size: 35px;
 $max-cell-size: 70px;
 $cell-size: clamp($min-cell-size, calc(100vw / 20), $max-cell-size);
@@ -45,11 +47,11 @@ $unavailable-opacity-on-text: 0.25;
       }
 
       &--selectable {
-        border-color: lighten($color-border-selectable, $color-border-selectable-lighten-factor);
+        border-color: color.adjust($color-border-selectable, $lightness: $color-border-selectable-lighten-factor);
   
         .periodic-table__state-info__item-rectangle {
           margin-right: 0.25rem;
-          background-color: lighten($color-border-selectable, $color-border-selectable-lighten-factor);
+          background-color: color.adjust($color-border-selectable, $lightness: $color-border-selectable-lighten-factor);
         }
       }
   
@@ -64,11 +66,11 @@ $unavailable-opacity-on-text: 0.25;
       }
   
       &--unavailable {
-        border-color: lighten($color-border-unavailable, $color-border-unavailable-lighten-factor);
+        border-color: color.adjust($color-border-unavailable, $lightness: $color-border-unavailable-lighten-factor);
         background-color: $color-background-unavailable;
   
         .periodic-table__state-info__item-rectangle {
-          background-color: lighten($color-border-unavailable, $color-border-unavailable-lighten-factor);
+          background-color: color.adjust($color-border-unavailable, $lightness: $color-border-unavailable-lighten-factor);
         }
       }
     }
