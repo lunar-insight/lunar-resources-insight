@@ -1,6 +1,6 @@
 import './LayerGradientSelect.scss'
 import React, { useState, useEffect, useRef } from 'react'
-import { Select, Button, Label, ListBox, ListBoxItem, Popover, SelectValue, Section, Header } from "react-aria-components";
+import { Select, Button, Label, ListBox, ListBoxItem, Popover, SelectValue, ListBoxSection, Header } from "react-aria-components";
 import { colorbrewer } from '../../../utils/constants/colorbrewer.constants.js'
 import { extractColorBrewerGradient } from 'utils/style.utils';
 import { useLayerContext } from 'utils/context/LayerContext';
@@ -139,12 +139,11 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
       >
         <ListBox className="layer-gradient-select__list">
           {Object.entries(groupedGradients).map(([category, categoryGradients]: [string, Gradient[]]) => (
-            <Section key={category}>
+            <ListBoxSection key={category}>
               <Header className="layer-gradient-select__section-header">
                 {category}
               </Header>
               {categoryGradients.map((gradient: Gradient) => (
-
                 <ListBoxItem
                   key={gradient.value}
                   id={gradient.value}
@@ -157,7 +156,7 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
                   {gradient.label}
                 </ListBoxItem>
               ))}
-            </Section>
+            </ListBoxSection>
           ))}
         </ListBox>
       </Popover>
