@@ -59,18 +59,6 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         viewer.cesiumWidget.creditContainer
       );
 
-      // Skybox creation
-      // viewer.scene.skyBox = new Cesium.SkyBox({
-      //   sources: {
-      //     positiveX: positiveX,
-      //     negativeX: negativeX,
-      //     positiveY: positiveY,
-      //     negativeY: negativeY,
-      //     positiveZ: positiveZ,
-      //     negativeZ: negativeZ,
-      //   }
-      // });
-
       viewer.scene.skyBox = new Cesium.SkyBox({
         sources: {
           positiveX,
