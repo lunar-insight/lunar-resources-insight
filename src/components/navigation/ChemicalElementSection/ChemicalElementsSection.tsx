@@ -7,6 +7,7 @@ import { GridListLayer, GridListLayerItem } from '../../layout/GridListLayerComp
 import { useLayerContext } from '../../../utils/context/LayerContext';
 import { layersConfig, mapServerWorkspaceName } from '../../../geoConfigExporter';
 import LayerGradientSelect from '../../ui/LayerGradientSelect/LayerGradientSelect'
+import { ColorRampSlider } from '../../layout/Slider/ColorRampSlider/ColorRampSlider';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -105,9 +106,14 @@ const ChemicalElementsSection: React.FC = () => {
             onRemove={() => handleRemoveElement(item.id)}
             layerId={fullLayerName}
             accordionContent={
-              <div>
+              <div className='chemical-section__accordion-content'>
                 Description: {item.atomicNumber}
                 <LayerGradientSelect layerId={fullLayerName}/>
+                <ColorRampSlider
+                  label="Color Ramp Values"
+                  defaultValue={[0, 10]}
+                  thumbLabels={['start', 'end']}
+                />
               </div>
             }  
           >

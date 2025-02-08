@@ -28,4 +28,10 @@
       background-color: var(--color-dark-intermediary);
     }
   }
+
+  &__accordion-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
 }
