@@ -12,7 +12,7 @@ import { ColorRampSlider } from '../../layout/Slider/ColorRampSlider/ColorRampSl
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
-  const { addLayer, removeLayer, reorderLayers } = useLayerContext();
+  const { addLayer, removeLayer, reorderLayers, updateRampValues } = useLayerContext();
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -70,6 +70,12 @@ const ChemicalElementsSection: React.FC = () => {
     });
   };
 
+  const handleRampValueChange = (layerId: string, values: number[]) => {
+    if (values.length === 2) {
+      updateRampValues(layerId, values[0], values[1]);
+    }
+  };
+
   return (
     <>
       <Button 
@@ -112,7 +118,11 @@ const ChemicalElementsSection: React.FC = () => {
                 <ColorRampSlider
                   label="Color Ramp Values"
                   defaultValue={[0, 10]}
-                  thumbLabels={['start', 'end']}
+                  minValue={0}
+                  maxValue={100}
+                  step={1}
+                  thumbLabels={['min', 'max']}
+                  onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
                 />
               </div>
             }  

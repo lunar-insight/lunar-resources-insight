@@ -12,6 +12,7 @@ interface LayerContextType {
   reorderLayers: (layers: string[]) => void;
   toggleLayerVisibility: (layer: string) => void;
   updateStyle: (layer: string, styleConfig: StyleConfig) => Promise<void>;
+  updateRampValues: (layer: string, min: number, max: number) => Promise<void>;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -19,10 +20,13 @@ const LayerContext = createContext<LayerContextType | undefined>(undefined);
 class CesiumLayerManager {
 
   private layerMap: Map<string, Cesium.ImageryLayer>;
+  private layerStyleConfig: Map<string, StyleConfig>;
 
   constructor(private viewer: Cesium.Viewer | null) {
     this.layerMap = new Map();
+    this.layerStyleConfig = new Map();
   }
+
 
   addLayer(layerId: string) {
     if (!this.viewer) return;
@@ -56,6 +60,7 @@ class CesiumLayerManager {
     this.layerMap.set(layerId, layer);
   }
 
+
   removeLayer(layerId: string) {
     if (!this.viewer) return;
 
@@ -67,12 +72,14 @@ class CesiumLayerManager {
     }
   }
 
+
   toggleVisibility(layerId: string) {
     const layer = this.layerMap.get(layerId);
     if (layer) {
       layer.show = !layer.show;
     }
   }
+
 
   reorderLayers(layerIds: string[]) {
     if (!this.viewer) return;
@@ -93,6 +100,21 @@ class CesiumLayerManager {
       }
     })
   }
+
+
+  updateRampValues(layerId: string, min: number, max: number) {
+    const currentStyle = this.layerStyleConfig.get(layerId);
+    if (currentStyle) {
+      const updatedStyle = {
+        ...currentStyle,
+        min,
+        max
+      };
+      this.layerStyleConfig.set(layerId, updatedStyle);
+      this.updateLayerStyle(layerId, updatedStyle);
+    }
+  }
+
   
   updateLayerStyle(layerId: string, styleConfig: StyleConfig) {
     if (!this.viewer) return;
@@ -129,8 +151,12 @@ class CesiumLayerManager {
       this.viewer.imageryLayers.remove(existingLayer, true);
       this.viewer.imageryLayers.add(newLayer, index);
       this.layerMap.set(layerId, newLayer);
+
+      // Save style config for the possibility of updating color ramp values
+      this.layerStyleConfig.set(layerId, styleConfig)
     }
   }
+
 
   private generateEnvParams(styleConfig: StyleConfig): string {
     const { colors, min = 0, max = 100 } = styleConfig;
@@ -144,6 +170,7 @@ class CesiumLayerManager {
   }
 }
 
+
 export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedLayers, setSelectedLayers] = useState<string[]>([]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
@@ -156,11 +183,13 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     cesiumManagerRef.current = new CesiumLayerManager(viewer);
   }
 
+
   const addLayer = (layer: string) => {
     setSelectedLayers(prev => [...prev, layer]);
     setVisibleLayers(prev => new Set(prev).add(layer));
     cesiumManagerRef.current?.addLayer(layer);
   };
+
 
   const removeLayer = (layer: string) => {
     setSelectedLayers(prev => prev.filter(l => l !== layer));
@@ -171,6 +200,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
     cesiumManagerRef.current?.removeLayer(layer);
   };
+
 
   const toggleLayerVisibility = (layer: string) => {
     setVisibleLayers(prev => {
@@ -185,10 +215,20 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     cesiumManagerRef.current?.toggleVisibility(layer);
   };
 
+
   const reorderLayers = (layers: string[]) => {
     setSelectedLayers(layers);
     cesiumManagerRef.current?.reorderLayers(layers);
   }
+
+
+  const updateRampValues = async (layer: string, min: number, max: number) => {
+    try {
+      cesiumManagerRef.current?.updateRampValues(layer, min, max);
+    } catch (error) {
+      console.error(`Error updating ramp values for layer ${layer}:`, error);
+    }
+  };
 
 
   const updateStyle = async (layer: string, styleConfig: StyleConfig) => {
@@ -199,6 +239,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+
   return (
     <LayerContext.Provider 
       value={{ 
@@ -208,7 +249,8 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         removeLayer, 
         reorderLayers, 
         toggleLayerVisibility,
-        updateStyle
+        updateStyle,
+        updateRampValues
       }}
     >
       {children}

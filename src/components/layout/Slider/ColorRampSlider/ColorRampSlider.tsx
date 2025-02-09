@@ -1,15 +1,20 @@
 /**
  * Customizable slider component for selecting minimum and maximum values of the maps color ramp
+ * @see {@link https://react-spectrum.adobe.com/react-aria/Slider.html React Aria Slider Documentation}
  * @example
  * ```tsx
  * function Example() {
  *   let [value, setValue] = React.useState(25);
  *   return (
- *     <ColorRampSlider<number>
- *       label="Color Ramp Value"
- *       value={value}
- *       onChange={setValue}
- *     />
+ *    <ColorRampSlider
+ *      label="Color Ramp Values"
+ *      defaultValue={[0, 10]}
+ *      minValue={0}
+ *      maxValue={100}
+ *      step={1}
+ *      thumbLabels={['start', 'end']}
+ *      onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
+ *    />
  *   );
  * }
  * ```
