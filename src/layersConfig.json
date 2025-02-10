@@ -1,16 +1,32 @@
 {
   "chemicalElementLayer": {
     "calcium": {
-      "1": "global20ppd_calcium"
+      "1": {
+        "layer": "global20ppd_calcium",
+        "min": 7.2267388910919,
+        "max": 13.20825231297
+      } 
     },
     "iron": {
-      "1": "global20ppd_iron"
+      "1": {
+        "layer": "global20ppd_iron",
+        "min": 2.856382407782,
+        "max": 18.416580110917
+      }
     },
     "magnesium": {
-      "1": "global20ppd_magnesium"
+      "1": {
+        "layer": "global20ppd_magnesium",
+        "min": 2.3578183256022,
+        "max": 9.4609746189685
+      }
     },
     "titanium": {
-      "1": "global20ppd_titanium"
+      "1": {
+        "layer": "global20ppd_titanium",
+        "min": 0.10929474573047,
+        "max": 4.5005753084526
+      }
     }
   }
 }

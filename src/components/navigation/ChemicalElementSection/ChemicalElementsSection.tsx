@@ -29,16 +29,16 @@ const ChemicalElementsSection: React.FC = () => {
       // If clicked element on ptable is not on the list, its added in it
       if (index === -1) {
         const newElements = [...prev, { ...element, id: element.atomicNumber }];
-        const layerName = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
+        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
         addLayer(fullLayerName)
         return newElements;
 
       // If clicked element is already in the list (already selected), it's removed from the list
       } else {
         const newElements = prev.filter(e => e.id !== element.atomicNumber);
-        const layerName = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
+        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
         removeLayer(fullLayerName);
         return newElements;
       }
@@ -50,8 +50,8 @@ const ChemicalElementsSection: React.FC = () => {
 
     // Map the new selected elements into layer names
     const newSelectedLayers = newItems.map(item => {
-      const layerName = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
-      return `${mapServerWorkspaceName}:${layerName}`;
+      const layerConfig = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
+      return `${mapServerWorkspaceName}:${layerConfig.layer}`;
     });
 
     // Update the layers order in the context
@@ -62,8 +62,8 @@ const ChemicalElementsSection: React.FC = () => {
     setSelectedElements(prev => {
       const element = prev.find(e => e.id === id);
       if (element) {
-        const layerName = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
+        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
         removeLayer(fullLayerName);
       }
       return prev.filter(e => e.id !== id);
@@ -102,8 +102,8 @@ const ChemicalElementsSection: React.FC = () => {
         centerText='No geographic layer selected, choose one or multiple above.'
       >
         {(item: Element & { id: number }) => {
-          const layerName = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
-          const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+          const layerConfig = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
+          const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
 
           return (
             <GridListLayerItem 
@@ -117,9 +117,9 @@ const ChemicalElementsSection: React.FC = () => {
                 <LayerGradientSelect layerId={fullLayerName}/>
                 <ColorRampSlider
                   label="Color Ramp Values"
-                  defaultValue={[0, 10]}
-                  minValue={0}
-                  maxValue={100}
+                  defaultValue={[layerConfig.min, layerConfig.max]}
+                  minValue={layerConfig.min}
+                  maxValue={layerConfig.max}
                   step={1}
                   thumbLabels={['min', 'max']}
                   onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
