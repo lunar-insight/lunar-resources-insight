@@ -11,7 +11,7 @@ $text: var(--color-neutralVariant);
 
 .color-ramp-slider {
   display: grid;
-  grid-template-areas: "label output"
+  grid-template-areas: "label inputs"
                        "track track";
   grid-template-columns: 1fr auto;
   max-width: $slider-width;
@@ -20,9 +20,24 @@ $text: var(--color-neutralVariant);
   .react-aria-Label {
     grid-area: label;
   }
-   
-  .react-aria-SliderOutput {
-    grid-area: output;
+
+  &__inputs {
+    grid-area: inputs;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    .react-aria-Input {
+      border-radius: 6px;
+      width: 3rem;
+      padding: 0.25rem;
+      border: 1px solid $border;
+
+      &:focus {
+        outline: 2px solid $focus-ring;
+        outline-offset: -1px;
+      }
+    }
   }
   
   .react-aria-SliderTrack {

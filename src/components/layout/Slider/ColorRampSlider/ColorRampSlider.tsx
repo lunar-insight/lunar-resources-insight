@@ -27,9 +27,12 @@ import './ColorRampSlider.scss';
 import {
   Label,
   Slider,
-  SliderOutput,
   SliderThumb,
-  SliderTrack
+  SliderTrack,
+  Input,
+  NumberField,
+  LabelContext,
+  useSlottedContext
 } from 'react-aria-components';
 
 import type { SliderProps } from 'react-aria-components';
@@ -45,25 +48,39 @@ function ColorRampSlider<T extends number | number[]>({
   className,
   ...props 
 }: ColorRampSliderProps<T>) {
+  const labelId = useSlottedContext(LabelContext)?.id;
+
   return (
     <Slider className={`color-ramp-slider ${className || ''}`} {...props}>
-      {label && <Label>{label}</Label>}
-      <SliderOutput>
-        {({ state }) =>
-          state.values.map((_, i) =>
-            state.getThumbValueLabel(i)
-          ).join(' - ')}
-      </SliderOutput>
-      <SliderTrack>
-        {({ state }) =>
-          state.values.map((_, i) => (
-            <SliderThumb 
-              key={i}
-              index={i}
-              aria-label={thumbLabels?.[i]}
-            />
-          ))}
-      </SliderTrack>
+      {({ state }) => (
+        <>
+          {label && <Label>{label}</Label>}
+          <div className='color-ramp-slider__inputs'>
+            {state.values.map((_, i) => (
+              <NumberField
+                key={i}
+                aria-labelledby={labelId}
+                value={state.values[i]}
+                onChange={(v) => state.setThumbValue(i, v)}
+              >
+                <Label>{thumbLabels?.[i] || `Value ${i + 1}`}</Label>
+                <Input />
+              </NumberField>
+            ))}
+          </div>
+        
+          <SliderTrack>
+            {({ state }) =>
+              state.values.map((_, i) => (
+                <SliderThumb 
+                  key={i}
+                  index={i}
+                  aria-label={thumbLabels?.[i]}
+                />
+              ))}
+          </SliderTrack>
+        </>
+      )}
     </Slider>
   );
 }
