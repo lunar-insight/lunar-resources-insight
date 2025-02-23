@@ -121,7 +121,7 @@ const ChemicalElementsSection: React.FC = () => {
                   minValue={layerConfig.min}
                   maxValue={layerConfig.max}
                   step={0.001}
-                  thumbLabels={['min', 'max']}
+                  thumbLabels={['Min', 'Max']}
                   onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
                 />
               </div>
