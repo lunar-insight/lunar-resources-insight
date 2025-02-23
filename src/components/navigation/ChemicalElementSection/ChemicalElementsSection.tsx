@@ -7,11 +7,12 @@ import { GridListLayer, GridListLayerItem } from '../../layout/GridListLayerComp
 import { useLayerContext } from '../../../utils/context/LayerContext';
 import { layersConfig, mapServerWorkspaceName } from '../../../geoConfigExporter';
 import LayerGradientSelect from '../../ui/LayerGradientSelect/LayerGradientSelect'
+import { ColorRampSlider } from '../../layout/Slider/ColorRampSlider/ColorRampSlider';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
-  const { addLayer, removeLayer, reorderLayers } = useLayerContext();
+  const { addLayer, removeLayer, reorderLayers, updateRampValues } = useLayerContext();
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -28,16 +29,16 @@ const ChemicalElementsSection: React.FC = () => {
       // If clicked element on ptable is not on the list, its added in it
       if (index === -1) {
         const newElements = [...prev, { ...element, id: element.atomicNumber }];
-        const layerName = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
+        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
         addLayer(fullLayerName)
         return newElements;
 
       // If clicked element is already in the list (already selected), it's removed from the list
       } else {
         const newElements = prev.filter(e => e.id !== element.atomicNumber);
-        const layerName = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
+        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
         removeLayer(fullLayerName);
         return newElements;
       }
@@ -49,8 +50,8 @@ const ChemicalElementsSection: React.FC = () => {
 
     // Map the new selected elements into layer names
     const newSelectedLayers = newItems.map(item => {
-      const layerName = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
-      return `${mapServerWorkspaceName}:${layerName}`;
+      const layerConfig = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
+      return `${mapServerWorkspaceName}:${layerConfig.layer}`;
     });
 
     // Update the layers order in the context
@@ -61,12 +62,18 @@ const ChemicalElementsSection: React.FC = () => {
     setSelectedElements(prev => {
       const element = prev.find(e => e.id === id);
       if (element) {
-        const layerName = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
+        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
         removeLayer(fullLayerName);
       }
       return prev.filter(e => e.id !== id);
     });
+  };
+
+  const handleRampValueChange = (layerId: string, values: number[]) => {
+    if (values.length === 2) {
+      updateRampValues(layerId, values[0], values[1]);
+    }
   };
 
   return (
@@ -95,8 +102,8 @@ const ChemicalElementsSection: React.FC = () => {
         centerText='No geographic layer selected, choose one or multiple above.'
       >
         {(item: Element & { id: number }) => {
-          const layerName = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
-          const fullLayerName = `${mapServerWorkspaceName}:${layerName}`;
+          const layerConfig = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
+          const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
 
           return (
             <GridListLayerItem 
@@ -105,9 +112,18 @@ const ChemicalElementsSection: React.FC = () => {
             onRemove={() => handleRemoveElement(item.id)}
             layerId={fullLayerName}
             accordionContent={
-              <div>
+              <div className='chemical-section__accordion-content'>
                 Description: {item.atomicNumber}
                 <LayerGradientSelect layerId={fullLayerName}/>
+                <ColorRampSlider
+                  label="Color Ramp Values"
+                  defaultValue={[layerConfig.min, layerConfig.max]}
+                  minValue={layerConfig.min}
+                  maxValue={layerConfig.max}
+                  step={0.001}
+                  thumbLabels={['Min', 'Max']}
+                  onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
+                />
               </div>
             }  
           >

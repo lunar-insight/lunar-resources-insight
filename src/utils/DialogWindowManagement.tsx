@@ -14,7 +14,7 @@ interface DialogContextValue {
   openDialog: (id: string, content?: React.ReactNode) => void;
   closeDialog: (id: string) => void;
   isDialogOpen: (id: string) => boolean;
-  renderDialog: (dialog: Dialog) => JSX.Element;
+  renderDialog: (dialog: Dialog) => React.ReactElement;
   addDialog: (dialog: Dialog) => void;
 }
 
@@ -69,7 +69,7 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
     return dialogsState.some(dialog => dialog.id === id && dialog.isOpen);
   };
 
-  const renderDialog = (dialog: Dialog): JSX.Element => (
+  const renderDialog = (dialog: Dialog): React.ReactElement => (
     <DraggableContentContainer
       key={dialog.id}
       title={dialog.title}

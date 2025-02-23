@@ -60,7 +60,7 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
       }
 
       const { colors, type } = extractColorBrewerGradient(selectedGradient.label);
-      updateStyle(layerId, { colors, type });
+      updateStyle(layerId, { colors, type, min: 0, max: 10 });
 
       setSelectedLayerGradient(selectedValue);
     } catch (error) {

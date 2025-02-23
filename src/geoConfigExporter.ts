@@ -23,10 +23,15 @@ if (!mapServerWorkspaceName) {
   throw new Error('REACT_APP_GEOSERVER_WORKSPACE_NAME is not defined in environment variables.');
 }
 
+export type ChemicalElementLayerConfig = {
+  layer: string;
+  min: number;
+  max: number;
+}
 
 export type ChemicalElementsLayer = {
   [element: string]: {
-    [key: string]: string;
+    [key: string]: ChemicalElementLayerConfig;
   };
 };
 
