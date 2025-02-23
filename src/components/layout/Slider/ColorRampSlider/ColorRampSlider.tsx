@@ -46,12 +46,21 @@ function ColorRampSlider<T extends number | number[]>({
   label, 
   thumbLabels,
   className,
+  defaultValue,
+  minValue,
+  maxValue,
   ...props 
 }: ColorRampSliderProps<T>) {
   const labelId = useSlottedContext(LabelContext)?.id;
 
   return (
-    <Slider className={`color-ramp-slider ${className || ''}`} {...props}>
+    <Slider 
+      className={`color-ramp-slider ${className || ''}`}
+      defaultValue={defaultValue}
+      minValue={minValue}
+      maxValue={maxValue}
+      {...props}
+    >
       {({ state }) => (
         <>
           {label && <Label>{label}</Label>}
