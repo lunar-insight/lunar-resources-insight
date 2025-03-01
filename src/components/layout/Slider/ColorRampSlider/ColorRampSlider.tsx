@@ -59,6 +59,8 @@ function ColorRampSlider<T extends number | number[]>({
       defaultValue={defaultValue}
       minValue={minValue}
       maxValue={maxValue}
+      aria-label={label || "Color range selector"}
+      orientation="horizontal"
       {...props}
     >
       {({ state }) => (
