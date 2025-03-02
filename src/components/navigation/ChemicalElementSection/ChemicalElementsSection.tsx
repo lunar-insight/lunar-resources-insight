@@ -8,11 +8,12 @@ import { useLayerContext } from '../../../utils/context/LayerContext';
 import { layersConfig, mapServerWorkspaceName } from '../../../geoConfigExporter';
 import LayerGradientSelect from '../../ui/LayerGradientSelect/LayerGradientSelect'
 import { ColorRampSlider } from '../../layout/Slider/ColorRampSlider/ColorRampSlider';
+import OpacitySlider from '../../layout/Slider/OpacitySlider/OpacitySlider';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
-  const { addLayer, removeLayer, reorderLayers, updateRampValues } = useLayerContext();
+  const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -76,6 +77,11 @@ const ChemicalElementsSection: React.FC = () => {
     }
   };
 
+  const handleOpacityChange = (layerId: string, value: number) => {
+    const opacityValue = value / 100 // Cesium is 0-1
+    updateLayerOpacity(layerId, opacityValue);
+  }
+
   return (
     <>
       <Button 
@@ -123,6 +129,14 @@ const ChemicalElementsSection: React.FC = () => {
                   step={0.001}
                   thumbLabels={['Min', 'Max']}
                   onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
+                />
+                <OpacitySlider
+                  label="Layer Opacity"
+                  defaultValue={100}
+                  minValue={0}
+                  maxValue={100}
+                  step={1}
+                  onChange={(value) => handleOpacityChange(fullLayerName, value as number)}
                 />
               </div>
             }  

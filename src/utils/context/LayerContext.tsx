@@ -13,6 +13,7 @@ interface LayerContextType {
   toggleLayerVisibility: (layer: string) => void;
   updateStyle: (layer: string, styleConfig: StyleConfig) => Promise<void>;
   updateRampValues: (layer: string, min: number, max: number) => Promise<void>;
+  updateLayerOpacity: (layer: string, opacity: number) => void;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -127,6 +128,7 @@ class CesiumLayerManager {
     if (existingLayer) {
       const index = this.viewer.imageryLayers.indexOf(existingLayer);
       const show = existingLayer.show;
+      const opacity = existingLayer.alpha;
 
       const newProvider = new Cesium.WebMapServiceImageryProvider({
         url: mapServerWmsUrl,
@@ -147,6 +149,7 @@ class CesiumLayerManager {
 
       const newLayer = new Cesium.ImageryLayer(newProvider);
       newLayer.show = show;
+      newLayer.alpha = opacity;
 
       this.viewer.imageryLayers.remove(existingLayer, true);
       this.viewer.imageryLayers.add(newLayer, index);
@@ -168,13 +171,22 @@ class CesiumLayerManager {
     })
     .join(';');
   }
+
+
+  updateLayerOpacity(layerId: string, opacity: number) {
+    if (!this.viewer) return;
+
+    const layer = this.layerMap.get(layerId);
+    if (layer) {
+      layer.alpha = opacity;
+    }
+  }
 }
 
 
 export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedLayers, setSelectedLayers] = useState<string[]>([]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
-  // const styleContext = useStyle();
   const { viewer } = useViewer();
   const cesiumManagerRef = useRef<CesiumLayerManager | null>(null);
 
@@ -240,6 +252,15 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
 
+  const updateLayerOpacity = (layer: string, opacity: number) => {
+    try {
+      cesiumManagerRef.current?.updateLayerOpacity(layer, opacity);
+    } catch (error) {
+      console.error(`Error updating opacity for layer ${layer}:`, error);
+    }
+  }
+
+
   return (
     <LayerContext.Provider 
       value={{ 
@@ -250,7 +271,8 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         reorderLayers, 
         toggleLayerVisibility,
         updateStyle,
-        updateRampValues
+        updateRampValues,
+        updateLayerOpacity
       }}
     >
       {children}
