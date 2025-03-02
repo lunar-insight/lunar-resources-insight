@@ -14,6 +14,16 @@ $heading-item-min-height: 3rem;
   overflow-y: auto;
   overflow-x: hidden;
 
+  &__disclosure-wrapper {
+    display: flex;
+    flex-grow: 1;
+    position: relative;
+  }
+
+  &__disclosure {
+    width: 100%;
+  }
+
   &__center-text {
     position: absolute;
     top: 50%;
@@ -60,8 +70,17 @@ $heading-item-min-height: 3rem;
       align-items: center;
       gap: 0.75rem;
       height: auto;
-      width: auto;
+      width: 100%;
       min-height: $heading-item-min-height;
+      position: relative;
+      
+      &.disclosure-expanded {
+        flex-direction: row !important;
+      }
+
+      &.expanded {
+        padding-bottom: 0.5rem;
+      }
 
       &__drag {
         pointer-events: none;
@@ -106,8 +125,14 @@ $heading-item-min-height: 3rem;
       }
 
       &__remove-layer-wrapper {
-        width: auto;
-        height: auto;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        height: 100%;
+      }
+
+      .react-aria-Heading {
+        margin: 0;
       }
     }
 

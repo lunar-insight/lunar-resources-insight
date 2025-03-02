@@ -1,7 +1,8 @@
 import React, {ReactNode, useState } from 'react';
 import {
   GridListItemProps, GridListProps,
-  Button, GridList, GridListItem, useDragAndDrop 
+  Button, GridList, GridListItem, useDragAndDrop,
+  Disclosure, DisclosurePanel, Heading 
 } from 'react-aria-components';
 import './GridListLayerComponent.scss';
 import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
@@ -93,21 +94,68 @@ export function GridListLayerItem<T extends { id: string | number }>({
   layerId,
   ...props 
 }: GridListLayerItemProps<T> & { textValue: string; layerId: string }) {
-  const [isExpanded, setIsExpanded] = useState(false);
   const { visibleLayers, toggleLayerVisibility } = useLayerContext();
   
   let textValue = typeof children === 'string' ? children : undefined;
   
-  const toggleAccordion = () => {
-    setIsExpanded(!isExpanded);
-  };
-  
   return (
     <GridListItem textValue={textValue} className='grid-list-layer-component__grid-list-item' {...props}>
       {({ selectionMode, selectionBehavior }) => (
-        <>
+        accordionContent ? (
+          // With disclosure/accordion content
+          <Disclosure className="grid-list-layer-component__disclosure">
+            {({ isExpanded }) => (
+              <>
+                <div className='grid-list-layer-component__grid-list-item__header'>
+                  <div className='grid-list-layer-component__grid-list-item__header__drag'>≡</div>
+                  
+                  {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
+                    <LayerVisibilityCheckbox 
+                      slot="selection"
+                      isSelected={visibleLayers.has(layerId)}
+                      onChange={() => toggleLayerVisibility(layerId)}
+                    />
+                  )}
+                  
+                  <div className="grid-list-layer-component__grid-list-item__header__item-text">
+                    {children}
+                  </div>
+                  
+                  <Heading>
+                    <Button 
+                      slot="trigger"
+                      className='grid-list-layer-component__grid-list-item__header__accordion-header'
+                    >
+                      <i className='grid-list-layer-component__grid-list-item__header__accordion-header__icon material-symbols-outlined'>
+                        {isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'}
+                      </i>
+                      <span className='grid-list-layer-component__grid-list-item__header__accordion-header__text'>
+                        {isExpanded ? 'Hide' : 'Show'}
+                      </span>
+                    </Button>
+                  </Heading>
+                  
+                  <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper'>
+                    <RemoveLayerButton onPress={onRemove} />
+                  </div>
+                </div>
+                
+                <DisclosurePanel 
+                  className={`grid-list-layer-component__grid-list-item__accordion-content-wrapper ${
+                    isExpanded ? 'expanded' : ''
+                  }`}
+                >
+                  <div className='grid-list-layer-component__grid-list-item__accordion-content-wrapper__main'>
+                    {accordionContent}
+                  </div>
+                </DisclosurePanel>
+              </>
+            )}
+          </Disclosure>
+        ) : (
           <div className='grid-list-layer-component__grid-list-item__header'>
-            <Button slot="drag" className='grid-list-layer-component__grid-list-item__header__drag'>≡</Button>
+            <div className='grid-list-layer-component__grid-list-item__header__drag'>≡</div>
+            
             {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
               <LayerVisibilityCheckbox 
                 slot="selection"
@@ -115,40 +163,16 @@ export function GridListLayerItem<T extends { id: string | number }>({
                 onChange={() => toggleLayerVisibility(layerId)}
               />
             )}
+            
             <div className="grid-list-layer-component__grid-list-item__header__item-text">
               {children}
             </div>
-            {accordionContent && (
-              <Button
-                onPress={toggleAccordion}
-                aria-expanded={isExpanded}
-                className='grid-list-layer-component__grid-list-item__header__accordion-header'
-              >
-                <i className='grid-list-layer-component__grid-list-item__header__accordion-header__icon material-symbols-outlined'>
-                  {isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'}
-                </i>
-                <span className='grid-list-layer-component__grid-list-item__header__accordion-header__text'>
-                  {isExpanded ? 'Hide' : 'Show'}
-                </span>                
-              </Button>
-            )}
+            
             <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper'>
-              <RemoveLayerButton
-                onPress={onRemove}
-              />
+              <RemoveLayerButton onPress={onRemove} />
             </div>
           </div>
-          {/* Always render accordion content */}
-          {accordionContent && (
-            <div 
-              className={`grid-list-layer-component__grid-list-item__accordion-content-wrapper ${isExpanded ? 'expanded' : ''}`}
-            >
-              <div className='grid-list-layer-component__grid-list-item__accordion-content-wrapper__main'>
-                {accordionContent}
-              </div>
-            </div>
-          )}
-        </>
+        )
       )}
     </GridListItem>
   );
