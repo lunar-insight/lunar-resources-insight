@@ -6,7 +6,7 @@ import {
 } from 'react-aria-components';
 import './GridListLayerComponent.scss';
 import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
-import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox';
+import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox/LayerVisibilityCheckbox';
 import { useLayerContext } from 'utils/context/LayerContext';
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
