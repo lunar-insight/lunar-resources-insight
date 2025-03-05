@@ -9,6 +9,7 @@ import { layersConfig, mapServerWorkspaceName } from '../../../geoConfigExporter
 import LayerGradientSelect from '../../ui/LayerGradientSelect/LayerGradientSelect'
 import { ColorRampSlider } from '../../layout/Slider/ColorRampSlider/ColorRampSlider';
 import OpacitySlider from '../../layout/Slider/OpacitySlider/OpacitySlider';
+import { RangeFilterCheckbox } from '../../layout/Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -121,15 +122,18 @@ const ChemicalElementsSection: React.FC = () => {
               <div className='chemical-section__accordion-content'>
                 Description: {item.atomicNumber}
                 <LayerGradientSelect layerId={fullLayerName}/>
-                <ColorRampSlider
-                  label="Color Ramp Values"
-                  defaultValue={[layerConfig.min, layerConfig.max]}
-                  minValue={layerConfig.min}
-                  maxValue={layerConfig.max}
-                  step={0.001}
-                  thumbLabels={['Min', 'Max']}
-                  onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
-                />
+                <div className='chemical-section__accordion-content__ramp-container'>
+                  <ColorRampSlider
+                    label="Color Ramp Values"
+                    defaultValue={[layerConfig.min, layerConfig.max]}
+                    minValue={layerConfig.min}
+                    maxValue={layerConfig.max}
+                    step={0.001}
+                    thumbLabels={['Min', 'Max']}
+                    onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
+                  />
+                  <RangeFilterCheckbox />
+                </div>
                 <OpacitySlider
                   label="Layer Opacity"
                   defaultValue={100}
