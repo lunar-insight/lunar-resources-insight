@@ -5,11 +5,12 @@ import ModalOverlayContainer from './../../layout/ModalOverlayContainer/ModalOve
 import PeriodicTable, { Element } from '../submenu/PeriodicTable/PeriodicTable'
 import { GridListLayer, GridListLayerItem } from '../../layout/GridListLayerComponent/GridListLayerComponent';
 import { useLayerContext } from '../../../utils/context/LayerContext';
-import { layersConfig, mapServerWorkspaceName } from '../../../geoConfigExporter';
+import { layersConfig } from '../../../geoConfigExporter';
 import LayerGradientSelect from '../../ui/LayerGradientSelect/LayerGradientSelect'
 import { ColorRampSlider } from '../../layout/Slider/ColorRampSlider/ColorRampSlider';
 import OpacitySlider from '../../layout/Slider/OpacitySlider/OpacitySlider';
 import { RangeFilterCheckbox } from '../../layout/Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
+import { layerStatsService } from '../../../services/LayerStatsService';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,49 +25,71 @@ const ChemicalElementsSection: React.FC = () => {
     setIsModalOpen(false);
   };
 
+
   const handleElementSelection = (element: Element) => {
-    setSelectedElements(prev => {
-      const index = prev.findIndex(e => e.id === element.atomicNumber);
+    const elementWithId = { ...element, id: element.atomicNumber };
+    const elementName = element.name.toLowerCase();
+    const availableLayers = Object.entries(layersConfig.layers)
+      .filter(([_, config]) =>
+        config.category === 'chemical' &&
+        config.element === elementName
+      );
 
-      // If clicked element on ptable is not on the list, its added in it
-      if (index === -1) {
-        const newElements = [...prev, { ...element, id: element.atomicNumber }];
-        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
-        addLayer(fullLayerName)
-        return newElements;
+    if (availableLayers.length === 0) {
+      console.warn(`No layers found for element ${element.name}`);
+      return;
+    }
 
-      // If clicked element is already in the list (already selected), it's removed from the list
-      } else {
-        const newElements = prev.filter(e => e.id !== element.atomicNumber);
-        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
-        removeLayer(fullLayerName);
-        return newElements;
-      }
-    });
+    const elementSelected = selectedElements.some(
+      el => el.id === element.atomicNumber
+    );
+
+    if (!elementSelected) {
+      // Add every layer available for that element
+      availableLayers.forEach(([layerId, _]) => {
+        addLayer(layerId);
+      });
+
+      setSelectedElements(prev => [...prev, elementWithId]);
+    } else {
+      // Delete layers from that element
+      availableLayers.forEach(([layerId, _]) => {
+        removeLayer(layerId);
+      });
+
+      setSelectedElements(prev =>
+        prev.filter(el => el.id !== element.atomicNumber)
+      );
+    }
   };
 
   const handleReorder = (newItems: (Element & { id: number })[]) => {
     setSelectedElements(newItems);
 
-    // Map the new selected elements into layer names
-    const newSelectedLayers = newItems.map(item => {
-      const layerConfig = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
-      return `${mapServerWorkspaceName}:${layerConfig.layer}`;
-    });
+    // Get all layer for the selected elements
+    const newLayerIds: string[] = [];
+
+    newItems.forEach(item => {
+      const elementName= item.name.toLowerCase();
+      const elementLayers = layerStatsService.getLayersByElement(elementName);
+      const layerIds = elementLayers.map(([layerId, _]) => layerId);
+      newLayerIds.push(...layerIds)
+    })
 
     // Update the layers order in the context
-    reorderLayers(newSelectedLayers);
+    reorderLayers(newLayerIds);
   }
 
   const handleRemoveElement = (id: number) => {
     setSelectedElements(prev => {
       const element = prev.find(e => e.id === id);
       if (element) {
-        const layerConfig = layersConfig.chemicalElementLayer[element.name.toLowerCase()]['1'];
-        const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
-        removeLayer(fullLayerName);
+        const elementName = element.name.toLowerCase();
+        const elementLayers = layerStatsService.getLayersByElement(elementName);
+
+        elementLayers.forEach(([layerId, _]) => {
+          removeLayer(layerId);
+        });
       }
       return prev.filter(e => e.id !== id);
     });
@@ -109,28 +132,38 @@ const ChemicalElementsSection: React.FC = () => {
         centerText='No geographic layer selected, choose one or multiple above.'
       >
         {(item: Element & { id: number }) => {
-          const layerConfig = layersConfig.chemicalElementLayer[item.name.toLowerCase()]['1'];
-          const fullLayerName = `${mapServerWorkspaceName}:${layerConfig.layer}`;
+          const elementName = item.name.toLowerCase();
+          const [layerId, layerConfig] = Object.entries(layersConfig.layers)
+            .find(([_, config]) => 
+              config.category === 'chemical' &&
+              config.element === elementName
+            ) || [null, null];
+          
+          if (!layerId || !layerConfig) {
+            return null;
+          }
+
+          const stats = layerStatsService.getLayerStats(layerId);
 
           return (
             <GridListLayerItem 
             key={item.id}
             textValue={`${item.name} (${item.symbol})`}
             onRemove={() => handleRemoveElement(item.id)}
-            layerId={fullLayerName}
+            layerId={layerId}
             accordionContent={
               <div className='chemical-section__accordion-content'>
                 Description: {item.atomicNumber}
-                <LayerGradientSelect layerId={fullLayerName}/>
+                <LayerGradientSelect layerId={layerId}/>
                 <div className='chemical-section__accordion-content__ramp-container'>
                   <ColorRampSlider
                     label="Color Ramp Values"
-                    defaultValue={[layerConfig.min, layerConfig.max]}
-                    minValue={layerConfig.min}
-                    maxValue={layerConfig.max}
+                    defaultValue={[stats.min, stats.max]}
+                    minValue={layerConfig.metadata?.min || 0}
+                    maxValue={layerConfig.metadata?.max || 100}
                     step={0.001}
                     thumbLabels={['Min', 'Max']}
-                    onChange={(values) => handleRampValueChange(fullLayerName, values as number[])}
+                    onChange={(values) => handleRampValueChange(layerId, values as number[])}
                   />
                   <RangeFilterCheckbox />
                 </div>
@@ -140,7 +173,7 @@ const ChemicalElementsSection: React.FC = () => {
                   minValue={0}
                   maxValue={100}
                   step={1}
-                  onChange={(value) => handleOpacityChange(fullLayerName, value as number)}
+                  onChange={(value) => handleOpacityChange(layerId, value as number)}
                 />
               </div>
             }  

@@ -1,31 +1,43 @@
 {
-  "chemicalElementLayer": {
-    "calcium": {
-      "1": {
-        "layer": "global20ppd_calcium",
-        "min": 7.2267388910919,
-        "max": 13.20825231297
-      } 
-    },
-    "iron": {
-      "1": {
-        "layer": "global20ppd_iron",
-        "min": 2.856382407782,
-        "max": 18.416580110917
+  "layers": {
+    "calcium_primary": {
+      "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Ca_IAU2015_COG.tif",
+      "category": "chemical",
+      "element": "calcium",
+      "displayName": "Calcium (Primary)",
+      "metadata": {
+        "source": "NASA",
+        "resolution": "20ppd"
       }
     },
-    "magnesium": {
-      "1": {
-        "layer": "global20ppd_magnesium",
-        "min": 2.3578183256022,
-        "max": 9.4609746189685
+    "iron_primary": {
+      "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Fe_IAU2015_COG.tif",
+      "category": "chemical",
+      "element": "iron",
+      "displayName": "Iron (Primary)",
+      "metadata": {
+        "source": "NASA",
+        "resolution": "20ppd"
       }
     },
-    "titanium": {
-      "1": {
-        "layer": "global20ppd_titanium",
-        "min": 0.10929474573047,
-        "max": 4.5005753084526
+    "magnesium_primary": {
+      "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Mg_IAU2015_COG.tif",
+      "category": "chemical",
+      "element": "magnesium",
+      "displayName": "Magnesium (Primary)",
+      "metadata": {
+        "source": "NASA",
+        "resolution": "20ppd"
+      }
+    },
+    "titanium_primary": {
+      "filename": "chemical_elements/Global20ppd_LPGRS_geotiff_Ti_IAU2015_COG.tif",
+      "category": "chemical",
+      "element": "titanium",
+      "displayName": "Titanium (Primary)",
+      "metadata": {
+        "source": "NASA",
+        "resolution": "20ppd"
       }
     }
   }

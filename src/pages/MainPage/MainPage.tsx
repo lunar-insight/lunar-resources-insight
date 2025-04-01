@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import SectionNavigation, { dialogs } from '../../components/navigation/SectionNavigation/SectionNavigation';
 import './MainPage.scss';
 import CesiumComponent from '../../components/viewer/CesiumComponent/CesiumComponent';
@@ -6,9 +6,19 @@ import { BoundaryRefProvider } from '../../components/reference/BoundaryRefProvi
 import { DialogProvider, DialogRenderer } from '../../utils/DialogWindowManagement';
 import { LayerProvider } from '../../utils/context/LayerContext';
 import { ViewerProvider } from 'utils/context/ViewerContext';
+import { initializeLayerStats } from '../../services/LayerStatsService';
 
 const MainPage = () => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const init = async () => {
+      await initializeLayerStats();
+      console.log('Layer stats initialized');
+    };
+
+    init();
+  }, []);
   
   return (
     <BoundaryRefProvider value={viewerContainerRef}>

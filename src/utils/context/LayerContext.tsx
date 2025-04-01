@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useRef } from 'react';
 import { StyleConfig } from 'types/style.types';
 import { useViewer } from './ViewerContext';
 import * as Cesium from 'cesium';
-import { mapServerWmsUrl } from '../../geoConfigExporter';
+import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics } from '../../geoConfigExporter';
 
 interface LayerContextType {
   selectedLayers: string[];
@@ -22,14 +22,17 @@ class CesiumLayerManager {
 
   private layerMap: Map<string, Cesium.ImageryLayer>;
   private layerStyleConfig: Map<string, StyleConfig>;
+  private layerStats: Map<string, { min: number; max: number }>;
+  private tileCache = new Map<string, string>();
 
   constructor(private viewer: Cesium.Viewer | null) {
     this.layerMap = new Map();
     this.layerStyleConfig = new Map();
+    this.layerStats = new Map();
   }
 
 
-  addLayer(layerId: string) {
+  async addLayer(layerId: string) {
     if (!this.viewer) return;
 
     if (this.layerMap.has(layerId)) {
@@ -40,25 +43,43 @@ class CesiumLayerManager {
       return;
     }
 
-    const imageryProvider = new Cesium.WebMapServiceImageryProvider({
-      url: mapServerWmsUrl,
-      layers: layerId,
-      parameters: {
-        service: 'WMS',
-        version: '1.1.1',
-        request: 'GetMap',
-        format: 'image/png',
-        transparent: true,
-        styles: '',
-        srs: 'IAU:30100'
-      },
-      tileWidth: 256,
-      tileHeight: 256,
-    });
+    const layerConfig = layersConfig.layers[layerId];
+    if (!layerConfig) {
+      console.error(`Layer configuration not found for ${layerId}`);
+      return;
+    }
 
-    const layer = new Cesium.ImageryLayer(imageryProvider);
-    this.viewer.imageryLayers.add(layer);
-    this.layerMap.set(layerId, layer);
+    try {
+      const { bounds } = await fetchCogInfo(layerConfig.filename);
+
+      const { min, max } = await fetchCogStatistics(layerConfig.filename);
+
+      const rectangle = Cesium.Rectangle.fromDegrees(
+        bounds[0], // West
+        bounds[1], // South
+        bounds[2], // East
+        bounds[3]  // North
+      )
+
+      this.layerStats.set(layerId, { min, max });
+
+      const imageryProvider = new Cesium.UrlTemplateImageryProvider({
+        url: buildCogTileUrl(layerConfig.filename, {
+          rescale: [min, max]
+        }),
+        tilingScheme: new Cesium.GeographicTilingScheme(),
+        minimumLevel: 0,
+        maximumLevel: 20,
+        rectangle: rectangle,
+        credit: `${layerConfig.displayName || layerId}`
+      });
+
+      const layer = new Cesium.ImageryLayer(imageryProvider);
+      this.viewer.imageryLayers.add(layer);
+      this.layerMap.set(layerId, layer);
+    } catch (error) {
+      console.error(`Failed to add layer ${layerId}:`, error);
+    }
   }
 
 
@@ -104,24 +125,32 @@ class CesiumLayerManager {
 
 
   updateRampValues(layerId: string, min: number, max: number) {
-    const currentStyle = this.layerStyleConfig.get(layerId);
-    if (currentStyle) {
-      const updatedStyle = {
-        ...currentStyle,
-        min,
-        max
-      };
-      this.layerStyleConfig.set(layerId, updatedStyle);
-      this.updateLayerStyle(layerId, updatedStyle);
-    }
+    const currentStats = this.layerStats.get(layerId);
+    const currentStyle = this.layerStyleConfig.get(layerId) || {
+      type: 'gray',
+      colors: [],
+      min: currentStats?.min || 0,
+      max: currentStats?.max || 100
+    };
+    
+    const updatedStyle = {
+      ...currentStyle,
+      min,
+      max
+    };
+
+    this.layerStyleConfig.set(layerId, updatedStyle);
+    this.updateLayerStyle(layerId, updatedStyle);
+    
   }
 
-  
   updateLayerStyle(layerId: string, styleConfig: StyleConfig) {
     if (!this.viewer) return;
 
-    if (styleConfig.colors.length !== 9 && styleConfig.colors.length !== 11) {
-      throw new Error(`Invalid number of colors: ${styleConfig.colors.length}`);
+    const layerConfig = layersConfig.layers[layerId];
+    if (!layerConfig) {
+      console.error(`Layer configuration not found for ${layerId}`);
+      return;
     }
 
     const existingLayer = this.layerMap.get(layerId);
@@ -129,22 +158,17 @@ class CesiumLayerManager {
       const index = this.viewer.imageryLayers.indexOf(existingLayer);
       const show = existingLayer.show;
       const opacity = existingLayer.alpha;
+      const bounds = existingLayer.imageryProvider.rectangle;
 
-      const newProvider = new Cesium.WebMapServiceImageryProvider({
-        url: mapServerWmsUrl,
-        layers: layerId,
-        parameters: {
-          service: 'WMS',
-          version: '1.1.1',
-          request: 'GetMap',
-          format: 'image/png',
-          transparent: true,
-          styles: `chemical_element_${styleConfig.type}`,
-          env: this.generateEnvParams(styleConfig),
-          srs: 'IAU:30100'
-        },
-        tileWidth: 256,
-        tileHeight: 256
+      const newProvider = new Cesium.UrlTemplateImageryProvider({
+        url: buildCogTileUrl(layerConfig.filename, {
+          colormap: styleConfig.type === 'gray' ? undefined : styleConfig.type,
+          rescale: [styleConfig.min, styleConfig.max]
+        }),
+        tilingScheme: new Cesium.GeographicTilingScheme(),
+        minimumLevel: 0,
+        maximumLevel: 20,
+        rectangle: bounds
       });
 
       const newLayer = new Cesium.ImageryLayer(newProvider);
@@ -155,8 +179,7 @@ class CesiumLayerManager {
       this.viewer.imageryLayers.add(newLayer, index);
       this.layerMap.set(layerId, newLayer);
 
-      // Save style config for the possibility of updating color ramp values
-      this.layerStyleConfig.set(layerId, styleConfig)
+      this.layerStyleConfig.set(layerId, styleConfig);
     }
   }
 
@@ -170,6 +193,24 @@ class CesiumLayerManager {
         return `color${index + 1}:${color};quantity${index + 1}:${quantity}`;
     })
     .join(';');
+  }
+
+  // TODO need to see if necessary
+  private getCachedTileUrl(layerId: string, style: StyleConfig): string {
+    const cacheKey = `${layerId}-${JSON.stringify(style)}`;
+
+    if (this.tileCache.has(cacheKey)) {
+      return this.tileCache.get(cacheKey)!;
+    }
+
+    const layerConfig = layersConfig.layers[layerId];
+    const url = buildCogTileUrl(layerConfig.filename, {
+      colormap: style.type === 'gray' ? undefined : style.type,
+      rescale: [style.min, style.max]
+    });
+
+    this.tileCache.set(cacheKey, url);
+    return url;
   }
 
 
