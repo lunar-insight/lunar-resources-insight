@@ -115,7 +115,7 @@ class CesiumLayerManager {
     });
 
     // Reorder
-    layerIds.forEach(layerId => {
+    [...layerIds].reverse().forEach(layerId => {
       const layer = this.layerMap.get(layerId);
       if (layer) {
         imageryLayers.add(layer);
@@ -238,7 +238,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 
   const addLayer = (layer: string) => {
-    setSelectedLayers(prev => [...prev, layer]);
+    setSelectedLayers(prev => [layer, ...prev]);
     setVisibleLayers(prev => new Set(prev).add(layer));
     cesiumManagerRef.current?.addLayer(layer);
   };

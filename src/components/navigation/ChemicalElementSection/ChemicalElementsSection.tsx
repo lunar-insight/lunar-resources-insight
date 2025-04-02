@@ -50,7 +50,7 @@ const ChemicalElementsSection: React.FC = () => {
         addLayer(layerId);
       });
 
-      setSelectedElements(prev => [...prev, elementWithId]);
+      setSelectedElements(prev => [elementWithId, ...prev]);
     } else {
       // Delete layers from that element
       availableLayers.forEach(([layerId, _]) => {
