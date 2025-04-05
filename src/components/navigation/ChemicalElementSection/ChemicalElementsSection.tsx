@@ -165,7 +165,7 @@ const ChemicalElementsSection: React.FC = () => {
                     thumbLabels={['Min', 'Max']}
                     onChange={(values) => handleRampValueChange(layerId, values as number[])}
                   />
-                  <RangeFilterCheckbox />
+                  <RangeFilterCheckbox layerId={layerId} />
                 </div>
                 <OpacitySlider
                   label="Layer Opacity"

@@ -46,11 +46,18 @@ export function buildCogTileUrl(filename: string, options: {
   rescale?: [number, number];
   bidx?: number[];
   expression?: string;
+  nodata?: number;
+  return_mask?: boolean;
+  format?: string;
 } = {}): string {
   const fileUrl = `${workspacePath}/${filename}`;
   const encodedFileUrl = safeEncodeURI(fileUrl);
   
   let url = `${tilerEndpoints.tiles}?url=${encodedFileUrl}`;
+
+  if (options.colormap) {
+    url += `&colormap=${encodeURIComponent(options.colormap)}`;
+  }
 
   if (options.colormap) {
     url += `&colormap_name=${options.colormap}`;
@@ -66,6 +73,14 @@ export function buildCogTileUrl(filename: string, options: {
 
   if (options.expression) {
     url += `&expression=${encodeURIComponent(options.expression)}`;
+  }
+
+  if (options.nodata !== undefined) {
+    url += `&nodata=${options.nodata}`;
+  }
+
+  if (options.format) {
+    url += `&format=${options.format}`;
   }
 
   return url;

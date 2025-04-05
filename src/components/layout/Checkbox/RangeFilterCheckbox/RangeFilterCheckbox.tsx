@@ -1,23 +1,62 @@
-import React from 'react';
-import { Checkbox, CheckboxProps } from 'react-aria-components';
+import React, { useState } from 'react';
+import { Checkbox, Label } from 'react-aria-components';
 import './RangeFilterCheckbox.scss';
+import { useLayerContext } from 'utils/context/LayerContext';
 
-export function RangeFilterCheckbox({ children, ...props}: CheckboxProps) {
-  return (
-    <Checkbox {...props} className='range-filter-checkbox'>
-      {({ isSelected, isIndeterminate }) => (
-        <>
-          <div className='checkbox'>
-            {(isSelected || isIndeterminate) && (
-              <svg viewBox="0 0 18 18" aria-hidden="true">
-                <polyline points="1 9 7 14 15 4" />
-              </svg>
-            )}
-          </div>
-          <span>Hide areas out of range</span>
-        </>
-      )}
-      
-    </Checkbox>
-  );
+interface RangeFilterCheckboxProps {
+  layerId?: string;
 }
+
+export const RangeFilterCheckbox: React.FC<RangeFilterCheckboxProps> = ({ layerId }) => {
+  const [isChecked, setIsChecked] = useState(false);
+  const { updateLayerRangeFilter } = useLayerContext();
+
+  if (!layerId) {
+    return (
+      <div className="range-filter-checkbox-container">
+        <Checkbox isDisabled className="range-filter-checkbox">
+          {({ isSelected }) => (
+            <>
+              <div className='checkbox'>
+                {isSelected && (
+                  <svg viewBox="0 0 18 18">
+                    <polyline points="1 9 7 14 17 4" />
+                  </svg>
+                )}
+              </div>
+              <Label>Filter values outside range</Label>
+            </>
+          )}
+        </Checkbox>
+      </div>
+    );
+  }
+
+  const handleChange = (isSelected: boolean) => {
+    setIsChecked(isSelected);
+    updateLayerRangeFilter(layerId, isSelected);
+  };
+
+  return (
+    <div className="range-filter-checkbox-container">
+      <Checkbox
+        isSelected={isChecked}
+        onChange={handleChange}
+        className="range-filter-checkbox"
+      >
+        {({ isSelected }) => (
+          <>
+            <div className="checkbox">
+              {isSelected && (
+                <svg viewBox="0 0 18 18">
+                  <polyline points="1 9 7 14 17 4" />
+                </svg>
+              )}
+            </div>
+            <Label>Filter values outside range</Label>
+          </>
+        )}
+      </Checkbox>
+    </div>
+  );
+};

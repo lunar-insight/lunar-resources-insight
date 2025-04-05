@@ -14,6 +14,7 @@ interface LayerContextType {
   updateStyle: (layer: string, styleConfig: StyleConfig) => Promise<void>;
   updateRampValues: (layer: string, min: number, max: number) => Promise<void>;
   updateLayerOpacity: (layer: string, opacity: number) => void;
+  updateLayerRangeFilter: (layer: string, enabled: boolean) => void;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -24,11 +25,13 @@ class CesiumLayerManager {
   private layerStyleConfig: Map<string, StyleConfig>;
   private layerStats: Map<string, { min: number; max: number }>;
   private tileCache = new Map<string, string>();
+  private rangeFilterEnabled: Map<string, boolean>;
 
   constructor(private viewer: Cesium.Viewer | null) {
     this.layerMap = new Map();
     this.layerStyleConfig = new Map();
     this.layerStats = new Map();
+    this.rangeFilterEnabled = new Map();
   }
 
 
@@ -74,7 +77,9 @@ class CesiumLayerManager {
         credit: `${layerConfig.displayName || layerId}`
       });
 
-      const layer = new Cesium.ImageryLayer(imageryProvider);
+      const layer = new Cesium.ImageryLayer(imageryProvider, {
+        alpha: 1.0
+      });
       this.viewer.imageryLayers.add(layer);
       this.layerMap.set(layerId, layer);
     } catch (error) {
@@ -146,13 +151,10 @@ class CesiumLayerManager {
 
   updateLayerStyle(layerId: string, styleConfig: StyleConfig) {
     if (!this.viewer) return;
-
+    
     const layerConfig = layersConfig.layers[layerId];
-    if (!layerConfig) {
-      console.error(`Layer configuration not found for ${layerId}`);
-      return;
-    }
-
+    if (!layerConfig) return;
+    
     const existingLayer = this.layerMap.get(layerId);
     if (existingLayer) {
       const index = this.viewer.imageryLayers.indexOf(existingLayer);
@@ -160,25 +162,43 @@ class CesiumLayerManager {
       const opacity = existingLayer.alpha;
       const bounds = existingLayer.imageryProvider.rectangle;
 
+      const rangeFilterEnabled = this.rangeFilterEnabled.get(layerId) || false;
+
+      const options: any = {
+        colormap: styleConfig.type === 'gray' ? undefined : styleConfig.type,
+        rescale: [styleConfig.min, styleConfig.max]
+      };
+
+      if (rangeFilterEnabled) {
+        options.expression = `where((b1 >= ${styleConfig.min}) & (b1 <= ${styleConfig.max}), b1, 0)`;
+        options.nodata = 0;
+        options.return_mask = true;
+      }
+
       const newProvider = new Cesium.UrlTemplateImageryProvider({
-        url: buildCogTileUrl(layerConfig.filename, {
-          colormap: styleConfig.type === 'gray' ? undefined : styleConfig.type,
-          rescale: [styleConfig.min, styleConfig.max]
-        }),
+        url: buildCogTileUrl(layerConfig.filename, options),
         tilingScheme: new Cesium.GeographicTilingScheme(),
         minimumLevel: 0,
         maximumLevel: 20,
-        rectangle: bounds
+        rectangle: bounds,
+        hasAlphaChannel: rangeFilterEnabled
       });
 
-      const newLayer = new Cesium.ImageryLayer(newProvider);
-      newLayer.show = show;
-      newLayer.alpha = opacity;
+      const layerOptions: any = {
+        show: show,
+        alpha: opacity
+      };
+
+      if (rangeFilterEnabled) {
+        layerOptions.colorToAlpha = new Cesium.Color(0, 0, 0, 1);
+        layerOptions.colorToAlphaThreshold = 0.0001;
+      }
+
+      const newLayer = new Cesium.ImageryLayer(newProvider, layerOptions);
 
       this.viewer.imageryLayers.remove(existingLayer, true);
       this.viewer.imageryLayers.add(newLayer, index);
       this.layerMap.set(layerId, newLayer);
-
       this.layerStyleConfig.set(layerId, styleConfig);
     }
   }
@@ -220,6 +240,16 @@ class CesiumLayerManager {
     const layer = this.layerMap.get(layerId);
     if (layer) {
       layer.alpha = opacity;
+    }
+  }
+
+  
+  updateLayerRangeFilter(layerId: string, enabled: boolean) {
+    this.rangeFilterEnabled.set(layerId, enabled)
+
+    const currentStyle = this.layerStyleConfig.get(layerId);
+    if (currentStyle) {
+      this.updateLayerStyle(layerId, currentStyle);
     }
   }
 }
@@ -302,6 +332,15 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }
 
 
+  const updateLayerRangeFilter = (layer: string, enabled: boolean) => {
+    try {
+      cesiumManagerRef.current?.updateLayerRangeFilter(layer, enabled);
+    } catch (error) {
+      console.error(`Error updating range filter for layer ${layer}:`, error)
+    }
+  };
+
+
   return (
     <LayerContext.Provider 
       value={{ 
@@ -313,7 +352,8 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toggleLayerVisibility,
         updateStyle,
         updateRampValues,
-        updateLayerOpacity
+        updateLayerOpacity,
+        updateLayerRangeFilter
       }}
     >
       {children}
