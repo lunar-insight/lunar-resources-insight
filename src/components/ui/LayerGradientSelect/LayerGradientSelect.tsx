@@ -16,15 +16,20 @@ interface LayerGradientSelectProps {
 }
 
 const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) => {
-  const { updateStyle } = useLayerContext();
+  const { updateStyle, getLayerStyle } = useLayerContext();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [buttonWidth, setButtonWidth] = useState<number>(0);
   const [selectedLayerGradient, setSelectedLayerGradient] = useState<string>('gray');
 
   // When the component mount
   useEffect(() => {
-    setSelectedLayerGradient('gray');
-  }, []);
+    const currentStyle = getLayerStyle(layerId);
+    if (currentStyle?.type) {
+      setSelectedLayerGradient(currentStyle.type);
+    } else {
+      setSelectedLayerGradient('gray');
+    }
+  }, [layerId, getLayerStyle]);
 
   useEffect(() => {
     const updateWidth = () => {
@@ -51,12 +56,13 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
   const handleGradientChange = (selectedValue: string) => {
     try {
       const stats = layerStatsService.getLayerStats(layerId);
+      const currentStyle = getLayerStyle(layerId)
 
       updateStyle(layerId, {
         type: selectedValue,
         colors: [],
-        min: stats.min,
-        max: stats.max
+        min: currentStyle?.min !== undefined ? currentStyle.min : stats.min,
+        max: currentStyle?.max !== undefined ? currentStyle.max : stats.max
       });
       setSelectedLayerGradient(selectedValue);
     } catch (error) {
@@ -80,7 +86,7 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
     <Select
       className="layer-gradient-select"
       onSelectionChange={(value) => handleGradientChange(value.toString())}
-      defaultSelectedKey="gray"
+      defaultSelectedKey={selectedLayerGradient}
     >
       <Label>Select a gradient</Label>
       <Button 

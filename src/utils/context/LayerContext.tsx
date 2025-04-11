@@ -16,6 +16,7 @@ interface LayerContextType {
   updateRampValues: (layer: string, min: number, max: number) => Promise<void>;
   updateLayerOpacity: (layer: string, opacity: number) => void;
   updateLayerRangeFilter: (layer: string, enabled: boolean) => void;
+  getLayerStyle: (layer: string) => StyleConfig | undefined;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -259,6 +260,10 @@ class CesiumLayerManager {
       this.updateLayerStyle(layerId, currentStyle);
     }
   }
+
+  getLayerStyleConfig(layerId: string): StyleConfig | undefined {
+    return this.layerStyleConfig.get(layerId);
+  }
 }
 
 
@@ -347,6 +352,10 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const getLayerStyle = (layer: string) => {
+    return cesiumManagerRef.current?.getLayerStyleConfig(layer);
+  }
+
 
   return (
     <LayerContext.Provider 
@@ -360,7 +369,8 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateStyle,
         updateRampValues,
         updateLayerOpacity,
-        updateLayerRangeFilter
+        updateLayerRangeFilter,
+        getLayerStyle
       }}
     >
       {children}
