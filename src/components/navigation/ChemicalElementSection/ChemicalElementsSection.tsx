@@ -145,6 +145,20 @@ const ChemicalElementsSection: React.FC = () => {
 
           const stats = layerStatsService.getLayerStats(layerId);
 
+          let sliderMinValue, sliderMaxValue, sliderStep;
+
+          if (stats.loaded) {
+            const range = stats.max - stats.min;
+            sliderMinValue = stats.min;
+            sliderMaxValue = stats.max;
+            sliderStep = Math.max(range / 1000, 0.001); // Minimum of 0.001
+          } else {
+            // Default value if stats are not loaded
+            sliderMinValue = 0;
+            sliderMaxValue = 100;
+            sliderStep = 0.001;
+          }
+
           return (
             <GridListLayerItem 
             key={item.id}
@@ -156,15 +170,20 @@ const ChemicalElementsSection: React.FC = () => {
                 Description: {item.atomicNumber}
                 <LayerGradientSelect layerId={layerId}/>
                 <div className='chemical-section__accordion-content__ramp-container'>
-                  <ColorRampSlider
-                    label="Color Ramp Values"
-                    defaultValue={[stats.min, stats.max]}
-                    minValue={layerConfig.metadata?.min || 0}
-                    maxValue={layerConfig.metadata?.max || 100}
-                    step={0.001}
-                    thumbLabels={['Min', 'Max']}
-                    onChange={(values) => handleRampValueChange(layerId, values as number[])}
-                  />
+
+                  {stats.loaded ? (
+                    <ColorRampSlider
+                      label="Color Ramp Values"
+                      defaultValue={[stats.min, stats.max]}
+                      minValue={sliderMinValue}
+                      maxValue={sliderMaxValue}
+                      step={sliderStep}
+                      thumbLabels={['Min', 'Max']}
+                      onChange={(values) => handleRampValueChange(layerId, values as number[])}
+                    />
+                  ) : (
+                    <div>Layer statistics not loaded, remove and re-add the element map...</div>
+                  )}
                   <RangeFilterCheckbox layerId={layerId} />
                 </div>
                 <OpacitySlider
