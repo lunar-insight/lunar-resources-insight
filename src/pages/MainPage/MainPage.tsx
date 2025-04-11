@@ -7,14 +7,22 @@ import { DialogProvider, DialogRenderer } from '../../utils/DialogWindowManageme
 import { LayerProvider } from '../../utils/context/LayerContext';
 import { ViewerProvider } from 'utils/context/ViewerContext';
 import { initializeLayerStats } from '../../services/LayerStatsService';
+import { initializeColormapService } from '../../services/ColormapService';
 
 const MainPage = () => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const init = async () => {
-      await initializeLayerStats();
-      console.log('Layer stats initialized');
+      try {
+        await Promise.all([
+          initializeLayerStats(),
+          initializeColormapService()
+        ]);
+        console.log('Services initialized');
+      } catch (error) {
+        console.error('Error initializing services:', error);
+      }
     };
 
     init();

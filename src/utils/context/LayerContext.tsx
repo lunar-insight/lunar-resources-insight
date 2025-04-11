@@ -3,6 +3,7 @@ import { StyleConfig } from 'types/style.types';
 import { useViewer } from './ViewerContext';
 import * as Cesium from 'cesium';
 import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics } from '../../geoConfigExporter';
+import { colormapService } from '../../services/ColormapService';
 
 interface LayerContextType {
   selectedLayers: string[];
@@ -170,9 +171,12 @@ class CesiumLayerManager {
       };
 
       if (rangeFilterEnabled) {
-        options.expression = `where((b1 >= ${styleConfig.min}) & (b1 <= ${styleConfig.max}), b1, 0)`;
-        options.nodata = 0;
+        const nodataValue = -9999;
+
+        options.expression = `where((b1 >= ${styleConfig.min}) & (b1 <= ${styleConfig.max}), b1, ${nodataValue})`;
+        options.nodata = nodataValue;
         options.return_mask = true;
+        options.format = 'png';
       }
 
       const newProvider = new Cesium.UrlTemplateImageryProvider({
@@ -181,7 +185,8 @@ class CesiumLayerManager {
         minimumLevel: 0,
         maximumLevel: 20,
         rectangle: bounds,
-        hasAlphaChannel: rangeFilterEnabled
+        hasAlphaChannel: rangeFilterEnabled,
+        credit: `${layerConfig.displayName || layerId}`
       });
 
       const layerOptions: any = {
@@ -190,8 +195,10 @@ class CesiumLayerManager {
       };
 
       if (rangeFilterEnabled) {
-        layerOptions.colorToAlpha = new Cesium.Color(0, 0, 0, 1);
-        layerOptions.colorToAlphaThreshold = 0.0001;
+        const colorToMakeTransparent = colormapService.getColormapFirstColor(styleConfig.type);
+
+        layerOptions.colorToAlpha = colorToMakeTransparent;
+        layerOptions.colorToAlphaThreshold = 0.0001; // or 0.05
       }
 
       const newLayer = new Cesium.ImageryLayer(newProvider, layerOptions);

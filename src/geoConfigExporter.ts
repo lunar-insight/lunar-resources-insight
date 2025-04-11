@@ -79,6 +79,10 @@ export function buildCogTileUrl(filename: string, options: {
     url += `&nodata=${options.nodata}`;
   }
 
+  if (options.return_mask !== undefined) {
+    url += `&return_mask=${options.return_mask}`;
+  }
+
   if (options.format) {
     url += `&format=${options.format}`;
   }
@@ -243,6 +247,22 @@ export const getFormattedColormaps = () => {
     };
   });
 };
+
+
+export async function fetchColormapData(colormapName: string): Promise<Record<string, number[]>> {
+  const url = `${tilerEndpoints.colorMap.replace('{colormap}', colormapName)}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Error fetching colormap data: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Failed to fetch colormap data for ${colormapName}:`, error);
+    throw error;
+  }
+}
 
 export function getGradientPreviewUrl(colormap: string, width: number): string {
   return `${tilerEndpoints.colorMap.replace('{colormap}', colormap)}?format=png&width=${width}&height=30`;
