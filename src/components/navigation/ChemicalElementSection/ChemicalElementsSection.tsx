@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback, useRef } from 'react'
 import './ChemicalElementsSection.scss';
 import { Button } from 'react-aria-components';
 import ModalOverlayContainer from './../../layout/ModalOverlayContainer/ModalOverlayContainer';
@@ -16,6 +16,20 @@ const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
   const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const debouncedUpdateRampValues = useCallback((layerId: string, values: number[]) => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      if (values.length === 2) {
+        updateRampValues(layerId, values[0], values[1]);
+      }
+      debounceTimeoutRef.current = null;
+    }, 300);
+  }, [updateRampValues]);
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -96,9 +110,7 @@ const ChemicalElementsSection: React.FC = () => {
   };
 
   const handleRampValueChange = (layerId: string, values: number[]) => {
-    if (values.length === 2) {
-      updateRampValues(layerId, values[0], values[1]);
-    }
+    debouncedUpdateRampValues(layerId, values);
   };
 
   const handleOpacityChange = (layerId: string, value: number) => {
