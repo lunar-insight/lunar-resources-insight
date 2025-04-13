@@ -264,9 +264,20 @@ export async function fetchColormapData(colormapName: string): Promise<Record<st
   }
 }
 
-export function getGradientPreviewUrl(colormap: string, width: number): string {
-  return `${tilerEndpoints.colorMap.replace('{colormap}', colormap)}?format=png&width=${width}&height=30`;
-};
+/**
+ * Builds the URL to obtain a preview image of a color gradient
+ * @param colormapName Name of the colormap (ex: 'viridis', 'plasma', 'gray')
+ * @param width Image width in pixels
+ * @param height Image height in pixels (optional, default: 30)
+ * @returns Preview image URL
+ */
+export function buildGradientPreviewUrl(
+  colormapName: string, 
+  width: number, 
+  height: number = 30
+): string {
+  return `${tilerEndpoints.colorMap.replace('{colormap}', colormapName)}?format=png&width=${width}&height=${height}`;
+}
 
 function safeEncodeURI(uri: string): string {
   if (uri.includes('%20') || uri.includes('%3A')) {

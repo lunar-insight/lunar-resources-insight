@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Select, Button, Label, ListBox, ListBoxItem, Popover, SelectValue, ListBoxSection, Header } from "react-aria-components";
 import { useLayerContext } from 'utils/context/LayerContext';
 import { layerStatsService } from '../../../services/LayerStatsService';
-import { getFormattedColormaps, getGradientPreviewUrl } from '../../../geoConfigExporter';
+import { getFormattedColormaps } from '../../../geoConfigExporter';
+import { colormapService } from '../../../services/ColormapService';
 
 interface Gradient {
   category: string;
@@ -32,16 +33,16 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
   }, [layerId, getLayerStyle]);
 
   useEffect(() => {
-    const updateWidth = () => {
+    const updateButtonWidth = () => {
       if (buttonRef.current) {
         setButtonWidth(buttonRef.current.offsetWidth);
       }
     };
 
     // Initial measurement
-    updateWidth();
+    updateButtonWidth();
 
-    const resizeObserver = new ResizeObserver(updateWidth);
+    const resizeObserver = new ResizeObserver(updateButtonWidth);
     if (buttonRef.current) {
       resizeObserver.observe(buttonRef.current);
     }
@@ -50,8 +51,6 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
       resizeObserver.disconnect();
     };
   }, []);
-
-  const gradients = getFormattedColormaps();
 
   const handleGradientChange = (selectedValue: string) => {
     try {
@@ -70,6 +69,8 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
     }
   };
 
+  const gradients = getFormattedColormaps();
+
   if (gradients.length === 0) {
     console.error('No gradients available')
   }
@@ -82,6 +83,10 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
     return acc;
   }, {});
 
+  const getGradientUrl  = (colormapName: string) => {
+    return colormapService.getGradientUrl(colormapName);
+  };
+
   return (
     <Select
       className="layer-gradient-select"
@@ -93,7 +98,7 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
         ref={buttonRef}
         className="layer-gradient-select__button"
         style={{
-          '--selected-layer-gradient': `url('${getGradientPreviewUrl(selectedLayerGradient, buttonWidth)}')`,
+          '--selected-layer-gradient': `url('${getGradientUrl(selectedLayerGradient)}')`,
         } as React.CSSProperties}
       >
         <div className="layer-gradient-select__selected-value-wrapper">
@@ -118,7 +123,7 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
                   textValue={gradient.label}
                   className="layer-gradient-select__list-box-item"
                   style={{
-                    backgroundImage: `url('${getGradientPreviewUrl(gradient.value, buttonWidth)}')`
+                    backgroundImage: `url('${getGradientUrl(gradient.value)}')`
                   }}
                 >
                   {gradient.label}
