@@ -189,6 +189,8 @@ const ChemicalElementsSection: React.FC = () => {
                       defaultValue={[stats.min, stats.max]}
                       minValue={sliderMinValue}
                       maxValue={sliderMaxValue}
+                      absoluteMin={stats.min}
+                      absoluteMax={stats.max}
                       step={sliderStep}
                       thumbLabels={['Min', 'Max']}
                       onChange={(values) => handleRampValueChange(layerId, values as number[])}
