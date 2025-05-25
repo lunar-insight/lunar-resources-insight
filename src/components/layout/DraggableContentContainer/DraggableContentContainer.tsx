@@ -145,14 +145,12 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     }
   }, [isOpen]);
 
-  if (!isVisible) return null; // Linked to the SectionNavigation code
-
   return (
     <div 
       {...dialogProps} 
       ref={dialogRef} 
-      className="draggable-content-container"
-      style={containerStyle}       
+      className={`draggable-content-container ${!isVisible ? 'draggable-content-container__hidden' : ''}`}
+      style={isVisible ? containerStyle : undefined}       
     >
       <div {...moveProps} className="draggable-content-container__move-area">
         <h3 {...titleProps} className="draggable-content-container__move-area__title">{title}</h3>

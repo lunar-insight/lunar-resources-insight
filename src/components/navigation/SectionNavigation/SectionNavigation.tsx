@@ -46,7 +46,7 @@ const dialogsData = [
     name: 'lab_research', 
     label: 'Elements',
     dialogTitle: 'Chemical Elements', 
-    dialogContent: () => <ChemicalElementsSection /> // Function here, in order to create it only when the dialog is really opened
+    dialogContent: <ChemicalElementsSection />
   },
   /*
   { 
