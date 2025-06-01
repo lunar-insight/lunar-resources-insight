@@ -11,6 +11,7 @@ import { ColorRampSlider } from '../../layout/Slider/ColorRampSlider/ColorRampSl
 import OpacitySlider from '../../layout/Slider/OpacitySlider/OpacitySlider';
 import { RangeFilterCheckbox } from '../../layout/Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
 import { layerStatsService } from '../../../services/LayerStatsService';
+import { FeatureCheckbox } from '../../layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -126,6 +127,13 @@ const ChemicalElementsSection: React.FC = () => {
       >
         Open Periodic Table
       </Button>
+
+      {selectedElements.length > 0 && (
+        <div className='chemical-section__display-options'>
+          <FeatureCheckbox />
+        </div>
+      )}
+
       <ModalOverlayContainer
         isOpen={isModalOpen}
         onOpenChange={handleClosePeriodicTable}
