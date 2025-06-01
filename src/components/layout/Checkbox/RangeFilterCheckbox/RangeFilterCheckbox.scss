@@ -13,7 +13,7 @@
     color: var(--color-neutralVariant);
     forced-color-adjust: none;
 
-    .checkbox {
+    &__indicator {
       width: 1.143rem;
       height: 1.143rem;
       border: 2px solid var(--color-secondary);
@@ -35,23 +35,23 @@
       transition: all 200ms;
     }
 
-    &[data-pressed] .checkbox {
+    &[data-pressed] .range-filter-checkbox__indicator {
       border-color: var(--color-primary);
     }
 
-    &[data-focus-visible] .checkbox {
+    &[data-focus-visible] .range-filter-checkbox__indicator {
       outline: 2px solid black;
       outline-offset: 2px;
     }
 
     &[data-selected],
     &[data-indeterminate] {
-      .checkbox {
+      .range-filter-checkbox__indicator {
         border-color: var(--selected-color);
         background: var(--selected-color);
       }
 
-      &[data-pressed] .checkbox {
+      &[data-pressed] .range-filter-checkbox__indicator {
         border-color: var(--selected-color-pressed);
         background: var(--selected-color-pressed);
       }

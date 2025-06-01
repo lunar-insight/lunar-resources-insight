@@ -17,7 +17,7 @@ export const RangeFilterCheckbox: React.FC<RangeFilterCheckboxProps> = ({ layerI
         <Checkbox isDisabled className="range-filter-checkbox">
           {({ isSelected }) => (
             <>
-              <div className='checkbox'>
+              <div className='range-filter-checkbox__indicator'>
                 {isSelected && (
                   <svg viewBox="0 0 18 18">
                     <polyline points="1 9 7 14 17 4" />
@@ -46,7 +46,7 @@ export const RangeFilterCheckbox: React.FC<RangeFilterCheckboxProps> = ({ layerI
       >
         {({ isSelected }) => (
           <>
-            <div className="checkbox">
+            <div className="range-filter-checkbox__indicator">
               {isSelected && (
                 <svg viewBox="0 0 18 18">
                   <polyline points="1 9 7 14 17 4" />
