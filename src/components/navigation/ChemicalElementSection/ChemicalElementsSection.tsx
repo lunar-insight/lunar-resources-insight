@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react'
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import './ChemicalElementsSection.scss';
 import { Button } from 'react-aria-components';
 import ModalOverlayContainer from './../../layout/ModalOverlayContainer/ModalOverlayContainer';
@@ -12,12 +12,31 @@ import OpacitySlider from '../../layout/Slider/OpacitySlider/OpacitySlider';
 import { RangeFilterCheckbox } from '../../layout/Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
 import { layerStatsService } from '../../../services/LayerStatsService';
 import { FeatureCheckbox } from '../../layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
+import { pointValueService } from '../../../services/PointValueService';
+import { useViewer } from '../../../utils/context/ViewerContext';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
   const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { viewer } = useViewer();
+
+  // Initialize the service with the viewer and selected layers
+  useEffect(() => {
+    pointValueService.setViewer(viewer);
+  }, [viewer]);
+
+  useEffect(() => {
+    // Update the service with current selected layers (only chemical ones)
+    const chemicalLayers = selectedElements.flatMap(element => {
+      const elementName = element.name.toLowerCase();
+      return layerStatsService.getLayersByElement(elementName).map(([layerId, _]) => layerId);
+    });
+
+    pointValueService.setSelectedLayers(chemicalLayers);
+  }, [selectedElements]);
 
   const debouncedUpdateRampValues = useCallback((layerId: string, values: number[]) => {
     if (debounceTimeoutRef.current) {
@@ -31,6 +50,14 @@ const ChemicalElementsSection: React.FC = () => {
       debounceTimeoutRef.current = null;
     }, 300);
   }, [updateRampValues]);
+
+  const handlePointFetchToggle = (isEnabled: boolean) => {
+    if (isEnabled) {
+      pointValueService.start();
+    } else {
+      pointValueService.stop();
+    }
+  };
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -130,7 +157,7 @@ const ChemicalElementsSection: React.FC = () => {
 
       {selectedElements.length > 0 && (
         <div className='chemical-section__display-options'>
-          <FeatureCheckbox />
+          <FeatureCheckbox onChange={handlePointFetchToggle}/>
         </div>
       )}
 

@@ -181,6 +181,7 @@ export function getCogTileJsonUrl(filename: string, options: {
 export function getPointValueUrl(filename: string, lon: number, lat: number, options: {
   bidx?: number[];
   expression?: string;
+  coord_crs?: string;
 } = {}): string {
   const fileUrl = `${workspacePath}/${filename}`;
   const encodedFileUrl = safeEncodeURI(fileUrl);
@@ -196,6 +197,10 @@ export function getPointValueUrl(filename: string, lon: number, lat: number, opt
 
   if (options.expression) {
     url += `&expression=${encodeURIComponent(options.expression)}`;
+  }
+
+  if (options.coord_crs) {
+    url += `&coord_crs=${encodeURIComponent(options.coord_crs)}`;
   }
 
   return url;

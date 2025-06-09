@@ -2,14 +2,27 @@ import React, { useState } from 'react';
 import { Checkbox, Label } from 'react-aria-components';
 import './FeatureCheckbox.scss';
 
-export const FeatureCheckbox = () => {
-  const [isChecked, setIsChecked] = useState(false);
-// Todo find name css
+interface FeatureCheckboxProps {
+  onChange?: (isChecked: boolean) => void;
+  defaultChecked?: boolean;
+}
+
+export const FeatureCheckbox: React.FC<FeatureCheckboxProps> = ({
+  onChange,
+  defaultChecked = false
+}) => {
+  const [isChecked, setIsChecked] = useState(defaultChecked);
+
+  const handleChange = (checked: boolean) => {
+    setIsChecked(checked);
+    onChange?.(checked);
+  };
+
   return (
     <div className='feature-checkbox'>
       <Checkbox
         isSelected={isChecked}
-        onChange={setIsChecked}
+        onChange={handleChange}
         className="feature-checkbox__input"
       >
         {({ isSelected }) => (
