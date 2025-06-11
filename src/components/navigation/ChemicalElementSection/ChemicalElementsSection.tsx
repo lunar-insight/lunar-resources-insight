@@ -14,12 +14,19 @@ import { layerStatsService } from '../../../services/LayerStatsService';
 import { FeatureCheckbox } from '../../layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
 import { pointValueService } from '../../../services/PointValueService';
 import { useViewer } from '../../../utils/context/ViewerContext';
+import { BoxContentContainer } from '../../layout/BoxContentContainer/BoxContentContainer';
+import { Portal } from '../../ui/Portal/Portal';
+import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
-  const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
+  const [showValueBox, setShowValueBox] = useState(false);
+  const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
+
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
 
   const { viewer } = useViewer();
 
@@ -38,6 +45,18 @@ const ChemicalElementsSection: React.FC = () => {
     pointValueService.setSelectedLayers(chemicalLayers);
   }, [selectedElements]);
 
+  useEffect(() => {
+    if (showValueBox) {
+      const unsubscribe = pointValueService.onValuesUpdate((values) => {
+        setHoverValues(values);
+      });
+
+      return unsubscribe;
+    } else {
+      setHoverValues(null);
+    }
+  }, [showValueBox]);
+
   const debouncedUpdateRampValues = useCallback((layerId: string, values: number[]) => {
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);
@@ -52,10 +71,12 @@ const ChemicalElementsSection: React.FC = () => {
   }, [updateRampValues]);
 
   const handlePointFetchToggle = (isEnabled: boolean) => {
+    setShowValueBox(isEnabled);
     if (isEnabled) {
       pointValueService.start();
     } else {
       pointValueService.stop();
+      setHoverValues(null);
     }
   };
 
@@ -159,6 +180,30 @@ const ChemicalElementsSection: React.FC = () => {
         <div className='chemical-section__display-options'>
           <FeatureCheckbox onChange={handlePointFetchToggle}/>
         </div>
+      )}
+
+      {showValueBox && (
+        <Portal>
+          <BoxContentContainer 
+            className='map-hover-values-box'
+          >
+            <div className='map-hover-values-box__content'>
+              {hoverValues ? (
+                <>
+                  <h4 className='map-hover-values-box__title'>Map Values</h4>
+                  {Object.entries(hoverValues).map(([layerName, value]) => (
+                    <div key={layerName} className='map-hover-values-box__item'>
+                      <span className='map-hover-values-box__layer'>{layerName}:</span>
+                      <span className='map-hover-values-box__value'>{value.toFixed(3)}</span>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <p>Hover over the map to see values</p>
+              )}
+            </div>
+          </BoxContentContainer>
+        </Portal>
       )}
 
       <ModalOverlayContainer

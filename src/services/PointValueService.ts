@@ -18,6 +18,8 @@ export class PointValueService {
   private currentMousePosition: Cesium.Cartesian2 | null = null;
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
 
+  private callbacks: Array<(values: {[layerId: string]: number}) => void> = [];
+
   constructor() {}
 
   setViewer(viewer: Cesium.Viewer | null) {
@@ -27,6 +29,30 @@ export class PointValueService {
 
   setSelectedLayers(layers: string[]) {
     this.selectedLayers = layers;
+  }
+
+  // Method to subscribe to values change
+  onValuesUpdate(callback: (values: {[layerId: string]: number}) => void): () => void {
+    this.callbacks.push(callback);
+
+    // Return unsubscribe function
+    return () => {
+      const index = this.callbacks.indexOf(callback);
+      if (index > -1) {
+        this.callbacks.splice(index, 1);
+      }
+    };
+  }
+
+  // Notify callbacks
+  private notifyValuesUpdate(values: {[layerId: string]: number}) {
+    this.callbacks.forEach(callback => {
+      try {
+        callback(values);
+      } catch (error) {
+        console.error('Error in values update callback:', error);
+      }
+    });
   }
 
   private setupMouseTracking() {
@@ -49,9 +75,7 @@ export class PointValueService {
     this.isActive = true;
     this.intervalId = setInterval(() => {
       this.fetchPointValues();
-    }, 1000);
-
-    console.log('Point value fetching started - fetching every second at mouse position (lunar coordinates)');
+    }, 100); // 16, 33, 50-100
   }
 
   stop() {
@@ -62,8 +86,6 @@ export class PointValueService {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
-
-    console.log('Point value fetching stopped');
   }
 
   private getCurrentPosition(): { lon: number; lat: number } | null {
@@ -121,8 +143,23 @@ export class PointValueService {
         }
       });
 
-      const values = pointValues.map(pv => pv.value)
-      console.log('Values:', values);
+      const validValues: {[layerId: string]: number} = {};
+
+      pointValues.forEach(pv => {
+        if (pv.value !== null && !pv.error) {
+          const layerConfig = layersConfig.layers[pv.layerId];
+          const displayName = layerConfig?.name || pv.layerId;
+          validValues[displayName] = pv.value;
+        }
+      });
+
+      // Notify callbacks only when there is valid values
+      if (Object.keys(validValues).length > 0) {
+        this.notifyValuesUpdate(validValues); 
+      }
+
+      // const values = pointValues.map(pv => pv.value)
+      // console.log('Values:', values);
 
     } catch(error) {
       console.error('Error fetching lunar point values:', error);
@@ -165,6 +202,7 @@ export class PointValueService {
   // Clean up
   destroy() {
     this.stop();
+    this.callbacks = [];
     if (this.mouseMoveHandler) {
       this.mouseMoveHandler.destroy();
       this.mouseMoveHandler = null;
