@@ -9,12 +9,19 @@ $thumb-border: #ffffff;
 $focus-ring: #0066cc;
 $text: var(--color-neutralVariant);
 
+.color-ramp-slider-wrapper {
+  max-width: $slider-width;
+  width: 100%;
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
 .color-ramp-slider {
   display: grid;
   grid-template-areas: "label inputs"
                        "track track";
   grid-template-columns: 1fr auto;
-  max-width: $slider-width;
+  width: 100%;
   color: $text;
   
   .react-aria-Label {
@@ -83,7 +90,7 @@ $text: var(--color-neutralVariant);
   
   &[data-orientation=horizontal] {
     flex-direction: column;
-    width: $slider-width;
+    width: 100%;
     
     .react-aria-SliderTrack {
       height: $slider-height;
@@ -102,4 +109,23 @@ $text: var(--color-neutralVariant);
       transform: translateY(-50%);
     }
   }
+}
+
+.color-ramp-slider__absolute-values {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  font-size: 0.8rem;
+  color: var(--color-neutralVariant);
+}
+
+.color-ramp-slider__absolute-min {
+  text-align: left;
+}
+
+.color-ramp-slider__absolute-max {
+  text-align: right;
 }

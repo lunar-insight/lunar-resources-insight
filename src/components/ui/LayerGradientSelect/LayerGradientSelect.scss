@@ -4,6 +4,9 @@
 
   &__button {
     background: var(--selected-layer-gradient);
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
     padding: 8px 12px;
     border-radius: 6px;
     border: 1px solid var(--color-neutralVariant);
@@ -60,5 +63,8 @@
     text-overflow: ellipsis;
     width: auto;
     text-align: center;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
   }
 }

@@ -1,15 +1,15 @@
 import './LayerGradientSelect.scss'
 import React, { useState, useEffect, useRef } from 'react'
 import { Select, Button, Label, ListBox, ListBoxItem, Popover, SelectValue, ListBoxSection, Header } from "react-aria-components";
-import { colorbrewer } from '../../../utils/constants/colorbrewer.constants.js'
-import { extractColorBrewerGradient } from 'utils/style.utils';
 import { useLayerContext } from 'utils/context/LayerContext';
+import { layerStatsService } from '../../../services/LayerStatsService';
+import { getFormattedColormaps } from '../../../geoConfigExporter';
+import { colormapService } from '../../../services/ColormapService';
 
 interface Gradient {
   category: string;
   label: string;
   value: string;
-  dataClasses: number;
 }
 
 interface LayerGradientSelectProps {
@@ -17,22 +17,32 @@ interface LayerGradientSelectProps {
 }
 
 const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) => {
-  const { updateStyle } = useLayerContext();
-
+  const { updateStyle, getLayerStyle } = useLayerContext();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [buttonWidth, setButtonWidth] = useState<number>(0);
+  const [selectedLayerGradient, setSelectedLayerGradient] = useState<string>('gray');
+
+  // When the component mount
+  useEffect(() => {
+    const currentStyle = getLayerStyle(layerId);
+    if (currentStyle?.type) {
+      setSelectedLayerGradient(currentStyle.type);
+    } else {
+      setSelectedLayerGradient('gray');
+    }
+  }, [layerId, getLayerStyle]);
 
   useEffect(() => {
-    const updateWidth = () => {
+    const updateButtonWidth = () => {
       if (buttonRef.current) {
         setButtonWidth(buttonRef.current.offsetWidth);
       }
     };
 
     // Initial measurement
-    updateWidth();
+    updateButtonWidth();
 
-    const resizeObserver = new ResizeObserver(updateWidth);
+    const resizeObserver = new ResizeObserver(updateButtonWidth);
     if (buttonRef.current) {
       resizeObserver.observe(buttonRef.current);
     }
@@ -42,68 +52,27 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
     };
   }, []);
 
-  const allowedSchemes = {
-    'Single hue': [
-      'Blues', 'Greens', 'Greys', 'Oranges', 'Purples', 'Reds'
-    ],
-    'Multi-hue': [
-      'BuGn', 'BuPu', 'GnBu', 'OrRd', 'PuBu', 'PuBuGn', 'PuRd', 'RdPu', 'YlGn', 'YlGnBu', 'YlOrBr', 'YlOrRd'
-    ]
-  } as const;
-  
   const handleGradientChange = (selectedValue: string) => {
     try {
-      const selectedGradient = gradients.find(g => g.value === selectedValue);
+      const stats = layerStatsService.getLayerStats(layerId);
+      const currentStyle = getLayerStyle(layerId)
 
-      if (!selectedGradient) {
-        throw new Error(`Gradient ${selectedValue} not found`);
-      }
-
-      const { colors, type } = extractColorBrewerGradient(selectedGradient.label);
-      updateStyle(layerId, { colors, type, min: 0, max: 10 });
-
+      updateStyle(layerId, {
+        type: selectedValue,
+        colors: [],
+        min: currentStyle?.min !== undefined ? currentStyle.min : stats.min,
+        max: currentStyle?.max !== undefined ? currentStyle.max : stats.max
+      });
       setSelectedLayerGradient(selectedValue);
     } catch (error) {
       console.error('Error when loading gradient:', error);
     }
   };
 
-  const createGradient = (colors: string[]) => `linear-gradient(to right, ${colors.join(', ')})`;
-
-  const generateGradients = () => {
-    const gradientsList = [];
-
-    for (const [category, schemes] of Object.entries(allowedSchemes)) {
-      for (const schemeName of schemes) {
-        const scheme = colorbrewer[schemeName];
-    
-        if (scheme) {
-          const maxDataClasses = Math.max(...Object.keys(scheme).map(Number));
-          const colors = scheme[maxDataClasses];
-          gradientsList.push({
-            category,
-            label: `${schemeName}`,
-            value: createGradient(colors as string[]),
-            dataClasses: maxDataClasses
-          });
-        }
-      }
-    }
-
-    return gradientsList.sort((a, b) => {
-      const categoryOrder = Object.keys(allowedSchemes);
-      const categoryCompare = categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category);
-      if (categoryCompare !== 0) return categoryCompare;
-
-      return a.label.localeCompare(b.label);
-    });
-  };
-
-  const gradients = generateGradients();
-  const [selectedLayerGradient, setSelectedLayerGradient] = useState<string>(gradients[0]?.value || '');
+  const gradients = getFormattedColormaps();
 
   if (gradients.length === 0) {
-    return <div>No gradients available</div>;
+    console.error('No gradients available')
   }
 
   const groupedGradients = gradients.reduce<Record<string, Gradient[]>>((acc, gradient) => {
@@ -114,18 +83,22 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
     return acc;
   }, {});
 
+  const getGradientUrl  = (colormapName: string) => {
+    return colormapService.getGradientUrl(colormapName);
+  };
+
   return (
     <Select
       className="layer-gradient-select"
       onSelectionChange={(value) => handleGradientChange(value.toString())}
-      defaultSelectedKey={gradients[0].value}
+      defaultSelectedKey={selectedLayerGradient}
     >
       <Label>Select a gradient</Label>
       <Button 
         ref={buttonRef}
         className="layer-gradient-select__button"
         style={{
-          '--selected-layer-gradient': selectedLayerGradient,
+          '--selected-layer-gradient': `url('${getGradientUrl(selectedLayerGradient)}')`,
         } as React.CSSProperties}
       >
         <div className="layer-gradient-select__selected-value-wrapper">
@@ -138,19 +111,19 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
         style={{ '--button-width': `${buttonWidth}px` } as React.CSSProperties}
       >
         <ListBox className="layer-gradient-select__list">
-          {Object.entries(groupedGradients).map(([category, categoryGradients]: [string, Gradient[]]) => (
+          {Object.entries(groupedGradients).map(([category, categoryGradients]) => (
             <ListBoxSection key={category}>
               <Header className="layer-gradient-select__section-header">
                 {category}
               </Header>
-              {categoryGradients.map((gradient: Gradient) => (
+              {categoryGradients.map((gradient) => (
                 <ListBoxItem
                   key={gradient.value}
                   id={gradient.value}
                   textValue={gradient.label}
                   className="layer-gradient-select__list-box-item"
                   style={{
-                    background: gradient.value
+                    backgroundImage: `url('${getGradientUrl(gradient.value)}')`
                   }}
                 >
                   {gradient.label}

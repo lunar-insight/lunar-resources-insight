@@ -49,22 +49,27 @@ export function GridListLayer<T extends { id: string | number }>({
         return items.find(item => item.id === numericKey);
       }).filter(Boolean) as T[];
 
+      let newItems: T[] = [...items];
+
       if (e.target.dropPosition === 'before') {
-        const newItems = [...items];
         movedItems.forEach(item => {
           const currentIndex = newItems.findIndex(i => i.id === item.id);
           newItems.splice(currentIndex, 1);
           newItems.splice(targetIndex, 0, item);
         });
-        onReorder(newItems);
       } else if (e.target.dropPosition === 'after') {
-        const newItems = [...items];
         const insertionIndex = targetIndex + 1;
         movedItems.forEach(item => {
           const currentIndex = newItems.findIndex(i => i.id === item.id);
           newItems.splice(currentIndex, 1);
           newItems.splice(insertionIndex, 0 , item);
         });
+      }
+
+      const orderUnchanged = newItems.length === items.length && 
+                             newItems.every((item, index) => item.id === items[index].id);
+      
+      if (!orderUnchanged) {
         onReorder(newItems);
       }
     }

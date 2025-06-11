@@ -30,11 +30,11 @@ const useDialogContext = () => {
 
 // This keep the same position in DOM for every dialog
 const DialogRenderer: React.FC = () => {
-  const { dialogsState, isDialogOpen, renderDialog } = useDialogContext();
+  const { dialogsState, renderDialog } = useDialogContext();
 
   return (
     <>
-       {dialogsState.map((dialog) => isDialogOpen(dialog.id) && renderDialog(dialog))}
+       {dialogsState.map((dialog) => renderDialog(dialog))}
     </>
   );
 };
