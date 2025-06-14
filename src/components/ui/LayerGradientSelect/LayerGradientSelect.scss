@@ -1,0 +1,70 @@
+.layer-gradient-select {
+  position: relative;
+  width: 100%;
+
+  &__button {
+    background: var(--selected-layer-gradient);
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--color-neutralVariant);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: auto;
+    color: #fff;
+    cursor: pointer;
+    width: 100%;
+    position: relative;
+  }
+
+  &__selected-value-wrapper {
+    flex-grow: 1;
+    text-align: center;
+  }
+
+  &__button-icon {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  &__popover {
+    width: var(--button-width);
+    box-shadow: 0px 0px 3px black;
+  }
+
+  &__list {
+    width: 100%;
+    max-height: 400px;
+    overflow-y: auto;
+    background-color: var(--color-primary);
+    border: 1px solid var(--color-quartenary);
+    border-radius: 6px;
+  }
+
+  &__section-header {
+    padding: 8px 12px;
+    font-weight: bold;
+    color: var(--color-neutralVariant);
+
+    section:last-child & {
+      margin-top: 1rem;
+    }
+  }
+
+  &__list-box-item {
+    padding: 8px 12px;
+    margin: 4px;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    text-overflow: ellipsis;
+    width: auto;
+    text-align: center;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+}

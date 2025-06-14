@@ -1,0 +1,183 @@
+@use "sass:color";
+
+$min-cell-size: 35px;
+$max-cell-size: 70px;
+$cell-size: clamp($min-cell-size, calc(100vw / 20), $max-cell-size);
+$cell-spacing: 4px;
+
+$color-border-selectable: rgba(128, 128, 128, 0.5);
+$color-border-selectable-lighten-factor: 40%; // Used for the "info" only to differentiate with unavailable
+
+$color-border-chosen: rgba(255, 166, 0, 0.6);
+$color-background-chosen: rgba(224, 154, 89, 0.10);
+
+$color-border-unavailable: rgb(26, 26, 26);
+$color-background-unavailable: rgba(25, 29, 37, 0.50);
+$color-border-unavailable-lighten-factor: 10%; // Used for the "info" only to see the border
+$unavailable-opacity-on-text: 0.25;
+
+.periodic-table {
+  width: 100%;
+  margin: 1.5rem;
+
+  &__state-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    &__item {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 0.5rem;
+      color: var(--color-neutralVariant);
+      font-size: 1rem;
+      border-radius: 1rem;
+      border-style: solid;
+      border-width: 2px;
+      height: 1.3125rem;
+      width: 7.25rem;
+
+      &-rectangle {
+        width: 1em;
+        height: 0.25em;
+      }
+
+      &--selectable {
+        border-color: color.adjust($color-border-selectable, $lightness: $color-border-selectable-lighten-factor);
+  
+        .periodic-table__state-info__item-rectangle {
+          margin-right: 0.25rem;
+          background-color: color.adjust($color-border-selectable, $lightness: $color-border-selectable-lighten-factor);
+        }
+      }
+  
+      &--chosen {
+        border-color: $color-border-chosen;
+        background-color: $color-background-chosen;
+  
+        .periodic-table__state-info__item-rectangle {
+          margin-right: 0.75rem;
+          background-color: $color-border-chosen;
+        }
+      }
+  
+      &--unavailable {
+        border-color: color.adjust($color-border-unavailable, $lightness: $color-border-unavailable-lighten-factor);
+        background-color: $color-background-unavailable;
+  
+        .periodic-table__state-info__item-rectangle {
+          background-color: color.adjust($color-border-unavailable, $lightness: $color-border-unavailable-lighten-factor);
+        }
+      }
+    }
+  }
+  
+  &__column {
+    color: var(--color-neutralVariant);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(18, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    gap: $cell-spacing;
+    width: 100%;
+    max-width: calc(18 * #{$max-cell-size} + 17 * #{$cell-spacing});
+    margin: 0 auto;
+
+    &__first-column-cell {
+      color: var(--color-neutralVariant);
+    }
+
+    &__cell {
+      padding: 0;
+      width: $cell-size;
+      height: $cell-size;
+      aspect-ratio: 1 / 1;
+      position: relative;
+      box-sizing: border-box;
+      min-height: $min-cell-size;
+      min-width: $min-cell-size;
+      max-height: $max-cell-size;
+      max-width: $max-cell-size;
+      font-size: calc($cell-size / 10);
+
+      &__element,
+      &__empty-cell {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 2px;
+        box-sizing: border-box;
+      }
+
+      &__element {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: stretch;
+        box-sizing: border-box;
+        padding: 3px;
+        border: 2px solid $color-border-selectable;
+        transition: all 0.2s ease-out;
+        position: relative;
+        cursor: pointer;
+
+        &__top {
+          &__atomic-number {
+            text-align: left;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--color-neutralVariant);
+          }
+        }
+
+        &__symbol {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 4.2em;
+          font-weight: bold;
+          color: var(--color-secondary);
+        }
+
+        &__bottom {
+          text-align: center;
+
+          &__name {  
+            font-size: 1.30em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--color-neutralVariant);
+          }
+        }
+
+        &--unavailable {
+          border-color: $color-border-unavailable;
+          background: $color-background-unavailable;
+          cursor: default;
+
+          .periodic-table__grid__cell__element__top__atomic-number,
+          .periodic-table__grid__cell__element__symbol,
+          .periodic-table__grid__cell__element__bottom__name {
+            opacity: $unavailable-opacity-on-text;
+          }
+        }
+      }
+
+      &[data-selected] {
+        .periodic-table__grid__cell__element {
+          background-color: $color-background-chosen;
+          border-color: $color-border-chosen;
+        }
+      }
+    }
+  }
+}

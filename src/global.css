@@ -1,0 +1,52 @@
+:root {
+  --color-primary: #232935; /* dark color 35 41 53*/
+  --color-secondary: #85a2af; /* light color */
+  --color-tertiary: #97a5ab; /* light color */
+  --color-quartenary: #324049; /* dark color 50 64 73*/
+  --color-red: #ff5449; /* red for error or cancel */
+  --color-green: #2eaf2e; /* green for validation */
+  --color-dark-intermediary: #2d3a42; /* 45 58 66 dark color, used for sidebar for "is-active + pressed" state */
+  --color-neutral: #2b353e; /* dark color 43 53 62 */
+  --color-neutralVariant: #b6bbc1; /* light color */
+  /* Or #2f3c46 */
+  /* Other color */
+  /* 25, 29, 37, 0.75 --> Used for the modal background */
+}
+
+/*
+    Color code:
+  
+    #232935 , #2b353e (dark color)
+    #85a2af , #97a5ab , #b6bbc1 (light color) - darker to lighter
+*/
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('./fonts//Roboto/Roboto-Regular.ttf') format('truetype');
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  background-color: black;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  scrollbar-color: var(--color-quartenary) var(--color-primary);
+}
+
+::-webkit-scrollbar-track {
+  background-color: var(--color-quartenary);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary)
+}
+
+.react-aria-DropIndicator[data-drop-target] {
+  outline: 2px solid var(--color-secondary);
+  z-index: 2; /* Z-index Should be higher than the ::after of GridListItems */
+  position: relative;
+}

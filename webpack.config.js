@@ -1,27 +1,19 @@
 const path = require('path');
-
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-
 const CopywebpackPlugin = require('copy-webpack-plugin');
-
 const fs = require('fs');
-
 const cesiumSource = 'node_modules/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
-
-const periodicTableHtmlContent = fs.readFileSync('./src/components/tabs/elements/periodic-table/periodic-table.html', 'utf8');
-const tabsElementsHtmlContent = fs.readFileSync('./src/components/tabs/elements/elements.html', 'utf-8');
-
 const dotenv = require('dotenv');
 dotenv.config();
 
 module.exports = {
   context: __dirname,
   mode: 'development',
-  devtool: 'eval',
+  devtool: 'source-map',
   entry: {
-    app: './src/index.js'
+    app: './src/index.tsx'
   },
   optimization: {
     runtimeChunk: 'single',
@@ -29,6 +21,7 @@ module.exports = {
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
+    publicPath: '/',
 
     // Needed to compile multiline strings in Cesium
     sourcePrefix: ''
@@ -45,23 +38,13 @@ module.exports = {
       http: false,
     },
     alias: {
-
-      // Main
-      cesium: path.resolve(__dirname, cesiumSource),
-      images: path.resolve(__dirname, 'src/image/'),
-      index$: path.resolve(__dirname,'src/index.js'),
-      config$: path.resolve(__dirname,'src/config.js'),
-      colorbrewer$: path.resolve(__dirname, 'src/constants/colorbrewer.js'),
-      tooltip$: path.resolve(__dirname, 'src/functions/tooltip/tooltip.js'),
-
-      // Tabs
-      elementTab: path.resolve(__dirname, 'src/components/tabs/elements/'),
-
-      // Element layer management
-      updateElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/update-element-layer.js'),
-      deselectElementLayer$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/layer-deselection.js'),
-      dynamicSldStyle$: path.resolve(__dirname, 'src/components/tabs/elements/element-layer-management/dynamic-sld-style.js'),
+      '@': path.resolve(__dirname, 'src'),
+      '@assets': path.resolve(__dirname, 'src/assets'),
+      '@components': path.resolve(__dirname, 'src/components'),
+      'utils': path.resolve(__dirname, 'src/utils'),
+      '@types': path.resolve(__dirname, 'src/types'),
     },
+    extensions: ['.*', '.js', '.jsx', '.ts', '.tsx'],
   },
   module: {
     rules: [{
@@ -71,8 +54,35 @@ module.exports = {
       test: /\.scss$/,
       use: ['style-loader', 'css-loader', 'sass-loader']
     }, {
-      test: /\.(png|jpg|jpeg|gif|svg|xml|json)$/,
+      test: /\.(png|jpg|jpeg|gif|svg|xml)$/,
       type: 'asset',
+    }, {
+      test: /\.workers\.js$/,           // Cesium >1.100 workers files is now integrated in the main js bundle,
+      use: { loader: 'worker-loader '}  // This transform the worker files into a web worker object to ensure correct loading
+    }, {
+      test: /\.(ts|tsx)$/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            ['@babel/preset-env', {
+              "targets": {
+                "browsers": [
+                  "last 2 versions",
+                  "not ie <= 11"
+                ]
+              }
+            }],
+            '@babel/react',
+            '@babel/preset-typescript'
+          ],
+        },
+      },
+      exclude: /node_modules/,
+    }, {
+      test: /\.(js|jsx)$/,
+      exclude: /node_modules/,
+      use: ['babel-loader'],
     }, {
       // Strip cesium pragmas
       test: /\.js$/,
@@ -89,7 +99,8 @@ module.exports = {
     }]
   },
   devServer: {
-    static: './dist'
+    static: './dist',
+    hot: true
   },
   node: {
     global: false,
@@ -99,10 +110,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: 'src/index.html',
-      templateParameters: {
-        periodicTableContent: periodicTableHtmlContent,
-        tabsElementsContent: tabsElementsHtmlContent
-      }
     }),
     // Copy Cesium Assets, Widgets, and Workers to a static directory
     new CopywebpackPlugin({
@@ -121,7 +128,12 @@ module.exports = {
       minChunks: module => module.context && module.context.indexOf('cesium') !== -1
     }),
     new webpack.DefinePlugin({
-      'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
-    })
+      ...Object.keys(process.env).reduce((env, key) => {
+        env[`process.env.${key}`] = JSON.stringify(process.env[key]);
+        return env;
+      }, {})
+      //'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
+    }),
+    //new webpack.HotModuleReplacementPlugin(),
   ]
 };

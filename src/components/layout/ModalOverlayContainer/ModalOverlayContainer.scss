@@ -1,0 +1,78 @@
+$heading-height: 3rem;
+$min-modal-height: 20rem;
+$close-button-margin-right: 0.75rem;
+
+.modal-overlay-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(25, 29, 37, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100;
+
+  &[data-entering] {
+    animation: modal-fade 200ms;
+  }
+
+  &[data-exiting] {
+    animation: modal-fade 150ms reverse ease-in;
+  }
+
+  &__modal {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &__dialog {
+      width: 100%;
+      height: 100%;
+      max-height: 100vh;
+      min-height: $min-modal-height;
+      display: flex;
+      flex-direction: column;
+
+      &__heading {
+        height: $heading-height;
+        min-height: $heading-height;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid var(--color-tertiary);
+        position: relative;
+
+        &__title {
+          color: var(--color-tertiary);
+        }
+
+        &__close-button {
+          position: absolute;
+          right: $close-button-margin-right;
+        }
+      }
+
+      &__content {
+        width: 100%;
+        flex-grow: 1;
+        overflow: auto;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+      }
+    }
+  }
+}
+
+@keyframes modal-fade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
