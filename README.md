@@ -4,21 +4,19 @@
 
 Lunar Resources Insight is a easy-to use web application dedicated to lunar resources.
 
+## Important information
+
+```diff
+@@ New version development ongoing in other branch @@
+```
+
 ## Technology
 
-Lunar Resources Insight use different technologies on top of Javascript/HTML/CSS to work properly:
+Lunar Resources Insight use different technologies to work properly:
 
 - [Node.js](https://nodejs.org/) - Javascript runtime environment.
-- [Typescript](https://www.typescriptlang.org/) - Superset of Javascript that adds static types definitions.
-- [React](https://react.dev/) - Javascript library for user interfaces using components.
-- [Storybook](https://storybook.js.org/) - UI development tool for building and testing components in isolation.
 - [Webpack](https://webpack.js.org/) - Static module bundler for javascript.
 - [GeoServer](https://geoserver.org/) - Geographical data backend.
-- [React-Aria-Components](https://react-spectrum.adobe.com/react-aria/components.html) - Library of unstyled React components.
-- [React-Aria](https://react-spectrum.adobe.com/react-aria/hooks.html) - React Aria provides behavior and accessibility through React Hooks.
-- [React-Stately](https://react-spectrum.adobe.com/react-stately/getting-started.html) - Library of React Hooks that provides cross-platform state management for the design system.
-
-The complete list of dependencies can be seen in ``package.json``.
 
 ## Get Started
 
@@ -34,7 +32,7 @@ Create a private .env config file in your project at the same level
 MAP_SERVER_URL=http://example.com/geoserver
 ```
 
-Edit the geoconfig.ts file with your map server configuration with your workspace name and layer name assuming you are using GeoServer.
+Edit the config.js file with your map server configuration with your workspace name and layer name assuming you are using GeoServer.
 
 ### Installation
 
@@ -73,7 +71,7 @@ The **Layers** page in GeoServer should look like this:
 
 The *Name* category is related to the Lunar Resources Insight ``config.js`` file. The *Title* and *Store* can be any names.
 
-### Style for Geographical data
+### Style
 
 Styles are in SLD format that can be incorporated into GeoServer via Data > Styles option.
 
@@ -91,11 +89,7 @@ Download and add the [required test data](https://offworldhorizon-my.sharepoint.
 
 Starting the 2.24.0 version of GeoServer, planetary CRS support was added. The data can be now in lunar coordinate system with the [GeoServer IAU planetary CRS extension](https://docs.geoserver.org/stable/en/user/extensions/iau/index.html). The data will be changed in the future to reflect this changes (Globally to IAU2015:30100 projection and related code), the Cesium globe ellipsoid will be modified to take into account the lunar ellipsoid. You will need to [download](https://sourceforge.net/projects/geoserver/files/GeoServer/) and install the extension in GeoServer.
 
-### Using UI components
-
-The project use [Storybook](https://storybook.js.org/) for components library. To launch the local library storybook interface, the command is ``npm run storybook``. Components can be created to be used in the project.
-
 ### Launch
 
-1. Open the project in your code editor and do `npm install`
-2. Start the project with `npm start`
+2. Open the project in your code editor and do `npm install`
+3. Start the project with `npm start`
