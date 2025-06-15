@@ -4,6 +4,7 @@ import { useViewer } from './ViewerContext';
 import * as Cesium from 'cesium';
 import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics } from '../../geoConfigExporter';
 import { colormapService } from '../../services/ColormapService';
+import { layerStatsService } from '../../services/LayerStatsService';
 
 interface LayerContextType {
   selectedLayers: string[];
@@ -57,7 +58,9 @@ class CesiumLayerManager {
     try {
       const { bounds } = await fetchCogInfo(layerConfig.filename);
 
-      const { min, max } = await fetchCogStatistics(layerConfig.filename);
+      const stats = layerStatsService.getLayerStats(layerId);
+      const min = stats.loaded ? stats.min : 0;
+      const max = stats.loaded ? stats.max : 100;
 
       const rectangle = Cesium.Rectangle.fromDegrees(
         bounds[0], // West

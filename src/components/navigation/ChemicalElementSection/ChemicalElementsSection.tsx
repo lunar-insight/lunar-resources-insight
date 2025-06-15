@@ -17,6 +17,7 @@ import { useViewer } from '../../../utils/context/ViewerContext';
 import { BoxContentContainer } from '../../layout/BoxContentContainer/BoxContentContainer';
 import { Portal } from '../../ui/Portal/Portal';
 import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
+import { ResourceBarsVisualizer } from '../../viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -186,20 +187,24 @@ const ChemicalElementsSection: React.FC = () => {
         <Portal>
           <BoxContentContainer 
             className='map-hover-values-box'
+            width={300}
+            height={350}
           >
             <div className='map-hover-values-box__content'>
+              <h4 className='map-hover-value-box__title'>Resource Scanner</h4>
               {hoverValues ? (
-                <>
-                  <h4 className='map-hover-values-box__title'>Map Values</h4>
-                  {Object.entries(hoverValues).map(([layerName, value]) => (
-                    <div key={layerName} className='map-hover-values-box__item'>
-                      <span className='map-hover-values-box__layer'>{layerName}:</span>
-                      <span className='map-hover-values-box__value'>{value.toFixed(3)}</span>
-                    </div>
-                  ))}
-                </>
+                <ResourceBarsVisualizer values={hoverValues} width={270} height={250} />
+                // <>
+                //   <h4 className='map-hover-values-box__title'>Map Values</h4>
+                //   {Object.entries(hoverValues).map(([layerName, value]) => (
+                //     <div key={layerName} className='map-hover-values-box__item'>
+                //       <span className='map-hover-values-box__layer'>{layerName}:</span>
+                //       <span className='map-hover-values-box__value'>{value.toFixed(3)}</span>
+                //     </div>
+                //   ))}
+                // </>
               ) : (
-                <p>Hover over the map to see values</p>
+                <p>Hover over the map to scan resources</p>
               )}
             </div>
           </BoxContentContainer>
