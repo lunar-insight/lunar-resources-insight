@@ -89,7 +89,8 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    const margin = { top: 20, right: 20, bottom: 60, left: 20 };
+    const margin = { top: 40, right: 20, bottom: 60, left: 20 };
+    const axisWidth = 25;
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
@@ -97,20 +98,32 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
+    // Container
+    const containerRect = g.append('rect')
+      .attr('class', 'chart-container')
+      .attr('x', 0)
+      .attr('y', 0)
+      .attr('width', innerWidth)
+      .attr('height', innerHeight)
+      .attr('fill', 'rgba(255, 255, 255, 0.05)')
+      .attr('stroke', 'rgba(255, 255, 255, 0.2)')
+      .attr('stroke-width', 1)
+      .attr('rx', 5);
+
     const yScale = d3.scaleLinear()
       .domain([0, 1]) // 0 = 0%, 1 = 100%
       .range([innerHeight, 0]);
     
     const yAxis = d3.axisLeft(yScale)
       .tickValues([0, 0.02, 0.15, 0.85, 0.95, 0.98, 1])
-      .tickFormat(d => `${(+d * 100).toFixed(0)}%`);
+      .tickFormat(d => ''); // No ticks text yet
     
     g.append('g')
       .attr('class', 'y-axis')
+      .attr('transform', `translate(${axisWidth}, 0)`)
       .call(yAxis)
-      .selectAll('text')
-      .style('fill', '#ccc')
-      .style('font-size', '10px')
+      .selectAll('line')
+      .style('stroke', '#ccc')
     
     // Classification zones background rectangles
     const zones = [
@@ -127,31 +140,17 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       .enter()
       .append('rect')
       .attr('class', 'zone-rect')
-      .attr('x', -90)
+      .attr('x', 3)
       .attr('y', d => yScale(d.end))
-      .attr('width', 15)
+      .attr('width', axisWidth - 6)
       .attr('height', d => yScale(d.start) - yScale(d.end))
       .attr('fill', d => d.color)
       .attr('opacity', 0.3);
 
-    // Zone labels
-    g.selectAll('.zone-label')
-      .data(zones)
-      .enter()
-      .append('text')
-      .attr('class', 'zone-label')
-      .attr('x', -70)
-      .attr('y', d => yScale((d.start + d.end) / 2))
-      .attr('text-anchor', 'start')
-      .attr('alignment-baseline', 'middle')
-      .style('font-size', '9px')
-      .style('fill', '#aaa')
-      .text(d => GEOCHEMICAL_CONFIG[d.class as GeochemicalClass].label);
-
     // Scale for bars
     const xScale = d3.scaleBand()
       .domain(resourceData.map(d => d.layerName))
-      .range([0, innerWidth])
+      .range([axisWidth + 10, innerWidth - 10])
       .padding(0.3)
     
     // Groups for each resources
@@ -166,31 +165,19 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     resourceGroups.append('rect')
       .attr('class', 'resource-bar')
       .attr('x', 0)
-      .attr('y', d => yScale(d.continuousPosition) - 8)
+      .attr('y', d => yScale(d.continuousPosition))
       .attr('width', xScale.bandwidth())
-      .attr('height', 16)
+      .attr('height', d => yScale(0) - yScale(d.continuousPosition))
       .attr('fill', d => d.color)
       .attr('stroke', '#fff')
       .attr('stroke-width', 1)
       .attr('opacity', 0.9);
-    
-    // Connexion line at percentile line
-    resourceGroups.append('line')
-      .attr('class', 'connection-line')
-      .attr('x1', 0)
-      .attr('y1', d => yScale(d.continuousPosition))
-      .attr('x2', -20)
-      .attr('y2', d => yScale(d.continuousPosition))
-      .attr('stroke', d => d.color)
-      .attr('stroke-width', 1)
-      .attr('stroke-dasharray', '2,2')
-      .attr('opacity', 0.6);
 
-    // Resource symbols on bars
+    // Fixed resource symbols 
     resourceGroups.append('text')
       .attr('class', 'resource-symbol')
       .attr('x', xScale.bandwidth() / 2)
-      .attr('y', d => yScale(d.continuousPosition) + 4)
+      .attr('y', -10)
       .attr('text-anchor', 'middle')
       .style('font-size', '12px')
       .style('fill', '#fff')
@@ -198,7 +185,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       .style('text-shadow', '0 0 3px rgba(0,0,0,0.8)')
       .text(d => d.symbol);
 
-    // Labels
+    // Labels outside the container
     resourceGroups.append('text')
       .attr('class', 'resource-label')
       .attr('x', xScale.bandwidth() / 2)

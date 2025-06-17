@@ -7,6 +7,10 @@
     border-radius: 10px;
   }
 
+  .chart-container {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
   .resource-bar {
     filter: drop-shadow(0 0 4px currentColor);
     transition: all 0.3s ease;
