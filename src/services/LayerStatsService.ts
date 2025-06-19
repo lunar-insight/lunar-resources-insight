@@ -25,11 +25,11 @@ export interface LayerConfig {
 }
 
 export type GeochemicalClass =
-  | 'strongly-depleted'
+  | 'highly-depleted'
   | 'depleted' 
   | 'background'
   | 'enriched'
-  | 'strongly-enriched'
+  | 'highly-enriched'
   | 'anomalous';
 
 export async function initializeLayerStats() {
@@ -196,11 +196,11 @@ class LayerStatsService {
     }
 
     if (value > stats.percentile_98) return 'anomalous';
-    if (value > stats.percentile_95) return 'strongly-enriched';
+    if (value > stats.percentile_95) return 'highly-enriched';
     if (value > stats.percentile_85) return 'enriched';
     if (value > stats.percentile_15) return 'background';
     if (value > stats.percentile_2) return 'depleted';
-    return 'strongly-depleted';
+    return 'highly-depleted';
   }
 
   // Method to obtain the exact percentile of a value (for bar height)

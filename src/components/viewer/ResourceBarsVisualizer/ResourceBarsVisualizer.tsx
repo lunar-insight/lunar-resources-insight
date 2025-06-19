@@ -20,11 +20,11 @@ interface ResourceBarsVisalizerProps {
 }
 
 const GEOCHEMICAL_CONFIG = {
-  'strongly-depleted': { symbol: '▼▼', label: 'Strongly Depleted', threshold: 2 },
+  'highly-depleted': { symbol: '▼▼', label: 'Highly Depleted', threshold: 2 },
   'depleted': { symbol: '▼', label: 'Depleted', threshold: 15 },
   'background': { symbol: '—', label: 'Background', threshold: 85 },
   'enriched': { symbol: '▲', label: 'Enriched', threshold: 95 },
-  'strongly-enriched': { symbol: '▲▲', label: 'Strongly Enriched', threshold: 98 },
+  'highly-enriched': { symbol: '▲▲', label: 'Highly Enriched', threshold: 98 },
   'anomalous': { symbol: '★', label: 'Anomalous', threshold: 100 }
 };
 
@@ -127,11 +127,11 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     
     // Classification zones background rectangles
     const zones = [
-      { start: 0, end: 0.02, class: 'strongly-depleted', color: '#1a365d' },
+      { start: 0, end: 0.02, class: 'highly-depleted', color: '#1a365d' },
       { start: 0.02, end: 0.15, class: 'depleted', color: '#2c5282' },
       { start: 0.15, end: 0.85, class: 'background', color: '#4a5568' },
       { start: 0.85, end: 0.95, class: 'enriched', color: '#c05621' },
-      { start: 0.95, end: 0.98, class: 'strongly-enriched', color: '#e53e3e' },
+      { start: 0.95, end: 0.98, class: 'highly-enriched', color: '#e53e3e' },
       { start: 0.98, end: 1, class: 'anomalous', color: '#9c1c1c' }
     ];
 
