@@ -1,65 +1,85 @@
 .resource-bars-visualizer {
-  width: 100%;
-  height: 100%;
-
-  svg {
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+  position: relative;
+  
+  .terrain-context {
+    margin-top: 5px;
+    text-align: center;
+    color: #fff;
+    font-size: 10px;
+    font-style: italic;
+  }
+  
+  .terrain-type {
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+    letter-spacing: 1px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .terrain-details {
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+    opacity: 0.9;
   }
 
-  .chart-container {
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  .abundance-zone-label {
+    pointer-events: none;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
   }
 
-  .resource-bar {
-    filter: drop-shadow(0 0 4px currentColor);
-    transition: all 0.3s ease;
-
-    &:hover {
-      filter: drop-shadow(0 0 8px currentColor);
-      opacity: 1 !important;
-    }
+  .threshold-line {
+    pointer-events: none;
   }
 
   .resource-symbol {
-    text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
     pointer-events: none;
   }
 
   .resource-label {
-    fill: #fff;
-    font-size: 11px;
     font-weight: 500;
   }
 
   .resource-value {
-    fill: #ccc;
+    font-family: 'Courier New', monospace;
     font-size: 10px;
-    font-weight: normal;
   }
 
-  .resource-percentile {
-    fill: #999;
-    font-size: 9px;
+  .resource-enrichment {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
   }
 
   .y-axis {
-    .domain, .tick line {
-      stroke: #666
+    .domain {
+      stroke: #ccc;
+      stroke-width: 1;
+    }
+    
+    .tick line {
+      stroke: #ccc;
+      stroke-width: 0.5;
+    }
+    
+    .tick text {
+      fill: #ccc;
+      font-weight: 500;
     }
   }
 
-  .zone-rect {
-    &:hover {
-      opacity: 0.5 !important;
+  @media (max-width: 400px) {
+    .terrain-type {
+      font-size: 10px;
     }
-  }
-
-  .zone-label {
-    pointer-events: none;
-  }
-
-  .connection-line {
-    pointer-events: none;
+    
+    .terrain-details {
+      font-size: 8px;
+    }
+    
+    .resource-label {
+      font-size: 9px;
+    }
+    
+    .resource-value,
+    .resource-enrichment {
+      font-size: 8px;
+    }
   }
 }

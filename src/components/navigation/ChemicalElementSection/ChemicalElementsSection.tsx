@@ -24,6 +24,7 @@ const ChemicalElementsSection: React.FC = () => {
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
   const [showValueBox, setShowValueBox] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
+  const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -48,13 +49,15 @@ const ChemicalElementsSection: React.FC = () => {
 
   useEffect(() => {
     if (showValueBox) {
-      const unsubscribe = pointValueService.onValuesUpdate((values) => {
-        setHoverValues(values);
+      const unsubscribe = pointValueService.onValuesUpdate((data) => {
+        setHoverValues(data.displayValues); // Bar show
+        setAllHoverValues(data.allValues); // Terrain calculation
       });
 
       return unsubscribe;
     } else {
       setHoverValues(null);
+      setAllHoverValues(null);
     }
   }, [showValueBox]);
 
@@ -193,16 +196,11 @@ const ChemicalElementsSection: React.FC = () => {
             <div className='map-hover-values-box__content'>
               <h4 className='map-hover-value-box__title'>Resource Scanner</h4>
               {hoverValues ? (
-                <ResourceBarsVisualizer values={hoverValues} width={270} height={250} />
-                // <>
-                //   <h4 className='map-hover-values-box__title'>Map Values</h4>
-                //   {Object.entries(hoverValues).map(([layerName, value]) => (
-                //     <div key={layerName} className='map-hover-values-box__item'>
-                //       <span className='map-hover-values-box__layer'>{layerName}:</span>
-                //       <span className='map-hover-values-box__value'>{value.toFixed(3)}</span>
-                //     </div>
-                //   ))}
-                // </>
+                <ResourceBarsVisualizer 
+                  values={hoverValues} 
+                  allValues={allHoverValues}
+                  width={270} 
+                  height={250} />
               ) : (
                 <p>Hover over the map to scan resources</p>
               )}

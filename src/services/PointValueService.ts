@@ -1,5 +1,6 @@
 import { getPointValueUrl, layersConfig } from '../geoConfigExporter';
 import * as Cesium from 'cesium';
+import { layerStatsService } from './LayerStatsService';
 
 export interface PointValue {
   layerId: string;
@@ -10,15 +11,21 @@ export interface PointValue {
   error?: string;
 }
 
+export interface PointValueCallbackData {
+  displayValues: {[layerId: string]: number}; // Only explicited selected layers
+  allValues: {[layerId: string]: number}; // Every layers for the calculation
+}
+
 export class PointValueService {
   private viewer: Cesium.Viewer | null = null;
   private intervalId: NodeJS.Timeout | null = null;
   private isActive: boolean = false;
-  private selectedLayers: string[] = [];
+  private selectedLayers: string[] = []; // All layers to fetch (selected + required)
+  private explicitlySelectedLayers: string[] = []; // Only user-selected layers
   private currentMousePosition: Cesium.Cartesian2 | null = null;
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
 
-  private callbacks: Array<(values: {[layerId: string]: number}) => void> = [];
+  private callbacks: Array<(data: PointValueCallbackData) => void> = [];
 
   constructor() {}
 
@@ -27,12 +34,38 @@ export class PointValueService {
     this.setupMouseTracking();
   }
 
+  /**
+   * Get the layer IDs for required terrain classification elements (Ca, Fe, Ti)
+   */
+  private getRequiredTerrainLayers(): string[] {
+    const requiredElements = ['calcium', 'iron', 'titanium'];
+    const requiredLayers: string[] = [];
+
+    requiredElements.forEach(element => {
+      const layers = layerStatsService.getLayersByElement(element);
+      if (layers.length > 0) {
+        // Get first layer available for each elements
+        requiredLayers.push(layers[0][0]);
+      }
+    });
+
+    return requiredLayers;
+  }
+
   setSelectedLayers(layers: string[]) {
-    this.selectedLayers = layers;
+    this.explicitlySelectedLayers = layers;
+
+    // Get required classification layers
+    const requiredLayers = this.getRequiredTerrainLayers();
+
+    // Combine selected layers with required classification layers
+    // Set to avoid duplicate
+    const allLayers = new Set([...layers, ...requiredLayers]);
+    this.selectedLayers = Array.from(allLayers);
   }
 
   // Method to subscribe to values change
-  onValuesUpdate(callback: (values: {[layerId: string]: number}) => void): () => void {
+  onValuesUpdate(callback: (data: PointValueCallbackData) => void): () => void {
     this.callbacks.push(callback);
 
     // Return unsubscribe function
@@ -45,10 +78,22 @@ export class PointValueService {
   }
 
   // Notify callbacks
-  private notifyValuesUpdate(values: {[layerId: string]: number}) {
+  private notifyValuesUpdate(allValues: {[layerId: string]: number}) {
+    // Filter to get only explicitly selected layers for display
+    const displayValues = Object.fromEntries(
+      Object.entries(allValues).filter(([layerId]) =>
+        this.explicitlySelectedLayers.includes(layerId)
+      )
+    );
+
+    const callbackData: PointValueCallbackData = {
+      displayValues,
+      allValues
+    };
+
     this.callbacks.forEach(callback => {
       try {
-        callback(values);
+        callback(callbackData);
       } catch (error) {
         console.error('Error in values update callback:', error);
       }
@@ -143,23 +188,18 @@ export class PointValueService {
         }
       });
 
-      const validValues: {[layerId: string]: number} = {};
+      const allValues: {[layerId: string]: number} = {};
 
       pointValues.forEach(pv => {
         if (pv.value !== null && !pv.error) {
-          const layerConfig = layersConfig.layers[pv.layerId];
-          const displayName = layerConfig?.name || pv.layerId;
-          validValues[displayName] = pv.value;
+          allValues[pv.layerId] = pv.value;
         }
       });
 
       // Notify callbacks only when there is valid values
-      if (Object.keys(validValues).length > 0) {
-        this.notifyValuesUpdate(validValues); 
+      if (Object.keys(allValues).length > 0) {
+        this.notifyValuesUpdate(allValues); 
       }
-
-      // const values = pointValues.map(pv => pv.value)
-      // console.log('Values:', values);
 
     } catch(error) {
       console.error('Error fetching lunar point values:', error);
