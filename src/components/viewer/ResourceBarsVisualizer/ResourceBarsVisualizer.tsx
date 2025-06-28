@@ -128,21 +128,14 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     return null;
   }, [allValues, values]);
 
-  // Convert elemental values to geochemical scores with terrain adjustment
+  // Convert elemental values to geochemical scores
   const resourceData = useMemo(() => {
-    // Calculate terrain adjustment factor based on Ca/(Fe + 2*Ti) ratio
-    const terrainAdjustmentFactor = terrainClassification ?
-      LunarTerrainClassifier.getTerrainAdjustmentFactor(terrainClassification.ratio) :
-      1.0;
-
     const data = Object.entries(values).map(([layerName, value]) => {
       // Calculate base geochemical score using literature elemental ranges
       const geochemicalScore = calculateGeochemicalScore(layerName, value);
 
       // Apply terrain context adjustment
-      const enrichmentScore = Math.min(100, Math.max(0,
-        geochemicalScore * terrainAdjustmentFactor
-      ));
+      const enrichmentScore = geochemicalScore;
 
       const abundanceClass = classifyByAbundance(enrichmentScore);
       const symbol = ABUNDANCE_CONFIG[abundanceClass].symbol;
@@ -163,7 +156,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     }).filter(Boolean) as ResourceData[];
 
     return data;
-  }, [values, colorScale, terrainClassification]);
+  }, [values, colorScale]);
 
   useEffect(() => {
     if (!svgRef.current || resourceData.length === 0) {

@@ -78,28 +78,6 @@ export class LunarTerrainClassifier {
   }
 
   /**
-   * Get terrain adjustment factor based on how "typical" the terrain is
-   * More typical terrains get lower factors (values appear more "normal")
-   * Applies universally to all elements based on terrain context
-   */
-  static getTerrainAdjustmentFactor(ratio: number): number {
-    // Highly typical highlands (ratio > 1.5): all values appear more "normal"
-    if (ratio > 1.5) return 0.7;
-
-    // Moderate highlands (1.0 < ratio <= 1.5)
-    if (ratio > 1.0) return 0.85;
-
-    // Highly typical mare (ratio < 0.6): all values appear more "normal"
-    if (ratio < 0.6) return 0.7;
-    
-    // Moderate mare (0.6 <= ratio < 0.8)
-    if (ratio < 0.8) return 0.85;
-    
-    // Transitional zone: no adjustment
-    return 1.0;
-  }
-
-  /**
    * Extract Ca, Fe, Ti values dynamically based on layersConfig
    */
   static extractElements(values: Record<string, number>): { calcium: number; iron: number; titanium: number } | null {
