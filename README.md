@@ -81,11 +81,8 @@ Styles are in SLD format that can be incorporated into GeoServer via Data > Styl
 
 ### Data
 
-Download and add the [required test data](https://offworldhorizon-my.sharepoint.com/:f:/p/thibaut/EvZYOlu_bHpBt1b8KZHISR4BJv49LEsWeNWsEcjfqvry1w?e=87b22J) to your geoserver local directory, also with the style files. The test data is composed of WGS84 processed and optimised:
-- Tiled basemap (WAC global 100m)
-- IAU Nomenclature
-- Geologic map from USGS
-- Global20ppd Titanium, Calcium, Magnesium and Iron
+Download and add the required test data to your geoserver local directory. The test data is composed of WGS84 processed and optimised from the following original:
+- [Global20ppd Titanium, Calcium, Magnesium and Iron](https://zenodo.org/records/5762834)
 
 Starting the 2.24.0 version of GeoServer, planetary CRS support was added. The data can be now in lunar coordinate system with the [GeoServer IAU planetary CRS extension](https://docs.geoserver.org/stable/en/user/extensions/iau/index.html). The data will be changed in the future to reflect this changes (Globally to IAU2015:30100 projection and related code), the Cesium globe ellipsoid will be modified to take into account the lunar ellipsoid. You will need to [download](https://sourceforge.net/projects/geoserver/files/GeoServer/) and install the extension in GeoServer.
 
