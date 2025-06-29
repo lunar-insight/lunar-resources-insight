@@ -14,10 +14,11 @@ import { layerStatsService } from '../../../services/LayerStatsService';
 import { FeatureCheckbox } from '../../layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
 import { pointValueService } from '../../../services/PointValueService';
 import { useViewer } from '../../../utils/context/ViewerContext';
-import { BoxContentContainer } from '../../layout/BoxContentContainer/BoxContentContainer';
+import { DraggableBoxContentContainer } from '../../layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
 import { Portal } from '../../ui/Portal/Portal';
 import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
 import { ResourceBarsVisualizer } from '../../viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
+import { useBoundaryRef } from '../../../components/reference/BoundaryRefProvider';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,6 +28,8 @@ const ChemicalElementsSection: React.FC = () => {
   const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const boundaryRef = useBoundaryRef();
 
   const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
 
@@ -188,13 +191,16 @@ const ChemicalElementsSection: React.FC = () => {
 
       {showValueBox && (
         <Portal>
-          <BoxContentContainer 
+          <DraggableBoxContentContainer 
             className='map-hover-values-box'
             width={400}
             height={350}
+            title="Element concentration"
+            isOpen={showValueBox}
+            onClose={() => handlePointFetchToggle(false)}
+            boundaryRef={boundaryRef}
           >
             <div className='map-hover-values-box__content'>
-              <h4 className='map-hover-value-box__title'>Resource Scanner</h4>
               {hoverValues ? (
                 <ResourceBarsVisualizer 
                   values={hoverValues} 
@@ -205,7 +211,7 @@ const ChemicalElementsSection: React.FC = () => {
                 <p>Hover over the map to scan resources</p>
               )}
             </div>
-          </BoxContentContainer>
+          </DraggableBoxContentContainer>
         </Portal>
       )}
 

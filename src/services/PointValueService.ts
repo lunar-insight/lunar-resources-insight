@@ -24,6 +24,7 @@ export class PointValueService {
   private explicitlySelectedLayers: string[] = []; // Only user-selected layers
   private currentMousePosition: Cesium.Cartesian2 | null = null;
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
+  private isMouseTrackingEnabled: boolean = true;
 
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
 
@@ -110,10 +111,20 @@ export class PointValueService {
     this.mouseMoveHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
 
     this.mouseMoveHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
-      this.currentMousePosition = event.endPosition;
+      if (this.isMouseTrackingEnabled) {
+        this.currentMousePosition = event.endPosition;
+      }
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
   }
 
+  disableMouseTracking() {
+    this.isMouseTrackingEnabled = false;
+  }
+
+  enableMouseTracking() {
+    this.isMouseTrackingEnabled = true;
+  }
+      
   start() {
     if (this.isActive || !this.viewer) return;
     
