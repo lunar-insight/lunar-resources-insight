@@ -190,7 +190,7 @@ const ChemicalElementsSection: React.FC = () => {
         <Portal>
           <BoxContentContainer 
             className='map-hover-values-box'
-            width={300}
+            width={400}
             height={350}
           >
             <div className='map-hover-values-box__content'>

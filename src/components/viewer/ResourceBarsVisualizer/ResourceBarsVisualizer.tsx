@@ -1,15 +1,12 @@
-import React, { useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { layersConfig } from '../../../geoConfigExporter';
 import { LunarTerrainClassifier, TerrainClassification } from '../../../utils/LunarTerrainClassifier';
 import './ResourceBarsVisualizer.scss';
 
-export type AbundanceClass = 'scarce' | 'common' | 'abundant';
-
 export interface ResourceData {
   layerName: string;
   value: number;
-  abundanceClass: AbundanceClass;
   geochemicalScore: number; // Score based on lunar elemental ranges (0-100)
   enrichmentScore: number; // Terrain-adjusted score (0-100)
   continuousPosition: number; // 0-1, based on enrichmentScore
@@ -23,12 +20,6 @@ interface ResourceBarsVisalizerProps {
   width?: number;
   height?: number;
 }
-
-const ABUNDANCE_CONFIG = {
-  'scarce': { symbol: '▼', label: 'Scarce', minScore: 0, maxScore: 25 },
-  'common': { symbol: '—', label: 'Common', minScore: 25, maxScore: 75 },
-  'abundant': { symbol: '▲', label: 'Abundant', minScore: 75, maxScore: 100 }
-};
 
 // Data for Ca, Fe, Ti, Mg from gamma spectrometry, magnetometry and isotope analysis
 const LUNAR_ELEMENTAL_RANGES: Record<string, { min: number; max: number }> = {
@@ -98,19 +89,41 @@ function calculateGeochemicalScore(layerName: string, value: number): number {
 
 }
 
-function classifyByAbundance(enrichmentScore: number): AbundanceClass {
-  if (enrichmentScore < 25 ) return 'scarce';
-  if (enrichmentScore < 75 ) return 'common';
-  return 'abundant';
-}
-
 export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   values,
   allValues,
-  width = 320,
-  height = 300
+  width: propWidth,
+  height: propHeight
 }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
+  const [dimensions, setDimensions] = useState({
+    width: propWidth,
+    height: propHeight
+  })
+
+  // Measure container and respond to size changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width, height } = entry.contentRect;
+        setDimensions({
+          width: propWidth || width,
+          height: propHeight || height
+        });
+      }
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [propWidth, propHeight]);
+
+  const { width, height } = dimensions;
 
   // Color scale (gradient from scarce to abundant)
   const colorScale = useMemo(() => {
@@ -137,21 +150,16 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       // Apply terrain context adjustment
       const enrichmentScore = geochemicalScore;
 
-      const abundanceClass = classifyByAbundance(enrichmentScore);
-      const symbol = ABUNDANCE_CONFIG[abundanceClass].symbol;
-
       const continuousPosition = enrichmentScore / 100;
       const color = colorScale(1 - continuousPosition);
 
       return {
         layerName,
         value,
-        abundanceClass,
         geochemicalScore,
         enrichmentScore,
         continuousPosition,
         color,
-        symbol
       };
     }).filter(Boolean) as ResourceData[];
 
@@ -166,63 +174,38 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
 
-    const margin = { top: 40, right: 20, bottom: 60, left: 70 };
-    const axisWidth = 50;
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
+    const svgElement = svgRef.current;
+    const actualWidth = svgElement.clientWidth;
+    const actualHeight = svgElement.clientHeight;
+
+    const margin = { 
+      top: 30, 
+      right: 0,
+      bottom: 40, 
+      left: 0
+    };
+
+    const axisWidth = 50; 
+    const innerWidth = actualWidth - margin.left - margin.right;
+    const innerHeight = actualHeight - margin.top - margin.bottom;
 
     const g = svg
       .append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
-    
-    if (terrainClassification) {
-      g.append('text')
-        .attr('class', 'terrain-type')
-        .attr('x', innerWidth / 2)
-        .attr('y', -25)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '12px')
-        .style('fill', '#fff')
-        .style('font-weight', 'bold')
-        .style('text-shadow', '0 0 3px rgba(0,0,0,0.8)')
-        .text(`${terrainClassification.type.toUpperCase()} TERRAIN`);
-      
-      // Confidence and ratio details
-      g.append('text')
-        .attr('class', 'terrain-details')
-        .attr('x', innerWidth / 2)
-        .attr('y', -10)
-        .attr('text-anchor', 'middle')
-        .style('font-size', '9px')
-        .style('fill', '#ccc')
-        .style('text-shadow', '0 0 3px rgba(0,0,0,0.8)')
-        .text(`${terrainClassification.confidence.toUpperCase()} confidence • Ca/(Fe+2Ti) = ${terrainClassification.ratio.toFixed(2)}`);
-    }
-
-    // Chart container
-    const containerRect = g.append('rect')
-      .attr('class', 'chart-container')
-      .attr('x', 0)
-      .attr('y', 0)
-      .attr('width', innerWidth)
-      .attr('height', innerHeight)
-      .attr('fill', 'rgba(255, 255, 255, 0.05)')
-      .attr('stroke', 'rgba(255, 255, 255, 0.2)')
-      .attr('stroke-width', 1)
-      .attr('rx', 5);
 
     const yScale = d3.scaleLinear()
-      .domain([0, 1]) // 0 = enrichment score 0%, 1 = enrichment score 100%
+      .domain([0, 1])
       .range([innerHeight, 0]);
 
     const yAxis = d3.axisLeft(yScale)
-      .tickValues([0, 0.25, 0.75, 1])
+      .tickValues([0, 0.25, 0.5, 0.75, 1])
       .tickFormat((d) => {
         const labels = {
-          0: 'Scarce',
-          0.25: '',
-          0.75: '',
-          1: 'Abundant'
+          0: 'LOW',
+          0.25: '0.25%',
+          0.5: 'MED',
+          0.75: '0.75%',
+          1: 'HIGH'
         };
         return labels[d as number] || '';
       });
@@ -239,42 +222,9 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     g.selectAll('.y-axis line')
       .style('stroke', '#ccc');
     
-    const abundanceZones = [
-      { start: 0, end: 0.25, class: 'scarce', color: '#2c5282', label: 'Scarce' },
-      { start: 0.25, end: 0.75, class: 'common', color: '#4a5568', label: 'Common' },
-      { start: 0.75, end: 1, class: 'abundant', color: '#c05621', label: 'Abundant' }
-    ];
-
-    g.selectAll('.abundance-zone')
-      .data(abundanceZones)
-      .enter()
-      .append('rect')
-      .attr('class', 'abundance-zone')
-      .attr('x', 3)
-      .attr('y', d => yScale(d.end))
-      .attr('width', axisWidth - 6)
-      .attr('height', d => yScale(d.start) - yScale(d.end))
-      .attr('fill', d => d.color)
-      .attr('opacity', 0.2);
-    
-    g.selectAll('.abundance-zone-label')
-      .data(abundanceZones)
-      .enter()
-      .append('text')
-      .attr('class', 'abundance-zone-label')
-      .attr('x', axisWidth / 2)
-      .attr('y', d => yScale((d.start + d.end) / 2))
-      .attr('text-anchor', 'middle')
-      .attr('alignment-baseline', 'middle')
-      .style('font-size', '10px')
-      .style('fill', '#fff')
-      .style('font-weight', 'bold')
-      .style('text-shadow', '0 0 3px rgba(0,0,0,0.8)')
-      .text(d => d.label);
-    
-    // Threshold lines at 0.25 and 0.75
+    // Threshold lines
     g.selectAll('.threshold-line')
-      .data([0.25, 0.75])
+      .data([0.25, 0.5, 0.75])
       .enter()
       .append('line')
       .attr('class', 'threshold-line')
@@ -285,11 +235,28 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       .style('stroke', '#fff')
       .style('stroke-dasharray', '3,3')
       .style('opacity', 0.4);
+    
+    const referenceData = [
+      { position: 0, label: '0%' },
+      { position: 1, label: '100%' }
+    ];
+
+    g.selectAll('.reference-bar')
+      .data(referenceData)
+      .enter()
+      .append('line')
+      .attr('class', 'reference-bar')
+      .attr('x1', axisWidth)
+      .attr('x2', innerWidth)
+      .attr('y1', d => yScale(d.position))
+      .attr('y2', d => yScale(d.position))
+      .style('stroke', ' #ffffff')
+      .style('opacity', 0.4)
 
     // Scale for bars
     const xScale = d3.scaleBand()
       .domain(resourceData.map(d => d.layerName))
-      .range([axisWidth + 10, innerWidth - 10])
+      .range([axisWidth, innerWidth])
       .padding(0.3)
     
     // Groups for each resources
@@ -312,18 +279,6 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       .attr('stroke-width', 1)
       .attr('opacity', 0.9);
 
-    // Abundance symbols above bars
-    resourceGroups.append('text')
-      .attr('class', 'resource-symbol')
-      .attr('x', xScale.bandwidth() / 2)
-      .attr('y', -10)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '14px')
-      .style('fill', '#fff')
-      .style('font-weight', 'bold')
-      .style('text-shadow', '0 0 3px rgba(0,0,0,0.8)')
-      .text(d => d.symbol);
-
     // Labels outside the container (Element name labels)
     resourceGroups.append('text')
       .attr('class', 'resource-label')
@@ -344,35 +299,22 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       .attr('y', innerHeight + 30)
       .attr('text-anchor', 'middle')
       .style('font-size', '10px')
-      .style('fill', '#ccc')
+      .style('fill', '#dcdcdc')
       .text(d => `${d.value.toFixed(2)} wt%`);
     
-    // Terrain-adjusted enrichment scores
-    resourceGroups.append('text')
-      .attr('class', 'resource-enrichment')
-      .attr('x', xScale.bandwidth() / 2)
-      .attr('y', innerHeight + 45)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '9px')
-      .style('fill', '#999')
-      .text(d => `${d.enrichmentScore.toFixed(0)}%`);
-    
-  }, [resourceData, width, height, colorScale, terrainClassification]);
+  }, [resourceData, colorScale, terrainClassification]);
 
   return (
-    <div className='resource-bars-visualizer'>
+    <div 
+      ref={containerRef}
+      className='resource-bars-visualizer'
+    >
       <svg ref={svgRef} width={width} height={height} />
       {/* Terrain context information */}
       {terrainClassification && (
         <div className='terrain-context'>
           <small>
-            <strong>{terrainClassification.type.toUpperCase()}</strong> terrain • 
-            <span style={{marginLeft: '4px'}}>
-              {terrainClassification.confidence} confidence
-            </span> • 
-            <span style={{marginLeft: '4px'}}>
-              ratio: {terrainClassification.ratio.toFixed(2)}
-            </span>
+            <strong>{terrainClassification.type.charAt(0).toUpperCase() + terrainClassification.type.slice(1)}</strong> terrain ({terrainClassification.confidence} confidence)
           </small>
         </div>
       )}
