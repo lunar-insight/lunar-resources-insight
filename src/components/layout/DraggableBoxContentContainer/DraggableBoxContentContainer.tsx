@@ -167,6 +167,7 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
           <CloseButton
             onPress={onClose}
             className="draggable-box-content-container__move-area__close-button"
+            light
           />
         </div>
       )}
