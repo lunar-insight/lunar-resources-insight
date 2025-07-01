@@ -89,12 +89,35 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       // Add the primary layer to the viewer
       viewer.imageryLayers.add(baseLayer);
 
+      // Grab cursor style management
+      const canvas = viewer.cesiumWidget.canvas;
+      const handler = viewer.cesiumWidget.screenSpaceEventHandler;
+
+      handler.setInputAction(() => {
+        canvas.style.cursor = 'grabbing';
+      }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+      handler.setInputAction(() => {
+        canvas.style.cursor = 'default';
+      }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
+      canvas.addEventListener('mouseleave', () => {
+        canvas.style.cursor = 'default';
+      });
+
       setViewer(viewer);
 
       // Error handling for the base layer
       baseLayer.imageryProvider.errorEvent.addEventListener((error) => {
         console.error('Error loading base imagery layer:', error);
       });
+
+      // Cleanup function
+      return () => {
+        canvas.removeEventListener('mouseleave', () => {
+          canvas.style.cursor = 'default';
+        });
+      };
     }
   }, [setViewer]);
 
