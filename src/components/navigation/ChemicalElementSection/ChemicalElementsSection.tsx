@@ -185,7 +185,10 @@ const ChemicalElementsSection: React.FC = () => {
 
       {selectedElements.length > 0 && (
         <div className='chemical-section__display-options'>
-          <FeatureCheckbox onChange={handlePointFetchToggle}/>
+          <FeatureCheckbox 
+            checked={showValueBox}
+            onChange={handlePointFetchToggle}
+          />
         </div>
       )}
 
