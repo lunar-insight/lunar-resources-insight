@@ -1,6 +1,8 @@
+import React, { useState, useCallback, useRef, useEffect } from 'react'
 import { getPointValueUrl, layersConfig } from '../geoConfigExporter';
 import * as Cesium from 'cesium';
 import { layerStatsService } from './LayerStatsService';
+import { ScanIndicator } from '../components/viewer/ScanIndicator/ScanIndicator';
 
 export interface PointValue {
   layerId: string;
@@ -26,12 +28,15 @@ export class PointValueService {
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
   private isMouseTrackingEnabled: boolean = true;
 
+  private scanIndicator: ScanIndicator = new ScanIndicator();
+
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
 
   constructor() {}
 
   setViewer(viewer: Cesium.Viewer | null) {
     this.viewer = viewer;
+    this.scanIndicator.setViewer(viewer);
     this.setupMouseTracking();
   }
 
@@ -113,6 +118,10 @@ export class PointValueService {
     this.mouseMoveHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
       if (this.isMouseTrackingEnabled) {
         this.currentMousePosition = event.endPosition;
+
+        if (this.isActive) {
+          this.scanIndicator.updatePosition(event.endPosition);
+        }
       }
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
   }
@@ -129,6 +138,10 @@ export class PointValueService {
     if (this.isActive || !this.viewer) return;
     
     this.isActive = true;
+
+    // Continous render for animation
+    this.viewer.scene.requestRenderMode = false;
+
     this.intervalId = setInterval(() => {
       this.fetchPointValues();
     }, 100); // 16, 33, 50-100
@@ -138,6 +151,13 @@ export class PointValueService {
     if (!this.isActive) return;
 
     this.isActive = false;
+
+    if (this.viewer) {
+      this.viewer.scene.requestRenderMode = true;
+    }
+
+    this.scanIndicator.hide();
+
     if (this.intervalId) {
       clearInterval(this.intervalId);
       this.intervalId = null;
@@ -254,6 +274,9 @@ export class PointValueService {
   destroy() {
     this.stop();
     this.callbacks = [];
+
+    this.scanIndicator.destroy();
+
     if (this.mouseMoveHandler) {
       this.mouseMoveHandler.destroy();
       this.mouseMoveHandler = null;
