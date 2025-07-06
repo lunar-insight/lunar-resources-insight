@@ -44,6 +44,8 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   });
   const [translation, setTranslation] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -59,6 +61,14 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       });
     }
   };
+
+  useEffect(() => {
+    if (isDragging || isHovered) {
+      pointValueService.disableMouseTracking();
+    } else {
+      pointValueService.enableMouseTracking();
+    }
+  }, [isDragging, isHovered]);
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -97,8 +107,7 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
 
   const { moveProps } = useMove({
     onMoveStart: () => {
-      // Disable the mouse point fetch when drag
-      pointValueService.disableMouseTracking();
+      setIsDragging(true);
     },
     onMove: (moveEvent) => {
       requestAnimationFrame(() => {
@@ -110,12 +119,20 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       });
     },
     onMoveEnd: () => {
-      // Reactivate mouse point fetch after drag
+      // Slight delay to avoid instant reactivation when drag
       setTimeout(() => {
-        pointValueService.enableMouseTracking();
+        setIsDragging(false);
       }, 100); // ms
     }
   });
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  }
 
   const inlineStyles: React.CSSProperties = {
     ...style,
@@ -146,6 +163,8 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
 
       const timer = setTimeout(() => {
         setIsVisible(false);
+        setIsHovered(false);
+        setIsDragging(false);
       }, 200);
 
       return () => clearTimeout(timer);
@@ -157,7 +176,9 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       {...dialogProps} 
       ref={dialogRef} 
       className={`draggable-box-content-container ${className} ${!isVisible ? 'draggable-box-content-container__hidden' : ''}`}
-      style={isVisible ? containerStyle : undefined}       
+      style={isVisible ? containerStyle : undefined}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       {title && (
         <div {...moveProps} className="draggable-box-content-container__move-area">

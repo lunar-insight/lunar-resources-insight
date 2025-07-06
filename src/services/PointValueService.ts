@@ -16,6 +16,7 @@ export interface PointValue {
 export interface PointValueCallbackData {
   displayValues: {[layerId: string]: number}; // Only explicited selected layers
   allValues: {[layerId: string]: number}; // Every layers for the calculation
+  isPaused?: boolean;
 }
 
 export class PointValueService {
@@ -84,7 +85,7 @@ export class PointValueService {
   }
 
   // Notify callbacks
-  private notifyValuesUpdate(allValues: {[layerId: string]: number}) {
+  private notifyValuesUpdate(allValues: {[layerId: string]: number}, isPaused: boolean = false) {
     // Filter to get only explicitly selected layers for display
     const displayValues = Object.fromEntries(
       Object.entries(allValues).filter(([layerId]) =>
@@ -93,8 +94,9 @@ export class PointValueService {
     );
 
     const callbackData: PointValueCallbackData = {
-      displayValues,
-      allValues
+      displayValues: isPaused ? {} : displayValues,
+      allValues: isPaused ? {} : allValues,
+      isPaused
     };
 
     this.callbacks.forEach(callback => {
@@ -128,6 +130,8 @@ export class PointValueService {
 
   disableMouseTracking() {
     this.isMouseTrackingEnabled = false;
+    this.scanIndicator.hide();
+    this.notifyValuesUpdate({}, true);
   }
 
   enableMouseTracking() {
@@ -165,7 +169,7 @@ export class PointValueService {
   }
 
   private getCurrentPosition(): { lon: number; lat: number } | null {
-    if (!this.viewer || !this.currentMousePosition) return null;
+    if (!this.viewer || !this.currentMousePosition || !this.isMouseTrackingEnabled) return null;
 
     // Ellipsoid setup in CesiumComponent
     const ellipsoid = this.viewer.scene.globe.ellipsoid;
@@ -184,9 +188,16 @@ export class PointValueService {
   }
 
   private async fetchPointValues() {
+    if (!this.isMouseTrackingEnabled) {
+      this.scanIndicator.hide();
+      this.notifyValuesUpdate({}, true);
+      return;
+    }
+
     const position = this.getCurrentPosition();
     if (!position) {
       console.log('Could not determine current mouse selenographic position (mouse might be off the moon surface)');
+      this.scanIndicator.hide();
       return;
     }
 
@@ -228,8 +239,8 @@ export class PointValueService {
       });
 
       // Notify callbacks only when there is valid values
-      if (Object.keys(allValues).length > 0) {
-        this.notifyValuesUpdate(allValues); 
+      if (Object.keys(allValues).length > 0 && this.isMouseTrackingEnabled) {
+        this.notifyValuesUpdate(allValues, false); // Second place is notification for "isPaused = false"
       }
 
     } catch(error) {

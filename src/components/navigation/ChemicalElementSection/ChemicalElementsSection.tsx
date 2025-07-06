@@ -26,6 +26,7 @@ const ChemicalElementsSection: React.FC = () => {
   const [showValueBox, setShowValueBox] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -55,12 +56,14 @@ const ChemicalElementsSection: React.FC = () => {
       const unsubscribe = pointValueService.onValuesUpdate((data) => {
         setHoverValues(data.displayValues); // Bar show
         setAllHoverValues(data.allValues); // Terrain calculation
+        setIsPaused(data.isPaused || false);
       });
 
       return unsubscribe;
     } else {
       setHoverValues(null);
       setAllHoverValues(null);
+      setIsPaused(false);
     }
   }, [showValueBox]);
 
@@ -84,6 +87,7 @@ const ChemicalElementsSection: React.FC = () => {
     } else {
       pointValueService.stop();
       setHoverValues(null);
+      setIsPaused(false);
     }
   };
 
@@ -174,6 +178,30 @@ const ChemicalElementsSection: React.FC = () => {
     updateLayerOpacity(layerId, opacityValue);
   }
 
+  const renderValueBoxContent = () => {
+    if (isPaused) {
+      return (
+        <div className="map-hover-values-box__paused">
+          <p>⏸️ Scan paused</p>
+          <small>Move the mouse on the globe to resume</small>
+        </div>
+      );
+    }
+    
+    if (hoverValues && Object.keys(hoverValues).length > 0) {
+      return (
+        <ResourceBarsVisualizer 
+          values={hoverValues} 
+          allValues={allHoverValues}
+          width={270} 
+          height={250} 
+        />
+      );
+    }
+    
+    return <p>Hover over the map to scan resources</p>;
+  };
+
   return (
     <>
       <Button 
@@ -204,15 +232,7 @@ const ChemicalElementsSection: React.FC = () => {
             boundaryRef={boundaryRef}
           >
             <div className='map-hover-values-box__content'>
-              {hoverValues ? (
-                <ResourceBarsVisualizer 
-                  values={hoverValues} 
-                  allValues={allHoverValues}
-                  width={270} 
-                  height={250} />
-              ) : (
-                <p>Hover over the map to scan resources</p>
-              )}
+              {renderValueBoxContent()}
             </div>
           </DraggableBoxContentContainer>
         </Portal>
