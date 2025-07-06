@@ -135,7 +135,16 @@ export class PointValueService {
   }
 
   enableMouseTracking() {
+    this.resume();
+  }
+
+  resume() {
     this.isMouseTrackingEnabled = true;
+
+    if (this.currentMousePosition && this.isActive) {
+      this.scanIndicator.updatePosition(this.currentMousePosition);
+      this.fetchPointValues();
+    }
   }
       
   start() {
