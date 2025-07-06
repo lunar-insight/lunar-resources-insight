@@ -70,7 +70,7 @@ $margin: 0.75rem;
       overflow-x: auto;
       overflow-y: auto;
       flex-grow: 1;
-      max-height: calc(100% - 3rem); // Soustrait la hauteur de la move area
+      max-height: calc(100% - 3rem); // Minus move area
       display: flex;
       flex-direction: column;
       gap: 1rem;

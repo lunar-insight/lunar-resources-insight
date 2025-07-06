@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import * as Cesium from 'cesium';
 import 'cesium/Source/Widgets/widgets.css';
 import { useViewer } from '../../../utils/context/ViewerContext';
+import { pointValueService } from '../../../services/PointValueService';
 
 // Skybox images
 import positiveX from '@assets/images/skybox/px.jpg';
@@ -21,12 +22,13 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
   const { setViewer } = useViewer();
 
+  const isMovingRef = useRef<boolean>(false);
+  const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   // For Cesium initialisation
   useEffect(() => {
     if (cesiumContainerRef.current) {
-
       Cesium.Ion.defaultAccessToken = ''; // No Cesium Key (to remove the message)
-
       Cesium.Ellipsoid.default = Cesium.Ellipsoid.MOON
 
       const mapProjection = new Cesium.GeographicProjection(Cesium.Ellipsoid.default);
@@ -93,6 +95,46 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       const canvas = viewer.cesiumWidget.canvas;
       const handler = viewer.cesiumWidget.screenSpaceEventHandler;
 
+      const startMovement = () => {
+        if (!isMovingRef.current) {
+          isMovingRef.current = true;
+          pointValueService.disableMouseTracking();
+
+          // Clear any pending resume timeout
+          if (resumeTimeoutRef.current) {
+            clearTimeout(resumeTimeoutRef.current);
+            resumeTimeoutRef.current = null;
+          }
+        }
+      };
+
+      const endMovement = () => {
+        if (isMovingRef.current) {
+          isMovingRef.current = false;
+
+          // Clear any existing timeout
+          if (resumeTimeoutRef.current) {
+            clearTimeout(resumeTimeoutRef.current);
+          }
+
+          // Resume after a short delay to avoid flickering
+          resumeTimeoutRef.current = setTimeout(() => {
+            if (!isMovingRef.current) {
+              pointValueService.enableMouseTracking();
+            }
+            resumeTimeoutRef.current = null;
+          }, 100);
+        }
+      };
+
+      const mouseLeaveHandler = () => {
+        canvas.style.cursor = 'default';
+      };
+
+      const moveStartRemover = viewer.camera.moveStart.addEventListener(startMovement);
+      const moveEndRemover = viewer.camera.moveEnd.addEventListener(endMovement);
+
+      // Event listeners for mouse drag (backup in case of problems with camera events)
       handler.setInputAction(() => {
         canvas.style.cursor = 'grabbing';
       }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
@@ -101,10 +143,6 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         canvas.style.cursor = 'default';
       }, Cesium.ScreenSpaceEventType.LEFT_UP);
 
-      canvas.addEventListener('mouseleave', () => {
-        canvas.style.cursor = 'default';
-      });
-
       setViewer(viewer);
 
       // Error handling for the base layer
@@ -112,11 +150,26 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         console.error('Error loading base imagery layer:', error);
       });
 
+      canvas.addEventListener('mouseleave', mouseLeaveHandler);
+
       // Cleanup function
       return () => {
-        canvas.removeEventListener('mouseleave', () => {
-          canvas.style.cursor = 'default';
-        });
+
+        if (resumeTimeoutRef.current) {
+          clearTimeout(resumeTimeoutRef.current);
+        }
+
+        if (moveStartRemover) {
+          moveStartRemover();
+        }
+        if (moveEndRemover) {
+          moveEndRemover();
+        }
+
+        canvas.removeEventListener('mouseleave', mouseLeaveHandler)
+
+        // Re-enable mouse tracking on cleanup
+        pointValueService.enableMouseTracking();
       };
     }
   }, [setViewer]);
