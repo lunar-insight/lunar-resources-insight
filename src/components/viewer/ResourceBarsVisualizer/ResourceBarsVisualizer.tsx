@@ -357,7 +357,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       {terrainClassification && (
         <div className='terrain-context'>
           <small>
-            <strong>{terrainClassification.type.charAt(0).toUpperCase() + terrainClassification.type.slice(1)}</strong> terrain ({terrainClassification.confidence} confidence)
+            <strong>{terrainClassification.type.charAt(0).toUpperCase() + terrainClassification.type.slice(1)}</strong> terrain
           </small>
         </div>
       )}
