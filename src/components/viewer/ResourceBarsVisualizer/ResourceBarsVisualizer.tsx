@@ -65,7 +65,7 @@ function getElementSymbol(elementName: string): string {
 function calculateGeochemicalScore(layerName: string, value: number): number {
 
   const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
-    return config.displayName === layerName || layerId === layerName || config.element === layerName;
+    return layerId === layerName || config.element === layerName;
   })
 
   if (!layerEntry) {
@@ -162,7 +162,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
 
       // Get element symbol from layersConfig
       const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
-        return config.displayName === layerName || layerId === layerName || config.element === layerName;
+        return layerId === layerName || config.element === layerName;
       });
 
       const elementName = layerEntry?.[1]?.element;
