@@ -58,6 +58,26 @@
     font-weight: bold;
   }
 
+  .element-symbol-square {
+    pointer-events: none;
+  }
+
+  .element-symbol {
+    pointer-events: none;
+    font-family: 'Arial', sans-serif;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+  }
+
+  .element-value {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    text-shadow: 0 0 2px rgba(0,0,0,0.8);
+  }
+
+  .element-separator {
+    pointer-events: none;
+  }
+
   .y-axis {
     .domain {
       stroke: #ccc;

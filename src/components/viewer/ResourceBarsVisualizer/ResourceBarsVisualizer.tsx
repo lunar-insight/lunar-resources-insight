@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { layersConfig } from '../../../geoConfigExporter';
 import { LunarTerrainClassifier, TerrainClassification } from '../../../utils/LunarTerrainClassifier';
+import { elements } from '../../navigation/submenu/PeriodicTable/PeriodicTable';
 import './ResourceBarsVisualizer.scss';
 
 export interface ResourceData {
@@ -51,6 +52,12 @@ const LUNAR_ELEMENTAL_RANGES: Record<string, { min: number; max: number }> = {
    */
   'magnesium': { min: 0, max: 13.0 }
 };
+
+/* PeriodicTable element mapping with layersConfig */
+function getElementSymbol(elementName: string): string {
+  const element = elements.find(el => el.name.toLowerCase() === elementName.toLowerCase());
+  return element?.symbol || elementName.toUpperCase().substring(0, 2);
+}
 
 /**
  * Calculate geochemical score based on lunar elemental literature ranges
@@ -153,6 +160,14 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       const continuousPosition = enrichmentScore / 100;
       const color = colorScale(1 - continuousPosition);
 
+      // Get element symbol from layersConfig
+      const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
+        return config.displayName === layerName || layerId === layerName || config.element === layerName;
+      });
+
+      const elementName = layerEntry?.[1]?.element;
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+
       return {
         layerName,
         value,
@@ -160,6 +175,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
         enrichmentScore,
         continuousPosition,
         color,
+        symbol,
       };
     }).filter(Boolean) as ResourceData[];
 
@@ -181,7 +197,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     const margin = { 
       top: 30, 
       right: 0,
-      bottom: 40, 
+      bottom: 80, 
       left: 0
     };
 
@@ -278,28 +294,55 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       .attr('stroke', '#fff')
       .attr('stroke-width', 1)
       .attr('opacity', 0.9);
-
-    // Labels outside the container (Element name labels)
+    
+    // Vertical separator between elements symbol and value
+    g.selectAll('.element-separator')
+      .data(resourceData.slice(0, -1)) // no separator for the last element
+      .enter()
+      .append('line')
+      .attr('class', 'element-separator')
+      .attr('x1', d => (xScale(d.layerName) || 0) + xScale.bandwidth() + xScale.padding() * xScale.bandwidth() / 2)
+      .attr('x2', d => (xScale(d.layerName) || 0) + xScale.bandwidth() + xScale.padding() * xScale.bandwidth() / 2)
+      .attr('y1', innerHeight + 5)
+      .attr('y2', innerHeight + 45)
+      .style('stroke', '#fff')
+      .style('stroke-width', 1)
+      .style('opacity', 0.3);
+    
+    // Square for chemical elements
+    resourceGroups.append('rect')
+      .attr('class', 'element-symbol-square')
+      .attr('x', xScale.bandwidth() / 2 - 12) // Centered square of 24x24
+      .attr('y', innerHeight + 8)
+      .attr('width', 24)
+      .attr('height', 24)
+      .attr('fill', 'none')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1.5)
+      .attr('rx', 2); // Rounded border
+    
+    // Chemical element inside the square
     resourceGroups.append('text')
-      .attr('class', 'resource-label')
+      .attr('class', 'element-symbol')
       .attr('x', xScale.bandwidth() / 2)
-      .attr('y', innerHeight + 15)
+      .attr('y', innerHeight + 8 + 12) // Verticaly centered inside the square
+      .attr('dy', '0.32em')
       .attr('text-anchor', 'middle')
-      .style('font-size', '11px')
+      .style('font-size', '12px')
+      .style('font-weight', 'bold')
       .style('fill', '#fff')
-      .text(d => {
-        const name = d.layerName.replace('_primary', '');
-        return name.length > 8 ? name.substring(0, 8) + '...' : name;
-      });
+      .style('font-family', 'Arial, sans-serif')
+      .text(d => d.symbol);
     
     // Raw elemental values
     resourceGroups.append('text')
       .attr('class', 'resource-value')
       .attr('x', xScale.bandwidth() / 2)
-      .attr('y', innerHeight + 30)
+      .attr('y', innerHeight + 45)
       .attr('text-anchor', 'middle')
-      .style('font-size', '10px')
+      .style('font-size', '12px')
       .style('fill', '#dcdcdc')
+      .style('font-family', 'Courier New, monospace')
       .text(d => `${d.value.toFixed(2)} wt%`);
     
   }, [resourceData, colorScale, terrainClassification]);
