@@ -197,7 +197,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     const margin = { 
       top: 30, 
       right: 0,
-      bottom: 80, 
+      bottom: 55, 
       left: 0
     };
 
