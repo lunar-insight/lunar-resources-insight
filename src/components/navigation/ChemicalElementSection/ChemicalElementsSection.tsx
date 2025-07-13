@@ -19,6 +19,7 @@ import { Portal } from '../../ui/Portal/Portal';
 import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
 import { ResourceBarsVisualizer } from '../../viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
 import { useBoundaryRef } from '../../../components/reference/BoundaryRefProvider';
+import { useZIndex } from '../../../utils/ZIndexProvider';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,6 +34,8 @@ const ChemicalElementsSection: React.FC = () => {
   const boundaryRef = useBoundaryRef();
 
   const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
+
+  const { registerModal, unregisterModal } = useZIndex();
 
   const { viewer } = useViewer();
 
@@ -93,10 +96,12 @@ const ChemicalElementsSection: React.FC = () => {
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
+    registerModal('periodic-table-modal');
   };
 
   const handleClosePeriodicTable = () => {
     setIsModalOpen(false);
+    unregisterModal('periodic-table-modal');
   };
 
 
@@ -230,6 +235,7 @@ const ChemicalElementsSection: React.FC = () => {
             isOpen={showValueBox}
             onClose={() => handlePointFetchToggle(false)}
             boundaryRef={boundaryRef}
+            id="element-concentration-box"
           >
             <div className='map-hover-values-box__content'>
               {renderValueBoxContent()}

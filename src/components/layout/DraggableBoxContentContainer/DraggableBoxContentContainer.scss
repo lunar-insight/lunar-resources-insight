@@ -17,7 +17,7 @@ $margin: 0.75rem;
   & {
     border-radius: 0.25rem;
     position: absolute;
-    z-index: 100;
+    z-index: 100; // Non active Dialog
     height: auto;
     min-width: 16rem;
     width: auto;

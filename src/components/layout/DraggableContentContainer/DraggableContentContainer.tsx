@@ -1,15 +1,20 @@
 import './DraggableContentContainer.scss';
 import React, { useRef, useState, useEffect } from 'react';
 import { useDialog } from '@react-aria/dialog';
-import { useMove } from '@react-aria/interactions';
+import { useMove, usePress } from '@react-aria/interactions';
+import { mergeProps } from '@react-aria/utils';
 import CloseButton from '../Button/CloseButton/CloseButton';
+import { useZIndex } from '../../../utils/ZIndexProvider';
 
 export interface DraggableContentContainerProps {
   title?: React.ReactNode;
   children?: React.ReactNode;
   isOpen: boolean;
   onClose: () => void;
-  boundaryRef: React.RefObject<HTMLDivElement>,
+  boundaryRef: React.RefObject<HTMLDivElement>;
+  style?: React.CSSProperties;
+  onFocus?: () => void;
+  id?: string;
 }
 
 interface ViewerContainerSize {
@@ -27,20 +32,20 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   isOpen,
   onClose,
   boundaryRef,
+  style = {},
+  onFocus,
+  id = 'draggable-content-' + Math.random().toString(36).substring(2, 11),
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
-  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const { bringToFront, getZIndex } = useZIndex();
   const [viewerContainerSize, setViewerContainerSize] = useState<ViewerContainerSize>({ x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 });
-  const [draggableContainerSize, setDraggableContainerSize] = useState({ width: 0, height: 0 });
   const [translation, setTranslation] = useState({ x: 0, y: 0});
   const [isVisible, setIsVisible] = useState(false);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
       const viewerBounds = boundaryRef.current.getBoundingClientRect();
-      const dialogBounds = dialogRef.current.getBoundingClientRect();
 
       setViewerContainerSize({
         x: viewerBounds.left,
@@ -49,11 +54,6 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
         height: viewerBounds.height,
         left: viewerBounds.left,
         top: viewerBounds.top,
-      });
-
-      setDraggableContainerSize({
-        width: dialogBounds.width,
-        height: dialogBounds.height
       });
     }
   };
@@ -75,8 +75,6 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     };
   }, [boundaryRef.current, dialogRef.current]);
 
-  // Obtain dimension and position from Viewer Div
-
   const clampX = (translateX: number) => {
     if (!boundaryRef.current || !dialogRef.current) return translateX;
     const boundaryRect = boundaryRef.current.getBoundingClientRect();
@@ -95,10 +93,20 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     return Math.max(minY, Math.min(translateY, maxY));
   };
 
-  //if (moveEvent.pointerType === 'keyboard') { // Dragging outside the container and using arrow keys (need testing to confirm)
+  const handleBringToFront = (e?: any) => {
+    // Prevent firing when clicking on buttons
+    if (e && (e.target as HTMLElement).closest('button')) {
+      return;
+    }
+    
+    bringToFront(id, 'content-container');
+    onFocus?.();
+  };
 
   const { moveProps } = useMove({
-  
+    onMoveStart: () => {
+      handleBringToFront();
+    },
     onMove: (moveEvent) => {
       requestAnimationFrame(() => {
         setTranslation(({ x, y }) => {
@@ -108,29 +116,35 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
         });
       });
     },
-    
-
   });
-//const containerStyle: React.CSSProperties & { [key: string]: string } = {
+
+  // Simple click without dragging
+  const { pressProps } = usePress({
+    onPressStart: handleBringToFront,
+  });
+
+  const titleBarProps = mergeProps(moveProps, pressProps);
+
+  const zIndex = getZIndex(id, 'content-container');
+
   const containerStyle: React.CSSProperties = {
     transform: `translate(${clampX(translation.x)}px, ${clampY(translation.y)}px)`,
     left: `${viewerContainerSize.left}px`,
     top: `${viewerContainerSize.top}px`,
-    // To add security limit with 0.9:
-    //maxWidth: `${viewerContainerSize.width * 0.9}px`,
-    //maxHeight: `${viewerContainerSize.height * 0.9}px`,
-    //
     maxWidth: `${viewerContainerSize.width}px`,
     maxHeight: `${viewerContainerSize.height}px`,
+    zIndex,
+    ...style,
   };
 
-  
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
 
       const timer = setTimeout(() => {
         dialogRef.current?.classList.add('draggable-content-container__visible');
+        // Foreground when opening
+        bringToFront(id, 'content-container');
       }, 50);
 
       return () => clearTimeout(timer);
@@ -143,16 +157,20 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen]);
+  }, [isOpen, id, bringToFront]);
 
   return (
     <div 
       {...dialogProps} 
+      {...pressProps}
       ref={dialogRef} 
       className={`draggable-content-container ${!isVisible ? 'draggable-content-container__hidden' : ''}`}
-      style={isVisible ? containerStyle : undefined}       
+      style={isVisible ? containerStyle : undefined}
     >
-      <div {...moveProps} className="draggable-content-container__move-area">
+      <div 
+        {...titleBarProps}
+        className="draggable-content-container__move-area"
+      >
         <h3 {...titleProps} className="draggable-content-container__move-area__title">{title}</h3>
 
         <CloseButton
