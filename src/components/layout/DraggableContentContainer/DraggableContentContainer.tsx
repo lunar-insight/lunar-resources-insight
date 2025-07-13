@@ -5,6 +5,7 @@ import { useMove, usePress } from '@react-aria/interactions';
 import { mergeProps } from '@react-aria/utils';
 import CloseButton from '../Button/CloseButton/CloseButton';
 import { useZIndex } from '../../../utils/ZIndexProvider';
+import { pointValueService } from '../../../services/PointValueService';
 
 export interface DraggableContentContainerProps {
   title?: React.ReactNode;
@@ -42,6 +43,8 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const [viewerContainerSize, setViewerContainerSize] = useState<ViewerContainerSize>({ x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 });
   const [translation, setTranslation] = useState({ x: 0, y: 0});
   const [isVisible, setIsVisible] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -57,6 +60,14 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       });
     }
   };
+
+  useEffect(() => {
+    if (isDragging || isHovered) {
+      pointValueService.disableMouseTracking();
+    } else {
+      pointValueService.enableMouseTracking();
+    }
+  }, [isDragging, isHovered]);
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -105,6 +116,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
 
   const { moveProps } = useMove({
     onMoveStart: () => {
+      setIsDragging(true);
       handleBringToFront();
     },
     onMove: (moveEvent) => {
@@ -116,6 +128,11 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
         });
       });
     },
+    onMoveEnd: () => {
+      setTimeout(() => {
+        setIsDragging(false);
+      }, 100);
+    }
   });
 
   // Simple click without dragging
@@ -124,6 +141,14 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   });
 
   const titleBarProps = mergeProps(moveProps, pressProps);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  }
 
   const zIndex = getZIndex(id, 'content-container');
 
@@ -153,6 +178,8 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
 
       const timer = setTimeout(() => {
         setIsVisible(false);
+        setIsHovered(false);
+        setIsDragging(false);
       }, 200);
 
       return () => clearTimeout(timer);
@@ -166,6 +193,8 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       ref={dialogRef} 
       className={`draggable-content-container ${!isVisible ? 'draggable-content-container__hidden' : ''}`}
       style={isVisible ? containerStyle : undefined}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div 
         {...titleBarProps}
