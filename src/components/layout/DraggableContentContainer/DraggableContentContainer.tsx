@@ -6,6 +6,7 @@ import { mergeProps } from '@react-aria/utils';
 import CloseButton from '../Button/CloseButton/CloseButton';
 import { useZIndex } from '../../../utils/ZIndexProvider';
 import { pointValueService } from '../../../services/PointValueService';
+import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 
 export interface DraggableContentContainerProps {
   title?: React.ReactNode;
@@ -46,6 +47,8 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  useMouseTrackingControl(isDragging || isHovered, `draggable-content-${id}`);
+
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
       const viewerBounds = boundaryRef.current.getBoundingClientRect();
@@ -60,14 +63,6 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       });
     }
   };
-
-  useEffect(() => {
-    if (isDragging || isHovered) {
-      pointValueService.disableMouseTracking();
-    } else {
-      pointValueService.enableMouseTracking();
-    }
-  }, [isDragging, isHovered]);
 
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {

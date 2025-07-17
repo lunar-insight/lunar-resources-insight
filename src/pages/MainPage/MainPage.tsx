@@ -9,6 +9,7 @@ import { ViewerProvider } from 'utils/context/ViewerContext';
 import { initializeLayerStats } from '../../services/LayerStatsService';
 import { initializeColormapService } from '../../services/ColormapService';
 import { ZIndexProvider } from 'utils/ZIndexProvider';
+import { MouseTrackingProvider } from 'utils/MouseTrackingProvider';
 
 const MainPage = () => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
@@ -34,15 +35,17 @@ const MainPage = () => {
       <ViewerProvider>
         <LayerProvider>
           <ZIndexProvider>
-            <DialogProvider dialogs={dialogs}>
-              <div className="main-page">
-                <SectionNavigation />
-                <div className="viewer-container" ref={viewerContainerRef}>
-                  <CesiumComponent className="cesium-component" />
+            <MouseTrackingProvider>
+              <DialogProvider dialogs={dialogs}>
+                <div className="main-page">
+                  <SectionNavigation />
+                  <div className="viewer-container" ref={viewerContainerRef}>
+                    <CesiumComponent className="cesium-component" />
+                  </div>
+                  <DialogRenderer />
                 </div>
-                <DialogRenderer />
-              </div>
-            </DialogProvider>
+              </DialogProvider>
+            </MouseTrackingProvider>
           </ZIndexProvider>  
         </LayerProvider>
       </ViewerProvider>

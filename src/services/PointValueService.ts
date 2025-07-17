@@ -129,12 +129,19 @@ export class PointValueService {
   }
 
   disableMouseTracking() {
-    this.isMouseTrackingEnabled = false;
-    this.scanIndicator.hide();
-    this.notifyValuesUpdate({}, true);
+    if (this.isMouseTrackingEnabled) {
+      this.isMouseTrackingEnabled = false;
+      this.scanIndicator.hide();
+      this.notifyValuesUpdate({}, true);
+    }
   }
 
   enableMouseTracking() {
+    if (!this.isMouseTrackingEnabled) {
+      this.isMouseTrackingEnabled = true;
+      this.resume();
+    }
+
     this.resume();
   }
 

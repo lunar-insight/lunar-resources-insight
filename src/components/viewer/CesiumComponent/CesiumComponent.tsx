@@ -1,16 +1,17 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
 import 'cesium/Source/Widgets/widgets.css';
 import { useViewer } from '../../../utils/context/ViewerContext';
 import { pointValueService } from '../../../services/PointValueService';
 
 // Skybox images
-import positiveX from '@assets/images/skybox/px.jpg';
-import negativeX from '@assets/images/skybox/nx.jpg';
-import positiveY from '@assets/images/skybox/py.jpg';
-import negativeY from '@assets/images/skybox/ny.jpg';
-import positiveZ from '@assets/images/skybox/pz.jpg';
-import negativeZ from '@assets/images/skybox/nz.jpg';
+import positiveX from 'assets/images/skybox/px.jpg';
+import negativeX from 'assets/images/skybox/nx.jpg';
+import positiveY from 'assets/images/skybox/py.jpg';
+import negativeY from 'assets/images/skybox/ny.jpg';
+import positiveZ from 'assets/images/skybox/pz.jpg';
+import negativeZ from 'assets/images/skybox/nz.jpg';
+import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 
 // Info: The Cesium CSS is edited on the MainPage component
 
@@ -19,11 +20,15 @@ interface CesiumComponentProps {
 }
 
 const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
+  const [isCameraMoving, setIsCameraMoving] = useState(false);
+
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
   const { setViewer } = useViewer();
 
   const isMovingRef = useRef<boolean>(false);
   const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useMouseTrackingControl(isCameraMoving, 'cesium-camera');
 
   // For Cesium initialisation
   useEffect(() => {
@@ -96,35 +101,14 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       const handler = viewer.cesiumWidget.screenSpaceEventHandler;
 
       const startMovement = () => {
-        if (!isMovingRef.current) {
-          isMovingRef.current = true;
-          pointValueService.disableMouseTracking();
-
-          // Clear any pending resume timeout
-          if (resumeTimeoutRef.current) {
-            clearTimeout(resumeTimeoutRef.current);
-            resumeTimeoutRef.current = null;
-          }
-        }
+        setIsCameraMoving(true);
       };
 
       const endMovement = () => {
-        if (isMovingRef.current) {
-          isMovingRef.current = false;
-
-          // Clear any existing timeout
-          if (resumeTimeoutRef.current) {
-            clearTimeout(resumeTimeoutRef.current);
-          }
-
-          // Resume after a short delay to avoid flickering
-          resumeTimeoutRef.current = setTimeout(() => {
-            if (!isMovingRef.current) {
-              pointValueService.enableMouseTracking();
-            }
-            resumeTimeoutRef.current = null;
-          }, 100);
-        }
+        // Delay to avoid flickering
+        setTimeout(() => {
+          setIsCameraMoving(false);
+        }, 100);
       };
 
       const mouseLeaveHandler = () => {

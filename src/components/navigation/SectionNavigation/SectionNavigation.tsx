@@ -3,6 +3,8 @@ import { Button } from 'react-aria-components';
 import './SectionNavigation.scss';
 import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
+import { pointValueService } from '../../../services/PointValueService';
+import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 
 interface Icon {
   id: string;
@@ -99,7 +101,19 @@ export const dialogs = dialogsData.map(({ id, dialogTitle, dialogContent }) => (
 
 const SectionNavigation = () => {
 
+  const [isHovered, setIsHovered] = useState(false);
+
   const { openDialog, closeDialog, isDialogOpen } = useDialogContext();
+
+  useMouseTrackingControl(isHovered, 'section-navigation');
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+  };
 
   const IconButton = ({ icon, label, id, isActive }) => (
     <Button 
@@ -112,7 +126,11 @@ const SectionNavigation = () => {
   );
 
   return (
-    <div className='section-navigation'>
+    <div 
+      className='section-navigation'
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {dialogsData.map((icon) => (
         <Fragment key={icon.id}>
           <IconButton
