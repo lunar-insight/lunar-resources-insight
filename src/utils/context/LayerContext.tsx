@@ -5,6 +5,8 @@ import * as Cesium from 'cesium';
 import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics } from '../../geoConfigExporter';
 import { colormapService } from '../../services/ColormapService';
 import { layerStatsService } from '../../services/LayerStatsService';
+import { pointValueService } from 'services/PointValueService';
+import { useMouseTracking } from 'utils/MouseTrackingProvider';
 
 interface LayerContextType {
   selectedLayers: string[];
@@ -29,14 +31,18 @@ class CesiumLayerManager {
   private layerStats: Map<string, { min: number; max: number }>;
   private tileCache = new Map<string, string>();
   private rangeFilterEnabled: Map<string, boolean>;
+  private hasDisableRequests: (() => boolean) | null = null;
 
-  constructor(private viewer: Cesium.Viewer | null) {
+  constructor(
+    private viewer: Cesium.Viewer | null,
+    hasDisableRequestsFn?: () => boolean
+  ) {
     this.layerMap = new Map();
     this.layerStyleConfig = new Map();
     this.layerStats = new Map();
     this.rangeFilterEnabled = new Map();
+    this.hasDisableRequests = hasDisableRequestsFn || null;
   }
-
 
   async addLayer(layerId: string) {
     if (!this.viewer) return;
@@ -87,6 +93,8 @@ class CesiumLayerManager {
       });
       this.viewer.imageryLayers.add(layer);
       this.layerMap.set(layerId, layer);
+
+      this.forceResumeMouseTracking();
     } catch (error) {
       console.error(`Failed to add layer ${layerId}:`, error);
     }
@@ -211,6 +219,8 @@ class CesiumLayerManager {
       this.viewer.imageryLayers.add(newLayer, index);
       this.layerMap.set(layerId, newLayer);
       this.layerStyleConfig.set(layerId, styleConfig);
+
+      this.forceResumeMouseTracking();
     }
   }
 
@@ -267,6 +277,15 @@ class CesiumLayerManager {
   getLayerStyleConfig(layerId: string): StyleConfig | undefined {
     return this.layerStyleConfig.get(layerId);
   }
+
+  private forceResumeMouseTracking() {
+    // Delay in ms to wait Cesium finish operations
+    setTimeout(() => {
+      if (!this.hasDisableRequests || !this.hasDisableRequests()) {
+        pointValueService.enableMouseTracking();
+      }
+    }, 150);
+  }
 }
 
 
@@ -274,11 +293,12 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedLayers, setSelectedLayers] = useState<string[]>([]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
   const { viewer } = useViewer();
+  const { hasDisableRequests } = useMouseTracking();
   const cesiumManagerRef = useRef<CesiumLayerManager | null>(null);
 
   // When viewer change, init or update manager
   if (viewer && !cesiumManagerRef.current) {
-    cesiumManagerRef.current = new CesiumLayerManager(viewer);
+    cesiumManagerRef.current = new CesiumLayerManager(viewer, hasDisableRequests);
   }
 
 

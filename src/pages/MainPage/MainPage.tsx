@@ -33,9 +33,9 @@ const MainPage = () => {
   return (
     <BoundaryRefProvider value={viewerContainerRef}>
       <ViewerProvider>
-        <LayerProvider>
-          <ZIndexProvider>
-            <MouseTrackingProvider>
+        <MouseTrackingProvider>
+          <LayerProvider>
+            <ZIndexProvider>
               <DialogProvider dialogs={dialogs}>
                 <div className="main-page">
                   <SectionNavigation />
@@ -45,9 +45,9 @@ const MainPage = () => {
                   <DialogRenderer />
                 </div>
               </DialogProvider>
-            </MouseTrackingProvider>
-          </ZIndexProvider>  
-        </LayerProvider>
+            </ZIndexProvider>  
+          </LayerProvider>
+        </MouseTrackingProvider>
       </ViewerProvider>
     </BoundaryRefProvider>
   );

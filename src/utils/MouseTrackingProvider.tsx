@@ -5,6 +5,7 @@ interface MouseTrackingContextValue {
   requestDisable: (id: string) => void;
   requestEnable: (id: string) => void;
   isEnabled: boolean;
+  hasDisableRequests: () => boolean;
 }
 
 const MouseTrackingContext = createContext<MouseTrackingContextValue | undefined>(undefined);
@@ -70,6 +71,10 @@ export const MouseTrackingProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, []);
 
+  const hasDisableRequests = useCallback(() => {
+    return Object.keys(disableRequests).length > 0;
+  }, [disableRequests]);
+
   // Cleanup
   useEffect(() => {
     return () => {
@@ -82,7 +87,12 @@ export const MouseTrackingProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   return (
-    <MouseTrackingContext.Provider value={{ requestDisable, requestEnable, isEnabled }}>
+    <MouseTrackingContext.Provider value={{ 
+      requestDisable, 
+      requestEnable, 
+      isEnabled,
+      hasDisableRequests
+    }}>
       {children}
     </MouseTrackingContext.Provider>
   );

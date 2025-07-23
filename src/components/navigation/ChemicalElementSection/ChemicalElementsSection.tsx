@@ -248,6 +248,7 @@ const ChemicalElementsSection: React.FC = () => {
         isOpen={isModalOpen}
         onOpenChange={handleClosePeriodicTable}
         title="Periodic Table of Elements"
+        modalId='periodic-table-modal'
       >
         <PeriodicTable 
           onElementSelect={handleElementSelection} 

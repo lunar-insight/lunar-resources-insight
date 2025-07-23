@@ -134,8 +134,8 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
 
   // Color scale (gradient from scarce to abundant)
   const colorScale = useMemo(() => {
-    return d3.scaleSequential(d3.interpolateRdYlBu)
-      .domain([0, 1]); // 0 = enrichment score 0%, 1 = enrichment score 100%
+    return d3.scaleSequential(d3.interpolateGreens)
+      .domain([1, 0]); // 0 = enrichment score 0%, 1 = enrichment score 100%
   }, []);
 
   // Lunar terrain classification based on Ca/(Fe + 2*Ti) ratio

@@ -1,6 +1,7 @@
 import React, { useRef } from 'react';
 import {Modal, ModalOverlay, Dialog, Heading} from 'react-aria-components';
 import CloseButton from '../Button/CloseButton/CloseButton';
+import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 import './ModalOverlayContainer.scss';
 
 interface ModalOverlayContainerProps {
@@ -8,15 +9,19 @@ interface ModalOverlayContainerProps {
   onOpenChange: (isOpen: boolean) => void;
   title: string;
   children: React.ReactNode;
+  modalId?: string;
 }
 
 const ModalOverlayContainer: React.FC<ModalOverlayContainerProps> = ({
   isOpen,
   onOpenChange,
   title,
-  children
+  children,
+  modalId
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+
+  useMouseTrackingControl(isOpen, modalId || `modal-${title.toLowerCase().replace(/\s+/g, '-')}`);
 
   const handleClose = () => {
     onOpenChange(false);

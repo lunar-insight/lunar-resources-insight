@@ -21,7 +21,6 @@ export interface PointValueCallbackData {
 
 export class PointValueService {
   private viewer: Cesium.Viewer | null = null;
-  private intervalId: NodeJS.Timeout | null = null;
   private isActive: boolean = false;
   private selectedLayers: string[] = []; // All layers to fetch (selected + required)
   private explicitlySelectedLayers: string[] = []; // Only user-selected layers
@@ -29,8 +28,13 @@ export class PointValueService {
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
   private isMouseTrackingEnabled: boolean = true;
 
-  private scanIndicator: ScanIndicator = new ScanIndicator();
+  // Throttling
+  private lastFetchTime: number = 0;
+  private fetchThrottleMs: number = 100; // in ms, between requests. Can be 16, 33, 50-100
+  private pendingFetch: NodeJS.Timeout | null = null;
+  private isCurrentlyFetching: boolean = false;
 
+  private scanIndicator: ScanIndicator = new ScanIndicator();
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
 
   constructor() {}
@@ -61,21 +65,13 @@ export class PointValueService {
 
   setSelectedLayers(layers: string[]) {
     this.explicitlySelectedLayers = layers;
-
-    // Get required classification layers
     const requiredLayers = this.getRequiredTerrainLayers();
-
-    // Combine selected layers with required classification layers
-    // Set to avoid duplicate
     const allLayers = new Set([...layers, ...requiredLayers]);
     this.selectedLayers = Array.from(allLayers);
   }
 
-  // Method to subscribe to values change
   onValuesUpdate(callback: (data: PointValueCallbackData) => void): () => void {
     this.callbacks.push(callback);
-
-    // Return unsubscribe function
     return () => {
       const index = this.callbacks.indexOf(callback);
       if (index > -1) {
@@ -84,9 +80,7 @@ export class PointValueService {
     };
   }
 
-  // Notify callbacks
   private notifyValuesUpdate(allValues: {[layerId: string]: number}, isPaused: boolean = false) {
-    // Filter to get only explicitly selected layers for display
     const displayValues = Object.fromEntries(
       Object.entries(allValues).filter(([layerId]) =>
         this.explicitlySelectedLayers.includes(layerId)
@@ -118,14 +112,44 @@ export class PointValueService {
     this.mouseMoveHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
 
     this.mouseMoveHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
-      if (this.isMouseTrackingEnabled) {
+      if (this.isMouseTrackingEnabled && this.isActive) {
         this.currentMousePosition = event.endPosition;
+        this.scanIndicator.updatePosition(event.endPosition);
 
-        if (this.isActive) {
-          this.scanIndicator.updatePosition(event.endPosition);
-        }
+        this.throttledFetchPointValues();
       }
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+  }
+  
+  private throttledFetchPointValues() {
+    const now = Date.now();
+    const timeSinceLastFetch = now - this.lastFetchTime;
+
+    if (this.pendingFetch) {
+      clearTimeout(this.pendingFetch);
+      this.pendingFetch = null;
+    }
+
+    if (timeSinceLastFetch >= this.fetchThrottleMs && !this.isCurrentlyFetching) {
+      this.executeFetch();
+    } else {
+      const delay = Math.max(this.fetchThrottleMs - timeSinceLastFetch, 10);
+      this.pendingFetch = setTimeout(() => {
+        this.pendingFetch = null;
+        if (this.isActive && this.isMouseTrackingEnabled && !this.isCurrentlyFetching) {
+          this.executeFetch();
+        }
+      }, delay);
+    }
+  }
+
+  private executeFetch() {
+    this.lastFetchTime = Date.now();
+    this.isCurrentlyFetching = true;
+
+    this.fetchPointValues().finally(() => {
+      this.isCurrentlyFetching = false;
+    })
   }
 
   disableMouseTracking() {
@@ -133,6 +157,11 @@ export class PointValueService {
       this.isMouseTrackingEnabled = false;
       this.scanIndicator.hide();
       this.notifyValuesUpdate({}, true);
+
+      if (this.pendingFetch) {
+        clearTimeout(this.pendingFetch);
+        this.pendingFetch = null;
+      }
     }
   }
 
@@ -141,16 +170,13 @@ export class PointValueService {
       this.isMouseTrackingEnabled = true;
       this.resume();
     }
-
-    this.resume();
   }
 
   resume() {
     this.isMouseTrackingEnabled = true;
-
     if (this.currentMousePosition && this.isActive) {
       this.scanIndicator.updatePosition(this.currentMousePosition);
-      this.fetchPointValues();
+      this.throttledFetchPointValues(); // Immediate fetch on recovery
     }
   }
       
@@ -161,10 +187,6 @@ export class PointValueService {
 
     // Continous render for animation
     this.viewer.scene.requestRenderMode = false;
-
-    this.intervalId = setInterval(() => {
-      this.fetchPointValues();
-    }, 100); // 16, 33, 50-100
   }
 
   stop() {
@@ -178,9 +200,9 @@ export class PointValueService {
 
     this.scanIndicator.hide();
 
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+    if (this.pendingFetch) {
+      clearInterval(this.pendingFetch);
+      this.pendingFetch = null;
     }
   }
 
@@ -203,7 +225,7 @@ export class PointValueService {
     return { lon, lat };
   }
 
-  private async fetchPointValues() {
+  private async fetchPointValues(): Promise<void> {
     if (!this.isMouseTrackingEnabled) {
       this.scanIndicator.hide();
       this.notifyValuesUpdate({}, true);
@@ -212,7 +234,6 @@ export class PointValueService {
 
     const position = this.getCurrentPosition();
     if (!position) {
-      console.log('Could not determine current mouse selenographic position (mouse might be off the moon surface)');
       this.scanIndicator.hide();
       return;
     }
@@ -301,8 +322,12 @@ export class PointValueService {
   destroy() {
     this.stop();
     this.callbacks = [];
-
     this.scanIndicator.destroy();
+
+    if (this.pendingFetch) {
+      clearTimeout(this.pendingFetch);
+      this.pendingFetch = null;
+    }
 
     if (this.mouseMoveHandler) {
       this.mouseMoveHandler.destroy();
