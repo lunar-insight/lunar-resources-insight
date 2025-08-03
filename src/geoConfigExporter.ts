@@ -38,6 +38,43 @@ export type LayersConfig = {
   }
 }
 
+export interface CogBandStatistics {
+  min: number;
+  max: number;
+  mean: number;
+  std: number;
+  median: number;
+  count: number;
+  sum: number;
+  histogram: [number[], number[]]; // [counts, bins]
+  percentile_2: number;
+  percentile_15: number;
+  percentile_85: number;
+  percentile_95: number;
+  percentile_98: number;
+  majority: number;
+  minority: number;
+  unique: number;
+  valid_percent: number;
+  masked_pixels: number;
+  valid_pixels: number;
+}
+
+export interface CogStatistics {
+  // Band support
+  b1?: CogBandStatistics;
+  b2?: CogBandStatistics;
+  b3?: CogBandStatistics;
+  
+  // Fallback for compatibility)
+  min?: number;
+  max?: number;
+  mean?: number;
+  std?: number;
+  median?: number;
+  histogram?: [number[], number[]];
+}
+
 import layersConfigJson from './layersConfig.json';
 export const layersConfig: LayersConfig = layersConfigJson;
 
@@ -115,34 +152,33 @@ export async function fetchCogInfo(filename: string): Promise<{
   }
 }
 
-export async function fetchCogStatistics(filename: string): Promise<{
-  min: number;
-  max: number;
-  mean?: number;
-  std?: number;
-  median?: number;
-}> {
+export async function fetchCogStatistics(filename: string): Promise<CogStatistics> {
   const fileUrl = `${workspacePath}/${filename}`;
   const encodedFileUrl = safeEncodeURI(fileUrl);
-  const url = `${tilerEndpoints.statistics}?url=${encodedFileUrl}&bidx=1`;
+  const url = `${tilerEndpoints.statistics}?url=${encodedFileUrl}&bidx=1&p=2&p=15&p=85&p=95&p=98`;
 
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Error fetching COG statistics: ${response.statusText}`);
     }
-    const rawData  = await response.json();
 
-    return {
-      min: rawData ?.b1?.min ?? 0,
-      max: rawData ?.b1?.max ?? 100,
-      mean: rawData ?.b1?.mean,
-      std: rawData ?.b1?.std,
-      median: rawData ?.b1?.median
-    }
+    const rawData  = await response.json();
+    console.log(`Full API response for ${filename}:`, rawData);
+
+    return rawData;
+
   } catch (error) {
     console.error("Failed to fetch COG statistics:", error);
-    return { min: 0, max: 100 };
+
+    // Return error with valid structure
+    return { 
+      min: 0, 
+      max: 100,
+      mean: 50,
+      std: 0,
+      median: 50
+    };
   }
 }
 

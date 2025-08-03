@@ -1,21 +1,23 @@
-import './DraggableContentContainer.scss';
+import './DraggableBoxContentContainer.scss';
 import React, { useRef, useState, useEffect } from 'react';
 import { useDialog } from '@react-aria/dialog';
 import { useMove, usePress } from '@react-aria/interactions';
 import { mergeProps } from '@react-aria/utils';
 import CloseButton from '../Button/CloseButton/CloseButton';
-import { useZIndex } from '../../../utils/ZIndexProvider';
 import { pointValueService } from '../../../services/PointValueService';
+import { useZIndex } from '../../../utils/ZIndexProvider';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 
-export interface DraggableContentContainerProps {
-  title?: React.ReactNode;
+export interface DraggableBoxContentContainerProps {
+  className?: string;
   children?: React.ReactNode;
+  height?: number;
+  width?: number;
+  style?: React.CSSProperties;
+  title?: React.ReactNode;
   isOpen: boolean;
   onClose: () => void;
   boundaryRef: React.RefObject<HTMLDivElement>;
-  style?: React.CSSProperties;
-  onFocus?: () => void;
   id?: string;
 }
 
@@ -28,26 +30,30 @@ interface ViewerContainerSize {
   top: number;
 }
 
-export const DraggableContentContainer: React.FC<DraggableContentContainerProps> = ({
-  title,
+export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainerProps> = ({
+  className = '',
   children,
+  width,
+  height,
+  style,
+  title,
   isOpen,
   onClose,
   boundaryRef,
-  style = {},
-  onFocus,
-  id = 'draggable-content-' + Math.random().toString(36).substring(2, 11),
+  id = 'draggable-box-' + Math.random().toString(36).substring(2, 11),
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
   const { bringToFront, getZIndex } = useZIndex();
-  const [viewerContainerSize, setViewerContainerSize] = useState<ViewerContainerSize>({ x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 });
-  const [translation, setTranslation] = useState({ x: 0, y: 0});
+  const [viewerContainerSize, setViewerContainerSize] = useState<ViewerContainerSize>({
+    x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 
+  });
+  const [translation, setTranslation] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  useMouseTrackingControl(isDragging || isHovered, `draggable-content-${id}`);
+  useMouseTrackingControl(isDragging || isHovered, `draggable-box-${id}`);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -89,7 +95,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     const maxX = boundaryRect.width - dialogRect.width;
     return Math.max(minX, Math.min(translateX, maxX));
   };
-  
+
   const clampY = (translateY: number) => {
     if (!boundaryRef.current || !dialogRef.current) return translateY;
     const boundaryRect = boundaryRef.current.getBoundingClientRect();
@@ -100,13 +106,12 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   };
 
   const handleBringToFront = (e?: any) => {
-    // Prevent firing when clicking on buttons
+    // Prevent firing when click buttons
     if (e && (e.target as HTMLElement).closest('button')) {
       return;
     }
     
-    bringToFront(id, 'content-container');
-    onFocus?.();
+    bringToFront(id, 'box-container');
   };
 
   const { moveProps } = useMove({
@@ -130,7 +135,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     }
   });
 
-  // Simple click without dragging
+  // Foreground when simple click without dragging
   const { pressProps } = usePress({
     onPressStart: handleBringToFront,
   });
@@ -145,16 +150,22 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     setIsHovered(false);
   }
 
-  const zIndex = getZIndex(id, 'content-container');
+  const inlineStyles: React.CSSProperties = {
+    ...style,
+    ...(width && { width: `${width}px` }),
+    ...(height && { height: `${height}px` }),
+  };
+
+  const zIndex = getZIndex(id, 'box-container');
 
   const containerStyle: React.CSSProperties = {
+    ...inlineStyles,
     transform: `translate(${clampX(translation.x)}px, ${clampY(translation.y)}px)`,
     left: `${viewerContainerSize.left}px`,
     top: `${viewerContainerSize.top}px`,
     maxWidth: `${viewerContainerSize.width}px`,
     maxHeight: `${viewerContainerSize.height}px`,
     zIndex,
-    ...style,
   };
 
   useEffect(() => {
@@ -162,14 +173,14 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       setIsVisible(true);
 
       const timer = setTimeout(() => {
-        dialogRef.current?.classList.add('draggable-content-container__visible');
+        dialogRef.current?.classList.add('draggable-box-content-container__visible');
         // Foreground when opening
-        bringToFront(id, 'content-container');
+        bringToFront(id, 'box-container');
       }, 50);
 
       return () => clearTimeout(timer);
     } else {
-      dialogRef.current?.classList.remove('draggable-content-container__visible');
+      dialogRef.current?.classList.remove('draggable-box-content-container__visible');
 
       const timer = setTimeout(() => {
         setIsVisible(false);
@@ -186,28 +197,32 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       {...dialogProps} 
       {...pressProps}
       ref={dialogRef} 
-      className={`draggable-content-container ${!isVisible ? 'draggable-content-container__hidden' : ''}`}
+      className={`draggable-box-content-container ${className} ${!isVisible ? 'draggable-box-content-container__hidden' : ''}`}
       style={isVisible ? containerStyle : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div 
-        {...titleBarProps}
-        className="draggable-content-container__move-area"
-      >
-        <h3 {...titleProps} className="draggable-content-container__move-area__title">{title}</h3>
-
-        <CloseButton
-          onPress={onClose}
-          className="draggable-content-container__move-area__close-button"
-        />
-
-      </div>
-      <div className="draggable-content-container__content-area">
+      {title && (
+        <div 
+          {...titleBarProps}
+          className="draggable-box-content-container__move-area"
+        >
+          <h3 {...titleProps} className="draggable-box-content-container__move-area__title">
+            {title}
+          </h3>
+          <CloseButton
+            onPress={onClose}
+            className="draggable-box-content-container__move-area__close-button"
+            light
+          />
+        </div>
+      )}
+      
+      <div className="draggable-box-content-container__content-area">
         {children}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default DraggableContentContainer;
+export default DraggableBoxContentContainer;

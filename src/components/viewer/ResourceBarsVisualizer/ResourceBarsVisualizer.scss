@@ -1,0 +1,97 @@
+.resource-bars-visualizer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  svg {
+    width: 100%;
+    display: block;
+  }
+  
+  .terrain-context {
+    margin-top: 5px;
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+    font-style: italic;
+  }
+  
+  .terrain-type {
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+    letter-spacing: 1px;
+    font-family: 'Arial', sans-serif;
+  }
+  
+  .terrain-details {
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+    opacity: 0.9;
+  }
+
+  .abundance-zone-label {
+    pointer-events: none;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+  }
+
+  .threshold-line {
+    pointer-events: none;
+  }
+
+  .resource-symbol {
+    pointer-events: none;
+  }
+
+  .resource-label {
+    font-weight: 500;
+  }
+
+  .resource-value {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+  }
+
+  .resource-enrichment {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+  }
+
+  .element-symbol-square {
+    pointer-events: none;
+  }
+
+  .element-symbol {
+    pointer-events: none;
+    font-family: 'Arial', sans-serif;
+    text-shadow: 0 0 3px rgba(0,0,0,0.8);
+  }
+
+  .element-value {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    text-shadow: 0 0 2px rgba(0,0,0,0.8);
+  }
+
+  .element-separator {
+    pointer-events: none;
+  }
+
+  .y-axis {
+    .domain {
+      stroke: #ccc;
+      stroke-width: 1;
+    }
+    
+    .tick line {
+      stroke: #ccc;
+      stroke-width: 0.5;
+    }
+    
+    .tick text {
+      fill: #ccc;
+      font-weight: 500;
+    }
+  }
+}

@@ -21,4 +21,21 @@
     font-size: x-large;
     color: var(--color-tertiary)
   }
+  
+  &--light {
+    background-color: var(--color-intermediary);
+    border: 1px solid var(--color-primary);
+
+    &[data-hovered] {
+      background-color: var(--color-neutralVariant);
+    }
+
+    &[data-pressed] {
+      background-color: var(--color-light-button-pressed);
+    }
+
+    .close-button__icon {
+      color: var(--color-primary);
+    }
+  }
 }

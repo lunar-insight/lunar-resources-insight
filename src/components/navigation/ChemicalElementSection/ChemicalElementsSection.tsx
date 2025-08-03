@@ -14,19 +14,28 @@ import { layerStatsService } from '../../../services/LayerStatsService';
 import { FeatureCheckbox } from '../../layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
 import { pointValueService } from '../../../services/PointValueService';
 import { useViewer } from '../../../utils/context/ViewerContext';
-import { BoxContentContainer } from '../../layout/BoxContentContainer/BoxContentContainer';
+import { DraggableBoxContentContainer } from '../../layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
 import { Portal } from '../../ui/Portal/Portal';
 import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
+import { ResourceBarsVisualizer } from '../../viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
+import { useBoundaryRef } from '../../../components/reference/BoundaryRefProvider';
+import { useZIndex } from '../../../utils/ZIndexProvider';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
   const [showValueBox, setShowValueBox] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
+  const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const boundaryRef = useBoundaryRef();
+
   const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
+
+  const { registerModal, unregisterModal } = useZIndex();
 
   const { viewer } = useViewer();
 
@@ -47,15 +56,26 @@ const ChemicalElementsSection: React.FC = () => {
 
   useEffect(() => {
     if (showValueBox) {
-      const unsubscribe = pointValueService.onValuesUpdate((values) => {
-        setHoverValues(values);
+      const unsubscribe = pointValueService.onValuesUpdate((data) => {
+        setHoverValues(data.displayValues); // Bar show
+        setAllHoverValues(data.allValues); // Terrain calculation
+        setIsPaused(data.isPaused || false);
       });
 
       return unsubscribe;
     } else {
       setHoverValues(null);
+      setAllHoverValues(null);
+      setIsPaused(false);
     }
   }, [showValueBox]);
+
+  // Auto close value box when no elements are selected
+  useEffect(() => {
+    if (selectedElements.length === 0 && showValueBox) {
+      handlePointFetchToggle(false);
+    }
+  }, [selectedElements.length, showValueBox]);
 
   const debouncedUpdateRampValues = useCallback((layerId: string, values: number[]) => {
     if (debounceTimeoutRef.current) {
@@ -77,15 +97,18 @@ const ChemicalElementsSection: React.FC = () => {
     } else {
       pointValueService.stop();
       setHoverValues(null);
+      setIsPaused(false);
     }
   };
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
+    registerModal('periodic-table-modal');
   };
 
   const handleClosePeriodicTable = () => {
     setIsModalOpen(false);
+    unregisterModal('periodic-table-modal');
   };
 
 
@@ -167,6 +190,30 @@ const ChemicalElementsSection: React.FC = () => {
     updateLayerOpacity(layerId, opacityValue);
   }
 
+  const renderValueBoxContent = () => {
+    if (isPaused) {
+      return (
+        <div className="map-hover-values-box__paused">
+          <p>⏸️ Scan paused</p>
+          <small>Move the mouse on the globe to resume</small>
+        </div>
+      );
+    }
+    
+    if (hoverValues && Object.keys(hoverValues).length > 0) {
+      return (
+        <ResourceBarsVisualizer 
+          values={hoverValues} 
+          allValues={allHoverValues}
+          width={270} 
+          height={250} 
+        />
+      );
+    }
+    
+    return <p>Hover over the map to scan resources</p>;
+  };
+
   return (
     <>
       <Button 
@@ -178,31 +225,29 @@ const ChemicalElementsSection: React.FC = () => {
 
       {selectedElements.length > 0 && (
         <div className='chemical-section__display-options'>
-          <FeatureCheckbox onChange={handlePointFetchToggle}/>
+          <FeatureCheckbox 
+            checked={showValueBox}
+            onChange={handlePointFetchToggle}
+          />
         </div>
       )}
 
       {showValueBox && (
         <Portal>
-          <BoxContentContainer 
+          <DraggableBoxContentContainer 
             className='map-hover-values-box'
+            width={400}
+            height={350}
+            title="Element concentration"
+            isOpen={showValueBox}
+            onClose={() => handlePointFetchToggle(false)}
+            boundaryRef={boundaryRef}
+            id="element-concentration-box"
           >
             <div className='map-hover-values-box__content'>
-              {hoverValues ? (
-                <>
-                  <h4 className='map-hover-values-box__title'>Map Values</h4>
-                  {Object.entries(hoverValues).map(([layerName, value]) => (
-                    <div key={layerName} className='map-hover-values-box__item'>
-                      <span className='map-hover-values-box__layer'>{layerName}:</span>
-                      <span className='map-hover-values-box__value'>{value.toFixed(3)}</span>
-                    </div>
-                  ))}
-                </>
-              ) : (
-                <p>Hover over the map to see values</p>
-              )}
+              {renderValueBoxContent()}
             </div>
-          </BoxContentContainer>
+          </DraggableBoxContentContainer>
         </Portal>
       )}
 
@@ -210,6 +255,7 @@ const ChemicalElementsSection: React.FC = () => {
         isOpen={isModalOpen}
         onOpenChange={handleClosePeriodicTable}
         title="Periodic Table of Elements"
+        modalId='periodic-table-modal'
       >
         <PeriodicTable 
           onElementSelect={handleElementSelection} 

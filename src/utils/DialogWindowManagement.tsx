@@ -28,7 +28,6 @@ const useDialogContext = () => {
   return context;
 }
 
-// This keep the same position in DOM for every dialog
 const DialogRenderer: React.FC = () => {
   const { dialogsState, renderDialog } = useDialogContext();
 
@@ -72,6 +71,7 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
   const renderDialog = (dialog: Dialog): React.ReactElement => (
     <DraggableContentContainer
       key={dialog.id}
+      id={dialog.id}
       title={dialog.title}
       isOpen={dialog.isOpen}
       onClose={() => closeDialog(dialog.id)}
@@ -93,7 +93,14 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
   };
 
   return (
-    <DialogContext.Provider value={{ dialogsState, openDialog, closeDialog, isDialogOpen, renderDialog, addDialog }}>
+    <DialogContext.Provider value={{ 
+      dialogsState, 
+      openDialog, 
+      closeDialog, 
+      isDialogOpen, 
+      renderDialog, 
+      addDialog
+    }}>
       {children}
     </DialogContext.Provider>
   );

@@ -5,17 +5,23 @@ import './FeatureCheckbox.scss';
 interface FeatureCheckboxProps {
   onChange?: (isChecked: boolean) => void;
   defaultChecked?: boolean;
+  checked?: boolean;
 }
 
 export const FeatureCheckbox: React.FC<FeatureCheckboxProps> = ({
   onChange,
-  defaultChecked = false
+  defaultChecked = false,
+  checked
 }) => {
-  const [isChecked, setIsChecked] = useState(defaultChecked);
+  const [internalChecked, setInternalChecked] = useState(defaultChecked);
 
-  const handleChange = (checked: boolean) => {
-    setIsChecked(checked);
-    onChange?.(checked);
+  const isChecked = checked !== undefined ? checked : internalChecked;
+
+  const handleChange = (newChecked: boolean) => {
+    if (checked === undefined) {
+      setInternalChecked(newChecked);
+    }
+    onChange?.(newChecked);
   };
 
   return (

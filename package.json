@@ -16,32 +16,51 @@
     ],
     "moduleNameMapper": {
       "\\.(css|scss)$": "identity-obj-proxy",
-      "^utils/(.*)$": "<rootDir>/src/utils/$1"
-    }
+      "^utils/(.*)$": "<rootDir>/src/utils/$1",
+      "^components/(.*)$": "<rootDir>/src/components/$1",
+      "^assets/(.*)$": "<rootDir>/src/assets/$1",
+      "^types/(.*)$": "<rootDir>/src/types/$1",
+      "^hooks/(.*)$": "<rootDir>/src/hooks/$1",
+      "^services/(.*)$": "<rootDir>/src/services/$1",
+      "^pages/(.*)$": "<rootDir>/src/pages/$1"
+    },
+    "transform": {
+      "^.+\\.(ts|tsx|js|jsx)$": "babel-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(react-aria|react-stately)/)"
+    ],
+    "moduleFileExtensions": ["ts", "tsx", "js", "jsx"],
+    "testMatch": [
+      "<rootDir>/src/**/__tests__/**/*.(ts|tsx|js)",
+      "<rootDir>/src/**/*.(test|spec).(ts|tsx|js)"
+    ]
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.27.4",
-    "@babel/preset-env": "^7.27.2",
+    "@babel/core": "^7.28.0",
+    "@babel/preset-env": "^7.28.0",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
-    "@types/jest": "^29.5.14",
-    "@types/node": "^24.0.1",
+    "@types/d3": "^7.4.3",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.10",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
+    "babel-jest": "^30.0.4",
     "babel-loader": "^10.0.0",
-    "cesium": "^1.130.0",
+    "cesium": "^1.131.0",
     "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^7.1.2",
-    "dotenv": "^16.5.0",
+    "dotenv": "^17.0.1",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.0.0",
-    "jest-environment-jsdom": "^30.0.0",
+    "jest": "^30.0.4",
+    "jest-environment-jsdom": "^30.0.4",
     "node-sass": "^9.0.0",
     "react-aria": "^3.41.1",
     "react-aria-components": "^1.10.1",

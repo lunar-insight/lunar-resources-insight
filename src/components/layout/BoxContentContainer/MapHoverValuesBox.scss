@@ -5,7 +5,7 @@
   z-index: 5;
   width: 250px;
   height: auto;
-  pointer-events: none;
+  pointer-events: auto;
   box-sizing: border-box;
 
   &__content {
@@ -56,5 +56,34 @@
     color: #fff;
     text-align: right;
     flex-shrink: 0;
+  }
+
+  &__paused {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    
+    p {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    
+    small {
+      color: #cccccc;
+      font-size: 12px;
+    }
+  }
+
+  &.draggable-box-content-container {
+    pointer-events: auto;
+    
+    .map-hover-values-box__content {
+      pointer-events: auto;
+    }
   }
 }

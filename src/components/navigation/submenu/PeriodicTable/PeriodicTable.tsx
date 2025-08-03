@@ -12,7 +12,7 @@ export interface Element {
   dataExist: boolean;
 }
 
-const elements: Element[] = [
+export const elements: Element[] = [
   { atomicNumber: 1, group: 8, name: 'Hydrogen', symbol: 'H', column: 1, row: 1, dataExist: false },
   { atomicNumber: 2, group: 9, name: 'Helium', symbol: 'He', column: 18, row: 1, dataExist: false },
   { atomicNumber: 3, group: 1, name: 'Lithium', symbol: 'Li', column: 1, row: 2, dataExist: false },

@@ -6,15 +6,20 @@ import { ButtonTooltip } from '../../Tooltip/ButtonTooltip';
 interface CloseButtonProps {
   onPress: () => void;
   className?: string;
+  light?: boolean;
 }
 
-const CloseButton: React.FC<CloseButtonProps> = ({ onPress, className = '' }) => {
+const CloseButton: React.FC<CloseButtonProps> = ({ 
+  onPress, 
+  className = '',
+  light = false
+}) => {
   return (
     <TooltipTrigger>
       <Button
         onPress={onPress}
         aria-label='close'
-        className={`close-button ${className}`}
+        className={`close-button ${light ? 'close-button--light' : ''} ${className}`}
       >
         <span className='material-symbols-outlined close-button__icon'>
           close

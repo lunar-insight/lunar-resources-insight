@@ -8,7 +8,9 @@
   min-width: 1rem;
   min-height: 1rem;
   border-radius: 20px;
-  background: linear-gradient(45deg, #85a2af, #b6bbc1);
+  background: linear-gradient(45deg, rgba(133, 162, 175, 0.75), rgba(182, 187, 193, 0.75));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   box-shadow: 0px 0px 2px #000;
   box-sizing: border-box;
   overflow: hidden;

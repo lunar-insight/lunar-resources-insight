@@ -1,5 +1,9 @@
-import { getPointValueUrl, layersConfig } from '../geoConfigExporter';
+import React, { useState, useCallback, useRef, useEffect } from 'react'
+import { getPointValueUrl, layersConfig, fetchCogInfo } from '../geoConfigExporter';
 import * as Cesium from 'cesium';
+import { layerStatsService } from './LayerStatsService';
+import { ScanIndicator } from '../components/viewer/ScanIndicator/ScanIndicator';
+import { tree } from 'd3';
 
 export interface PointValue {
   layerId: string;
@@ -10,32 +14,89 @@ export interface PointValue {
   error?: string;
 }
 
+export interface PointValueCallbackData {
+  displayValues: {[layerId: string]: number}; // Only explicited selected layers
+  allValues: {[layerId: string]: number}; // Every layers for the calculation
+  isPaused?: boolean;
+}
+
 export class PointValueService {
   private viewer: Cesium.Viewer | null = null;
-  private intervalId: NodeJS.Timeout | null = null;
   private isActive: boolean = false;
-  private selectedLayers: string[] = [];
+  private selectedLayers: string[] = []; // All layers to fetch (selected + required)
+  private explicitlySelectedLayers: string[] = []; // Only user-selected layers
   private currentMousePosition: Cesium.Cartesian2 | null = null;
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
-
-  private callbacks: Array<(values: {[layerId: string]: number}) => void> = [];
+  private isMouseTrackingEnabled: boolean = true;
+  private lastFetchTime: number = 0;
+  private fetchThrottleMs: number = 100; // in ms, between requests. Can be 16, 33, 50-100
+  private pendingFetch: NodeJS.Timeout | null = null;
+  private isCurrentlyFetching: boolean = false;
+  private scanIndicator: ScanIndicator = new ScanIndicator();
+  private callbacks: Array<(data: PointValueCallbackData) => void> = [];
+  private layerBounds: Map<string, Cesium.Rectangle> = new Map(); // Store bounds for each layer
 
   constructor() {}
 
   setViewer(viewer: Cesium.Viewer | null) {
     this.viewer = viewer;
+    this.scanIndicator.setViewer(viewer);
     this.setupMouseTracking();
   }
 
-  setSelectedLayers(layers: string[]) {
-    this.selectedLayers = layers;
+  /**
+   * Get the layer IDs for required terrain classification elements (Ca, Fe, Ti)
+   */
+  private getRequiredTerrainLayers(): string[] {
+    const requiredElements = ['calcium', 'iron', 'titanium'];
+    const requiredLayers: string[] = [];
+
+    requiredElements.forEach(element => {
+      const layers = layerStatsService.getLayersByElement(element);
+      if (layers.length > 0) {
+        // Get first layer available for each elements
+        requiredLayers.push(layers[0][0]);
+      }
+    });
+
+    return requiredLayers;
   }
 
-  // Method to subscribe to values change
-  onValuesUpdate(callback: (values: {[layerId: string]: number}) => void): () => void {
-    this.callbacks.push(callback);
+  async setSelectedLayers(layers: string[]) {
+    this.explicitlySelectedLayers = layers;
 
-    // Return unsubscribe function
+    if (layers.length > 0) {
+      const requiredLayers = this.getRequiredTerrainLayers();
+      const allLayers = new Set([...layers, ...requiredLayers]);
+      this.selectedLayers = Array.from(allLayers);
+
+      // Ensure bounds are loaded for required layers that might not be explicitly added
+      await this.ensureBoundsForRequiredLayers(requiredLayers);
+    } else {
+      this.selectedLayers = [];
+    }
+  }
+
+  private async ensureBoundsForRequiredLayers(requiredLayers: string[]) {
+    const boundPromises = requiredLayers
+      .filter(layerId => !this.layerBounds.has(layerId))
+      .map(async (layerId) => {
+        try {
+          const layerConfig = layersConfig.layers[layerId];
+          if (layerConfig) {
+            const { bounds } = await fetchCogInfo(layerConfig.filename);
+            await this.setLayerBounds(layerId, bounds);
+          }
+        } catch (error) {
+          console.warn(`Failed to load bounds for required layer ${layerId}:`, error);
+        }
+      });
+    
+    await Promise.all(boundPromises);
+  }
+
+  onValuesUpdate(callback: (data: PointValueCallbackData) => void): () => void {
+    this.callbacks.push(callback);
     return () => {
       const index = this.callbacks.indexOf(callback);
       if (index > -1) {
@@ -44,11 +105,22 @@ export class PointValueService {
     };
   }
 
-  // Notify callbacks
-  private notifyValuesUpdate(values: {[layerId: string]: number}) {
+  private notifyValuesUpdate(allValues: {[layerId: string]: number}, isPaused: boolean = false) {
+    const displayValues = Object.fromEntries(
+      Object.entries(allValues).filter(([layerId]) =>
+        this.explicitlySelectedLayers.includes(layerId)
+      )
+    );
+
+    const callbackData: PointValueCallbackData = {
+      displayValues: isPaused ? {} : displayValues,
+      allValues: isPaused ? {} : allValues,
+      isPaused
+    };
+
     this.callbacks.forEach(callback => {
       try {
-        callback(values);
+        callback(callbackData);
       } catch (error) {
         console.error('Error in values update callback:', error);
       }
@@ -65,31 +137,102 @@ export class PointValueService {
     this.mouseMoveHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
 
     this.mouseMoveHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
-      this.currentMousePosition = event.endPosition;
+      if (this.isMouseTrackingEnabled && this.isActive) {
+        this.currentMousePosition = event.endPosition;
+        this.scanIndicator.updatePosition(event.endPosition);
+
+        this.throttledFetchPointValues();
+      }
     }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
   }
+  
+  private throttledFetchPointValues() {
+    const now = Date.now();
+    const timeSinceLastFetch = now - this.lastFetchTime;
 
+    if (this.pendingFetch) {
+      clearTimeout(this.pendingFetch);
+      this.pendingFetch = null;
+    }
+
+    if (timeSinceLastFetch >= this.fetchThrottleMs && !this.isCurrentlyFetching) {
+      this.executeFetch();
+    } else {
+      const delay = Math.max(this.fetchThrottleMs - timeSinceLastFetch, 10);
+      this.pendingFetch = setTimeout(() => {
+        this.pendingFetch = null;
+        if (this.isActive && this.isMouseTrackingEnabled && !this.isCurrentlyFetching) {
+          this.executeFetch();
+        }
+      }, delay);
+    }
+  }
+
+  private executeFetch() {
+    this.lastFetchTime = Date.now();
+    this.isCurrentlyFetching = true;
+
+    this.fetchPointValues().finally(() => {
+      this.isCurrentlyFetching = false;
+    })
+  }
+
+  disableMouseTracking() {
+    if (this.isMouseTrackingEnabled) {
+      this.isMouseTrackingEnabled = false;
+      this.scanIndicator.hide();
+      this.notifyValuesUpdate({}, true);
+
+      if (this.pendingFetch) {
+        clearTimeout(this.pendingFetch);
+        this.pendingFetch = null;
+      }
+    }
+  }
+
+  enableMouseTracking() {
+    if (!this.isMouseTrackingEnabled) {
+      this.isMouseTrackingEnabled = true;
+      this.resume();
+    }
+  }
+
+  resume() {
+    this.isMouseTrackingEnabled = true;
+    if (this.currentMousePosition && this.isActive) {
+      this.scanIndicator.updatePosition(this.currentMousePosition);
+      this.throttledFetchPointValues(); // Immediate fetch on recovery
+    }
+  }
+      
   start() {
     if (this.isActive || !this.viewer) return;
     
     this.isActive = true;
-    this.intervalId = setInterval(() => {
-      this.fetchPointValues();
-    }, 100); // 16, 33, 50-100
+
+    // Continous render for animation
+    this.viewer.scene.requestRenderMode = false;
   }
 
   stop() {
     if (!this.isActive) return;
 
     this.isActive = false;
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
+
+    if (this.viewer) {
+      this.viewer.scene.requestRenderMode = true;
+    }
+
+    this.scanIndicator.hide();
+
+    if (this.pendingFetch) {
+      clearInterval(this.pendingFetch);
+      this.pendingFetch = null;
     }
   }
 
   private getCurrentPosition(): { lon: number; lat: number } | null {
-    if (!this.viewer || !this.currentMousePosition) return null;
+    if (!this.viewer || !this.currentMousePosition || !this.isMouseTrackingEnabled) return null;
 
     // Ellipsoid setup in CesiumComponent
     const ellipsoid = this.viewer.scene.globe.ellipsoid;
@@ -107,15 +250,65 @@ export class PointValueService {
     return { lon, lat };
   }
 
-  private async fetchPointValues() {
+  // Set layer bounds for bounds checking
+  async setLayerBounds(layerId: string, bounds: number[]): Promise<void> {
+    try {
+      // bounds format: [west, south, east, north] in degrees
+      const rectangle = Cesium.Rectangle.fromDegrees(
+        bounds[0], // west
+        bounds[1], // south  
+        bounds[2], // east
+        bounds[3]  // north
+      );
+      this.layerBounds.set(layerId, rectangle);
+    } catch (error) {
+      console.warn(`Failed to set bounds for layer ${layerId}:`, error);
+    }
+  }
+
+  // Check if a position is within the bounds of a specific layer
+  private isPositionWithinLayerBounds(layerId: string, lon: number, lat: number): boolean {
+    const bounds = this.layerBounds.get(layerId);
+    if (!bounds) {
+      // Allow the request fallback if not bound are set
+      return true;
+    }
+
+    try {
+      const cartographic = Cesium.Cartographic.fromDegrees(lon, lat);
+      return Cesium.Rectangle.contains(bounds, cartographic);
+    } catch (error) {
+      console.warn(`Error checking bounds for layer ${layerId}:`, error);
+      return true; // Falback to allow request on error
+    }
+  }
+
+  private async fetchPointValues(): Promise<void> {
+    if (!this.isMouseTrackingEnabled) {
+      this.scanIndicator.hide();
+      this.notifyValuesUpdate({}, true);
+      return;
+    }
+
     const position = this.getCurrentPosition();
     if (!position) {
-      console.log('Could not determine current mouse selenographic position (mouse might be off the moon surface)');
+      this.scanIndicator.hide();
       return;
     }
 
     if (this.selectedLayers.length === 0) {
-      console.log('No layers selected for point fetching');
+      this.notifyValuesUpdate({}, true);
+      return;
+    }
+
+    // Filter layers to only those within bounds
+    const layersWithinBounds = this.selectedLayers.filter(layerId =>
+      this.isPositionWithinLayerBounds(layerId, position.lon, position.lat)
+    );
+
+    if (layersWithinBounds.length === 0) {
+      // No layer have data at this position
+      this.notifyValuesUpdate({}, false);
       return;
     }
 
@@ -143,23 +336,21 @@ export class PointValueService {
         }
       });
 
-      const validValues: {[layerId: string]: number} = {};
+      const allValues: {[layerId: string]: number} = {};
 
       pointValues.forEach(pv => {
         if (pv.value !== null && !pv.error) {
-          const layerConfig = layersConfig.layers[pv.layerId];
-          const displayName = layerConfig?.name || pv.layerId;
-          validValues[displayName] = pv.value;
+          allValues[pv.layerId] = pv.value;
         }
       });
 
       // Notify callbacks only when there is valid values
-      if (Object.keys(validValues).length > 0) {
-        this.notifyValuesUpdate(validValues); 
+      if (Object.keys(allValues).length > 0 && this.isMouseTrackingEnabled) {
+        this.notifyValuesUpdate(allValues, false); // Second place is notification for "isPaused = false"
+      } else {
+        // Send empty values but not paused state if we're just outside bounds
+        this.notifyValuesUpdate({}, false);
       }
-
-      // const values = pointValues.map(pv => pv.value)
-      // console.log('Values:', values);
 
     } catch(error) {
       console.error('Error fetching lunar point values:', error);
@@ -203,6 +394,14 @@ export class PointValueService {
   destroy() {
     this.stop();
     this.callbacks = [];
+    this.scanIndicator.destroy();
+    this.layerBounds.clear();
+
+    if (this.pendingFetch) {
+      clearTimeout(this.pendingFetch);
+      this.pendingFetch = null;
+    }
+
     if (this.mouseMoveHandler) {
       this.mouseMoveHandler.destroy();
       this.mouseMoveHandler = null;

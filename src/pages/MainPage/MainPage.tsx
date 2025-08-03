@@ -8,6 +8,8 @@ import { LayerProvider } from '../../utils/context/LayerContext';
 import { ViewerProvider } from 'utils/context/ViewerContext';
 import { initializeLayerStats } from '../../services/LayerStatsService';
 import { initializeColormapService } from '../../services/ColormapService';
+import { ZIndexProvider } from 'utils/ZIndexProvider';
+import { MouseTrackingProvider } from 'utils/MouseTrackingProvider';
 
 const MainPage = () => {
   const viewerContainerRef = useRef<HTMLDivElement>(null);
@@ -31,17 +33,21 @@ const MainPage = () => {
   return (
     <BoundaryRefProvider value={viewerContainerRef}>
       <ViewerProvider>
-        <LayerProvider>
-          <DialogProvider dialogs={dialogs}>
-            <div className="main-page">
-              <SectionNavigation />
-              <div className="viewer-container" ref={viewerContainerRef}>
-                <CesiumComponent className="cesium-component" />
-              </div>
-              <DialogRenderer />
-            </div>
-          </DialogProvider>
-        </LayerProvider>
+        <MouseTrackingProvider>
+          <LayerProvider>
+            <ZIndexProvider>
+              <DialogProvider dialogs={dialogs}>
+                <div className="main-page">
+                  <SectionNavigation />
+                  <div className="viewer-container" ref={viewerContainerRef}>
+                    <CesiumComponent className="cesium-component" />
+                  </div>
+                  <DialogRenderer />
+                </div>
+              </DialogProvider>
+            </ZIndexProvider>  
+          </LayerProvider>
+        </MouseTrackingProvider>
       </ViewerProvider>
     </BoundaryRefProvider>
   );
