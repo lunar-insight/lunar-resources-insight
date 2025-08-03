@@ -1,8 +1,9 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import { getPointValueUrl, layersConfig } from '../geoConfigExporter';
+import { getPointValueUrl, layersConfig, fetchCogInfo } from '../geoConfigExporter';
 import * as Cesium from 'cesium';
 import { layerStatsService } from './LayerStatsService';
 import { ScanIndicator } from '../components/viewer/ScanIndicator/ScanIndicator';
+import { tree } from 'd3';
 
 export interface PointValue {
   layerId: string;
@@ -27,15 +28,13 @@ export class PointValueService {
   private currentMousePosition: Cesium.Cartesian2 | null = null;
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
   private isMouseTrackingEnabled: boolean = true;
-
-  // Throttling
   private lastFetchTime: number = 0;
   private fetchThrottleMs: number = 100; // in ms, between requests. Can be 16, 33, 50-100
   private pendingFetch: NodeJS.Timeout | null = null;
   private isCurrentlyFetching: boolean = false;
-
   private scanIndicator: ScanIndicator = new ScanIndicator();
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
+  private layerBounds: Map<string, Cesium.Rectangle> = new Map(); // Store bounds for each layer
 
   constructor() {}
 
@@ -63,16 +62,37 @@ export class PointValueService {
     return requiredLayers;
   }
 
-  setSelectedLayers(layers: string[]) {
+  async setSelectedLayers(layers: string[]) {
     this.explicitlySelectedLayers = layers;
 
     if (layers.length > 0) {
       const requiredLayers = this.getRequiredTerrainLayers();
       const allLayers = new Set([...layers, ...requiredLayers]);
       this.selectedLayers = Array.from(allLayers);
+
+      // Ensure bounds are loaded for required layers that might not be explicitly added
+      await this.ensureBoundsForRequiredLayers(requiredLayers);
     } else {
       this.selectedLayers = [];
     }
+  }
+
+  private async ensureBoundsForRequiredLayers(requiredLayers: string[]) {
+    const boundPromises = requiredLayers
+      .filter(layerId => !this.layerBounds.has(layerId))
+      .map(async (layerId) => {
+        try {
+          const layerConfig = layersConfig.layers[layerId];
+          if (layerConfig) {
+            const { bounds } = await fetchCogInfo(layerConfig.filename);
+            await this.setLayerBounds(layerId, bounds);
+          }
+        } catch (error) {
+          console.warn(`Failed to load bounds for required layer ${layerId}:`, error);
+        }
+      });
+    
+    await Promise.all(boundPromises);
   }
 
   onValuesUpdate(callback: (data: PointValueCallbackData) => void): () => void {
@@ -230,6 +250,39 @@ export class PointValueService {
     return { lon, lat };
   }
 
+  // Set layer bounds for bounds checking
+  async setLayerBounds(layerId: string, bounds: number[]): Promise<void> {
+    try {
+      // bounds format: [west, south, east, north] in degrees
+      const rectangle = Cesium.Rectangle.fromDegrees(
+        bounds[0], // west
+        bounds[1], // south  
+        bounds[2], // east
+        bounds[3]  // north
+      );
+      this.layerBounds.set(layerId, rectangle);
+    } catch (error) {
+      console.warn(`Failed to set bounds for layer ${layerId}:`, error);
+    }
+  }
+
+  // Check if a position is within the bounds of a specific layer
+  private isPositionWithinLayerBounds(layerId: string, lon: number, lat: number): boolean {
+    const bounds = this.layerBounds.get(layerId);
+    if (!bounds) {
+      // Allow the request fallback if not bound are set
+      return true;
+    }
+
+    try {
+      const cartographic = Cesium.Cartographic.fromDegrees(lon, lat);
+      return Cesium.Rectangle.contains(bounds, cartographic);
+    } catch (error) {
+      console.warn(`Error checking bounds for layer ${layerId}:`, error);
+      return true; // Falback to allow request on error
+    }
+  }
+
   private async fetchPointValues(): Promise<void> {
     if (!this.isMouseTrackingEnabled) {
       this.scanIndicator.hide();
@@ -245,6 +298,17 @@ export class PointValueService {
 
     if (this.selectedLayers.length === 0) {
       this.notifyValuesUpdate({}, true);
+      return;
+    }
+
+    // Filter layers to only those within bounds
+    const layersWithinBounds = this.selectedLayers.filter(layerId =>
+      this.isPositionWithinLayerBounds(layerId, position.lon, position.lat)
+    );
+
+    if (layersWithinBounds.length === 0) {
+      // No layer have data at this position
+      this.notifyValuesUpdate({}, false);
       return;
     }
 
@@ -283,6 +347,9 @@ export class PointValueService {
       // Notify callbacks only when there is valid values
       if (Object.keys(allValues).length > 0 && this.isMouseTrackingEnabled) {
         this.notifyValuesUpdate(allValues, false); // Second place is notification for "isPaused = false"
+      } else {
+        // Send empty values but not paused state if we're just outside bounds
+        this.notifyValuesUpdate({}, false);
       }
 
     } catch(error) {
@@ -328,6 +395,7 @@ export class PointValueService {
     this.stop();
     this.callbacks = [];
     this.scanIndicator.destroy();
+    this.layerBounds.clear();
 
     if (this.pendingFetch) {
       clearTimeout(this.pendingFetch);

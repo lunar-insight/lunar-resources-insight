@@ -64,6 +64,9 @@ class CesiumLayerManager {
     try {
       const { bounds } = await fetchCogInfo(layerConfig.filename);
 
+      // Bounds checking
+      await pointValueService.setLayerBounds(layerId, bounds);
+
       const stats = layerStatsService.getLayerStats(layerId);
       const min = stats.loaded ? stats.min : 0;
       const max = stats.loaded ? stats.max : 100;
