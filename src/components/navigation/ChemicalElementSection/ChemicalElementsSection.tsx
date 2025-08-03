@@ -70,6 +70,13 @@ const ChemicalElementsSection: React.FC = () => {
     }
   }, [showValueBox]);
 
+  // Auto close value box when no elements are selected
+  useEffect(() => {
+    if (selectedElements.length === 0 && showValueBox) {
+      handlePointFetchToggle(false);
+    }
+  }, [selectedElements.length, showValueBox]);
+
   const debouncedUpdateRampValues = useCallback((layerId: string, values: number[]) => {
     if (debounceTimeoutRef.current) {
       clearTimeout(debounceTimeoutRef.current);

@@ -65,9 +65,14 @@ export class PointValueService {
 
   setSelectedLayers(layers: string[]) {
     this.explicitlySelectedLayers = layers;
-    const requiredLayers = this.getRequiredTerrainLayers();
-    const allLayers = new Set([...layers, ...requiredLayers]);
-    this.selectedLayers = Array.from(allLayers);
+
+    if (layers.length > 0) {
+      const requiredLayers = this.getRequiredTerrainLayers();
+      const allLayers = new Set([...layers, ...requiredLayers]);
+      this.selectedLayers = Array.from(allLayers);
+    } else {
+      this.selectedLayers = [];
+    }
   }
 
   onValuesUpdate(callback: (data: PointValueCallbackData) => void): () => void {
@@ -239,7 +244,7 @@ export class PointValueService {
     }
 
     if (this.selectedLayers.length === 0) {
-      console.log('No layers selected for point fetching');
+      this.notifyValuesUpdate({}, true);
       return;
     }
 
