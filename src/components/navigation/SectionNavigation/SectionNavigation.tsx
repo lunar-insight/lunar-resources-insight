@@ -1,9 +1,8 @@
-import React, { useState, Fragment, useEffect } from 'react';
+import React, { useState, Fragment } from 'react';
 import { Button } from 'react-aria-components';
-import './SectionNavigation.scss';
+import styles from './SectionNavigation.module.scss';
 import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
-import { pointValueService } from '../../../services/PointValueService';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 
 interface Icon {
@@ -12,9 +11,10 @@ interface Icon {
   label: string;
   dialogTitle: string;
   dialogContent: React.ReactNode | (() => React.ReactNode);
+  type?: 'dock' | 'float';
 }
 
-const dialogsData = [
+const dialogsData: Icon[] = [
   /*
     id: Code-related selector.
     name: icon name on the icon library.
@@ -22,6 +22,14 @@ const dialogsData = [
     dialogTitle: Title of the dialog.
     dialogContent: related imported React element.
   */
+  {
+    id: 'layer-management-category',
+    name: 'file_map_stack',
+    label: 'Layers',
+    dialogTitle: 'Layer Management',
+    dialogContent: 'Layer Management content goes here.',
+    type: 'dock'
+  },
   { 
     id: 'home-dialog', 
     name: 'home', 
@@ -31,10 +39,10 @@ const dialogsData = [
   },
   { 
     id: 'geospatial-layer-dialog', 
-    name: 'layers', 
-    label: 'Layers',
-    dialogTitle: 'Geospatial Layers', 
-    dialogContent: 'Geospatial Layers dialog content goes here.'
+    name: 'map', 
+    label: 'Base Maps',
+    dialogTitle: 'Base Maps', 
+    dialogContent: 'Base Maps dialog content goes here.'
   },
   { 
     id: 'mineral-layer-dialog', 
@@ -46,8 +54,8 @@ const dialogsData = [
   { 
     id: 'element-layer-dialog', 
     name: 'lab_research', 
-    label: 'Elements',
-    dialogTitle: 'Chemical Elements', 
+    label: 'Chemistry',
+    dialogTitle: 'Chemistry', 
     dialogContent: <ChemicalElementsSection />
   },
   /*
@@ -99,35 +107,47 @@ export const dialogs = dialogsData.map(({ id, dialogTitle, dialogContent }) => (
   content: dialogContent,
 }));
 
+interface IconButtonProps {
+  icon: string;
+  label: string;
+  id: string;
+  isActive: boolean;
+  type?: 'dock' | 'float';
+}
+
 const SectionNavigation = () => {
-
   const [isHovered, setIsHovered] = useState(false);
-
   const { openDialog, closeDialog, isDialogOpen } = useDialogContext();
 
   useMouseTrackingControl(isHovered, 'section-navigation');
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-  };
+  const IconButton = ({ icon, label, id, isActive, type = 'float' }: IconButtonProps) => {
+    const buttonClasses = [
+      styles.button,
+      isActive && styles.active,
+      type === 'dock' && styles.dock
+    ].filter(Boolean).join(' ');
 
-  const IconButton = ({ icon, label, id, isActive }) => (
-    <Button 
-      onPress={isActive ? () => closeDialog(id) : () => openDialog(id)} 
-      className={`section-navigation__icon-container ${isActive ? 'section-navigation__icon-container__is-active' : ''}`}
-    >  
-      <i className="material-symbols-outlined section-navigation__icon-container__icon">{icon}</i>
-      <span className="section-navigation__icon-container__label">{label}</span>
-    </Button>
-  );
+    return (
+      <Button 
+        onPress={isActive ? () => closeDialog(id) : () => openDialog(id)} 
+        className={buttonClasses}
+      >  
+        <i className={`material-symbols-outlined ${styles.icon}`}>{icon}</i>
+        <span className={styles.label}>{label}</span>
+        {type === 'dock' && (
+          <i className={`material-symbols-outlined ${styles.arrow}`}>chevron_right</i>
+        )}
+      </Button>
+    );
+  };
 
   return (
     <div 
-      className='section-navigation'
+      className={styles.navigation}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -138,11 +158,12 @@ const SectionNavigation = () => {
             label={icon.label}
             id={icon.id}
             isActive={isDialogOpen(icon.id)}
+            type={icon.type}
           />
         </Fragment>
       ))}
     </div>
-  )
-}
+  );
+};
 
 export default SectionNavigation;

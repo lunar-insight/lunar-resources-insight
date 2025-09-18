@@ -1,0 +1,115 @@
+@use 'sass:math';
+
+$navigation-width: 5rem;
+$icon-size: 5rem;
+$gap: 1rem;
+$dock-spacing: 1.5rem;
+
+@mixin centerFlex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin dockGradient($opacity: 0.15) {
+  background: linear-gradient(135deg,
+  rgba(var(--color-secondary-rgb), $opacity) 0%,
+  rgba(var(--color-primary-rgb), math.div($opacity, 1.5)) 100%);
+}
+
+.navigation {
+  background: linear-gradient(to top right, var(--color-primary), var(--color-neutral));
+  border-right: 1px solid black;
+  width: $navigation-width;
+  display: flex;
+  flex-direction: column;
+  gap: $gap;
+  padding-top: $gap;
+}
+
+.button {
+  width: $icon-size;
+  height: $icon-size;
+  @include centerFlex;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 0.25rem;
+  background-color: transparent;
+  border: transparent;
+  transition: background-color 0.6s, box-shadow 0.6s;
+  position: relative;
+
+  &:hover {
+    background-color: var(--color-quartenary);
+    box-shadow: inset 0 0 6px black;
+    transition: none;
+  }
+
+  &[data-pressed] {
+    background-color: var(--color-dark-intermediary);
+    box-shadow: inset 0 0 9px black;
+  }
+
+  &.active {
+    background-color: var(--color-neutral);
+    box-shadow: inset 0 0 12px black;
+    transition: background-color 0.4s, box-shadow 0.4s;
+
+    &:hover {
+      box-shadow: inset 0 0 12px black;
+    }
+  }
+
+  &.dock {
+    margin-bottom: $dock-spacing;
+    border-bottom: 2px solid var(--color-secondary);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    @include dockGradient;
+
+    &:hover {
+      @include dockGradient(0.25);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4),
+                  inset 0 0 8px rgba(var(--color-secondary-rgb), 0.2);
+    }
+
+    &[data-pressed] {
+      @include dockGradient(0.35);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5),
+                  inset 0 0 12px rgba(var(--color-secondary-rgb), 0.3);
+    }
+  }
+}
+
+.icon {
+  color: var(--color-secondary);
+  font-size: x-large;
+
+  .dock & {
+    filter: brightness(1.2);
+  }
+}
+
+.label {
+  color: var(--color-neutralVariant);
+  font-size: 0.9375rem;
+
+  .dock & {
+    color: var(--color-secondary);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.arrow {
+  position: absolute;
+  right: 2px;
+  top: 2px;
+  font-size: 1rem;
+  color: var(--color-secondary);
+  opacity: 0.7;
+  transition: opacity 0.3s, transform 0.3s;
+
+  .dock:hover & {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+}
