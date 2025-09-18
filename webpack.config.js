@@ -55,8 +55,30 @@ module.exports = {
       test: /\.css$/,
       use: ['style-loader', 'css-loader']
     }, {
-      test: /\.scss$/,
-      use: ['style-loader', 'css-loader', 'sass-loader']
+      test: /\.module\.scss$/,
+      use: [
+        'style-loader', 
+        {
+          loader: 'css-loader',
+          options: {
+            modules: {
+              namedExport: false, // Necessary for css-module V7+ breaking change to keep old behavior
+              localIdentName: process.env.NODE_ENV === 'production'
+                ? '[hash:base64:5]'
+                : '[name]__[local]--[hash:base64:5]',
+            },
+          },
+        },
+        'sass-loader'
+      ]
+    }, {
+    test: /\.scss$/,
+    exclude: /\.module\.scss$/,
+    use: [
+      'style-loader',
+      'css-loader',
+      'sass-loader'
+    ]
     }, {
       test: /\.(png|jpg|jpeg|gif|svg|xml)$/,
       type: 'asset',
