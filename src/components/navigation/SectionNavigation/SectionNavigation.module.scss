@@ -23,8 +23,24 @@ $dock-spacing: 1.5rem;
   width: $navigation-width;
   display: flex;
   flex-direction: column;
-  gap: $gap;
-  padding-top: $gap;
+  gap: 0;
+  padding-top: 0;
+}
+
+.logoContainer {
+  width: 100%;
+  background-color: #101a26;
+  @include centerFlex();
+  padding: 0;
+  // margin: 0;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.logo {
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
 }
 
 .button {
@@ -38,6 +54,11 @@ $dock-spacing: 1.5rem;
   border: transparent;
   transition: background-color 0.6s, box-shadow 0.6s;
   position: relative;
+  margin-top: $gap;
+
+  &:first-of-type {
+    margin-top: 0;
+  }
 
   &:hover {
     background-color: var(--color-quartenary);
@@ -62,6 +83,8 @@ $dock-spacing: 1.5rem;
 
   &.dock {
     margin-bottom: $dock-spacing;
+    margin-top: 0;
+    border-top: 2px solid var(--color-secondary);
     border-bottom: 2px solid var(--color-secondary);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     @include dockGradient;

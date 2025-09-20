@@ -4,6 +4,7 @@ import styles from './SectionNavigation.module.scss';
 import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
+import logo from 'assets/images/logo/lunar-resources-insight-logo-100x100.jpg'
 
 interface Icon {
   id: string;
@@ -151,6 +152,10 @@ const SectionNavigation = () => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      <div className={styles.logoContainer}>
+        <img src={logo} alt="Lunar Resources Insight" className={styles.logo} />
+      </div>
+
       {dialogsData.map((icon) => (
         <Fragment key={icon.id}>
           <IconButton
