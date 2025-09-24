@@ -3,6 +3,7 @@ import { Button } from 'react-aria-components';
 import styles from './SectionNavigation.module.scss';
 import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
+import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 import logo from 'assets/images/logo/lunar-resources-insight-logo-100x100.jpg'
 
@@ -119,11 +120,32 @@ interface IconButtonProps {
 const SectionNavigation = () => {
   const [isHovered, setIsHovered] = useState(false);
   const { openDialog, closeDialog, isDialogOpen } = useDialogContext();
+  const { isSidebarOpen, toggleSidebar } = useSidebarContext();
 
   useMouseTrackingControl(isHovered, 'section-navigation');
 
   const handleMouseEnter = () => setIsHovered(true);
   const handleMouseLeave = () => setIsHovered(false);
+
+  const handleIconPress = (icon: Icon) => {
+    if (icon.id === 'layer-management-category') {
+      toggleSidebar(<div>Layer Management Content goes here.</div>)
+    } else {
+      const isActive = isDialogOpen(icon.id);
+      if (isActive) {
+        closeDialog(icon.id);
+      } else {
+        openDialog(icon.id);
+      }
+    }
+  };
+
+  const getIsActive = (icon: Icon) => {
+    if (icon.id === 'layer-management-category') {
+      return isSidebarOpen;
+    }
+    return isDialogOpen(icon.id);
+  };
 
   const IconButton = ({ icon, label, id, isActive, type = 'float' }: IconButtonProps) => {
     const buttonClasses = [
@@ -132,15 +154,24 @@ const SectionNavigation = () => {
       type === 'dock' && styles.dock
     ].filter(Boolean).join(' ');
 
+    const getChevronIcon = () => {
+      if (type === 'dock' && id === 'layer-management-category') {
+        return isActive ? 'chevron_left' : 'chevron_right';
+      }
+      return 'chevron_right';
+    };
+
     return (
       <Button 
-        onPress={isActive ? () => closeDialog(id) : () => openDialog(id)} 
+        onPress={() => handleIconPress({ id, name: icon, label, dialogTitle: '', dialogContent: '', type })} 
         className={buttonClasses}
       >  
         <i className={`material-symbols-outlined ${styles.icon}`}>{icon}</i>
         <span className={styles.label}>{label}</span>
         {type === 'dock' && (
-          <i className={`material-symbols-outlined ${styles.arrow}`}>chevron_right</i>
+          <i className={`material-symbols-outlined ${styles.arrow}`}>
+            {getChevronIcon()}
+          </i>
         )}
       </Button>
     );
@@ -162,7 +193,7 @@ const SectionNavigation = () => {
             icon={icon.name}
             label={icon.label}
             id={icon.id}
-            isActive={isDialogOpen(icon.id)}
+            isActive={getIsActive(icon)}
             type={icon.type}
           />
         </Fragment>

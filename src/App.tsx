@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import MainPage from './pages/MainPage/MainPage';
-import './pages/MainPage/MainPage.scss'
+import './pages/MainPage/MainPage.module.scss'
 
 const App: FC = () => (
   <div style={{ 
