@@ -23,50 +23,44 @@ export const MouseTrackingProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isEnabled, setIsEnabled] = useState(true);
   const enableTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const requestDisable = useCallback((id: string) => {
-    // Cancel any current activation timeout
-    if (enableTimeoutRef.current) {
-      clearTimeout(enableTimeoutRef.current);
-      enableTimeoutRef.current = null;
+  useEffect(() => {
+    const hasRequests = Object.keys(disableRequests).length > 0;
+    
+    if (hasRequests && isEnabled) {
+      // Deactivate immediatly
+      setIsEnabled(false);
+      pointValueService.disableMouseTracking();
+      
+      // Remove any ongoing waiting state timeout
+      if (enableTimeoutRef.current) {
+        clearTimeout(enableTimeoutRef.current);
+        enableTimeoutRef.current = null;
+      }
+    } else if (!hasRequests && !isEnabled) {
+      // Reactivate after a delay
+      enableTimeoutRef.current = setTimeout(() => {
+        setIsEnabled(true);
+        pointValueService.enableMouseTracking();
+        enableTimeoutRef.current = null;
+      }, 50);
     }
 
-    setDisableRequests(prev => {
-      const wasEnabled = Object.keys(prev).length === 0;
-      const newRequests = { ...prev, [id]: true };
-      
-      if (wasEnabled) {
-        setIsEnabled(false);
-        pointValueService.disableMouseTracking();
+    return () => {
+      if (enableTimeoutRef.current) {
+        clearTimeout(enableTimeoutRef.current);
+        enableTimeoutRef.current = null;
       }
-      
-      return newRequests;
-    });
+    };
+  }, [disableRequests, isEnabled]);
+
+  const requestDisable = useCallback((id: string) => {
+    setDisableRequests(prev => ({ ...prev, [id]: true }));
   }, []);
 
   const requestEnable = useCallback((id: string) => {
-    // Cancel any previous activation timeout
-    if (enableTimeoutRef.current) {
-      clearTimeout(enableTimeoutRef.current);
-      enableTimeoutRef.current = null;
-    }
-
     setDisableRequests(prev => {
       const newRequests = { ...prev };
       delete newRequests[id];
-      
-      if (Object.keys(newRequests).length === 0) {
-        enableTimeoutRef.current = setTimeout(() => {
-          setDisableRequests(current => {
-            if (Object.keys(current).length === 0) {
-              setIsEnabled(true);
-              pointValueService.enableMouseTracking();
-            }
-            return current;
-          });
-          enableTimeoutRef.current = null;
-        }, 50);
-      }
-      
       return newRequests;
     });
   }, []);
@@ -81,7 +75,6 @@ export const MouseTrackingProvider: React.FC<{ children: React.ReactNode }> = ({
       if (enableTimeoutRef.current) {
         clearTimeout(enableTimeoutRef.current);
       }
-      setDisableRequests({});
       pointValueService.enableMouseTracking();
     };
   }, []);
