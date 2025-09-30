@@ -2,10 +2,9 @@ import React, { createContext, useContext, useState } from 'react';
 
 interface SidebarContextValue {
   isSidebarOpen: boolean;
-  sidebarContent: React.ReactNode;
-  openSidebar: (content: React.ReactNode) => void;
+  openSidebar: () => void;
   closeSidebar: () => void;
-  toggleSidebar: (content?: React.ReactNode) => void;
+  toggleSidebar: () => void;
 }
 
 const SidebarContext = createContext<SidebarContextValue | undefined>(undefined);
@@ -20,10 +19,8 @@ export const useSidebarContext = () => {
 
 export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [sidebarContent, setSidebarContent] = useState<React.ReactNode>(null);
 
-  const openSidebar = (content: React.ReactNode) => {
-    setSidebarContent(content);
+  const openSidebar = () => {
     setIsSidebarOpen(true);
   };
 
@@ -31,18 +28,13 @@ export const SidebarProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setIsSidebarOpen(false);
   };
 
-  const toggleSidebar = (content?: React.ReactNode) => {
-    if (isSidebarOpen) {
-      closeSidebar();
-    } else if (content) {
-      openSidebar(content);
-    }
+  const toggleSidebar = () => {
+    setIsSidebarOpen(prev => !prev);
   };
 
   return (
     <SidebarContext.Provider value={{
       isSidebarOpen,
-      sidebarContent,
       openSidebar,
       closeSidebar,
       toggleSidebar

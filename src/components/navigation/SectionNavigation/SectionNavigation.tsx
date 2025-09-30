@@ -129,7 +129,7 @@ const SectionNavigation = () => {
 
   const handleIconPress = (icon: Icon) => {
     if (icon.id === 'layer-management-category') {
-      toggleSidebar(<div>Layer Management Content goes here.</div>)
+      toggleSidebar()
     } else {
       const isActive = isDialogOpen(icon.id);
       if (isActive) {

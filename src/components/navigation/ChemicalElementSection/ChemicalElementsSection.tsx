@@ -1,16 +1,10 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import './ChemicalElementsSection.scss';
 import { Button } from 'react-aria-components';
 import ModalOverlayContainer from './../../layout/ModalOverlayContainer/ModalOverlayContainer';
-import PeriodicTable, { Element } from '../submenu/PeriodicTable/PeriodicTable'
-import { GridListLayer, GridListLayerItem } from '../../layout/GridListLayerComponent/GridListLayerComponent';
+import PeriodicTable, { Element, elements } from '../submenu/PeriodicTable/PeriodicTable'
 import { useLayerContext } from '../../../utils/context/LayerContext';
 import { layersConfig } from '../../../geoConfigExporter';
-import LayerGradientSelect from '../../ui/LayerGradientSelect/LayerGradientSelect'
-import { ColorRampSlider } from '../../layout/Slider/ColorRampSlider/ColorRampSlider';
-import OpacitySlider from '../../layout/Slider/OpacitySlider/OpacitySlider';
-import { RangeFilterCheckbox } from '../../layout/Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
-import { layerStatsService } from '../../../services/LayerStatsService';
 import { FeatureCheckbox } from '../../layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
 import { pointValueService } from '../../../services/PointValueService';
 import { useViewer } from '../../../utils/context/ViewerContext';
@@ -20,23 +14,19 @@ import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
 import { ResourceBarsVisualizer } from '../../viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
 import { useBoundaryRef } from '../../../components/reference/BoundaryRefProvider';
 import { useZIndex } from '../../../utils/ZIndexProvider';
+import { layerStatsService } from '../../../services/LayerStatsService';
 
 const ChemicalElementsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedElements, setSelectedElements] = useState<(Element & { id: number })[]>([]);
+  const [selectedElements, setSelectedElements] = useState<Set<number>>(new Set());
   const [showValueBox, setShowValueBox] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
-  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const boundaryRef = useBoundaryRef();
-
-  const { addLayer, removeLayer, reorderLayers, updateRampValues, updateLayerOpacity } = useLayerContext();
-
+  const { addLayer, removeLayer, selectedLayers } = useLayerContext();
   const { registerModal, unregisterModal } = useZIndex();
-
   const { viewer } = useViewer();
 
   // Initialize the service with the viewer and selected layers
@@ -46,13 +36,13 @@ const ChemicalElementsSection: React.FC = () => {
 
   useEffect(() => {
     // Update the service with current selected layers (only chemical ones)
-    const chemicalLayers = selectedElements.flatMap(element => {
-      const elementName = element.name.toLowerCase();
-      return layerStatsService.getLayersByElement(elementName).map(([layerId, _]) => layerId);
+    const chemicalLayers = selectedLayers.filter(layerId => {
+      const config = layersConfig.layers[layerId];
+      return config?.category === 'chemical';
     });
 
     pointValueService.setSelectedLayers(chemicalLayers);
-  }, [selectedElements]);
+  }, [selectedLayers]);
 
   useEffect(() => {
     if (showValueBox) {
@@ -61,7 +51,6 @@ const ChemicalElementsSection: React.FC = () => {
         setAllHoverValues(data.allValues); // Terrain calculation
         setIsPaused(data.isPaused || false);
       });
-
       return unsubscribe;
     } else {
       setHoverValues(null);
@@ -72,23 +61,10 @@ const ChemicalElementsSection: React.FC = () => {
 
   // Auto close value box when no elements are selected
   useEffect(() => {
-    if (selectedElements.length === 0 && showValueBox) {
+    if (selectedElements.size === 0 && showValueBox) {
       handlePointFetchToggle(false);
     }
-  }, [selectedElements.length, showValueBox]);
-
-  const debouncedUpdateRampValues = useCallback((layerId: string, values: number[]) => {
-    if (debounceTimeoutRef.current) {
-      clearTimeout(debounceTimeoutRef.current);
-    }
-
-    debounceTimeoutRef.current = setTimeout(() => {
-      if (values.length === 2) {
-        updateRampValues(layerId, values[0], values[1]);
-      }
-      debounceTimeoutRef.current = null;
-    }, 300);
-  }, [updateRampValues]);
+  }, [selectedElements.size, showValueBox]);
 
   const handlePointFetchToggle = (isEnabled: boolean) => {
     setShowValueBox(isEnabled);
@@ -111,9 +87,7 @@ const ChemicalElementsSection: React.FC = () => {
     unregisterModal('periodic-table-modal');
   };
 
-
   const handleElementSelection = (element: Element) => {
-    const elementWithId = { ...element, id: element.atomicNumber };
     const elementName = element.name.toLowerCase();
     const availableLayers = Object.entries(layersConfig.layers)
       .filter(([_, config]) =>
@@ -126,69 +100,27 @@ const ChemicalElementsSection: React.FC = () => {
       return;
     }
 
-    const elementSelected = selectedElements.some(
-      el => el.id === element.atomicNumber
-    );
+    const elementSelected = selectedElements.has(element.atomicNumber);
 
     if (!elementSelected) {
       // Add every layer available for that element
       availableLayers.forEach(([layerId, _]) => {
         addLayer(layerId);
       });
-
-      setSelectedElements(prev => [elementWithId, ...prev]);
+      setSelectedElements(prev => new Set(prev).add(element.atomicNumber));
     } else {
       // Delete layers from that element
       availableLayers.forEach(([layerId, _]) => {
         removeLayer(layerId);
       });
 
-      setSelectedElements(prev =>
-        prev.filter(el => el.id !== element.atomicNumber)
-      );
+      setSelectedElements(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(element.atomicNumber);
+        return newSet;
+      });
     }
   };
-
-  const handleReorder = (newItems: (Element & { id: number })[]) => {
-    setSelectedElements(newItems);
-
-    // Get all layer for the selected elements
-    const newLayerIds: string[] = [];
-
-    newItems.forEach(item => {
-      const elementName= item.name.toLowerCase();
-      const elementLayers = layerStatsService.getLayersByElement(elementName);
-      const layerIds = elementLayers.map(([layerId, _]) => layerId);
-      newLayerIds.push(...layerIds)
-    })
-
-    // Update the layers order in the context
-    reorderLayers(newLayerIds);
-  }
-
-  const handleRemoveElement = (id: number) => {
-    setSelectedElements(prev => {
-      const element = prev.find(e => e.id === id);
-      if (element) {
-        const elementName = element.name.toLowerCase();
-        const elementLayers = layerStatsService.getLayersByElement(elementName);
-
-        elementLayers.forEach(([layerId, _]) => {
-          removeLayer(layerId);
-        });
-      }
-      return prev.filter(e => e.id !== id);
-    });
-  };
-
-  const handleRampValueChange = (layerId: string, values: number[]) => {
-    debouncedUpdateRampValues(layerId, values);
-  };
-
-  const handleOpacityChange = (layerId: string, value: number) => {
-    const opacityValue = value / 100 // Cesium is 0-1
-    updateLayerOpacity(layerId, opacityValue);
-  }
 
   const renderValueBoxContent = () => {
     if (isPaused) {
@@ -214,6 +146,13 @@ const ChemicalElementsSection: React.FC = () => {
     return <p>Hover over the map to scan resources</p>;
   };
 
+  // selectedElements to table for PeriodicTable
+  const selectedElementsArray = Array.from(selectedElements)
+    .map(atomicNumber => {
+      return elements.find(el => el.atomicNumber === atomicNumber);
+    })
+    .filter((el): el is Element => el !== undefined);
+
   return (
     <>
       <Button 
@@ -223,7 +162,7 @@ const ChemicalElementsSection: React.FC = () => {
         Open Periodic Table
       </Button>
 
-      {selectedElements.length > 0 && (
+      {selectedElements.size > 0 && (
         <div className='chemical-section__display-options'>
           <FeatureCheckbox 
             checked={showValueBox}
@@ -259,89 +198,10 @@ const ChemicalElementsSection: React.FC = () => {
       >
         <PeriodicTable 
           onElementSelect={handleElementSelection} 
-          selectedElements={selectedElements}  
+          selectedElements={selectedElementsArray}  
         />
       </ModalOverlayContainer>
-      <GridListLayer
-        items={selectedElements}
-        aria-label='Layer Selection'
-        selectionMode="multiple"
-        onReorder={handleReorder}
-        centerText='No geographic layer selected, choose one or multiple above.'
-      >
-        {(item: Element & { id: number }) => {
-          const elementName = item.name.toLowerCase();
-          const [layerId, layerConfig] = Object.entries(layersConfig.layers)
-            .find(([_, config]) => 
-              config.category === 'chemical' &&
-              config.element === elementName
-            ) || [null, null];
-          
-          if (!layerId || !layerConfig) {
-            return null;
-          }
 
-          const stats = layerStatsService.getLayerStats(layerId);
-
-          let sliderMinValue, sliderMaxValue, sliderStep;
-
-          if (stats.loaded) {
-            const range = stats.max - stats.min;
-            sliderMinValue = stats.min;
-            sliderMaxValue = stats.max;
-            sliderStep = Math.max(range / 1000, 0.001); // Minimum of 0.001
-          } else {
-            // Default value if stats are not loaded
-            sliderMinValue = 0;
-            sliderMaxValue = 100;
-            sliderStep = 0.001;
-          }
-
-          return (
-            <GridListLayerItem 
-            key={item.id}
-            textValue={`${item.name} (${item.symbol})`}
-            onRemove={() => handleRemoveElement(item.id)}
-            layerId={layerId}
-            accordionContent={
-              <div className='chemical-section__accordion-content'>
-                Description: {item.atomicNumber}
-                <LayerGradientSelect layerId={layerId}/>
-                <div className='chemical-section__accordion-content__ramp-container'>
-
-                  {stats.loaded ? (
-                    <ColorRampSlider
-                      label="Color Ramp Values"
-                      defaultValue={[stats.min, stats.max]}
-                      minValue={sliderMinValue}
-                      maxValue={sliderMaxValue}
-                      absoluteMin={stats.min}
-                      absoluteMax={stats.max}
-                      step={sliderStep}
-                      thumbLabels={['Min', 'Max']}
-                      onChange={(values) => handleRampValueChange(layerId, values as number[])}
-                    />
-                  ) : (
-                    <div>Layer statistics not loaded, remove and re-add the element map...</div>
-                  )}
-                  <RangeFilterCheckbox layerId={layerId} />
-                </div>
-                <OpacitySlider
-                  label="Layer Opacity"
-                  defaultValue={100}
-                  minValue={0}
-                  maxValue={100}
-                  step={1}
-                  onChange={(value) => handleOpacityChange(layerId, value as number)}
-                />
-              </div>
-            }  
-          >
-            {item.name} ({item.symbol})
-          </GridListLayerItem>
-          );
-        }}
-      </GridListLayer>
     </>
   );
 };
