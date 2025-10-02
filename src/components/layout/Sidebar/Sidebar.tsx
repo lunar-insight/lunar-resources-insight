@@ -85,7 +85,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
           aria-label='Layer Selection'
           selectionMode="multiple"
           onReorder={handleReorder}
-          centerText='No geographic layer selected.'
+          centerText={
+            <>
+              No geographic layer selected.
+              <br /><br />
+              Select via Base Maps, Minerals or Chemistry.
+            </>
+          }
         >
           {(item: typeof layerItems[0]) => {
             const layerId = item.id;

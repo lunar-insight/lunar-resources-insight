@@ -43,10 +43,9 @@ $navigation-width: 5rem;
 }
 
 .content {
-  flex: 1;
-  padding: 1.5rem;
   overflow-y: auto;
   color: var(--color-neutralVariant);
+  height: 100%;
 }
 
 .accordionContent {

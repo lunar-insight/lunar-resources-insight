@@ -13,7 +13,7 @@ interface GridListLayerProps<T extends { id: string | number }> extends Omit<Gri
   items: T[];
   children: ((item: T) => ReactNode) | ReactNode;
   onReorder?: (newItems: T[]) => void;
-  centerText?: string;
+  centerText?: React.ReactNode;
 }
 
 interface GridListLayerItemProps<T> extends Omit<GridListItemProps, 'children'> {

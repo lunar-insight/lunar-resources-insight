@@ -3,13 +3,10 @@ $heading-item-min-height: 3rem;
 
 .grid-list-layer-component {
   width: auto;
-  border: 0.0625rem solid var(--color-tertiary);
-  border-radius: 0.25rem;
-  min-height: 16rem;
-  max-height: 28rem;
+  height: 100%;
   min-width: 22.5rem;
   box-shadow: inset 0 0 25px black;
-  background-color: rgba(35, 41, 53, 0.5);
+  background-color: var(--color-primary);
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
@@ -44,7 +41,7 @@ $heading-item-min-height: 3rem;
     height: auto;
     min-height: $heading-item-min-height;
     box-sizing: border-box;
-    background-color: rgba(25, 29, 37, 0.50);
+    background-color: rgba(25, 29, 37, 0.25);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -145,6 +142,7 @@ $heading-item-min-height: 3rem;
       width: 100%;
       padding-left: $scroll-bar-handler-width;
       position: relative;
+      box-shadow: inset 0 0 15px 1px black;
 
       &::before {
         content: '';
