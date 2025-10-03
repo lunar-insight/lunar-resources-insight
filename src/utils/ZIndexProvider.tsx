@@ -77,10 +77,11 @@ export const ZIndexProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 const getBaseZIndex = (type: 'content-container' | 'box-container' | 'modal'): number => {
   switch (type) {
     case 'content-container':
-    case 'box-container':
-      return 100;
-    case 'modal':
       return 1000;
+    case 'box-container':
+      return 1000;
+    case 'modal':
+      return 1500;
     default:
       return 100;
   }

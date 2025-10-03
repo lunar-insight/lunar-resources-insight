@@ -14,21 +14,20 @@ import { ZIndexProvider } from 'utils/ZIndexProvider';
 import { MouseTrackingProvider } from 'utils/MouseTrackingProvider';
 
 const MainPageContent: React.FC = () => {
-  const viewerContainerRef = useRef<HTMLDivElement>(null);
+  const mainContentRef = useRef<HTMLDivElement>(null);
   const { isSidebarOpen } = useSidebarContext();
 
   const sidebarWidth = 400;
 
   return (
-    <BoundaryRefProvider value={viewerContainerRef}>
+    <BoundaryRefProvider value={mainContentRef}>
       <DialogProvider dialogs={dialogs}>
         <div className={styles.mainPage}>
           <Sidebar width={sidebarWidth} />
-          <div className={styles.mainContent}>
+          <div className={styles.mainContent} ref={mainContentRef}>
             <SectionNavigation />
-            <div 
-              className={styles.viewerContainer} 
-              ref={viewerContainerRef}
+            <div
+              className={styles.viewerContainer}
               style={{
                 marginLeft: isSidebarOpen ? `${sidebarWidth}px` : '0',
                 transition: 'margin-left 0.3s ease-in-out'

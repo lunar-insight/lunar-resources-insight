@@ -85,7 +85,8 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     if (!boundaryRef.current || !dialogRef.current) return translateX;
     const boundaryRect = boundaryRef.current.getBoundingClientRect();
     const dialogRect = dialogRef.current.getBoundingClientRect();
-    const minX = 0;
+    const navigationWidth = 80; // 5rem = 80px (SectionNavigation width)
+    const minX = navigationWidth - viewerContainerSize.left;
     const maxX = boundaryRect.width - dialogRect.width;
     return Math.max(minX, Math.min(translateX, maxX));
   };
