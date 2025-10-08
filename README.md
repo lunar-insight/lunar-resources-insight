@@ -34,6 +34,16 @@ MAP_SERVER_URL=http://example.com/geoserver
 
 Edit the config.js file with your map server configuration with your workspace name and layer name assuming you are using GeoServer.
 
+### ENV File
+
+```
+NODE_ENV=development
+
+REACT_APP_SERVER_URL=http://127.0.0.1:8000
+
+REACT_APP_WORKSPACE_PATH = file://C:/Your/File/Path/To/Folder
+```
+
 ### Installation
 
 1. Install [Node.js](https://nodejs.org/) on your computer.
