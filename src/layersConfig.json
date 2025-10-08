@@ -1,5 +1,35 @@
 {
   "layers": {
+    "geological_global": {
+      "filename": "geographical/geology_moon_cog.tif",
+      "category": "geographical",
+      "displayName": "Global Geological Map",
+      "metadata": {
+        "source": "USGS",
+        "resolution": "1:5M",
+        "description": "Unified Geologic Map of the Moon"
+      }
+    },
+    "terrain_elevation": {
+      "filename": "geographical/lunar_terrain_elevation_COG.tif",
+      "category": "geographical",
+      "displayName": "Terrain Elevation",
+      "metadata": {
+        "source": "LOLA",
+        "resolution": "118m/pixel",
+        "description": "Lunar Orbiter Laser Altimeter elevation data"
+      }
+    },
+    "slope_map": {
+      "filename": "geographical/lunar_slope_map_COG.tif",
+      "category": "geographical",
+      "displayName": "Slope Map",
+      "metadata": {
+        "source": "LOLA",
+        "resolution": "118m/pixel",
+        "description": "Surface slope derived from LOLA data"
+      }
+    },
     "calcium_primary": {
       "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Ca_IAU2015_COG.tif",
       "category": "chemical",

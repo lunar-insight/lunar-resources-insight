@@ -313,11 +313,28 @@ export async function fetchColormapData(colormapName: string): Promise<Record<st
  * @returns Preview image URL
  */
 export function buildGradientPreviewUrl(
-  colormapName: string, 
-  width: number, 
+  colormapName: string,
+  width: number,
   height: number = 30
 ): string {
   return `${tilerEndpoints.colorMap.replace('{colormap}', colormapName)}?format=png&width=${width}&height=${height}`;
+}
+
+/**
+ * Builds the URL to obtain a preview image of a layer
+ * @param filename Layer filename
+ * @param width Image width in pixels (optional, default: 512)
+ * @param height Image height in pixels (optional, default: 256)
+ * @returns Preview image URL from TiTiler
+ */
+export function buildLayerPreviewUrl(
+  filename: string,
+  width: number = 512,
+  height: number = 256
+): string {
+  const fileUrl = `${workspacePath}/${filename}`;
+  const encodedFileUrl = safeEncodeURI(fileUrl);
+  return `${tilerEndpoints.preview}?url=${encodedFileUrl}&max_size=${width}&height=${height}&format=png`;
 }
 
 function safeEncodeURI(uri: string): string {

@@ -1,0 +1,246 @@
+// Variables SASS
+$button-height: 8rem;
+$container-max-width: 16rem; // 256px
+$gap-small: 0.25rem;
+$gap-medium: 0.5rem;
+$gap-large: 0.75rem;
+$gap-xlarge: 1rem;
+$border-radius: 0.25rem;
+$border-width: 0.0625rem;
+
+$transition-duration: 0.3s;
+$transition-timing: ease-out;
+
+$hover-zoom-scale: 110%;
+$checkbox-size: 1.5rem;
+
+$list-max-height: 28rem; // Height for scrollable area
+
+// Mixins SASS
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin text-shadow-strong {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+@mixin text-shadow-medium {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+@mixin overlay-gradient {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+@mixin transition-standard($properties...) {
+  transition: #{$properties} $transition-duration $transition-timing;
+}
+
+// Styles
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: $gap-xlarge;
+  padding: 0;
+  width: 100%;
+}
+
+.info {
+  padding: $gap-medium 0;
+}
+
+.description {
+  margin: 0;
+}
+
+.layersListContainer {
+  max-width: $container-max-width;
+  width: 100%;
+}
+
+.layersList {
+  display: flex;
+  flex-direction: column;
+  gap: $gap-large;
+  width: 100%;
+  max-height: $list-max-height;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+  outline: none; // Remove react-aria outline
+
+  // Custom scrollbar
+  &::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--color-neutral);
+    border-radius: $border-radius;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-tertiary);
+    border-radius: $border-radius;
+
+    &:hover {
+      background: var(--color-quartenary);
+    }
+  }
+}
+
+.layerItem {
+  outline: none; // Remove react-aria outline
+  list-style: none;
+}
+
+.empty {
+  padding: 2rem;
+  text-align: center;
+  color: var(--color-neutralVariant);
+  font-style: italic;
+}
+
+.layerButton {
+  position: relative;
+  height: $button-height;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: var(--color-neutral);
+  background-blend-mode: overlay;
+  border-radius: $border-radius;
+  border: $border-width solid var(--color-tertiary);
+  cursor: pointer;
+  overflow: hidden;
+  @include transition-standard(background-size, box-shadow, border-color);
+
+  // Image will be lazy loaded
+  &[data-loaded="false"] {
+    background-image: none;
+    background-color: var(--color-dark-intermediary);
+
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+      );
+      animation: shimmer 1.5s infinite;
+    }
+  }
+
+  // Hover effect
+  &[data-hovered] {
+    background-size: $hover-zoom-scale $hover-zoom-scale;
+    box-shadow: inset 0 0 10px 1px var(--color-tertiary);
+    border-color: var(--color-quartenary);
+
+    .layerOverlay {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .layerTitle {
+      font-size: 1.1875rem;
+    }
+  }
+
+  &[data-pressed] {
+    background-color: var(--color-dark-intermediary);
+  }
+
+  // Selected state
+  &.selected {
+    border-color: var(--color-quartenary);
+    box-shadow: 0 0 8px 2px rgba(var(--color-quartenary-rgb, 100, 200, 255), 0.5);
+
+    .layerOverlay {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .layerCheckbox input {
+      accent-color: var(--color-quartenary);
+    }
+  }
+}
+
+.layerOverlay {
+  position: absolute;
+  inset: 0;
+  @include flex-center;
+  justify-content: space-between;
+  padding: $gap-xlarge;
+  @include overlay-gradient;
+  @include transition-standard(background-color);
+}
+
+.layerInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $gap-small;
+}
+
+.layerTitle {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-neutralVariant);
+  @include text-shadow-strong;
+  @include transition-standard(font-size);
+}
+
+.layerMetadata {
+  display: flex;
+  gap: $gap-medium;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  @include text-shadow-medium;
+}
+
+.metadataItem {
+  &:not(:last-child)::after {
+    content: '•';
+    margin-left: $gap-medium;
+    opacity: 0.6;
+  }
+}
+
+.layerCheckbox {
+  @include flex-center;
+
+  input[type="checkbox"] {
+    width: $checkbox-size;
+    height: $checkbox-size;
+    cursor: pointer;
+    accent-color: var(--color-tertiary);
+    @include transition-standard(transform);
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Keyframes for loading shimmer
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

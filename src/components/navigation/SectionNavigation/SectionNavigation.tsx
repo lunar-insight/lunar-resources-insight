@@ -2,6 +2,7 @@ import React, { useState, Fragment } from 'react';
 import { Button } from 'react-aria-components';
 import styles from './SectionNavigation.module.scss';
 import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
+import GeographicalLayersSection from '../GeographicalLayersSection/GeographicalLayersSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
@@ -39,12 +40,12 @@ const dialogsData: Icon[] = [
     dialogTitle: 'Home Dialog', 
     dialogContent: 'Home dialog content goes here.' 
   },
-  { 
-    id: 'geospatial-layer-dialog', 
-    name: 'map', 
+  {
+    id: 'geospatial-layer-dialog',
+    name: 'map',
     label: 'Base Maps',
-    dialogTitle: 'Base Maps', 
-    dialogContent: 'Base Maps dialog content goes here.'
+    dialogTitle: 'Base Maps',
+    dialogContent: <GeographicalLayersSection />
   },
   { 
     id: 'mineral-layer-dialog', 
