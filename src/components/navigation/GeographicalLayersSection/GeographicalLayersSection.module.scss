@@ -1,5 +1,5 @@
 // Variables SASS
-$button-height: 8rem;
+$button-height: 5.3125rem; // 85px - adjusted for 3:1 aspect ratio (±60° latitude crop)
 $container-max-width: 16rem; // 256px
 $gap-small: 0.25rem;
 $gap-medium: 0.5rem;
@@ -113,26 +113,32 @@ $list-max-height: 28rem; // Height for scrollable area
   position: relative;
   height: $button-height;
   width: 100%;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
   background-color: var(--color-neutral);
-  background-blend-mode: overlay;
   border-radius: $border-radius;
   border: $border-width solid var(--color-tertiary);
   cursor: pointer;
   overflow: hidden;
-  @include transition-standard(background-size, box-shadow, border-color);
+  @include transition-standard(box-shadow, border-color);
 
-  // Image will be lazy loaded
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: var(--layer-bg-image, none);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-blend-mode: overlay;
+    @include transition-standard(transform);
+    z-index: 0;
+  }
+
+  // lazy loaded image
   &[data-loaded="false"] {
-    background-image: none;
     background-color: var(--color-dark-intermediary);
 
     &::before {
-      content: '';
-      position: absolute;
-      inset: 0;
+      background-image: none;
       background: linear-gradient(
         90deg,
         transparent,
@@ -143,18 +149,17 @@ $list-max-height: 28rem; // Height for scrollable area
     }
   }
 
-  // Hover effect
+  // Hover effect with zoom only the background map
   &[data-hovered] {
-    background-size: $hover-zoom-scale $hover-zoom-scale;
     box-shadow: inset 0 0 10px 1px var(--color-tertiary);
     border-color: var(--color-quartenary);
 
-    .layerOverlay {
-      background-color: rgba(0, 0, 0, 0.5);
+    &::before {
+      transform: scale(1.1);
     }
 
-    .layerTitle {
-      font-size: 1.1875rem;
+    .layerOverlay {
+      background-color: rgba(0, 0, 0, 0.5);
     }
   }
 
@@ -185,6 +190,7 @@ $list-max-height: 28rem; // Height for scrollable area
   padding: $gap-xlarge;
   @include overlay-gradient;
   @include transition-standard(background-color);
+  z-index: 1; // Above background image layer
 }
 
 .layerInfo {

@@ -83,8 +83,8 @@ const LayerButton: React.FC<LayerButtonProps> = ({ layer, isSelected, onToggle }
       onPress={onToggle}
       data-loaded={imageLoaded}
       style={{
-        backgroundImage: cachedImageUrl ? `url(${cachedImageUrl})` : 'none'
-      }}
+        '--layer-bg-image': cachedImageUrl ? `url(${cachedImageUrl})` : 'none'
+      } as React.CSSProperties}
     >
       <div className={styles.layerOverlay}>
         <div className={styles.layerInfo}>
@@ -130,7 +130,8 @@ const GeographicalLayersSection: React.FC = () => {
       id: layerId,
       displayName: config.displayName || layerId,
       filename: config.filename,
-      previewUrl: buildLayerPreviewUrl(config.filename, 256, 128), // Reduced size for performance
+      // Limit preview to ±60° latitude to avoid equirectangular distortion (3:1 aspect ratio)
+      previewUrl: buildLayerPreviewUrl(config.filename, 256, 85, [-180, -60, 180, 60]),
       metadata: config.metadata
     }));
 

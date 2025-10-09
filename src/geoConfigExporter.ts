@@ -325,16 +325,25 @@ export function buildGradientPreviewUrl(
  * @param filename Layer filename
  * @param width Image width in pixels (optional, default: 512)
  * @param height Image height in pixels (optional, default: 256)
+ * @param bbox Bounding box to crop the preview [minLon, minLat, maxLon, maxLat] (optional)
  * @returns Preview image URL from TiTiler
  */
 export function buildLayerPreviewUrl(
   filename: string,
   width: number = 512,
-  height: number = 256
+  height: number = 256,
+  bbox?: [number, number, number, number]
 ): string {
   const fileUrl = `${workspacePath}/${filename}`;
   const encodedFileUrl = safeEncodeURI(fileUrl);
-  return `${tilerEndpoints.preview}?url=${encodedFileUrl}&max_size=${width}&height=${height}&format=png`;
+  let url = `${tilerEndpoints.preview}?url=${encodedFileUrl}&max_size=${width}&height=${height}&format=png`;
+
+  // Add bounding box if provided to limit latitude/longitude range
+  if (bbox && bbox.length === 4) {
+    url += `&bbox=${bbox.join(',')}`;
+  }
+
+  return url;
 }
 
 function safeEncodeURI(uri: string): string {
