@@ -62,3 +62,8 @@ body {
   z-index: 2; /* Z-index Should be higher than the ::after of GridListItems */
   position: relative;
 }
+
+.cesium-viewer-fullscreenContainer {
+  bottom: 2.25rem;
+  right: 0.1875rem;
+}
