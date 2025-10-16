@@ -1,0 +1,20 @@
+$border-radius: 0.25rem;
+$bottom-bar-height: 2rem;
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 5rem; // SectionNavigation width
+  right: 0;
+  height: $bottom-bar-height;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(to right, rgba(35, 41, 53, 0.75), rgba(43, 53, 62, 0.75));
+  border-top: 1px solid rgba(35, 41, 53, 0.85);
+  box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  gap: 1rem;
+}

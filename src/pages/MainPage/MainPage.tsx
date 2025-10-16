@@ -12,6 +12,7 @@ import { initializeLayerStats } from '../../services/LayerStatsService';
 import { initializeColormapService } from '../../services/ColormapService';
 import { ZIndexProvider } from 'utils/ZIndexProvider';
 import { MouseTrackingProvider } from 'utils/MouseTrackingProvider';
+import BottomBar from '../../components/layout/BottomBar/BottomBar';
 
 const MainPageContent: React.FC = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
@@ -37,6 +38,7 @@ const MainPageContent: React.FC = () => {
             </div>
           </div>
           <DialogRenderer />
+          <BottomBar />
         </div>
       </DialogProvider>
     </BoundaryRefProvider>
