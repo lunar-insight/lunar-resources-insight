@@ -15,6 +15,29 @@ $bottom-bar-height: 2rem;
   box-shadow: 0px -2px 6px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 1rem;
   gap: 1rem;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.centerSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: flex-end;
 }
