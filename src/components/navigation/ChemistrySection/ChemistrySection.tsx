@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import './ChemicalElementsSection.scss';
+import './ChemistrySection.scss';
 import { Button } from 'react-aria-components';
-import ModalOverlayContainer from './../../layout/ModalOverlayContainer/ModalOverlayContainer';
+import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
 import PeriodicTable, { Element, elements } from '../submenu/PeriodicTable/PeriodicTable'
 import { useLayerContext } from '../../../utils/context/LayerContext';
 import { layersConfig } from '../../../geoConfigExporter';
@@ -12,11 +12,11 @@ import { DraggableBoxContentContainer } from '../../layout/DraggableBoxContentCo
 import { Portal } from '../../ui/Portal/Portal';
 import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
 import { ResourceBarsVisualizer } from '../../viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
-import { useBoundaryRef } from '../../../components/reference/BoundaryRefProvider';
+import { useBoundaryRef } from '../../reference/BoundaryRefProvider';
 import { useZIndex } from '../../../utils/ZIndexProvider';
 import { layerStatsService } from '../../../services/LayerStatsService';
 
-const ChemicalElementsSection: React.FC = () => {
+const ChemistrySection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<Set<number>>(new Set());
   const [showValueBox, setShowValueBox] = useState(false);
@@ -206,4 +206,4 @@ const ChemicalElementsSection: React.FC = () => {
   );
 };
 
-export default ChemicalElementsSection;
+export default ChemistrySection;

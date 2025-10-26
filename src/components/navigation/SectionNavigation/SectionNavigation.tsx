@@ -1,7 +1,7 @@
 import React, { useState, Fragment } from 'react';
 import { Button } from 'react-aria-components';
 import styles from './SectionNavigation.module.scss';
-import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
+import ChemistrySection from '../ChemistrySection/ChemistrySection';
 import GeographicalLayersSection from '../GeographicalLayersSection/GeographicalLayersSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
 import { useSidebarContext } from 'utils/context/SidebarContext';
@@ -59,7 +59,7 @@ const dialogsData: Icon[] = [
     name: 'lab_research', 
     label: 'Chemistry',
     dialogTitle: 'Chemistry', 
-    dialogContent: <ChemicalElementsSection />
+    dialogContent: <ChemistrySection />
   },
   /*
   { 
