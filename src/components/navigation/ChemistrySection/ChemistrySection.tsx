@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import './ChemistrySection.scss';
+import styles from './ChemistrySection.module.scss';
 import { Button } from 'react-aria-components';
 import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
 import PeriodicTable, { Element, elements } from '../submenu/PeriodicTable/PeriodicTable'
@@ -155,16 +155,16 @@ const ChemistrySection: React.FC = () => {
 
   return (
     <>
-      <Button 
-        className="chemical-section__open-periodic-table-button"
-        onPress={handleOpenPeriodicTable}  
+      <Button
+        className={styles.openPeriodicTableButton}
+        onPress={handleOpenPeriodicTable}
       >
         Open Periodic Table
       </Button>
 
       {selectedElements.size > 0 && (
-        <div className='chemical-section__display-options'>
-          <FeatureCheckbox 
+        <div>
+          <FeatureCheckbox
             checked={showValueBox}
             onChange={handlePointFetchToggle}
           />
