@@ -3,10 +3,13 @@
   flex-direction: row;
   gap: 1rem;
   width: 100%;
+  height: 4rem;
 }
 
 .openPeriodicTableButton {
   height: 4rem;
+  min-height: 4rem;
+  max-height: 4rem;
   flex: 1;
   background-image: url('../../../assets/images/button/periodic-table-element.jpg');
   background-size: 100% 100%;
@@ -26,7 +29,6 @@
     background-color: var(--color-quartenary);
     background-size: 110% 110%;
     box-shadow: inset 0 0 10px 1px var(--color-tertiary);
-    font-size: 1.0625rem;
   }
 
   &[data-pressed] {
@@ -36,6 +38,8 @@
 
 .openCompoundButton {
   height: 4rem;
+  min-height: 4rem;
+  max-height: 4rem;
   flex: 1;
   background-image: url('../../../assets/images/button/chemistry-compound.jpg');
   background-size: 100% 100%;
@@ -55,7 +59,6 @@
     background-color: var(--color-quartenary);
     background-size: 110% 110%;
     box-shadow: inset 0 0 10px 1px var(--color-tertiary);
-    font-size: 1.0625rem;
   }
 
   &[data-pressed] {
