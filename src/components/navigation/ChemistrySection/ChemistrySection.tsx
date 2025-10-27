@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import styles from './ChemistrySection.module.scss';
 import { Button } from 'react-aria-components';
 import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
-import PeriodicTable, { Element, elements } from '../submenu/PeriodicTable/PeriodicTable'
+import PeriodicTable, { Element, elements } from '../submenu/PeriodicTable/PeriodicTable';
+import Compound from '../submenu/Compound/Compound';
 import { useLayerContext } from '../../../utils/context/LayerContext';
 import { layersConfig } from '../../../geoConfigExporter';
 import { FeatureCheckbox } from '../../layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
@@ -14,10 +15,10 @@ import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
 import { ResourceBarsVisualizer } from '../../viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
 import { useBoundaryRef } from '../../reference/BoundaryRefProvider';
 import { useZIndex } from '../../../utils/ZIndexProvider';
-import { layerStatsService } from '../../../services/LayerStatsService';
 
 const ChemistrySection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCompoundModalOpen, setIsCompoundModalOpen] = useState(false);
   const [selectedElements, setSelectedElements] = useState<Set<number>>(new Set());
   const [showValueBox, setShowValueBox] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
@@ -87,6 +88,16 @@ const ChemistrySection: React.FC = () => {
     unregisterModal('periodic-table-modal');
   };
 
+  const handleOpenCompound = () => {
+    setIsCompoundModalOpen(true);
+    registerModal('compound-modal');
+  };
+
+  const handleCloseCompound = () => {
+    setIsCompoundModalOpen(false);
+    unregisterModal('compound-modal');
+  }
+
   const handleElementSelection = (element: Element) => {
     const elementName = element.name.toLowerCase();
     const availableLayers = Object.entries(layersConfig.layers)
@@ -125,7 +136,7 @@ const ChemistrySection: React.FC = () => {
   const renderValueBoxContent = () => {
     if (isPaused) {
       return (
-        <div className="map-hover-values-box__paused">
+        <div>
           <p>⏸️ Scan paused</p>
           <small>Move the mouse on the globe to resume</small>
         </div>
@@ -155,12 +166,21 @@ const ChemistrySection: React.FC = () => {
 
   return (
     <>
-      <Button
-        className={styles.openPeriodicTableButton}
-        onPress={handleOpenPeriodicTable}
-      >
-        Open Periodic Table
-      </Button>
+      <div className={styles.buttonsContainer}>
+        <Button
+          className={styles.openPeriodicTableButton}
+          onPress={handleOpenPeriodicTable}
+        >
+          Open Periodic Table
+        </Button>
+
+        <Button
+          className={styles.openCompoundButton}
+          onPress={handleOpenCompound}
+        >
+          Open Compound
+        </Button>
+      </div>
 
       {selectedElements.size > 0 && (
         <div>
@@ -202,6 +222,14 @@ const ChemistrySection: React.FC = () => {
         />
       </ModalOverlayContainer>
 
+      <ModalOverlayContainer
+        isOpen={isCompoundModalOpen}
+        onOpenChange={handleCloseCompound}
+        title='Chemical Compounds'
+        modalId='compound-modal'
+      >
+        <Compound />
+      </ModalOverlayContainer>
     </>
   );
 };

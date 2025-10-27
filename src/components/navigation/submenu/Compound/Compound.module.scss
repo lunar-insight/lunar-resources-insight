@@ -1,0 +1,20 @@
+.compound {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  min-height: 300px;
+}
+
+.compoundHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.compoundContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
