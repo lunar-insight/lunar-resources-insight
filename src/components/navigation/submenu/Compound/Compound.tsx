@@ -1,34 +1,79 @@
-import React, { useState} from "react";
-import { GridList, GridListItem, Text, Selection } from 'react-aria-components';
+import React, { useState, useMemo} from "react";
+import { ListBox, ListBoxItem, Text, Selection } from 'react-aria-components';
 import styles from './Compound.module.scss';
 
 interface CompoundData {
   formula: string;
   name: string;
   hasMap: boolean;
+  row: number;
+  column: number;
 }
 
 const compounds: CompoundData[] = [
-  // With global map
-  { formula: "H₂O", name: "Water ice", hasMap: true },
-  { formula: "FeO", name: "Iron(II) oxide", hasMap: true },
-  { formula: "TiO₂", name: "Titanium dioxide", hasMap: true },
-  { formula: "Al₂O₃", name: "Aluminum oxide", hasMap: true },
-  { formula: "MgO", name: "Magnesium oxide", hasMap: true },
-  { formula: "CaO", name: "Calcium oxide", hasMap: true },
-  { formula: "SiO₂", name: "Silicon dioxide", hasMap: true },
-  // Only ground truth
-  { formula: "CO₂", name: "Carbon dioxide", hasMap: false },
-  { formula: "NH₃", name: "Ammonia", hasMap: false },
-  { formula: "CH₄", name: "Methane", hasMap: false },
-  { formula: "SO₂", name: "Sulfur dioxide", hasMap: false },
-  { formula: "H₂S", name: "Hydrogen sulfide", hasMap: false },
-  { formula: "C₂H₄", name: "Ethylene", hasMap: false },
-  { formula: "CH₃OH", name: "Methanol", hasMap: false },
-  { formula: "CO", name: "Carbon monoxide", hasMap: false },
-  { formula: "H₂", name: "Hydrogen", hasMap: false }
+  { formula: "H₂O", name: "Water ice", hasMap: true, row: 1, column: 1 },
+  { formula: "FeO", name: "Iron(II) oxide", hasMap: true, row: 1, column: 2 },
+  { formula: "TiO₂", name: "Titanium dioxide", hasMap: true, row: 1, column: 3 },
+  { formula: "Al₂O₃", name: "Aluminum oxide", hasMap: true, row: 1, column: 4 },
+  { formula: "MgO", name: "Magnesium oxide", hasMap: true, row: 2, column: 1 },
+  { formula: "CaO", name: "Calcium oxide", hasMap: true, row: 2, column: 2 },
+  { formula: "SiO₂", name: "Silicon dioxide", hasMap: true, row: 2, column: 3 },
+  { formula: "CO₂", name: "Carbon dioxide", hasMap: false, row: 2, column: 4 },
+  { formula: "NH₃", name: "Ammonia", hasMap: false, row: 3, column: 1 },
+  { formula: "CH₄", name: "Methane", hasMap: false, row: 3, column: 2 },
+  { formula: "SO₂", name: "Sulfur dioxide", hasMap: false, row: 3, column: 3 },
+  { formula: "H₂S", name: "Hydrogen sulfide", hasMap: false, row: 3, column: 4 },
+  { formula: "C₂H₄", name: "Ethylene", hasMap: false, row: 4, column: 1 },
+  { formula: "CH₃OH", name: "Methanol", hasMap: false, row: 4, column: 2 },
+  { formula: "CO", name: "Carbon monoxide", hasMap: false, row: 4, column: 3 },
+  { formula: "H₂", name: "Hydrogen", hasMap: false, row: 4, column: 4 }
 ];
 
+// Create 4x4 grid structure
+const GRID: (CompoundData | null)[][] = Array(4).fill(null).map(() => Array(4).fill(null));
+
+// Populate grid with compounds based on their row/column positions
+compounds.forEach(compound => {
+  GRID[compound.row - 1][compound.column - 1] = compound;
+});
+
+const CompoundCell = React.memo(({
+  item,
+  cellKey
+}: {
+  item: CompoundData | null,
+  cellKey: string,
+}) => {
+  return (
+    <ListBoxItem
+      key={cellKey}
+      id={cellKey}
+      textValue={item ? `${item.name} ${item.formula}` : 'Empty'}
+      className={styles.compoundItem}
+    >
+      {item ? (
+        <div className={styles.compoundItemContent}>
+          {/* Coverage Badge */}
+          <span className={`${styles.badge} ${item.hasMap ? styles.badgeGlobal : styles.badgeLocal}`}>
+            {item.hasMap ? "Global" : "Local"}
+          </span>
+
+          {/* Name */}
+          <Text slot="description" className={styles.name}>
+            {item.name}
+          </Text>
+
+          {/* Formula */}
+          <Text slot="description" className={styles.formula}>
+            {item.formula}
+          </Text>
+        </div>
+      ) : (
+        <div className={styles.emptyCell}></div>
+      )}
+    </ListBoxItem>
+  );
+});
 
 export interface CompoundProps {
   // Placeholder (onCompoundSelect callback for map integration)
@@ -36,6 +81,17 @@ export interface CompoundProps {
 
 const Compound: React.FC<CompoundProps> = () => {
   const [selectedCompounds, setSelectedCompounds] = useState<Selection>(new Set());
+
+  // Convert formula-based selection to grid-based keys
+  const selectedKeys = useMemo(() =>
+    new Set(
+      Array.from(selectedCompounds).map(formula => {
+        const compound = compounds.find(c => c.formula === formula);
+        return compound ? `${compound.row}-${compound.column}` : '';
+      }).filter(Boolean)
+    ),
+    [selectedCompounds]
+  );
 
   return (
     <div className={styles.compound}>
@@ -56,39 +112,37 @@ const Compound: React.FC<CompoundProps> = () => {
         </span>
       </div>
 
-      <GridList
+      <ListBox
         aria-label="Chemical Compounds"
+        layout="grid"
         selectionMode="multiple"
-        selectedKeys={selectedCompounds}
-        onSelectionChange={setSelectedCompounds}
+        selectedKeys={selectedKeys}
+        onSelectionChange={(keys) => {
+          const newFormulas = new Set<string>();
+          Array.from(keys).forEach(key => {
+            const [row, col] = (key as string).split('-').map(Number);
+            const compound = GRID[row - 1][col - 1];
+            if (compound) newFormulas.add(compound.formula);
+          });
+          setSelectedCompounds(newFormulas);
+        }}
         className={styles.compoundGrid}
       >
-        {compounds.map((compound) => (
-          <GridListItem
-            key={compound.formula}
-            id={compound.formula}
-            textValue={`${compound.name} ${compound.formula}`}
-            className={styles.compoundItem}
-          >
-            <div className={styles.compoundItemContent}>
-              {/* Coverage Badge */}
-              <span className={`${styles.badge} ${compound.hasMap ? styles.badgeGlobal : styles.badgeLocal}`}>
-                {compound.hasMap ? "Global" : "Local"}
-              </span>
-
-              {/* Name */}
-              <Text slot="description" className={styles.name}>
-                {compound.name}
-              </Text>
-
-              {/* Formula */}
-              <Text slot="description" className={styles.formula}>
-                {compound.formula}
-              </Text>
-            </div>
-          </GridListItem>
+        {GRID.map((row, rowIndex) => (
+          <React.Fragment key={rowIndex}>
+            {row.map((item, colIndex) => {
+              const cellKey = `${rowIndex + 1}-${colIndex + 1}`;
+              return (
+                <CompoundCell
+                  key={cellKey}
+                  item={item}
+                  cellKey={cellKey}
+                />
+              );
+            })}
+          </React.Fragment>
         ))}
-      </GridList>
+      </ListBox>
     </div>
   );
 };
