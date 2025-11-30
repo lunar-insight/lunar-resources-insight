@@ -1,20 +1,177 @@
+// Color scheme variables
+$color-border-default: rgba(128, 128, 128, 0.5);
+$color-background-default: rgba(45, 55, 65, 0.3);
+
+// Selected items - BLUE
+$color-border-selected: rgba(59, 130, 246, 0.6);
+$color-background-selected: rgba(59, 130, 246, 0.15);
+
+// Coverage badges
+$color-badge-global: rgba(34, 197, 94, 0.8);   // Green for "Global coverage"
+$color-badge-local: rgba(251, 191, 36, 0.8);   // Amber/Yellow for "Local coverage"
+
 .compound {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   padding: 1rem;
-  min-height: 300px;
+  width: 100%;
 }
 
-.compoundHeader {
+.stateInfo {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.compoundContent {
-  flex: 1;
+.stateInfoItem {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-neutralVariant);
+}
+
+.stateInfoRectangle {
+  width: 1.5rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+
+  &Selected {
+    background-color: $color-background-selected;
+    border: 2px solid $color-border-selected;
+  }
+}
+
+.badgeMini {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+
+  &Global {
+    background-color: $color-badge-global;
+    color: white;
+  }
+
+  &Local {
+    background-color: $color-badge-local;
+    color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.compoundGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  // Tablet: 3 columns
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  // Mobile: 2 columns
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+.compoundItem {
+  border: 2px solid $color-border-default;
+  background-color: $color-background-default;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+  min-height: 120px;
+  outline: none;
+
+  &[data-selected] {
+    border-color: $color-border-selected;
+    background-color: $color-background-selected;
+  }
+
+  &[data-hovered] {
+    box-shadow: 0 0 12px rgba(128, 128, 128, 0.4);
+  }
+
+  &[data-pressed] {
+    transform: scale(0.98);
+  }
+
+  // keyboard navigation
+  &[data-focus-visible] {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+// Item content layout
+.compoundItemContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  position: relative;
+  min-height: 120px;
+  height: 100%;
+}
+
+// Coverage badge
+.badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    font-size: 0.6rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
+.badgeGlobal {
+  background-color: $color-badge-global;
+  color: white;
+}
+
+.badgeLocal {
+  background-color: $color-badge-local;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+// Compound name
+.name {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--color-neutralVariant);
+  text-align: center;
+  line-height: 1.3;
+
+  @media (max-width: 480px) {
+    font-size: 1rem;
+  }
+}
+
+// Chemical formula
+.formula {
+  font-size: 1.25rem;
+  color: rgba(156, 163, 175, 1);
+  text-align: center;
+  margin-top: 0.25rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+  }
 }
