@@ -3,6 +3,7 @@ import { Button } from 'react-aria-components';
 import styles from './SectionNavigation.module.scss';
 import ChemistrySection from '../ChemistrySection/ChemistrySection';
 import GeographicalLayersSection from '../GeographicalLayersSection/GeographicalLayersSection';
+import MineralsSection from '../MineralsSection/MineralsSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
@@ -47,12 +48,12 @@ const dialogsData: Icon[] = [
     dialogTitle: 'Base Maps',
     dialogContent: <GeographicalLayersSection />
   },
-  { 
-    id: 'mineral-layer-dialog', 
-    name: 'landslide', 
+  {
+    id: 'mineral-layer-dialog',
+    name: 'landslide',
     label: 'Minerals',
-    dialogTitle: 'Minerals Dialog', 
-    dialogContent: 'Minerals dialog content goes here.'
+    dialogTitle: 'Minerals',
+    dialogContent: <MineralsSection />
   },
   { 
     id: 'element-layer-dialog', 
