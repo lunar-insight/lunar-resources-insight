@@ -1,0 +1,134 @@
+// Color variables
+$color-border-default: rgba(128, 128, 128, 0.5);
+$color-background-default: rgba(45, 55, 65, 0.3);
+
+$color-border-selected: rgba(59, 130, 246, 0.6);
+$color-background-selected: rgba(59, 130, 246, 0.15);
+
+$color-border-highlighted: rgba(251, 146, 60, 0.7);
+$color-background-highlighted: rgba(251, 146, 60, 0.2);
+
+$color-border-combined: rgba(147, 51, 234, 0.7);
+$color-background-combined: rgba(147, 51, 234, 0.2);
+
+$color-badge-global: rgba(16, 185, 129, 0.55);
+$color-badge-local: rgba(245, 158, 11, 0.55);
+
+// Rock grid layout - single row with 8 columns
+.rockGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  outline: none;
+}
+
+// Rock item base styling
+.rockItem {
+  border: 2px solid $color-border-default;
+  background-color: $color-background-default;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+  min-height: 105px;
+  outline: none;
+
+  // Selected state
+  &[data-selected] {
+    border-color: $color-border-selected;
+    background-color: $color-background-selected;
+  }
+
+  // Highlighted state (when mineral is hovered)
+  &.highlighted {
+    border-color: $color-border-highlighted;
+    background-color: $color-background-highlighted;
+    box-shadow: 0 0 16px rgba(251, 146, 60, 0.5);
+  }
+
+  // Combined state (selected AND highlighted)
+  &[data-selected].highlighted {
+    border-color: $color-border-combined;
+    background-color: $color-background-combined;
+    box-shadow: 0 0 16px rgba(147, 51, 234, 0.6);
+  }
+
+  // Hover state - more visible
+  &[data-hovered] {
+    box-shadow: 0 0 20px rgba(128, 128, 128, 0.6);
+    transform: translateY(-2px);
+  }
+
+  // Focus visible (keyboard navigation)
+  &[data-focus-visible] {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
+
+  // Pressed state
+  &[data-pressed] {
+    transform: scale(0.98);
+  }
+}
+
+// Rock item content layout
+.rockItemContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  position: relative;
+  min-height: 105px;
+  gap: 0.25rem;
+}
+
+// Rock icon
+.rockIcon {
+  font-size: 1.75rem;
+  margin-bottom: 0.15rem;
+}
+
+// Rock name
+.rockName {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-neutralVariant);
+  text-align: center;
+  line-height: 1.2;
+  margin-top: 0.25rem;
+}
+
+// Rock location
+.rockLocation {
+  font-size: 0.8rem;
+  color: rgba(156, 163, 175, 0.8);
+  text-align: center;
+  line-height: 1.1;
+}
+
+// Coverage badges
+.badgeCoverage {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  &Global {
+    background-color: $color-badge-global;
+    color: white;
+  }
+
+  &Local {
+    background-color: $color-badge-local;
+    color: rgba(0, 0, 0, 0.9);
+  }
+}
