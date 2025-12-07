@@ -2,6 +2,7 @@ import React from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
 import { MineralGridProps } from './types';
 import styles from './MineralGrid.module.scss';
+import InfoButton from '../../layout/Button/InfoButton/InfoButton';
 
 export const MineralGrid: React.FC<MineralGridProps> = ({
   minerals,
@@ -104,7 +105,16 @@ export const MineralGrid: React.FC<MineralGridProps> = ({
 
       {/* Moon-Discovered Section */}
       <div className={styles.categorySection}>
-        <h3 className={styles.categoryTitle}>MOON-DISCOVERED MINERALS</h3>
+        <div className={styles.categoryTitleContainer}>
+          <h3 className={styles.categoryTitle}>MOON-DISCOVERED MINERALS</h3>
+          <InfoButton
+            tooltipText="More information"
+            popoverTitle="Moon-Discovered Minerals"
+            popoverBody="These minerals were first identified in lunar samples returned to Earth. Although later found on Earth, these mineral species were unknown to science before lunar exploration. Each is named after its discovery mission or location (e.g., Tranquillityite from Tranquility Base, Armalcolite from Armstrong-Aldrin-Collins)."
+            placement="top"
+            className={styles.categoryInfoButton}
+          />
+        </div>
         <ListBox
           aria-label="Moon-Discovered Minerals"
           className={styles.mineralGrid}
