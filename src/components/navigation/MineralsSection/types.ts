@@ -4,6 +4,8 @@ export type DataAvailability = 'map+ground' | 'ground' | 'map';
 
 export type MineralCategory = 'silicate' | 'oxide' | 'moon-discovered';
 
+export type MineralGrouping = 'group' | 'individual';
+
 export interface DiscoveryInfo {
   mission?: string;
   year?: number;
@@ -18,6 +20,7 @@ export interface Mineral {
   dataType: DataAvailability;
   discoveryInfo?: DiscoveryInfo;
   mineralType?: 'silicate' | 'oxide' | 'phosphate'; // For moon-discovered minerals
+  grouping?: MineralGrouping; // Distinguishes mineral groups from individual species
 }
 
 export interface Rock {

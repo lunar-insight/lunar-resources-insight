@@ -58,6 +58,13 @@ export const MineralGrid: React.FC<MineralGridProps> = ({
               ({mineral.mineralType})
             </Text>
           )}
+
+          {/* Grouping indicator for mineral groups */}
+          {mineral.grouping === 'group' && (
+            <Text slot="description" className={styles.mineralGrouping}>
+              (group)
+            </Text>
+          )}
         </div>
       </ListBoxItem>
     );

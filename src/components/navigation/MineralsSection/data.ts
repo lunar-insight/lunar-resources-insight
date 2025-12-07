@@ -8,6 +8,7 @@ export const MINERALS: Mineral[] = [
     formula: '(Ca,Na)(Al,Si)AlSi₂O₈',
     category: 'silicate',
     dataType: 'map+ground',
+    grouping: 'group',
   },
   {
     id: 'pyroxene',
@@ -15,6 +16,7 @@ export const MINERALS: Mineral[] = [
     formula: '(Ca,Mg,Fe)₂Si₂O₆',
     category: 'silicate',
     dataType: 'map+ground',
+    grouping: 'group',
   },
   {
     id: 'olivine',
@@ -22,6 +24,7 @@ export const MINERALS: Mineral[] = [
     formula: '(Mg,Fe)₂SiO₄',
     category: 'silicate',
     dataType: 'map+ground',
+    grouping: 'group',
   },
   {
     id: 'quartz',
@@ -29,6 +32,7 @@ export const MINERALS: Mineral[] = [
     formula: 'SiO₂',
     category: 'silicate',
     dataType: 'ground',
+    grouping: 'individual',
   },
   {
     id: 'k-feldspar',
@@ -36,6 +40,7 @@ export const MINERALS: Mineral[] = [
     formula: 'KAlSi₃O₈',
     category: 'silicate',
     dataType: 'ground',
+    grouping: 'group',
   },
 
   // OXIDES
@@ -45,6 +50,7 @@ export const MINERALS: Mineral[] = [
     formula: 'FeTiO₃',
     category: 'oxide',
     dataType: 'map+ground',
+    grouping: 'individual',
   },
   {
     id: 'hematite',
@@ -52,6 +58,7 @@ export const MINERALS: Mineral[] = [
     formula: 'Fe₂O₃',
     category: 'oxide',
     dataType: 'map',
+    grouping: 'individual',
   },
   {
     id: 'spinel',
@@ -59,6 +66,7 @@ export const MINERALS: Mineral[] = [
     formula: 'MgAl₂O₄',
     category: 'oxide',
     dataType: 'map+ground',
+    grouping: 'group',
   },
   {
     id: 'chromite',
@@ -66,6 +74,7 @@ export const MINERALS: Mineral[] = [
     formula: 'FeCr₂O₄',
     category: 'oxide',
     dataType: 'ground',
+    grouping: 'individual',
   },
   {
     id: 'ulvospinel',
@@ -73,6 +82,7 @@ export const MINERALS: Mineral[] = [
     formula: 'Fe₂TiO₄',
     category: 'oxide',
     dataType: 'ground',
+    grouping: 'individual',
   },
 
   // MOON-DISCOVERED
@@ -83,6 +93,7 @@ export const MINERALS: Mineral[] = [
     category: 'moon-discovered',
     dataType: 'ground',
     mineralType: 'oxide',
+    grouping: 'individual',
     discoveryInfo: {
       mission: 'Apollo 11',
       year: 1969,
@@ -96,6 +107,7 @@ export const MINERALS: Mineral[] = [
     category: 'moon-discovered',
     dataType: 'ground',
     mineralType: 'silicate',
+    grouping: 'individual',
     discoveryInfo: {
       mission: 'Apollo 11 & 12',
     },
@@ -107,6 +119,7 @@ export const MINERALS: Mineral[] = [
     category: 'moon-discovered',
     dataType: 'ground',
     mineralType: 'silicate',
+    grouping: 'individual',
     discoveryInfo: {
       mission: 'Apollo 11',
       year: 1969,
@@ -120,6 +133,7 @@ export const MINERALS: Mineral[] = [
     category: 'moon-discovered',
     dataType: 'ground',
     mineralType: 'phosphate',
+    grouping: 'individual',
     discoveryInfo: {
       mission: "Chang'e-5",
       year: 2020,
