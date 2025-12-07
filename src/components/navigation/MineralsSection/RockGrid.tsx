@@ -51,9 +51,9 @@ export const RockGrid: React.FC<RockGridProps> = ({
                 {rock.name}
               </Text>
 
-              {/* Rock location */}
-              <Text slot="description" className={styles.rockLocation}>
-                {rock.location}
+              {/* Rock types */}
+              <Text slot="description" className={styles.rockType}>
+                {rock.rockType}
               </Text>
             </div>
           </ListBoxItem>
