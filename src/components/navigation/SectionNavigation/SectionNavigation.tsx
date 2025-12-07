@@ -48,19 +48,19 @@ const dialogsData: Icon[] = [
     dialogTitle: 'Base Maps',
     dialogContent: <GeographicalLayersSection />
   },
-  {
-    id: 'mineral-layer-dialog',
-    name: 'landslide',
-    label: 'Minerals',
-    dialogTitle: 'Minerals',
-    dialogContent: <MineralsSection />
-  },
   { 
     id: 'element-layer-dialog', 
     name: 'lab_research', 
     label: 'Chemistry',
     dialogTitle: 'Chemistry', 
     dialogContent: <ChemistrySection />
+  },
+  {
+    id: 'mineral-layer-dialog',
+    name: 'landslide',
+    label: 'Geology',
+    dialogTitle: 'Geology',
+    dialogContent: <MineralsSection />
   },
   /*
   { 
