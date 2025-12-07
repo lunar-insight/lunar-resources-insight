@@ -37,10 +37,12 @@ export const RockGrid: React.FC<RockGridProps> = ({
                 className={`${styles.badgeCoverage} ${
                   rock.dataType === 'map+ground'
                     ? styles.badgeCoverageGlobal
-                    : styles.badgeCoverageLocal
+                    : rock.dataType === 'map'
+                      ? styles.badgeCoverageMap
+                      : styles.badgeCoverageLocal
                 }`}
               >
-                {rock.dataType === 'map+ground' ? '🗺️' : '📍'}
+                {rock.dataType === 'map+ground' ? '🗺️' : rock.dataType === 'map' ? '🛰️' : '📍'}
               </span>
 
               {/* Rock icon */}

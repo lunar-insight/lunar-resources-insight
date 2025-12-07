@@ -107,6 +107,12 @@ const MineralsSection: React.FC = () => {
               <span>Map + Ground</span>
             </div>
             <div className={styles.legendItem}>
+              <span className={`${styles.badgeMini} ${styles.badgeMapOnly}`}>
+                🛰️
+              </span>
+              <span>Map only</span>
+            </div>
+            <div className={styles.legendItem}>
               <span className={`${styles.badgeMini} ${styles.badgeGroundOnly}`}>
                 📍
               </span>

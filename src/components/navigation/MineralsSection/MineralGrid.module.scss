@@ -13,6 +13,7 @@ $color-background-combined: rgba(147, 51, 234, 0.2);
 
 $color-badge-global: rgba(16, 185, 129, 0.55);
 $color-badge-local: rgba(245, 158, 11, 0.55);
+$color-badge-map: rgba(59, 130, 246, 0.55);
 
 // Container for all mineral categories
 .mineralGridContainer {
@@ -149,6 +150,11 @@ $color-badge-local: rgba(245, 158, 11, 0.55);
   &Local {
     background-color: $color-badge-local;
     color: rgba(0, 0, 0, 0.9);
+  }
+
+  &Map {
+    background-color: $color-badge-map;
+    color: white;
   }
 }
 

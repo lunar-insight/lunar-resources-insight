@@ -34,10 +34,12 @@ export const MineralGrid: React.FC<MineralGridProps> = ({
             className={`${styles.badgeCoverage} ${
               mineral.dataType === 'map+ground'
                 ? styles.badgeCoverageGlobal
-                : styles.badgeCoverageLocal
+                : mineral.dataType === 'map'
+                  ? styles.badgeCoverageMap
+                  : styles.badgeCoverageLocal
             }`}
           >
-            {mineral.dataType === 'map+ground' ? '🗺️' : '📍'}
+            {mineral.dataType === 'map+ground' ? '🗺️' : mineral.dataType === 'map' ? '🛰️' : '📍'}
           </span>
 
           {/* Mineral name */}

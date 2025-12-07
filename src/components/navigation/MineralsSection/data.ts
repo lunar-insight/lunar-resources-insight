@@ -51,7 +51,7 @@ export const MINERALS: Mineral[] = [
     name: 'Hematite',
     formula: 'Fe₂O₃',
     category: 'oxide',
-    dataType: 'ground',
+    dataType: 'map',
   },
   {
     id: 'spinel',

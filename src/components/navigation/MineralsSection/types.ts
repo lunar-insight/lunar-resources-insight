@@ -1,6 +1,6 @@
 import { Selection } from 'react-aria-components';
 
-export type DataAvailability = 'map+ground' | 'ground';
+export type DataAvailability = 'map+ground' | 'ground' | 'map';
 
 export type MineralCategory = 'silicate' | 'oxide' | 'moon-discovered';
 
@@ -24,7 +24,7 @@ export interface Rock {
   id: string;
   name: string;
   icon: string;
-  location: string;
+  rockType: string;
   composition: string[]; // array of mineral IDs
   dataType: DataAvailability;
   description?: string;
