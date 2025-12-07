@@ -84,42 +84,30 @@ const MineralsSection: React.FC = () => {
           <div className={styles.legend}>
             <div className={styles.legendItem}>
               <span
-                className={styles.legendRectangle}
-                style={{
-                  backgroundColor: 'rgba(59, 130, 246, 0.15)',
-                  border: '2px solid rgba(59, 130, 246, 0.6)',
-                }}
+                className={`${styles.legendRectangle} ${styles.legendSelected}`}
               ></span>
               <span>Selected</span>
             </div>
             <div className={styles.legendItem}>
               <span
-                className={styles.legendRectangle}
-                style={{
-                  backgroundColor: 'rgba(251, 146, 60, 0.2)',
-                  border: '2px solid rgba(251, 146, 60, 0.7)',
-                }}
+                className={`${styles.legendRectangle} ${styles.legendHighlighted}`}
               ></span>
               <span>Highlighted</span>
             </div>
             <div className={styles.legendItem}>
               <span
-                className={styles.legendRectangle}
-                style={{
-                  backgroundColor: 'rgba(147, 51, 234, 0.2)',
-                  border: '2px solid rgba(147, 51, 234, 0.7)',
-                }}
+                className={`${styles.legendRectangle} ${styles.legendSelectedHighlighted}`}
               ></span>
               <span>Selected + Highlighted</span>
             </div>
             <div className={styles.legendItem}>
-              <span className={styles.badgeMini} style={{ backgroundColor: 'rgba(16, 185, 129, 0.55)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+              <span className={`${styles.badgeMini} ${styles.badgeMapGround}`}>
                 🗺️
               </span>
               <span>Map + Ground</span>
             </div>
             <div className={styles.legendItem}>
-              <span className={styles.badgeMini} style={{ backgroundColor: 'rgba(245, 158, 11, 0.55)', color: 'rgba(0, 0, 0, 0.9)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255, 255, 255, 0.2)' }}>
+              <span className={`${styles.badgeMini} ${styles.badgeGroundOnly}`}>
                 📍
               </span>
               <span>Ground only</span>
