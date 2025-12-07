@@ -37,7 +37,7 @@ export const MINERALS: Mineral[] = [
   {
     id: 'k-feldspar',
     name: 'K-Feldspar',
-    formula: 'KAlSi₃O₈',
+    formula: '(K,Na)AlSi₃O₈',
     category: 'silicate',
     dataType: 'ground',
     grouping: 'group',
@@ -63,7 +63,7 @@ export const MINERALS: Mineral[] = [
   {
     id: 'spinel',
     name: 'Spinel',
-    formula: 'MgAl₂O₄',
+    formula: '(Mg,Fe)Al₂O₄',
     category: 'oxide',
     dataType: 'map+ground',
     grouping: 'group',
