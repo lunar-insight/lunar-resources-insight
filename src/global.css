@@ -23,6 +23,22 @@
   --color-neutral-rgb: 43, 53, 62;
   --color-neutralVariant-rgb: 182, 187, 193;
   --color-light-button-pressed-rgb: 156, 167, 171;
+
+  /* Selection State Colors - Used across selection menus (Periodic Table, Compounds, Minerals, Rocks) */
+  --color-selection-default: #808080; /* Gray for default/selectable state */
+  --color-selection-default-rgb: 128, 128, 128;
+
+  --color-selection-selected: #3b82f6; /* Blue for selected state */
+  --color-selection-selected-rgb: 59, 130, 246;
+
+  --color-selection-hover: #808080; /* Gray for hover highlights */
+  --color-selection-hover-rgb: 128, 128, 128;
+
+  --color-selection-unavailable: #1a1a1a; /* Dark gray for unavailable/disabled state */
+  --color-selection-unavailable-rgb: 26, 26, 26;
+
+  --color-selection-unavailable-bg: #191d25; /* Background for unavailable items */
+  --color-selection-unavailable-bg-rgb: 25, 29, 37;
 }
 
 /*

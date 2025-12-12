@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
-import './PeriodicTable.scss';
+import styles from './PeriodicTable.module.scss';
 
 export interface Element {
   group: number;
@@ -171,28 +171,28 @@ const ElementCell = React.memo(({
   return (
     <ListBoxItem
       key={cellKey}
-      id={cellKey}    
+      id={cellKey}
       textValue={item?.name || 'Empty'}
-      className={`periodic-table__grid__cell ${item && !item.dataExist ? 'periodic-table__grid__cell--unavailable' : ''}`}
+      className={`${styles.cell} ${item && !item.dataExist ? styles.cellUnavailable : ''}`}
     >
       {item ? (
-        <div className={`periodic-table__grid__cell__element ${!item.dataExist ? 'periodic-table__grid__cell__element--unavailable' : ''}`}>
-          <div className='periodic-table__grid__cell__element__top'>
-            <Text slot='description' className='periodic-table__grid__cell__element__top__atomic-number'>
+        <div className={`${styles.element} ${!item.dataExist ? styles.elementUnavailable : ''}`}>
+          <div className={styles.top}>
+            <Text slot='description' className={styles.atomicNumber}>
               {item.atomicNumber}
             </Text>
           </div>
-          <Text slot="label" className='periodic-table__grid__cell__element__symbol'>
+          <Text slot="label" className={styles.symbol}>
             {item.symbol}
           </Text>
-          <div className='periodic-table__grid__cell__element__bottom'>
-            <Text slot="description" className='periodic-table__grid__cell__element__bottom__name'>
+          <div className={styles.bottom}>
+            <Text slot="description" className={styles.name}>
               {item.name}
             </Text>
           </div>
         </div>
       ) : (
-        <div className='periodic-table__grid__cell__empty-cell'></div>
+        <div className={styles.emptyCell}></div>
       )}
     </ListBoxItem>
   )
@@ -206,18 +206,18 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
   );
 
   return (
-    <div className='periodic-table'>
-      <div className='periodic-table__state-info'>
-        <span className='periodic-table__state-info__item periodic-table__state-info__item--selectable'>
-          <span className='periodic-table__state-info__item-rectangle'></span>
+    <div className={styles.periodicTable}>
+      <div className={styles.stateInfo}>
+        <span className={styles.stateInfoItem}>
+          <span className={`${styles.stateInfoRectangle} ${styles.stateInfoRectangleSelectable}`}></span>
           Selectable
         </span>
-        <span className='periodic-table__state-info__item periodic-table__state-info__item--chosen'>
-          <span className='periodic-table__state-info__item-rectangle'></span>
-          Chosen
+        <span className={styles.stateInfoItem}>
+          <span className={`${styles.stateInfoRectangle} ${styles.stateInfoRectangleSelected}`}></span>
+          Selected
         </span>
-        <span className='periodic-table__state-info__item periodic-table__state-info__item--unavailable'>
-          <span className='periodic-table__state-info__item-rectangle'></span>
+        <span className={styles.stateInfoItem}>
+          <span className={`${styles.stateInfoRectangle} ${styles.stateInfoRectangleUnavailable}`}></span>
           Unavailable
         </span>
       </div>
@@ -227,7 +227,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
         layout="grid"
         items={ALL_ELEMENTS}
         selectionMode="multiple"
-        className="periodic-table__grid"
+        className={styles.grid}
         disabledKeys={DISABLED_KEYS}
         selectedKeys={selectedKeys}
         onSelectionChange={(keys) => {

@@ -1,10 +1,10 @@
-// Color scheme variables
-$color-border-default: rgba(128, 128, 128, 0.5);
+// Color scheme variables - using global CSS variables
+$color-border-default: rgba(var(--color-selection-default-rgb), 0.5);
 $color-background-default: rgba(45, 55, 65, 0.3);
 
-// Selected items - BLUE
-$color-border-selected: rgba(59, 130, 246, 0.6);
-$color-background-selected: rgba(59, 130, 246, 0.15);
+// Selected items - BLUE (from global CSS)
+$color-border-selected: rgba(var(--color-selection-selected-rgb), 0.6);
+$color-background-selected: rgba(var(--color-selection-selected-rgb), 0.15);
 
 // Coverage badges
 $color-badge-global: rgba(34, 197, 94, 0.8);   // Green for "Global coverage"

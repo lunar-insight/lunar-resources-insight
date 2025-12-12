@@ -1,0 +1,165 @@
+// Component-specific sizing variables
+$min-cell-size: 35px;
+$max-cell-size: 70px;
+$cell-size: clamp($min-cell-size, calc(100vw / 20), $max-cell-size);
+$cell-spacing: 4px;
+$unavailable-opacity-on-text: 0.25;
+
+// Colors using global CSS variables
+$color-border-selectable: rgba(var(--color-selection-default-rgb), 0.5);
+$color-border-selectable-lighten: rgba(var(--color-selection-default-rgb), 0.7);
+
+// Selected state - BLUE
+$color-border-selected: rgba(var(--color-selection-selected-rgb), 0.6);
+$color-background-selected: rgba(var(--color-selection-selected-rgb), 0.15);
+
+// Unavailable state
+$color-border-unavailable: var(--color-selection-unavailable);
+$color-background-unavailable: rgba(var(--color-selection-unavailable-bg-rgb), 0.5);
+$color-border-unavailable-lighten: rgba(var(--color-selection-unavailable-rgb), 0.2);
+
+// === Main container ===
+.periodicTable {
+  width: 100%;
+  margin: 1.5rem;
+}
+
+// === Legend/State Info ===
+.stateInfo {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.stateInfoItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--color-neutralVariant);
+}
+
+.stateInfoRectangle {
+  width: 1.5rem;
+  height: 1rem;
+  border-radius: 0.25rem;
+
+  &Selectable {
+    background-color: rgba(var(--color-selection-default-rgb), 0.3);
+    border: 2px solid $color-border-selectable-lighten;
+  }
+
+  &Selected {
+    background-color: $color-background-selected;
+    border: 2px solid $color-border-selected;
+  }
+
+  &Unavailable {
+    background-color: $color-background-unavailable;
+    border: 2px solid $color-border-unavailable-lighten;
+  }
+}
+
+// === Grid Layout ===
+.grid {
+  display: grid;
+  grid-template-columns: repeat(18, 1fr);
+  grid-template-rows: repeat(10, 1fr);
+  gap: $cell-spacing;
+  width: 100%;
+  max-width: calc(18 * #{$max-cell-size} + 17 * #{$cell-spacing});
+  margin: 0 auto;
+}
+
+// === Cell Styling ===
+.cell {
+  padding: 0;
+  width: $cell-size;
+  height: $cell-size;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  box-sizing: border-box;
+  min-height: $min-cell-size;
+  min-width: $min-cell-size;
+  max-height: $max-cell-size;
+  max-width: $max-cell-size;
+  font-size: calc($cell-size / 10);
+
+  &[data-selected] .element {
+    background-color: $color-background-selected;
+    border-color: $color-border-selected;
+  }
+}
+
+// === Element Content ===
+.element,
+.emptyCell {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.element {
+  padding: 3px;
+  border: 2px solid $color-border-selectable;
+  transition: all 0.2s ease-out;
+  position: relative;
+  cursor: pointer;
+
+  &:hover:not(.elementUnavailable) {
+    box-shadow: 0 0 20px rgba(var(--color-selection-hover-rgb), 0.6);
+    transform: translateY(-2px);
+  }
+
+  &Unavailable {
+    border-color: $color-border-unavailable;
+    background: $color-background-unavailable;
+    cursor: default;
+
+    .atomicNumber,
+    .symbol,
+    .name {
+      opacity: $unavailable-opacity-on-text;
+    }
+  }
+}
+
+// === Element Parts ===
+.top {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.atomicNumber {
+  text-align: left;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: var(--color-neutralVariant);
+}
+
+.symbol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4.2em;
+  font-weight: bold;
+  color: var(--color-secondary);
+}
+
+.bottom {
+  text-align: center;
+}
+
+.name {
+  font-size: 1.30em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--color-neutralVariant);
+}
