@@ -65,7 +65,8 @@ $color-background-selected: rgba(var(--color-selection-selected-rgb), 0.15);
   }
 
   &[data-hovered] {
-    box-shadow: 0 0 12px rgba(128, 128, 128, 0.4);
+    box-shadow: 0 0 20px rgba(var(--color-selection-hover-rgb), 0.6);
+    transform: translateY(-2px);
   }
 
   &[data-pressed] {

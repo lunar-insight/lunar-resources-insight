@@ -98,6 +98,10 @@ $color-border-unavailable-lighten: rgba(var(--color-selection-unavailable-rgb), 
     background-color: $color-background-selected;
     border-color: $color-border-selected;
   }
+
+  &[data-pressed]:not(.cellUnavailable) .element {
+    transform: scale(0.98);
+  }
 }
 
 // === Element Content ===
