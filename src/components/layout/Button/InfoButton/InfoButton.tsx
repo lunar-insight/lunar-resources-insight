@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button, TooltipTrigger, DialogTrigger } from 'react-aria-components';
 import { ButtonTooltip } from '../../Tooltip/ButtonTooltip';
 import { InfoPopover } from '../../Popover/InfoPopover/InfoPopover';
@@ -19,8 +19,10 @@ const InfoButton: React.FC<InfoButtonProps> = ({
   placement = 'bottom',
   className = ''
 }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <DialogTrigger>
+    <DialogTrigger onOpenChange={setIsOpen}>
       <TooltipTrigger>
         <Button
           aria-label={tooltipText}
@@ -34,7 +36,7 @@ const InfoButton: React.FC<InfoButtonProps> = ({
           {tooltipText}
         </ButtonTooltip>
       </TooltipTrigger>
-      <InfoPopover title={popoverTitle} body={popoverBody} />
+      <InfoPopover title={popoverTitle} body={popoverBody} isOpen={isOpen} />
     </DialogTrigger>
   );
 };

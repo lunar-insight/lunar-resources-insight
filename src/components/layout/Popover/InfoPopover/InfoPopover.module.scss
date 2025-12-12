@@ -35,6 +35,17 @@
   color: var(--color-neutralVariant);
   margin: 0;
   line-height: 1.5;
+  font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+  min-height: 4.5rem;
+  will-change: contents;
+}
+
+.scrambledChar {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.revealedChar {
+  color: var(--color-neutralVariant);
 }
 
 @keyframes popover-slide {
