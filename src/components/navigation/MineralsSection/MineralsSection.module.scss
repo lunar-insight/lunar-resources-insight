@@ -1,5 +1,4 @@
 @use './colors' as *;
-@use './badges' as *;
 
 .buttonsContainer {
   display: flex;
@@ -88,36 +87,6 @@
 .legendSelectedHighlighted {
   background-color: $color-background-combined;
   border: 2px solid $color-border-combined;
-}
-
-.badgeMini {
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  font-size: 0.7rem;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.badgeMapGround {
-  background-color: $color-badge-global;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.badgeMapOnly {
-  background-color: $color-badge-map;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.badgeGroundOnly {
-  background-color: $color-badge-local;
-  color: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 // Section styles

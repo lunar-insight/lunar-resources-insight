@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import styles from './MineralsSection.module.scss';
 import { Button, Selection } from 'react-aria-components';
 import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
+import { DataSourceLegend } from '../../ui/DataSourceLegend/DataSourceLegend';
 import { useZIndex } from '../../../utils/ZIndexProvider';
 import { RockGrid } from './RockGrid';
 import { MineralGrid } from './MineralGrid';
@@ -100,24 +101,9 @@ const MineralsSection: React.FC = () => {
               ></span>
               <span>Selected + Highlighted</span>
             </div>
-            <div className={styles.legendItem}>
-              <span className={`${styles.badgeMini} ${styles.badgeMapGround}`}>
-                🗺️
-              </span>
-              <span>Map + Ground</span>
-            </div>
-            <div className={styles.legendItem}>
-              <span className={`${styles.badgeMini} ${styles.badgeMapOnly}`}>
-                🛰️
-              </span>
-              <span>Map only</span>
-            </div>
-            <div className={styles.legendItem}>
-              <span className={`${styles.badgeMini} ${styles.badgeGroundOnly}`}>
-                📍
-              </span>
-              <span>Ground only</span>
-            </div>
+
+            {/* Data Source Legend */}
+            <DataSourceLegend />
           </div>
 
           {/* Rocks Section */}

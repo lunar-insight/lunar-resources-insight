@@ -1,5 +1,6 @@
 import React from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
+import { DataSourceBadge } from '../../ui/DataSourceBadge/DataSourceBadge';
 import { RockGridProps } from './types';
 import styles from './RockGrid.module.scss';
 
@@ -32,18 +33,8 @@ export const RockGrid: React.FC<RockGridProps> = ({
             onHoverEnd={() => onRockHover(null)}
           >
             <div className={styles.rockItemContent}>
-              {/* Coverage badge */}
-              <span
-                className={`${styles.badgeCoverage} ${
-                  rock.dataType === 'map+ground'
-                    ? styles.badgeCoverageGlobal
-                    : rock.dataType === 'map'
-                      ? styles.badgeCoverageMap
-                      : styles.badgeCoverageLocal
-                }`}
-              >
-                {rock.dataType === 'map+ground' ? '🗺️' : rock.dataType === 'map' ? '🛰️' : '📍'}
-              </span>
+              {/* Data Source Badge */}
+              <DataSourceBadge dataType={rock.dataType} />
 
               {/* Rock icon */}
               <div className={styles.rockIcon}>{rock.icon}</div>

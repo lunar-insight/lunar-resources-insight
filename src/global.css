@@ -39,6 +39,11 @@
 
   --color-selection-unavailable-bg: #191d25; /* Background for unavailable items */
   --color-selection-unavailable-bg-rgb: 25, 29, 37;
+
+  /* Data Source Badge Colors. Used in DataSourceBadge and DataSourceLegend components */
+  --color-badge-global: rgba(34, 185, 67, 0.55); /* Green for map+ground data */
+  --color-badge-map: rgba(59, 130, 246, 0.55); /* Blue for map-only data */
+  --color-badge-local: rgba(240, 159, 17, 0.55); /* Orange for ground-only data */
 }
 
 /*

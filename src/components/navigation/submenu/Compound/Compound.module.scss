@@ -6,10 +6,6 @@ $color-background-default: rgba(45, 55, 65, 0.3);
 $color-border-selected: rgba(var(--color-selection-selected-rgb), 0.6);
 $color-background-selected: rgba(var(--color-selection-selected-rgb), 0.15);
 
-// Coverage badges
-$color-badge-global: rgba(34, 197, 94, 0.8);   // Green for "Global coverage"
-$color-badge-local: rgba(251, 191, 36, 0.8);   // Amber/Yellow for "Local coverage"
-
 .compound {
   display: flex;
   flex-direction: column;
@@ -42,23 +38,6 @@ $color-badge-local: rgba(251, 191, 36, 0.8);   // Amber/Yellow for "Local covera
   &Selected {
     background-color: $color-background-selected;
     border: 2px solid $color-border-selected;
-  }
-}
-
-.badgeMini {
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-
-  &Global {
-    background-color: $color-badge-global;
-    color: white;
-  }
-
-  &Local {
-    background-color: $color-badge-local;
-    color: rgba(0, 0, 0, 0.8);
   }
 }
 
@@ -111,33 +90,6 @@ $color-badge-local: rgba(251, 191, 36, 0.8);   // Amber/Yellow for "Local covera
   position: relative;
   min-height: 120px;
   height: 100%;
-}
-
-// Coverage badge
-.badge {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  font-size: 0.7rem;
-  font-weight: 500;
-  white-space: nowrap;
-
-  @media (max-width: 480px) {
-    font-size: 0.6rem;
-    padding: 0.2rem 0.4rem;
-  }
-}
-
-.badgeGlobal {
-  background-color: $color-badge-global;
-  color: white;
-}
-
-.badgeLocal {
-  background-color: $color-badge-local;
-  color: rgba(0, 0, 0, 0.8);
 }
 
 // Compound name

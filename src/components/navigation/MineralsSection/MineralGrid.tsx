@@ -1,5 +1,6 @@
 import React from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
+import { DataSourceBadge } from '../../ui/DataSourceBadge/DataSourceBadge';
 import { MineralGridProps } from './types';
 import styles from './MineralGrid.module.scss';
 import InfoButton from '../../layout/Button/InfoButton/InfoButton';
@@ -30,18 +31,8 @@ export const MineralGrid: React.FC<MineralGridProps> = ({
         onHoverEnd={() => onMineralHover(null)}
       >
         <div className={styles.mineralItemContent}>
-          {/* Coverage badge (top-right) */}
-          <span
-            className={`${styles.badgeCoverage} ${
-              mineral.dataType === 'map+ground'
-                ? styles.badgeCoverageGlobal
-                : mineral.dataType === 'map'
-                  ? styles.badgeCoverageMap
-                  : styles.badgeCoverageLocal
-            }`}
-          >
-            {mineral.dataType === 'map+ground' ? '🗺️' : mineral.dataType === 'map' ? '🛰️' : '📍'}
-          </span>
+          {/* Data Source Badge */}
+          <DataSourceBadge dataType={mineral.dataType} />
 
           {/* Mineral name */}
           <Text slot="description" className={styles.mineralName}>

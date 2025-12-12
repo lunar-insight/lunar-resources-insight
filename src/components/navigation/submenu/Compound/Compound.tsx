@@ -1,32 +1,35 @@
 import React, { useState, useMemo} from "react";
 import { ListBox, ListBoxItem, Text, Selection } from 'react-aria-components';
+import { DataAvailability } from '../../../../types/dataSource';
+import { DataSourceBadge } from '../../../ui/DataSourceBadge/DataSourceBadge';
+import { DataSourceLegend } from '../../../ui/DataSourceLegend/DataSourceLegend';
 import styles from './Compound.module.scss';
 
 interface CompoundData {
   formula: string;
   name: string;
-  hasMap: boolean;
+  dataType: DataAvailability;
   row: number;
   column: number;
 }
 
 const compounds: CompoundData[] = [
-  { formula: "H₂O", name: "Water ice", hasMap: true, row: 1, column: 1 },
-  { formula: "FeO", name: "Iron(II) oxide", hasMap: true, row: 1, column: 2 },
-  { formula: "TiO₂", name: "Titanium dioxide", hasMap: true, row: 1, column: 3 },
-  { formula: "Al₂O₃", name: "Aluminum oxide", hasMap: true, row: 1, column: 4 },
-  { formula: "MgO", name: "Magnesium oxide", hasMap: true, row: 2, column: 1 },
-  { formula: "CaO", name: "Calcium oxide", hasMap: true, row: 2, column: 2 },
-  { formula: "SiO₂", name: "Silicon dioxide", hasMap: true, row: 2, column: 3 },
-  { formula: "CO₂", name: "Carbon dioxide", hasMap: false, row: 2, column: 4 },
-  { formula: "NH₃", name: "Ammonia", hasMap: false, row: 3, column: 1 },
-  { formula: "CH₄", name: "Methane", hasMap: false, row: 3, column: 2 },
-  { formula: "SO₂", name: "Sulfur dioxide", hasMap: false, row: 3, column: 3 },
-  { formula: "H₂S", name: "Hydrogen sulfide", hasMap: false, row: 3, column: 4 },
-  { formula: "C₂H₄", name: "Ethylene", hasMap: false, row: 4, column: 1 },
-  { formula: "CH₃OH", name: "Methanol", hasMap: false, row: 4, column: 2 },
-  { formula: "CO", name: "Carbon monoxide", hasMap: false, row: 4, column: 3 },
-  { formula: "H₂", name: "Hydrogen", hasMap: false, row: 4, column: 4 }
+  { formula: "H₂O", name: "Water ice", dataType: 'map+ground', row: 1, column: 1 },
+  { formula: "FeO", name: "Iron(II) oxide", dataType: 'map+ground', row: 1, column: 2 },
+  { formula: "TiO₂", name: "Titanium dioxide", dataType: 'map+ground', row: 1, column: 3 },
+  { formula: "Al₂O₃", name: "Aluminum oxide", dataType: 'map+ground', row: 1, column: 4 },
+  { formula: "MgO", name: "Magnesium oxide", dataType: 'map+ground', row: 2, column: 1 },
+  { formula: "CaO", name: "Calcium oxide", dataType: 'map+ground', row: 2, column: 2 },
+  { formula: "SiO₂", name: "Silicon dioxide", dataType: 'map+ground', row: 2, column: 3 },
+  { formula: "CO₂", name: "Carbon dioxide", dataType: 'ground', row: 2, column: 4 },
+  { formula: "NH₃", name: "Ammonia", dataType: 'ground', row: 3, column: 1 },
+  { formula: "CH₄", name: "Methane", dataType: 'ground', row: 3, column: 2 },
+  { formula: "SO₂", name: "Sulfur dioxide", dataType: 'ground', row: 3, column: 3 },
+  { formula: "H₂S", name: "Hydrogen sulfide", dataType: 'ground', row: 3, column: 4 },
+  { formula: "C₂H₄", name: "Ethylene", dataType: 'ground', row: 4, column: 1 },
+  { formula: "CH₃OH", name: "Methanol", dataType: 'ground', row: 4, column: 2 },
+  { formula: "CO", name: "Carbon monoxide", dataType: 'ground', row: 4, column: 3 },
+  { formula: "H₂", name: "Hydrogen", dataType: 'ground', row: 4, column: 4 }
 ];
 
 // Create 4x4 grid structure
@@ -53,10 +56,8 @@ const CompoundCell = React.memo(({
     >
       {item ? (
         <div className={styles.compoundItemContent}>
-          {/* Coverage Badge */}
-          <span className={`${styles.badge} ${item.hasMap ? styles.badgeGlobal : styles.badgeLocal}`}>
-            {item.hasMap ? "Global" : "Local"}
-          </span>
+          {/* Data Source Badge */}
+          <DataSourceBadge dataType={item.dataType} />
 
           {/* Name */}
           <Text slot="description" className={styles.name}>
@@ -102,14 +103,9 @@ const Compound: React.FC<CompoundProps> = () => {
           <span className={`${styles.stateInfoRectangle} ${styles.stateInfoRectangleSelected}`}></span>
           Selected
         </span>
-        <span className={styles.stateInfoItem}>
-          <span className={`${styles.badgeMini} ${styles.badgeMiniGlobal}`}>Global</span>
-          Global coverage
-        </span>
-        <span className={styles.stateInfoItem}>
-          <span className={`${styles.badgeMini} ${styles.badgeMiniLocal}`}>Local</span>
-          Local coverage
-        </span>
+
+        {/* Data Source Legend */}
+        <DataSourceLegend />
       </div>
 
       <ListBox

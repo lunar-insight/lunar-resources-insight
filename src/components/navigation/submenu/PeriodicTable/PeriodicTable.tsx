@@ -1,5 +1,8 @@
 import React, { useMemo } from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
+import { DataAvailability } from '../../../../types/dataSource';
+import { DataSourceBadge } from '../../../ui/DataSourceBadge/DataSourceBadge';
+import { DataSourceLegend } from '../../../ui/DataSourceLegend/DataSourceLegend';
 import styles from './PeriodicTable.module.scss';
 
 export interface Element {
@@ -10,6 +13,7 @@ export interface Element {
   column: number;
   row: number;
   dataExist: boolean;
+  dataType?: DataAvailability;
 }
 
 export const elements: Element[] = [
@@ -24,7 +28,7 @@ export const elements: Element[] = [
   { atomicNumber: 9, group: 8, name: 'Fluorine', symbol: 'F', column: 17, row: 2, dataExist: false },
   { atomicNumber: 10, group: 9, name: 'Neon', symbol: 'Ne', column: 18, row: 2, dataExist: false },
   { atomicNumber: 11, group: 1, name: 'Sodium', symbol: 'Na', column: 1, row: 3, dataExist: false },
-  { atomicNumber: 12, group: 2, name: 'Magnesium', symbol: 'Mg', column: 2, row: 3, dataExist: true },
+  { atomicNumber: 12, group: 2, name: 'Magnesium', symbol: 'Mg', column: 2, row: 3, dataExist: true, dataType: 'map+ground' },
   { atomicNumber: 13, group: 6, name: 'Aluminum', symbol: 'Al', column: 13, row: 3, dataExist: false },
   { atomicNumber: 14, group: 7, name: 'Silicon', symbol: 'Si', column: 14, row: 3, dataExist: false },
   { atomicNumber: 15, group: 8, name: 'Phosphorus', symbol: 'P', column: 15, row: 3, dataExist: false },
@@ -32,13 +36,13 @@ export const elements: Element[] = [
   { atomicNumber: 17, group: 8, name: 'Chlorine', symbol: 'Cl', column: 17, row: 3, dataExist: false },
   { atomicNumber: 18, group: 9, name: 'Argon', symbol: 'Ar', column: 18, row: 3, dataExist: false },
   { atomicNumber: 19, group: 1, name: 'Potassium', symbol: 'K', column: 1, row: 4, dataExist: false },
-  { atomicNumber: 20, group: 2, name: 'Calcium', symbol: 'Ca', column: 2, row: 4, dataExist: true },
+  { atomicNumber: 20, group: 2, name: 'Calcium', symbol: 'Ca', column: 2, row: 4, dataExist: true, dataType: 'map+ground' },
   { atomicNumber: 21, group: 5, name: 'Scandium', symbol: 'Sc', column: 3, row: 4, dataExist: false },
-  { atomicNumber: 22, group: 5, name: 'Titanium', symbol: 'Ti', column: 4, row: 4, dataExist: true },
+  { atomicNumber: 22, group: 5, name: 'Titanium', symbol: 'Ti', column: 4, row: 4, dataExist: true, dataType: 'map+ground' },
   { atomicNumber: 23, group: 5, name: 'Vanadium', symbol: 'V', column: 5, row: 4, dataExist: false },
   { atomicNumber: 24, group: 5, name: 'Chromium', symbol: 'Cr', column: 6, row: 4, dataExist: false },
   { atomicNumber: 25, group: 5, name: 'Manganese', symbol: 'Mn', column: 7, row: 4, dataExist: false },
-  { atomicNumber: 26, group: 5, name: 'Iron', symbol: 'Fe', column: 8, row: 4, dataExist: true },
+  { atomicNumber: 26, group: 5, name: 'Iron', symbol: 'Fe', column: 8, row: 4, dataExist: true, dataType: 'map+ground' },
   { atomicNumber: 27, group: 5, name: 'Cobalt', symbol: 'Co', column: 9, row: 4, dataExist: false },
   { atomicNumber: 28, group: 5, name: 'Nickel', symbol: 'Ni', column: 10, row: 4, dataExist: false },
   { atomicNumber: 29, group: 5, name: 'Copper', symbol: 'Cu', column: 11, row: 4, dataExist: false },
@@ -177,6 +181,11 @@ const ElementCell = React.memo(({
     >
       {item ? (
         <div className={`${styles.element} ${!item.dataExist ? styles.elementUnavailable : ''}`}>
+          {/* Data Source Badge, only show on available elements with dataType */}
+          {item.dataExist && item.dataType && (
+            <DataSourceBadge dataType={item.dataType} className={styles.elementBadge} iconOnly />
+          )}
+
           <div className={styles.top}>
             <Text slot='description' className={styles.atomicNumber}>
               {item.atomicNumber}
@@ -220,6 +229,12 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
           <span className={`${styles.stateInfoRectangle} ${styles.stateInfoRectangleUnavailable}`}></span>
           Unavailable
         </span>
+
+        {/* Separator */}
+        <div className={styles.legendSeparator}></div>
+
+        {/* Data Source Legend */}
+        <DataSourceLegend />
       </div>
 
       <ListBox

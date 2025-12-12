@@ -62,6 +62,13 @@ $color-border-unavailable-lighten: rgba(var(--color-selection-unavailable-rgb), 
   }
 }
 
+.legendSeparator {
+  width: 1px;
+  height: 1.5rem;
+  background-color: var(--color-tertiary);
+  opacity: 0.3;
+}
+
 // === Grid Layout ===
 .grid {
   display: grid;
@@ -128,6 +135,15 @@ $color-border-unavailable-lighten: rgba(var(--color-selection-unavailable-rgb), 
       opacity: $unavailable-opacity-on-text;
     }
   }
+}
+
+.elementBadge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 1.2em;
+  padding: 1px 2px;
+  z-index: 1;
 }
 
 // === Element Parts ===
