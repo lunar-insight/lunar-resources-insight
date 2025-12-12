@@ -89,6 +89,13 @@
   border: 2px solid $color-border-combined;
 }
 
+.legendSeparator {
+  width: 1px;
+  height: 1.5rem;
+  background-color: var(--color-tertiary);
+  opacity: 0.3;
+}
+
 // Section styles
 .section {
   display: flex;

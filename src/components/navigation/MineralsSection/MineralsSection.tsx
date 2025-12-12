@@ -102,6 +102,9 @@ const MineralsSection: React.FC = () => {
               <span>Selected + Highlighted</span>
             </div>
 
+            {/* Separator */}
+            <div className={styles.legendSeparator}></div>
+
             {/* Data Source Legend */}
             <DataSourceLegend />
           </div>

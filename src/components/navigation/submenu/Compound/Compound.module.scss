@@ -41,6 +41,13 @@ $color-background-selected: rgba(var(--color-selection-selected-rgb), 0.15);
   }
 }
 
+.legendSeparator {
+  width: 1px;
+  height: 1.5rem;
+  background-color: var(--color-tertiary);
+  opacity: 0.3;
+}
+
 .compoundGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
