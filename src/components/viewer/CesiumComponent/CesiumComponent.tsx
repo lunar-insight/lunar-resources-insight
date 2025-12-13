@@ -4,6 +4,7 @@ import 'cesium/Source/Widgets/widgets.css';
 import { useViewer } from '../../../utils/context/ViewerContext';
 import { pointValueService } from '../../../services/PointValueService';
 import ZoomControls from '../ZoomControls/ZoomControls';
+import FullscreenButton from '../FullscreenButton/FullscreenButton';
 
 // Skybox images
 import positiveX from 'assets/images/skybox/px.jpg';
@@ -50,6 +51,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         baseLayerPicker: false,
         infoBox: false,
         selectionIndicator: false,
+        fullscreenButton: false,
         requestRenderMode: true,
       });
 
@@ -170,6 +172,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div ref={cesiumContainerRef} className={className} />
       <ZoomControls viewer={localViewer} />
+      <FullscreenButton />
     </div>
   );
 };
