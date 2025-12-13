@@ -3,6 +3,7 @@ import * as Cesium from 'cesium';
 import 'cesium/Source/Widgets/widgets.css';
 import { useViewer } from '../../../utils/context/ViewerContext';
 import { pointValueService } from '../../../services/PointValueService';
+import ZoomControls from '../ZoomControls/ZoomControls';
 
 // Skybox images
 import positiveX from 'assets/images/skybox/px.jpg';
@@ -21,6 +22,7 @@ interface CesiumComponentProps {
 
 const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const [isCameraMoving, setIsCameraMoving] = useState(false);
+  const [localViewer, setLocalViewer] = useState<Cesium.Viewer | null>(null);
 
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
   const { setViewer } = useViewer();
@@ -133,6 +135,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       }, Cesium.ScreenSpaceEventType.LEFT_UP);
 
       setViewer(viewer);
+      setLocalViewer(viewer);
 
       // Error handling for the base layer
       baseLayer.imageryProvider.errorEvent.addEventListener((error) => {
@@ -164,7 +167,10 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   }, [setViewer]);
 
   return (
-    <div ref={cesiumContainerRef} className={className} />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      <div ref={cesiumContainerRef} className={className} />
+      <ZoomControls viewer={localViewer} />
+    </div>
   );
 };
 
