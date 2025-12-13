@@ -53,6 +53,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         selectionIndicator: false,
         fullscreenButton: false,
         requestRenderMode: true,
+        sceneModePicker: false,
       });
 
       /*
