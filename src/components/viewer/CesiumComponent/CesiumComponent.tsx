@@ -98,11 +98,6 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         // { show: true }
       );
 
-      // Remove Z-axis constraint
-      // By default, viewer.camera.constrainedAxis is set to Cesium.Cartesian3.UNIT_Z
-      // This causes gimbal lock at the poles, we remove gimbal lock
-      viewer.camera.constrainedAxis = undefined;
-
       // Add the primary layer to the viewer
       viewer.imageryLayers.add(baseLayer);
 

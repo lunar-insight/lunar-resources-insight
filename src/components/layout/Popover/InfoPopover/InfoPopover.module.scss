@@ -19,6 +19,9 @@
 .dialog {
   padding: 1.25rem 1.5rem;
   outline: none;
+  min-height: 13rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
@@ -36,12 +39,14 @@
   margin: 0;
   line-height: 1.5;
   font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
-  min-height: 4.5rem;
+  min-height: 8rem;
   will-change: contents;
+  overflow-anchor: none;
+  contain: layout;
 }
 
 .scrambledChar {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(216, 216, 216, 0.5);
 }
 
 .revealedChar {

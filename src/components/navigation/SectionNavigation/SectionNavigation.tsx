@@ -4,6 +4,7 @@ import styles from './SectionNavigation.module.scss';
 import ChemistrySection from '../ChemistrySection/ChemistrySection';
 import GeographicalLayersSection from '../GeographicalLayersSection/GeographicalLayersSection';
 import MineralsSection from '../MineralsSection/MineralsSection';
+import ViewerOptionsSection from '../ViewerOptionsSection/ViewerOptionsSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
@@ -88,12 +89,12 @@ const dialogsData: Icon[] = [
     dialogContent: 'Plugins dialog content goes here.'
   },
   */
-  { 
-    id: 'viewer-option-dialog', 
-    name: 'tune', 
+  {
+    id: 'viewer-option-dialog',
+    name: 'tune',
     label: 'Viewer',
-    dialogTitle: 'Viewer Option', 
-    dialogContent: 'Viewer Option dialog content goes here.'
+    dialogTitle: 'Viewer Options',
+    dialogContent: <ViewerOptionsSection />
   },
   { 
     id: 'application-setting-dialog', 

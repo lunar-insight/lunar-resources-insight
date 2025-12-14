@@ -17,6 +17,10 @@
 
   &[data-pressed] {
     opacity: 1;
+
+    .icon {
+      color: var(--color-tertiary);
+    }
   }
 
   &[data-open] {

@@ -22,6 +22,11 @@ export const InfoPopover: React.FC<InfoPopoverProps> = ({ title, body, isOpen = 
   // Render text with individual character styling
   const renderStyledText = () => {
     return displayText.split('').map((char, index) => {
+      // Handle line breaks
+      if (char === '\n') {
+        return <br key={index} />;
+      }
+
       const isScrambleableChar = scrambleIndices.includes(index);
       const isRevealed = revealedIndicesSet.has(index);
       const shouldBeGray = isScrambleableChar && !isRevealed;
