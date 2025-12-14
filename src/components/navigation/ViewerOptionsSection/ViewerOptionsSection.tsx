@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Checkbox, Label } from 'react-aria-components';
 import * as Cesium from 'cesium';
 import { useViewer } from '../../../utils/context/ViewerContext';
-import InfoButton from '../../layout/Button/InfoButton/InfoButton';
+import { CheckboxWithInfo } from '../../layout/Checkbox/CheckboxWithInfo/CheckboxWithInfo';
 import styles from './ViewerOptionsSection.module.scss';
 
 const ViewerOptionsSection: React.FC = () => {
@@ -36,36 +35,15 @@ const ViewerOptionsSection: React.FC = () => {
       </div>
 
       <div className={styles.optionsContainer}>
-        <div className={styles.optionRow}>
-          <Checkbox
-            isSelected={isConstraintDisabled}
-            onChange={handleConstraintToggle}
-            className={styles.checkbox}
-          >
-            {({ isSelected }) => (
-              <>
-                <div className={styles.checkboxIndicator}>
-                  {isSelected && (
-                    <svg viewBox="0 0 18 18" className={styles.checkboxIcon}>
-                      <polyline points="1 9 7 14 17 4" />
-                    </svg>
-                  )}
-                </div>
-                <Label className={styles.checkboxLabel}>
-                  Remove rotation lock at poles
-                </Label>
-              </>
-            )}
-          </Checkbox>
-
-          <InfoButton
-            tooltipText="Learn about rotation lock"
-            popoverTitle="Rotation Lock at Poles"
-            popoverBody={`Controls camera rotation lock at the lunar poles.\n\nUnchecked: Rotation lock enabled (standard navigation mode).\n\nChecked: Rotation lock removed, allows full camera movement in all directions at polar regions.`}
-            placement="right"
-            className={styles.infoButton}
-          />
-        </div>
+        <CheckboxWithInfo
+          label="Remove rotation lock at poles"
+          isSelected={isConstraintDisabled}
+          onChange={handleConstraintToggle}
+          infoTooltipText="Learn about rotation lock"
+          infoPopoverTitle="Rotation Lock at Poles"
+          infoPopoverBody={`Controls camera rotation lock at the lunar poles.\n\nUnchecked: Rotation lock enabled (standard navigation mode).\n\nChecked: Rotation lock removed, allows full camera movement in all directions at polar regions.`}
+          infoPlacement="right"
+        />
       </div>
     </div>
   );
