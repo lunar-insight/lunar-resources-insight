@@ -5,6 +5,7 @@ import { useViewer } from '../../../utils/context/ViewerContext';
 import { pointValueService } from '../../../services/PointValueService';
 import ZoomControls from '../ZoomControls/ZoomControls';
 import FullscreenButton from '../FullscreenButton/FullscreenButton';
+import TopRightControls from '../TopRightControls/TopRightControls';
 
 // Skybox images
 import positiveX from 'assets/images/skybox/px.jpg';
@@ -54,6 +55,9 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         fullscreenButton: false,
         requestRenderMode: true,
         sceneModePicker: false,
+        geocoder: false,
+        homeButton: false,
+        navigationHelpButton: true,   // Enabled for API access (UI hidden by CSS)
       });
 
       /*
@@ -169,6 +173,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       <div ref={cesiumContainerRef} className={className} />
       <ZoomControls viewer={localViewer} />
       <FullscreenButton />
+      <TopRightControls />
     </div>
   );
 };

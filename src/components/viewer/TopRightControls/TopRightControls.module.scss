@@ -1,0 +1,9 @@
+.topRightControls {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  gap: 0.25rem;
+  z-index: 100;
+}
