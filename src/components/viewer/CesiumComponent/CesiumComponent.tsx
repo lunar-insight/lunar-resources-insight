@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
 import 'cesium/Source/Widgets/widgets.css';
+import './CesiumComponent.module.scss';
 import { useViewer } from '../../../utils/context/ViewerContext';
 import { pointValueService } from '../../../services/PointValueService';
 import BottomRightControls from '../BottomRightControls/BottomRightControls';
@@ -14,8 +15,6 @@ import negativeY from 'assets/images/skybox/ny.jpg';
 import positiveZ from 'assets/images/skybox/pz.jpg';
 import negativeZ from 'assets/images/skybox/nz.jpg';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
-
-// Info: The Cesium CSS is edited on the MainPage component
 
 interface CesiumComponentProps {
   className?: string;

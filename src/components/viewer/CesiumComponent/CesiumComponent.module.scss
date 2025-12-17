@@ -1,0 +1,4 @@
+/* Hide only the navigation help button element, keep the wrapper for the instructions panel */
+:global(.cesium-navigationHelpButton-wrapper > button) {
+  display: none !important;
+}
