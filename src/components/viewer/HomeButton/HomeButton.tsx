@@ -15,7 +15,7 @@ const HomeButton: React.FC = () => {
       icon="home"
       ariaLabel="Reset to home view"
       tooltipText="Reset to home view"
-      tooltipPlacement="bottom"
+      tooltipPlacement="left"
       onPress={handleHomeClick}
     />
   );

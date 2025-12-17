@@ -1,18 +1,18 @@
 .compassContainer {
   position: fixed;
-  top: 3rem;
+  bottom: 14.25rem;
   right: 0.5rem;
   width: 40px;
   height: 40px;
   z-index: 100; // Above viewer, below modals
   cursor: pointer;
 
+
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  background: linear-gradient(45deg, rgba(133, 162, 175, 0.75), rgba(182, 187, 193, 0.75));
-  border-radius: 50%; // Circular
+  background: rgba(var(--color-primary-rgb), 0.55);
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
-  opacity: 0.8;
+  border-radius: 50%; // Circular
   transition: opacity 0.2s ease, transform 0.2s ease;
 
   &[data-hovered] {
@@ -42,8 +42,8 @@
 // Outer ring
 .compassRing {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.6);
   stroke-width: 2;
+  stroke: rgba(var(--color-tertiary-rgb), 0.3);
 }
 
 .northArrow {
