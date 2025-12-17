@@ -1,8 +1,6 @@
 import React, { useRef } from 'react';
-import { Button, TooltipTrigger } from 'react-aria-components';
-import { ButtonTooltip } from '../../layout/Tooltip/ButtonTooltip';
 import { useViewer } from '../../../utils/context/ViewerContext';
-import styles from './HelpButton.module.scss';
+import ViewerIconButton from '../../layout/Button/ViewerIconButton/ViewerIconButton';
 
 const HelpButton: React.FC = () => {
   const { viewer } = useViewer();
@@ -44,20 +42,13 @@ const HelpButton: React.FC = () => {
   };
 
   return (
-    <TooltipTrigger>
-      <Button
-        aria-label="Show navigation help"
-        className={styles.helpButton}
-        onPress={handleHelpClick}
-      >
-        <span className={`material-symbols-outlined ${styles.icon}`}>
-          help
-        </span>
-      </Button>
-      <ButtonTooltip placement="bottom">
-        Show navigation help
-      </ButtonTooltip>
-    </TooltipTrigger>
+    <ViewerIconButton
+      icon="help"
+      ariaLabel="Show navigation help"
+      tooltipText="Show navigation help"
+      tooltipPlacement="bottom"
+      onPress={handleHelpClick}
+    />
   );
 };
 

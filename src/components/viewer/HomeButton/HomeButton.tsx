@@ -1,8 +1,6 @@
 import React from 'react';
-import { Button, TooltipTrigger } from 'react-aria-components';
-import { ButtonTooltip } from '../../layout/Tooltip/ButtonTooltip';
 import { useViewer } from '../../../utils/context/ViewerContext';
-import styles from './HomeButton.module.scss';
+import ViewerIconButton from '../../layout/Button/ViewerIconButton/ViewerIconButton';
 
 const HomeButton: React.FC = () => {
   const { viewer } = useViewer();
@@ -13,20 +11,13 @@ const HomeButton: React.FC = () => {
   };
 
   return (
-    <TooltipTrigger>
-      <Button
-        aria-label="Reset to home view"
-        className={styles.homeButton}
-        onPress={handleHomeClick}
-      >
-        <span className={`material-symbols-outlined ${styles.icon}`}>
-          home
-        </span>
-      </Button>
-      <ButtonTooltip placement="bottom">
-        Reset to home view
-      </ButtonTooltip>
-    </TooltipTrigger>
+    <ViewerIconButton
+      icon="home"
+      ariaLabel="Reset to home view"
+      tooltipText="Reset to home view"
+      tooltipPlacement="bottom"
+      onPress={handleHomeClick}
+    />
   );
 };
 

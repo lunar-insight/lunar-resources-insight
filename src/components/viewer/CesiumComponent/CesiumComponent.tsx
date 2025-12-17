@@ -3,8 +3,7 @@ import * as Cesium from 'cesium';
 import 'cesium/Source/Widgets/widgets.css';
 import { useViewer } from '../../../utils/context/ViewerContext';
 import { pointValueService } from '../../../services/PointValueService';
-import ZoomControls from '../ZoomControls/ZoomControls';
-import FullscreenButton from '../FullscreenButton/FullscreenButton';
+import BottomRightControls from '../BottomRightControls/BottomRightControls';
 import TopRightControls from '../TopRightControls/TopRightControls';
 
 // Skybox images
@@ -171,8 +170,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div ref={cesiumContainerRef} className={className} />
-      <ZoomControls viewer={localViewer} />
-      <FullscreenButton />
+      <BottomRightControls viewer={localViewer} />
       <TopRightControls />
     </div>
   );

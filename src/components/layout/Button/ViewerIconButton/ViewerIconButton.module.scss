@@ -1,14 +1,4 @@
-.zoomControls {
-  position: absolute;
-  bottom: 5.5rem;
-  right: 0.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  z-index: 100;
-}
-
-.zoomButton {
+.viewerIconButton {
   width: 32px;
   height: 32px;
   cursor: pointer;
@@ -26,19 +16,12 @@
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
 
-  // Button content styling
-  color: var(--color-tertiary);
-  font-size: 20px;
-  font-weight: bold;
-
   &[data-hovered] {
     background: rgba(var(--color-quartenary-rgb), 0.65);
-    color: var(--color-tertiary);
   }
 
   &[data-pressed] {
     background: rgba(var(--color-neutral-rgb), 0.70);
-    color: var(--color-tertiary);
   }
 
   &:focus {
@@ -48,5 +31,18 @@
 
   &:focus:not(:focus-visible) {
     outline: none;
+  }
+
+  .icon {
+    color: var(--color-tertiary);
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .label {
+    color: var(--color-tertiary);
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
   }
 }

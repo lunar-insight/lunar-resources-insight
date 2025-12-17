@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from 'react-aria-components';
-import styles from './FullscreenButton.module.scss';
+import ViewerIconButton from '../../layout/Button/ViewerIconButton/ViewerIconButton';
 
 const FullscreenButton: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -29,17 +28,13 @@ const FullscreenButton: React.FC = () => {
   };
 
   return (
-    <div className={styles.fullscreenButtonContainer}>
-      <Button
-        aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-        className={styles.fullscreenButton}
-        onPress={toggleFullscreen}
-      >
-        <span className={`material-symbols-outlined ${styles.icon}`}>
-          {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
-        </span>
-      </Button>
-    </div>
+    <ViewerIconButton
+      icon={isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
+      ariaLabel={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+      tooltipText={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+      tooltipPlacement="left"
+      onPress={toggleFullscreen}
+    />
   );
 };
 
