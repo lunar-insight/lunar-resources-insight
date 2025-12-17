@@ -5,22 +5,10 @@
   flex-direction: column;
 }
 
-.info {
-  margin-bottom: 1.5rem;
-  padding: 0;
-}
-
 .title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
   color: var(--color-tertiary);
-}
-
-.description {
-  font-size: 0.9rem;
-  color: var(--color-neutralVariant);
-  margin: 0;
 }
 
 .optionsContainer {

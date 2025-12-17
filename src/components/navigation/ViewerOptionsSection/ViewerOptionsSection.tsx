@@ -27,12 +27,7 @@ const ViewerOptionsSection: React.FC = () => {
 
   return (
     <div className={styles.section}>
-      <div className={styles.info}>
-        <h3 className={styles.title}>Camera Settings</h3>
-        <p className={styles.description}>
-          Configure camera behavior and controls.
-        </p>
-      </div>
+      <h3 className={styles.title}>Camera Settings</h3>
 
       <div className={styles.optionsContainer}>
         <CheckboxWithInfo
