@@ -59,6 +59,11 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         navigationHelpButton: true,   // Enabled for API access (UI hidden by CSS)
       });
 
+      // Disable automatic display of navigation help on startup
+      if (viewer.navigationHelpButton && viewer.navigationHelpButton.viewModel) {
+        viewer.navigationHelpButton.viewModel.showInstructions = false;
+      }
+
       /*
           More Cesium option
       */
