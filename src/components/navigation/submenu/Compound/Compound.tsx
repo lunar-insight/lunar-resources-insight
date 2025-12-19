@@ -40,6 +40,9 @@ compounds.forEach(compound => {
   GRID[compound.row - 1][compound.column - 1] = compound;
 });
 
+// Disabled keys - last compound (Hydrogen at position 4-4)
+const DISABLED_KEYS = new Set(['4-4']);
+
 const CompoundCell = React.memo(({
   item,
   cellKey
@@ -126,6 +129,7 @@ const Compound: React.FC<CompoundProps> = () => {
           setSelectedCompounds(newFormulas);
         }}
         className={styles.compoundGrid}
+        disabledKeys={DISABLED_KEYS}
       >
         {GRID.map((row, rowIndex) => (
           <React.Fragment key={rowIndex}>

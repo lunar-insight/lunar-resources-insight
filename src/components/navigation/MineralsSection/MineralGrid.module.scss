@@ -87,6 +87,35 @@
   &[data-pressed] {
     transform: scale(0.98);
   }
+
+  // Disabled state
+  &[data-disabled] {
+    border-color: var(--color-selection-unavailable);
+    background-color: rgba(var(--color-selection-unavailable-bg-rgb), 0.5);
+    cursor: default;
+    opacity: 0.6;
+
+    .mineralName,
+    .mineralFormula,
+    .mineralCategory,
+    .mineralGrouping {
+      opacity: 0.25;
+    }
+
+    // Disable hover
+    &[data-hovered] {
+      box-shadow: none;
+      transform: none;
+    }
+
+    &[data-focus-visible] {
+      outline: none;
+    }
+
+    &[data-pressed] {
+      transform: none;
+    }
+  }
 }
 
 // Mineral item content layout

@@ -22,9 +22,10 @@ interface LayerButtonProps {
   layer: GeographicalLayer;
   isSelected: boolean;
   onToggle: () => void;
+  isDisabled?: boolean;
 }
 
-const LayerButton: React.FC<LayerButtonProps> = ({ layer, isSelected, onToggle }) => {
+const LayerButton: React.FC<LayerButtonProps> = ({ layer, isSelected, onToggle, isDisabled = false }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [cachedImageUrl, setCachedImageUrl] = useState<string | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -79,9 +80,10 @@ const LayerButton: React.FC<LayerButtonProps> = ({ layer, isSelected, onToggle }
   return (
     <Button
       ref={buttonRef}
-      className={`${styles.layerButton} ${isSelected ? styles.selected : ''}`}
-      onPress={onToggle}
+      className={`${styles.layerButton} ${isSelected ? styles.selected : ''} ${isDisabled ? styles.disabled : ''}`}
+      onPress={isDisabled ? undefined : onToggle}
       data-loaded={imageLoaded}
+      isDisabled={isDisabled}
       style={{
         '--layer-bg-image': cachedImageUrl ? `url(${cachedImageUrl})` : 'none'
       } as React.CSSProperties}
@@ -166,19 +168,23 @@ const GeographicalLayersSection: React.FC = () => {
             className={styles.layersList}
             selectionMode="none"
           >
-            {geographicalLayers.map((layer) => (
-              <GridListItem
-                key={layer.id}
-                textValue={layer.displayName}
-                className={styles.layerItem}
-              >
-                <LayerButton
-                  layer={layer}
-                  isSelected={isLayerSelected(layer.id)}
-                  onToggle={() => handleLayerToggle(layer.id)}
-                />
-              </GridListItem>
-            ))}
+            {geographicalLayers.map((layer) => {
+              const isDisabled = layer.id === 'slope_map';
+              return (
+                <GridListItem
+                  key={layer.id}
+                  textValue={layer.displayName}
+                  className={styles.layerItem}
+                >
+                  <LayerButton
+                    layer={layer}
+                    isSelected={isLayerSelected(layer.id)}
+                    onToggle={() => handleLayerToggle(layer.id)}
+                    isDisabled={isDisabled}
+                  />
+                </GridListItem>
+              );
+            })}
           </GridList>
         )}
       </div>

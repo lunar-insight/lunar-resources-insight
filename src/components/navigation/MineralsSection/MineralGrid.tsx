@@ -17,6 +17,9 @@ export const MineralGrid: React.FC<MineralGridProps> = ({
   const oxides = minerals.filter((m) => m.category === 'oxide');
   const moonDiscovered = minerals.filter((m) => m.category === 'moon-discovered');
 
+  // Disabled keys
+  const disabledMineralKeys = new Set(['changesite-y']);
+
   const renderMineralItem = (mineral: typeof minerals[0]) => {
     const isHighlighted = highlightedMinerals.has(mineral.id);
     const isMoonDiscovered = mineral.category === 'moon-discovered';
@@ -113,6 +116,7 @@ export const MineralGrid: React.FC<MineralGridProps> = ({
           selectionMode="multiple"
           selectedKeys={selectedMinerals}
           onSelectionChange={onSelectionChange}
+          disabledKeys={disabledMineralKeys}
         >
           {moonDiscovered.map(renderMineralItem)}
         </ListBox>

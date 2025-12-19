@@ -1,10 +1,15 @@
-// Color scheme variables - using global CSS variables
+// Color scheme variables: using global CSS variables
 $color-border-default: rgba(var(--color-selection-default-rgb), 0.5);
 $color-background-default: rgba(45, 55, 65, 0.3);
 
-// Selected items - BLUE (from global CSS)
+// Selected items: BLUE (from global CSS)
 $color-border-selected: rgba(var(--color-selection-selected-rgb), 0.6);
 $color-background-selected: rgba(var(--color-selection-selected-rgb), 0.15);
+
+// Disabled items: GRAY (from global CSS)
+$unavailable-opacity-on-text: 0.25;
+$color-border-unavailable: var(--color-selection-unavailable);
+$color-background-unavailable: rgba(var(--color-selection-unavailable-bg-rgb), 0.5);
 
 .compound {
   display: flex;
@@ -84,6 +89,33 @@ $color-background-selected: rgba(var(--color-selection-selected-rgb), 0.15);
   &[data-focus-visible] {
     outline: 2px solid rgba(59, 130, 246, 0.5);
     outline-offset: 2px;
+  }
+
+  // Disabled state
+  &[data-disabled] {
+    border-color: $color-border-unavailable;
+    background-color: $color-background-unavailable;
+    cursor: default;
+    opacity: 0.6;
+
+    .name,
+    .formula {
+      opacity: $unavailable-opacity-on-text;
+    }
+
+    // Disable hover effects
+    &[data-hovered] {
+      box-shadow: none;
+      transform: none;
+    }
+
+    &[data-pressed] {
+      transform: none;
+    }
+
+    &[data-focus-visible] {
+      outline: none;
+    }
   }
 }
 

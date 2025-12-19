@@ -16,6 +16,11 @@ $checkbox-size: 1.5rem;
 
 $list-max-height: 28rem; // Height for scrollable area
 
+// Disabled state variables
+$unavailable-opacity-on-text: 0.25;
+$color-border-unavailable: var(--color-selection-unavailable);
+$color-background-unavailable: rgba(var(--color-selection-unavailable-bg-rgb), 0.5);
+
 // Mixins SASS
 @mixin flex-center {
   display: flex;
@@ -178,6 +183,39 @@ $list-max-height: 28rem; // Height for scrollable area
 
     .layerCheckbox input {
       accent-color: var(--color-quartenary);
+    }
+  }
+
+  // Disabled state
+  &.disabled {
+    border-color: $color-border-unavailable;
+    cursor: default;
+    opacity: 0.6;
+    pointer-events: none;
+
+    &::before {
+      opacity: $unavailable-opacity-on-text;
+    }
+
+    .layerTitle,
+    .metadataItem {
+      opacity: $unavailable-opacity-on-text;
+    }
+
+    // Disable hover
+    &[data-hovered] {
+      box-shadow: none;
+      border-color: $color-border-unavailable;
+
+      &::before {
+        transform: none;
+      }
+    }
+
+    // Disable selection
+    &.selected {
+      border-color: $color-border-unavailable;
+      box-shadow: none;
     }
   }
 }
