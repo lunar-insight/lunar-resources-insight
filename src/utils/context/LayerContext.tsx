@@ -14,10 +14,17 @@ interface StyleConfig {
   max?: number;
 }
 
+interface DynamicLayerMetadata {
+  displayName: string;
+  category: string;
+  element?: string;
+}
+
 interface LayerContextType {
   selectedLayers: string[];
   visibleLayers: Set<string>;
-  addLayer: (layer: string) => void;
+  dynamicLayerMetadata: Map<string, DynamicLayerMetadata>;
+  addLayer: (layer: string, metadata?: DynamicLayerMetadata) => void;
   removeLayer: (layer: string) => void;
   reorderLayers: (layers: string[]) => void;
   toggleLayerVisibility: (layer: string) => void;
@@ -301,6 +308,7 @@ class CesiumLayerManager {
 export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedLayers, setSelectedLayers] = useState<string[]>([]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
+  const [dynamicLayerMetadata, setDynamicLayerMetadata] = useState<Map<string, DynamicLayerMetadata>>(new Map());
   const { viewer } = useViewer();
   const { hasDisableRequests } = useMouseTracking();
   const cesiumManagerRef = useRef<CesiumLayerManager | null>(null);
@@ -311,14 +319,33 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }
 
 
-  const addLayer = (layer: string) => {
+  const addLayer = (layer: string, metadata?: DynamicLayerMetadata) => {
+    // Store dynamic metadata if provided
+    if (metadata) {
+      setDynamicLayerMetadata(prev => new Map(prev).set(layer, metadata));
+    }
+
     setSelectedLayers(prev => [layer, ...prev]);
     setVisibleLayers(prev => new Set(prev).add(layer));
-    cesiumManagerRef.current?.addLayer(layer);
+
+    // Only add to Cesium if layer has config with filename
+    const layerConfig = layersConfig.layers[layer];
+    if (layerConfig?.filename) {
+      cesiumManagerRef.current?.addLayer(layer);
+    } else {
+      console.log(`Layer ${layer} has no COG file. Added to management list only.`);
+    }
   };
 
 
   const removeLayer = (layer: string) => {
+    // Clean up dynamic metadata
+    setDynamicLayerMetadata(prev => {
+      const newMap = new Map(prev);
+      newMap.delete(layer);
+      return newMap;
+    });
+
     setSelectedLayers(prev => prev.filter(l => l !== layer));
     setVisibleLayers(prev => {
       const newSet = new Set(prev);
@@ -390,13 +417,14 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 
   return (
-    <LayerContext.Provider 
-      value={{ 
-        selectedLayers, 
-        visibleLayers, 
-        addLayer, 
-        removeLayer, 
-        reorderLayers, 
+    <LayerContext.Provider
+      value={{
+        selectedLayers,
+        visibleLayers,
+        dynamicLayerMetadata,
+        addLayer,
+        removeLayer,
+        reorderLayers,
         toggleLayerVisibility,
         updateStyle,
         updateRampValues,

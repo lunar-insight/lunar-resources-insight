@@ -4,6 +4,7 @@ import { Button, Selection } from 'react-aria-components';
 import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
 import { DataSourceLegend } from '../../ui/DataSourceLegend/DataSourceLegend';
 import { useZIndex } from '../../../utils/ZIndexProvider';
+import { useLayerContext } from '../../../utils/context/LayerContext';
 import { RockGrid } from './RockGrid';
 import { MineralGrid } from './MineralGrid';
 import { ROCKS, MINERALS } from './data';
@@ -11,6 +12,7 @@ import { ROCKS, MINERALS } from './data';
 const MineralsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { registerModal, unregisterModal } = useZIndex();
+  const { addLayer, removeLayer } = useLayerContext();
 
   // Hover state for bidirectional highlighting
   const [hoveredRockId, setHoveredRockId] = useState<string | null>(null);
@@ -56,10 +58,56 @@ const MineralsSection: React.FC = () => {
   };
 
   const handleRockSelection = (keys: Selection) => {
+    const oldRocks = new Set(selectedRocks);
+    const newRocks = new Set(keys);
+
+    // Add newly selected rocks with metadata
+    newRocks.forEach(rockId => {
+      if (!oldRocks.has(rockId)) {
+        const rock = ROCKS.find(r => r.id === rockId);
+        if (rock) {
+          addLayer(rockId as string, {
+            displayName: rock.name,
+            category: 'rock'
+          });
+        }
+      }
+    });
+
+    // Remove deselected rocks
+    oldRocks.forEach(rockId => {
+      if (!newRocks.has(rockId)) {
+        removeLayer(rockId as string);
+      }
+    });
+
     setSelectedRocks(keys);
   };
 
   const handleMineralSelection = (keys: Selection) => {
+    const oldMinerals = new Set(selectedMinerals);
+    const newMinerals = new Set(keys);
+
+    // Add newly selected minerals with metadata
+    newMinerals.forEach(mineralId => {
+      if (!oldMinerals.has(mineralId)) {
+        const mineral = MINERALS.find(m => m.id === mineralId);
+        if (mineral) {
+          addLayer(mineralId as string, {
+            displayName: mineral.name,
+            category: 'mineral'
+          });
+        }
+      }
+    });
+
+    // Remove deselected minerals
+    oldMinerals.forEach(mineralId => {
+      if (!newMinerals.has(mineralId)) {
+        removeLayer(mineralId as string);
+      }
+    });
+
     setSelectedMinerals(keys);
   };
 

@@ -19,6 +19,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
   const { isSidebarOpen, closeSidebar } = useSidebarContext();
   const {
     selectedLayers,
+    dynamicLayerMetadata,
     removeLayer,
     reorderLayers,
     updateRampValues,
@@ -30,11 +31,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
   // Layer ID to items
   const layerItems = selectedLayers.map((layerId) => {
     const config = layersConfig.layers[layerId];
+    const dynamicMeta = dynamicLayerMetadata.get(layerId);
+
     return {
       id: layerId,
-      displayName: config?.displayName || layerId,
-      category: config?.category,
-      element: config?.element
+      displayName: config?.displayName || dynamicMeta?.displayName || layerId,
+      category: config?.category || dynamicMeta?.category,
+      element: config?.element || dynamicMeta?.element
     };
   });
 

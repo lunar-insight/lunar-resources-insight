@@ -1,5 +1,6 @@
 import React, { useState, useMemo} from "react";
 import { ListBox, ListBoxItem, Text, Selection } from 'react-aria-components';
+import { useLayerContext } from '../../../../utils/context/LayerContext';
 import { DataAvailability } from '../../../../types/dataSource';
 import { DataSourceBadge } from '../../../ui/DataSourceBadge/DataSourceBadge';
 import { DataSourceLegend } from '../../../ui/DataSourceLegend/DataSourceLegend';
@@ -31,6 +32,26 @@ const compounds: CompoundData[] = [
   { formula: "CO", name: "Carbon monoxide", dataType: 'ground', row: 4, column: 3 },
   { formula: "H₂", name: "Hydrogen", dataType: 'ground', row: 4, column: 4 }
 ];
+
+// Mapping from compound formula to layer ID and metadata
+const COMPOUND_LAYER_MAP: Record<string, { id: string; displayName: string }> = {
+  'H₂O': { id: 'h2o', displayName: 'Water ice (H₂O)' },
+  'FeO': { id: 'feo', displayName: 'Iron(II) oxide (FeO)' },
+  'TiO₂': { id: 'tio2', displayName: 'Titanium dioxide (TiO₂)' },
+  'Al₂O₃': { id: 'al2o3', displayName: 'Aluminum oxide (Al₂O₃)' },
+  'MgO': { id: 'mgo', displayName: 'Magnesium oxide (MgO)' },
+  'CaO': { id: 'cao', displayName: 'Calcium oxide (CaO)' },
+  'SiO₂': { id: 'sio2', displayName: 'Silicon dioxide (SiO₂)' },
+  'CO₂': { id: 'co2', displayName: 'Carbon dioxide (CO₂)' },
+  'NH₃': { id: 'nh3', displayName: 'Ammonia (NH₃)' },
+  'CH₄': { id: 'ch4', displayName: 'Methane (CH₄)' },
+  'SO₂': { id: 'so2', displayName: 'Sulfur dioxide (SO₂)' },
+  'H₂S': { id: 'h2s', displayName: 'Hydrogen sulfide (H₂S)' },
+  'C₂H₄': { id: 'c2h4', displayName: 'Ethylene (C₂H₄)' },
+  'CH₃OH': { id: 'ch3oh', displayName: 'Methanol (CH₃OH)' },
+  'CO': { id: 'co', displayName: 'Carbon monoxide (CO)' },
+  'H₂': { id: 'h2', displayName: 'Hydrogen (H₂)' }
+};
 
 // Create 4x4 grid structure
 const GRID: (CompoundData | null)[][] = Array(4).fill(null).map(() => Array(4).fill(null));
@@ -85,6 +106,7 @@ export interface CompoundProps {
 
 const Compound: React.FC<CompoundProps> = () => {
   const [selectedCompounds, setSelectedCompounds] = useState<Selection>(new Set());
+  const { addLayer, removeLayer } = useLayerContext();
 
   // Convert formula-based selection to grid-based keys
   const selectedKeys = useMemo(() =>
@@ -120,12 +142,36 @@ const Compound: React.FC<CompoundProps> = () => {
         selectionMode="multiple"
         selectedKeys={selectedKeys}
         onSelectionChange={(keys) => {
+          const oldFormulas = new Set(selectedCompounds);
           const newFormulas = new Set<string>();
+
           Array.from(keys).forEach(key => {
             const [row, col] = (key as string).split('-').map(Number);
             const compound = GRID[row - 1][col - 1];
             if (compound) newFormulas.add(compound.formula);
           });
+
+          // Add newly selected compounds with metadata
+          newFormulas.forEach(formula => {
+            if (!oldFormulas.has(formula)) {
+              const layerInfo = COMPOUND_LAYER_MAP[formula];
+              if (layerInfo) {
+                addLayer(layerInfo.id, {
+                  displayName: layerInfo.displayName,
+                  category: 'compound'
+                });
+              }
+            }
+          });
+
+          // Remove deselected compounds
+          oldFormulas.forEach(formula => {
+            if (!newFormulas.has(formula as string)) {
+              const layerInfo = COMPOUND_LAYER_MAP[formula as string];
+              if (layerInfo) removeLayer(layerInfo.id);
+            }
+          });
+
           setSelectedCompounds(newFormulas);
         }}
         className={styles.compoundGrid}
