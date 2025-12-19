@@ -11,6 +11,7 @@ interface GeographicalLayer {
   displayName: string;
   filename: string;
   previewUrl: string;
+  available: boolean;
   metadata?: {
     source?: string;
     resolution?: string;
@@ -32,6 +33,11 @@ const LayerButton: React.FC<LayerButtonProps> = ({ layer, isSelected, onToggle, 
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
+    // Skip loading preview images for disabled layers
+    if (isDisabled) {
+      return;
+    }
+
     // Intersection Observer for lazy loading
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -134,7 +140,8 @@ const GeographicalLayersSection: React.FC = () => {
       filename: config.filename,
       // Limit preview to ±60° latitude to avoid equirectangular distortion (3:1 aspect ratio)
       previewUrl: buildLayerPreviewUrl(config.filename, 256, 85, [-180, -60, 180, 60]),
-      metadata: config.metadata
+      metadata: config.metadata,
+      available: config.available !== false
     }));
 
   const handleLayerToggle = (layerId: string) => {
@@ -169,7 +176,7 @@ const GeographicalLayersSection: React.FC = () => {
             selectionMode="none"
           >
             {geographicalLayers.map((layer) => {
-              const isDisabled = layer.id === 'slope_map';
+              const isDisabled = !layer.available;
               return (
                 <GridListItem
                   key={layer.id}

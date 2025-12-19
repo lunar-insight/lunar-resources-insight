@@ -14,6 +14,7 @@
       "filename": "geographical/lunar_terrain_elevation_COG.tif",
       "category": "geographical",
       "displayName": "Terrain Elevation",
+      "available": false,
       "metadata": {
         "source": "LOLA",
         "resolution": "118m/pixel",
@@ -24,6 +25,7 @@
       "filename": "geographical/lunar_slope_map_COG.tif",
       "category": "geographical",
       "displayName": "Slope Map",
+      "available": false,
       "metadata": {
         "source": "LOLA",
         "resolution": "118m/pixel",

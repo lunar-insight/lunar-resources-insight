@@ -66,15 +66,20 @@ class LayerStatsService {
     const fetchPromises: Promise<void>[] = [];
 
     Object.entries(layersConfig.layers).forEach(([layerId, config]) => {
-      // Set default statistics while waiting to load
+      // Set default statistics for all layers
       this.statsMap.set(layerId, {
         min: 0,
         max: 100,
         loaded: false
       });
 
-      const fetchPromise = this.fetchAndStoreStats(layerId, config.filename);
-      fetchPromises.push(fetchPromise);
+      // Only fetch statistics for available layers
+      if (config.available !== false) {
+        const fetchPromise = this.fetchAndStoreStats(layerId, config.filename);
+        fetchPromises.push(fetchPromise);
+      } else {
+        console.log(`Skipping statistics fetch for unavailable layer: ${layerId}`);
+      }
     });
 
     await Promise.allSettled(fetchPromises);

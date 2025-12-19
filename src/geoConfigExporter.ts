@@ -24,6 +24,7 @@ export type LayerConfig = {
   category: string;
   element?: string;
   displayName?: string;
+  available?: boolean;
   metadata?: {
     source?: string;
     resolution?: string;
