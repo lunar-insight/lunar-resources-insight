@@ -69,7 +69,16 @@ export const MineralGrid: React.FC<MineralGridProps> = ({
     <div className={styles.mineralGridContainer}>
       {/* Silicates Section */}
       <div className={styles.categorySection}>
-        <h3 className={styles.categoryTitle}>SILICATES</h3>
+        <div className={styles.categoryTitleContainer}>
+          <h3 className={styles.categoryTitle}>SILICATES</h3>
+          <InfoButton
+            tooltipText="More information"
+            popoverTitle="Silicates"
+            popoverBody="Silicate minerals constitute the majority of the Moon’s crust and mantle. During cooling from a molten state, silicate minerals crystallized and separated into distinct layers. Plagioclase-rich materials dominate the lunar highlands, whereas pyroxene and olivine-rich rocks are characteristic of the volcanic maria. This mineral distribution records the Moon’s thermal and volcanic evolution."
+            placement="top"
+            className={styles.categoryInfoButton}
+          />
+        </div>
         <ListBox
           aria-label="Silicate Minerals"
           className={styles.mineralGrid}
@@ -84,7 +93,16 @@ export const MineralGrid: React.FC<MineralGridProps> = ({
 
       {/* Oxides Section */}
       <div className={styles.categorySection}>
-        <h3 className={styles.categoryTitle}>OXIDES</h3>
+        <div className={styles.categoryTitleContainer}>
+          <h3 className={styles.categoryTitle}>OXIDES</h3>
+          <InfoButton
+            tooltipText="More information"
+            popoverTitle="Oxides"
+            popoverBody="Oxide minerals are metal-oxygen compounds found throughout lunar rocks. They formed as the Moon cooled and oxygen interacted with metals, creating key minerals like ilmenite. These oxides are concentrated in the maria and provide insight into the Moon’s oxidation history. They are important for in-situ resource utilization (ISRU), providing metals and oxygen for future lunar exploration."
+            placement="top"
+            className={styles.categoryInfoButton}
+          />
+        </div>
         <ListBox
           aria-label="Oxide Minerals"
           className={styles.mineralGrid}

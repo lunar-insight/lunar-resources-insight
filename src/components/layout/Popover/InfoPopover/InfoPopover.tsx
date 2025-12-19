@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Popover, Dialog, Heading } from 'react-aria-components';
 import { useTextScramble } from '../../../../hooks/useTextScramble';
 import styles from './InfoPopover.module.scss';
@@ -15,6 +15,17 @@ export const InfoPopover: React.FC<InfoPopoverProps> = ({ title, body, isOpen = 
     duration: 1800,
     charactersPerFrame: 2
   });
+
+  const measureRef = useRef<HTMLParagraphElement>(null);
+  const [calculatedHeight, setCalculatedHeight] = useState<number | null>(null);
+
+  // Calculate height when popover opens
+  useEffect(() => {
+    if (isOpen && measureRef.current) {
+      const height = measureRef.current.offsetHeight;
+      setCalculatedHeight(height);
+    }
+  }, [isOpen, body]);
 
   // Create a set of revealed scramble indices for fast lookup
   const revealedIndicesSet = new Set(scrambleIndices.slice(0, revealedCount));
@@ -46,7 +57,26 @@ export const InfoPopover: React.FC<InfoPopoverProps> = ({ title, body, isOpen = 
     <Popover className={styles.infoPopover} placement="bottom">
       <Dialog className={styles.dialog}>
         <Heading className={styles.title}>{title}</Heading>
-        <p className={styles.body}>{renderStyledText()}</p>
+        {/* Hidden element to measure final height */}
+        <p
+          ref={measureRef}
+          className={styles.measureBody}
+          aria-hidden="true"
+        >
+          {body.split('\n').map((line, i) => (
+            <React.Fragment key={i}>
+              {line}
+              {i < body.split('\n').length - 1 && <br />}
+            </React.Fragment>
+          ))}
+        </p>
+        {/* Visible animated text with fixed height */}
+        <p
+          className={styles.body}
+          style={calculatedHeight ? { height: `${calculatedHeight}px` } : undefined}
+        >
+          {renderStyledText()}
+        </p>
       </Dialog>
     </Popover>
   );

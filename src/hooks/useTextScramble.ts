@@ -20,7 +20,7 @@ const DEFAULT_OPTIONS = {
   enabled: true,
   duration: 1800,
   charactersPerFrame: 2,
-  scrambleChars: '!@#$%^&*()_+-=[]{}|;:,.<>?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
+  scrambleChars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
   delay: 0
 };
 

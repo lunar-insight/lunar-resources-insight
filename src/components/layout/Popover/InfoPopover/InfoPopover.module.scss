@@ -32,6 +32,21 @@
   line-height: 1.3;
 }
 
+.measureBody {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--color-neutralVariant);
+  margin: 0;
+  line-height: 1.5;
+  font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+  width: calc(100% - 3rem); // Match dialog padding
+  top: 0;
+  left: 0;
+}
+
 .body {
   font-size: 0.875rem;
   font-weight: 400;
