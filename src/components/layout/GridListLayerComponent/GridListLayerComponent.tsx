@@ -110,19 +110,21 @@ export function GridListLayer<T extends { id: string | number }>({
   );
 }
 
-export function GridListLayerItem<T extends { id: string | number }>({ 
-  children, 
+export function GridListLayerItem<T extends { id: string | number }>({
+  children,
   accordionContent,
-  onRemove, 
+  onRemove,
   layerId,
-  ...props 
+  textValue,
+  ...props
 }: GridListLayerItemProps<T> & { textValue: string; layerId: string }) {
   const { visibleLayers, toggleLayerVisibility } = useLayerContext();
-  
-  let textValue = typeof children === 'string' ? children : undefined;
-  
+
+  // Ensure textValue is always a valid string for drag and drop to work
+  const effectiveTextValue = textValue || (typeof children === 'string' ? children : String(layerId));
+
   return (
-    <GridListItem textValue={textValue} className={styles.gridListItem} {...props}>
+    <GridListItem textValue={effectiveTextValue} className={styles.gridListItem} {...props}>
       {({ selectionMode, selectionBehavior }) => (
         accordionContent ? (
           // With disclosure/accordion content
