@@ -140,7 +140,10 @@ export function GridListLayerItem<T extends { id: string | number }>({
                     />
                   )}
                   
-                  <div className="grid-list-layer-component__grid-list-item__header__item-text">
+                  <div
+                    className="grid-list-layer-component__grid-list-item__header__item-text"
+                    title={typeof children === 'string' ? children : undefined}
+                  >
                     {children}
                   </div>
                   
@@ -187,7 +190,10 @@ export function GridListLayerItem<T extends { id: string | number }>({
               />
             )}
             
-            <div className="grid-list-layer-component__grid-list-item__header__item-text">
+            <div
+              className="grid-list-layer-component__grid-list-item__header__item-text"
+              title={typeof children === 'string' ? children : undefined}
+            >
               {children}
             </div>
             
