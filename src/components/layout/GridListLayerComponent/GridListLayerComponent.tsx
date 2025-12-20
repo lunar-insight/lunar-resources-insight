@@ -34,41 +34,59 @@ export function GridListLayer<T extends { id: string | number }>({
 
     getItems: (keys) =>
       Array.from(keys).map((key) => {
-        const numericKey = typeof key === 'string' ? Number(key) : key;
-        const item = items.find(item => item.id === numericKey);
+        const item = items.find(item => item.id === key);
         return { 'text/plain': JSON.stringify(item)};
       }),
 
     onReorder(e) {
       if (!onReorder) return;
 
-      const targetKey = typeof e.target.key === 'string' ? Number(e.target.key) : e.target.key;
-      const targetIndex = items.findIndex(item => item.id === targetKey);
+      const targetKey = e.target.key;
+
+      // Get items being moved
       const movedItems = Array.from(e.keys).map(key => {
-        const numericKey = typeof key === 'string' ? Number(key) : key;
-        return items.find(item => item.id === numericKey);
+        return items.find(item => item.id === key);
       }).filter(Boolean) as T[];
 
-      let newItems: T[] = [...items];
+      // Set for for fast lookup when filtering items 0(n) linear time
+      const movedItemIds = new Set(movedItems.map(item => item.id));
 
-      if (e.target.dropPosition === 'before') {
-        movedItems.forEach(item => {
-          const currentIndex = newItems.findIndex(i => i.id === item.id);
-          newItems.splice(currentIndex, 1);
-          newItems.splice(targetIndex, 0, item);
-        });
-      } else if (e.target.dropPosition === 'after') {
-        const insertionIndex = targetIndex + 1;
-        movedItems.forEach(item => {
-          const currentIndex = newItems.findIndex(i => i.id === item.id);
-          newItems.splice(currentIndex, 1);
-          newItems.splice(insertionIndex, 0 , item);
-        });
+      // Filter: keep only items that are not moving
+      const itemsToKeep = items.filter(item => !movedItemIds.has(item.id));
+
+      // Find: position of target in filtered list
+      const targetPosition = itemsToKeep.findIndex(item => item.id === targetKey);
+
+      // Special case: target is one of the moved items, do nothing
+      if (targetPosition === -1) {
+        return;
       }
 
-      const orderUnchanged = newItems.length === items.length && 
+      // Rebuild: assemble the new array
+      let newItems: T[];
+
+      if (e.target.dropPosition === 'before') {
+        // Insert before the target
+        newItems = [
+          ...itemsToKeep.slice(0, targetPosition),  // Items before target
+          ...movedItems,                             // Moved items
+          ...itemsToKeep.slice(targetPosition)       // Target + items after
+        ];
+      } else if (e.target.dropPosition === 'after') {
+        // Insert AFTER the target
+        newItems = [
+          ...itemsToKeep.slice(0, targetPosition + 1),  // Items up to and including target
+          ...movedItems,                                 // Moved items
+          ...itemsToKeep.slice(targetPosition + 1)       // Items after target
+        ];
+      } else {
+        return; // Unknown position
+      }
+
+      // Check if the order actually changed
+      const orderUnchanged = newItems.length === items.length &&
                              newItems.every((item, index) => item.id === items[index].id);
-      
+
       if (!orderUnchanged) {
         onReorder(newItems);
       }
