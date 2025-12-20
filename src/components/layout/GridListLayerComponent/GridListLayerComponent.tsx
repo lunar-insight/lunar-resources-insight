@@ -2,9 +2,9 @@ import React, {ReactNode, useState } from 'react';
 import {
   GridListItemProps, GridListProps,
   Button, GridList, GridListItem, useDragAndDrop,
-  Disclosure, DisclosurePanel, Heading 
+  Disclosure, DisclosurePanel, Heading
 } from 'react-aria-components';
-import './GridListLayerComponent.scss';
+import styles from './GridListLayerComponent.module.scss';
 import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
 import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox/LayerVisibilityCheckbox';
 import { useLayerContext } from 'utils/context/LayerContext';
@@ -94,10 +94,10 @@ export function GridListLayer<T extends { id: string | number }>({
   });
 
   return (
-    <div className='grid-list-layer-component'>
+    <div className={styles.gridListLayerComponent}>
 
-      <GridList 
-        {...props} 
+      <GridList
+        {...props}
         items={items}
         {...dragAndDropHooks}
       >
@@ -105,7 +105,7 @@ export function GridListLayer<T extends { id: string | number }>({
             typeof children === 'function' ? children(item) : children
         )}
       </GridList>
-      {items.length === 0 && centerText && <div className='grid-list-layer-component__center-text'>{centerText}</div>}
+      {items.length === 0 && centerText && <div className={styles.centerText}>{centerText}</div>}
     </div>
   );
 }
@@ -122,56 +122,56 @@ export function GridListLayerItem<T extends { id: string | number }>({
   let textValue = typeof children === 'string' ? children : undefined;
   
   return (
-    <GridListItem textValue={textValue} className='grid-list-layer-component__grid-list-item' {...props}>
+    <GridListItem textValue={textValue} className={styles.gridListItem} {...props}>
       {({ selectionMode, selectionBehavior }) => (
         accordionContent ? (
           // With disclosure/accordion content
-          <Disclosure className="grid-list-layer-component__disclosure">
+          <Disclosure className={styles.disclosure}>
             {({ isExpanded }) => (
               <>
-                <div className='grid-list-layer-component__grid-list-item__header'>
-                  <div className='grid-list-layer-component__grid-list-item__header__drag'>≡</div>
+                <div className={styles.gridListItemHeader}>
+                  <div className={styles.gridListItemHeaderDrag}>≡</div>
                   
                   {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-                    <LayerVisibilityCheckbox 
+                    <LayerVisibilityCheckbox
                       slot="selection"
                       isSelected={visibleLayers.has(layerId)}
                       onChange={() => toggleLayerVisibility(layerId)}
                     />
                   )}
-                  
+
                   <div
-                    className="grid-list-layer-component__grid-list-item__header__item-text"
+                    className={styles.gridListItemHeaderItemText}
                     title={typeof children === 'string' ? children : undefined}
                   >
                     {children}
                   </div>
-                  
+
                   <Heading>
-                    <Button 
+                    <Button
                       slot="trigger"
-                      className='grid-list-layer-component__grid-list-item__header__accordion-header'
+                      className={styles.gridListItemHeaderAccordionHeader}
                     >
-                      <i className='grid-list-layer-component__grid-list-item__header__accordion-header__icon material-symbols-outlined'>
+                      <i className={`${styles.gridListItemHeaderAccordionHeaderIcon} material-symbols-outlined`}>
                         {isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'}
                       </i>
-                      <span className='grid-list-layer-component__grid-list-item__header__accordion-header__text'>
+                      <span className={styles.gridListItemHeaderAccordionHeaderText}>
                         {isExpanded ? 'Hide' : 'Show'}
                       </span>
                     </Button>
                   </Heading>
-                  
-                  <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper'>
+
+                  <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
                     <RemoveLayerButton onPress={onRemove} />
                   </div>
                 </div>
-                
-                <DisclosurePanel 
-                  className={`grid-list-layer-component__grid-list-item__accordion-content-wrapper ${
-                    isExpanded ? 'expanded' : ''
+
+                <DisclosurePanel
+                  className={`${styles.gridListItemAccordionContentWrapper} ${
+                    isExpanded ? styles.expanded : ''
                   }`}
                 >
-                  <div className='grid-list-layer-component__grid-list-item__accordion-content-wrapper__main'>
+                  <div className={styles.gridListItemAccordionContentWrapperMain}>
                     {accordionContent}
                   </div>
                 </DisclosurePanel>
@@ -179,25 +179,25 @@ export function GridListLayerItem<T extends { id: string | number }>({
             )}
           </Disclosure>
         ) : (
-          <div className='grid-list-layer-component__grid-list-item__header'>
-            <div className='grid-list-layer-component__grid-list-item__header__drag'>≡</div>
-            
+          <div className={styles.gridListItemHeader}>
+            <div className={styles.gridListItemHeaderDrag}>≡</div>
+
             {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-              <LayerVisibilityCheckbox 
+              <LayerVisibilityCheckbox
                 slot="selection"
                 isSelected={visibleLayers.has(layerId)}
                 onChange={() => toggleLayerVisibility(layerId)}
               />
             )}
-            
+
             <div
-              className="grid-list-layer-component__grid-list-item__header__item-text"
+              className={styles.gridListItemHeaderItemText}
               title={typeof children === 'string' ? children : undefined}
             >
               {children}
             </div>
-            
-            <div className='grid-list-layer-component__grid-list-item__header__remove-layer-wrapper'>
+
+            <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
               <RemoveLayerButton onPress={onRemove} />
             </div>
           </div>
