@@ -126,7 +126,8 @@ module.exports = {
   },
   devServer: {
     static: './dist',
-    hot: true
+    hot: true,
+    host: '127.0.0.1'
   },
   node: {
     global: false,
