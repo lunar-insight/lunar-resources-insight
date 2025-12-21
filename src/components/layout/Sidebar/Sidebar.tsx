@@ -29,15 +29,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Layer ID to items
-  const layerItems = selectedLayers.map((layerId) => {
+  const layerItems = selectedLayers.map((layerId, index) => {
     const config = layersConfig.layers[layerId];
     const dynamicMeta = dynamicLayerMetadata.get(layerId);
+
+    // Detect category change
+    const prevLayerId = index > 0 ? selectedLayers[index - 1] : null;
+    let isFirstOfNewCategory = false;
+
+    if (prevLayerId) {
+      const prevConfig = layersConfig.layers[prevLayerId];
+      const prevDynamicMeta = dynamicLayerMetadata.get(prevLayerId);
+      const prevCategory = prevConfig?.category || prevDynamicMeta?.category;
+      const currentCategory = config?.category || dynamicMeta?.category;
+      isFirstOfNewCategory = prevCategory !== currentCategory;
+    }
 
     return {
       id: layerId,
       displayName: config?.displayName || dynamicMeta?.displayName || layerId,
       category: config?.category || dynamicMeta?.category,
-      element: config?.element || dynamicMeta?.element
+      element: config?.element || dynamicMeta?.element,
+      isFirstOfNewCategory
     };
   });
 
@@ -96,7 +109,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
             </>
           }
         >
-          {(item: typeof layerItems[0]) => {
+          {(item) => {
             const layerId = item.id;
             const stats = layerStatsService.getLayerStats(layerId);
 
@@ -115,11 +128,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
             }
 
             return (
-              <GridListLayerItem 
+              <GridListLayerItem
                 key={item.id}
                 textValue={item.displayName}
                 onRemove={() => removeLayer(layerId)}
                 layerId={layerId}
+                category={item.category}
+                isFirstOfNewCategory={item.isFirstOfNewCategory}
                 accordionContent={
                   <div className={styles.accordionContent}>
                     <LayerGradientSelect layerId={layerId}/>

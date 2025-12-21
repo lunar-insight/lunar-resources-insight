@@ -20,6 +20,8 @@ interface GridListLayerItemProps<T> extends Omit<GridListItemProps, 'children'> 
   children: ReactNode;
   accordionContent?: ReactNode;
   onRemove?: () => void;
+  category?: string;
+  isFirstOfNewCategory?: boolean;
 }
 
 export function GridListLayer<T extends { id: string | number }>({
@@ -116,6 +118,8 @@ export function GridListLayerItem<T extends { id: string | number }>({
   onRemove,
   layerId,
   textValue,
+  category,
+  isFirstOfNewCategory,
   ...props
 }: GridListLayerItemProps<T> & { textValue: string; layerId: string }) {
   const { visibleLayers, toggleLayerVisibility } = useLayerContext();
@@ -124,7 +128,13 @@ export function GridListLayerItem<T extends { id: string | number }>({
   const effectiveTextValue = textValue || (typeof children === 'string' ? children : String(layerId));
 
   return (
-    <GridListItem textValue={effectiveTextValue} className={styles.gridListItem} {...props}>
+    <GridListItem
+      textValue={effectiveTextValue}
+      className={styles.gridListItem}
+      data-category={category}
+      data-first-of-category={isFirstOfNewCategory ? "true" : "false"}
+      {...props}
+    >
       {({ selectionMode, selectionBehavior }) => (
         accordionContent ? (
           // With disclosure/accordion content
