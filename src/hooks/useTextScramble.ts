@@ -5,7 +5,6 @@ interface UseTextScrambleOptions {
   duration?: number;           // Total animation duration (ms)
   charactersPerFrame?: number; // Reveal speed
   scrambleChars?: string;      // Characters used for scrambling
-  delay?: number;              // Initial delay before starting
 }
 
 interface UseTextScrambleReturn {
@@ -20,8 +19,7 @@ const DEFAULT_OPTIONS = {
   enabled: true,
   duration: 1800,
   charactersPerFrame: 2,
-  scrambleChars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
-  delay: 0
+  scrambleChars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 };
 
 export const useTextScramble = (
@@ -104,12 +102,10 @@ export const useTextScramble = (
       // Immediately show fully scrambled text
       setDisplayText(generateScrambledText(0));
 
-      const timeoutId = setTimeout(() => {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      }, opts.delay);
+      // Start animation immediately (no setTimeout)
+      animationFrameRef.current = requestAnimationFrame(animate);
 
       return () => {
-        clearTimeout(timeoutId);
         if (animationFrameRef.current) {
           cancelAnimationFrame(animationFrameRef.current);
         }
