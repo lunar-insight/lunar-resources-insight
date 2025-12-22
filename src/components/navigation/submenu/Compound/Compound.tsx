@@ -1,5 +1,5 @@
-import React, { useState, useMemo} from "react";
-import { ListBox, ListBoxItem, Text, Selection } from 'react-aria-components';
+import React, { useState, useMemo, useCallback } from "react";
+import { ListBox, ListBoxItem, Text } from 'react-aria-components';
 import { useLayerContext } from '../../../../utils/context/LayerContext';
 import { DataAvailability } from '../../../../types/dataSource';
 import { DataSourceBadge } from '../../../ui/DataSourceBadge/DataSourceBadge';
@@ -105,13 +105,13 @@ export interface CompoundProps {
 }
 
 const Compound: React.FC<CompoundProps> = () => {
-  const [selectedCompounds, setSelectedCompounds] = useState<Selection>(new Set());
+  const [selectedCompounds, setSelectedCompounds] = useState<string[]>([]);
   const { addLayer, removeLayer } = useLayerContext();
 
   // Convert formula-based selection to grid-based keys
   const selectedKeys = useMemo(() =>
     new Set(
-      Array.from(selectedCompounds).map(formula => {
+      selectedCompounds.map(formula => {
         const compound = compounds.find(c => c.formula === formula);
         return compound ? `${compound.row}-${compound.column}` : '';
       }).filter(Boolean)
@@ -141,39 +141,41 @@ const Compound: React.FC<CompoundProps> = () => {
         layout="grid"
         selectionMode="multiple"
         selectedKeys={selectedKeys}
-        onSelectionChange={(keys) => {
-          const oldFormulas = new Set(selectedCompounds);
-          const newFormulas = new Set<string>();
+        onSelectionChange={useCallback((keys) => {
+          setSelectedCompounds(prevSelectedCompounds => {
+            const oldFormulas = new Set(prevSelectedCompounds);
+            const newFormulas = new Set<string>();
 
-          Array.from(keys).forEach(key => {
-            const [row, col] = (key as string).split('-').map(Number);
-            const compound = GRID[row - 1][col - 1];
-            if (compound) newFormulas.add(compound.formula);
-          });
+            Array.from(keys).forEach(key => {
+              const [row, col] = (key as string).split('-').map(Number);
+              const compound = GRID[row - 1][col - 1];
+              if (compound) newFormulas.add(compound.formula);
+            });
 
-          // Add newly selected compounds with metadata
-          newFormulas.forEach(formula => {
-            if (!oldFormulas.has(formula)) {
-              const layerInfo = COMPOUND_LAYER_MAP[formula];
-              if (layerInfo) {
-                addLayer(layerInfo.id, {
-                  displayName: layerInfo.displayName,
-                  category: 'compound'
-                });
+            // Add newly selected compounds with metadata
+            newFormulas.forEach(formula => {
+              if (!oldFormulas.has(formula)) {
+                const layerInfo = COMPOUND_LAYER_MAP[formula];
+                if (layerInfo) {
+                  addLayer(layerInfo.id, {
+                    displayName: layerInfo.displayName,
+                    category: 'compound'
+                  });
+                }
               }
-            }
-          });
+            });
 
-          // Remove deselected compounds
-          oldFormulas.forEach(formula => {
-            if (!newFormulas.has(formula as string)) {
-              const layerInfo = COMPOUND_LAYER_MAP[formula as string];
-              if (layerInfo) removeLayer(layerInfo.id);
-            }
-          });
+            // Remove deselected compounds
+            oldFormulas.forEach(formula => {
+              if (!newFormulas.has(formula as string)) {
+                const layerInfo = COMPOUND_LAYER_MAP[formula as string];
+                if (layerInfo) removeLayer(layerInfo.id);
+              }
+            });
 
-          setSelectedCompounds(newFormulas);
-        }}
+            return Array.from(newFormulas);
+          });
+        }, [addLayer, removeLayer])}
         className={styles.compoundGrid}
         disabledKeys={DISABLED_KEYS}
       >

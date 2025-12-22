@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useRef } from 'react';
+import React, { createContext, useContext, useState, useRef, useCallback, useMemo } from 'react';
 import { useViewer } from './ViewerContext';
 import * as Cesium from 'cesium';
 import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics } from '../../geoConfigExporter';
@@ -319,7 +319,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }
 
 
-  const addLayer = (layer: string, metadata?: DynamicLayerMetadata) => {
+  const addLayer = useCallback((layer: string, metadata?: DynamicLayerMetadata) => {
     // Store dynamic metadata if provided
     if (metadata) {
       setDynamicLayerMetadata(prev => new Map(prev).set(layer, metadata));
@@ -335,10 +335,10 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } else {
       console.log(`Layer ${layer} has no COG file. Added to management list only.`);
     }
-  };
+  }, []);
 
 
-  const removeLayer = (layer: string) => {
+  const removeLayer = useCallback((layer: string) => {
     // Clean up dynamic metadata
     setDynamicLayerMetadata(prev => {
       const newMap = new Map(prev);
@@ -353,10 +353,10 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return newSet;
     });
     cesiumManagerRef.current?.removeLayer(layer);
-  };
+  }, []);
 
 
-  const toggleLayerVisibility = (layer: string) => {
+  const toggleLayerVisibility = useCallback((layer: string) => {
     setVisibleLayers(prev => {
       const newSet = new Set(prev);
       if (newSet.has(layer)) {
@@ -367,72 +367,84 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return newSet
     });
     cesiumManagerRef.current?.toggleVisibility(layer);
-  };
+  }, []);
 
 
-  const reorderLayers = (layers: string[]) => {
+  const reorderLayers = useCallback((layers: string[]) => {
     setSelectedLayers(layers);
     cesiumManagerRef.current?.reorderLayers(layers);
-  }
+  }, []);
 
 
-  const updateRampValues = async (layer: string, min: number, max: number) => {
+  const updateRampValues = useCallback(async (layer: string, min: number, max: number) => {
     try {
       cesiumManagerRef.current?.updateRampValues(layer, min, max);
     } catch (error) {
       console.error(`Error updating ramp values for layer ${layer}:`, error);
     }
-  };
+  }, []);
 
 
-  const updateStyle = async (layer: string, styleConfig: StyleConfig) => {
+  const updateStyle = useCallback(async (layer: string, styleConfig: StyleConfig) => {
     try {
       cesiumManagerRef.current?.updateLayerStyle(layer, styleConfig);
     } catch (error) {
       console.error(`Error updating style for layer ${layer}:`, error);
     }
-  };
+  }, []);
 
 
-  const updateLayerOpacity = (layer: string, opacity: number) => {
+  const updateLayerOpacity = useCallback((layer: string, opacity: number) => {
     try {
       cesiumManagerRef.current?.updateLayerOpacity(layer, opacity);
     } catch (error) {
       console.error(`Error updating opacity for layer ${layer}:`, error);
     }
-  }
+  }, []);
 
 
-  const updateLayerRangeFilter = (layer: string, enabled: boolean) => {
+  const updateLayerRangeFilter = useCallback((layer: string, enabled: boolean) => {
     try {
       cesiumManagerRef.current?.updateLayerRangeFilter(layer, enabled);
     } catch (error) {
       console.error(`Error updating range filter for layer ${layer}:`, error)
     }
-  };
+  }, []);
 
-  const getLayerStyle = (layer: string) => {
+  const getLayerStyle = useCallback((layer: string) => {
     return cesiumManagerRef.current?.getLayerStyleConfig(layer);
-  }
+  }, []);
 
+  const contextValue = useMemo(() => ({
+    selectedLayers,
+    visibleLayers,
+    dynamicLayerMetadata,
+    addLayer,
+    removeLayer,
+    reorderLayers,
+    toggleLayerVisibility,
+    updateStyle,
+    updateRampValues,
+    updateLayerOpacity,
+    updateLayerRangeFilter,
+    getLayerStyle
+  }), [
+    selectedLayers,
+    visibleLayers,
+    dynamicLayerMetadata,
+    addLayer,
+    removeLayer,
+    reorderLayers,
+    toggleLayerVisibility,
+    updateStyle,
+    updateRampValues,
+    updateLayerOpacity,
+    updateLayerRangeFilter,
+    getLayerStyle
+  ]);
 
   return (
-    <LayerContext.Provider
-      value={{
-        selectedLayers,
-        visibleLayers,
-        dynamicLayerMetadata,
-        addLayer,
-        removeLayer,
-        reorderLayers,
-        toggleLayerVisibility,
-        updateStyle,
-        updateRampValues,
-        updateLayerOpacity,
-        updateLayerRangeFilter,
-        getLayerStyle
-      }}
-    >
+    <LayerContext.Provider value={contextValue}>
       {children}
     </LayerContext.Provider>
   );
