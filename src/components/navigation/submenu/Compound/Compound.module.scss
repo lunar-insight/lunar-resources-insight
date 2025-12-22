@@ -53,13 +53,49 @@ $color-background-unavailable: rgba(var(--color-selection-unavailable-bg-rgb), 0
   opacity: 0.3;
 }
 
+// Container for all compound categories
+.compoundGridContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+// Category section with title
+.categorySection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+// Title container with info button
+.categoryTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.categoryTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-tertiary);
+  text-align: left;
+  margin: 0;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.categoryInfoButton {
+  margin-top: -2px;
+}
+
 .compoundGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(6, minmax(140px, 1fr));
   gap: 1rem;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
+  outline: none;
 }
 
 .compoundItem {
@@ -155,10 +191,4 @@ $color-background-unavailable: rgba(var(--color-selection-unavailable-bg-rgb), 0
   @media (max-width: 480px) {
     font-size: 0.8rem;
   }
-}
-
-.emptyCell {
-  width: 100%;
-  height: 100%;
-  min-height: 120px;
 }
