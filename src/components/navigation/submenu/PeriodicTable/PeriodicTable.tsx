@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
 import { DataAvailability } from '../../../../types/dataSource';
 import { DataSourceBadge } from '../../../ui/DataSourceBadge/DataSourceBadge';
@@ -214,6 +214,17 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
     [selectedElements]
   );
 
+  const handleSelectionChange = useCallback((keys) => {
+    const newKeys = new Set(keys);
+    ALL_ELEMENTS.forEach(element => {
+      const elementKey = `${element.row}-${element.column}`;
+
+      if (newKeys.has(elementKey) !== selectedKeys.has(elementKey)) {
+        onElementSelect(element);
+      }
+    });
+  }, [selectedKeys, onElementSelect]);
+
   return (
     <div className={styles.periodicTable}>
       <div className={styles.stateInfo}>
@@ -245,16 +256,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
         className={styles.grid}
         disabledKeys={DISABLED_KEYS}
         selectedKeys={selectedKeys}
-        onSelectionChange={(keys) => {
-          const newKeys = new Set(keys);
-          ALL_ELEMENTS.forEach(element => {
-            const elementKey = `${element.row}-${element.column}`;
-
-            if (newKeys.has(elementKey) !== selectedKeys.has(elementKey)) {
-              onElementSelect(element);
-            }
-          });
-        }}
+        onSelectionChange={handleSelectionChange}
       >
         {GRID.map((row, rowIndex) => (
           <React.Fragment key={rowIndex}>

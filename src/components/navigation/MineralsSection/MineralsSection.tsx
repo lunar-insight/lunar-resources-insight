@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import styles from './MineralsSection.module.scss';
 import { Button, Selection } from 'react-aria-components';
 import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
@@ -57,59 +57,63 @@ const MineralsSection: React.FC = () => {
     setHoveredMineralId(mineralId);
   };
 
-  const handleRockSelection = (keys: Selection) => {
-    const oldRocks = new Set(selectedRocks);
-    const newRocks = new Set(keys);
+  const handleRockSelection = useCallback((keys: Selection) => {
+    setSelectedRocks(prevSelectedRocks => {
+      const oldRocks = new Set(prevSelectedRocks);
+      const newRocks = new Set(keys);
 
-    // Add newly selected rocks with metadata
-    newRocks.forEach(rockId => {
-      if (!oldRocks.has(rockId)) {
-        const rock = ROCKS.find(r => r.id === rockId);
-        if (rock) {
-          addLayer(rockId as string, {
-            displayName: rock.name,
-            category: 'rock'
-          });
+      // Add newly selected rocks with metadata
+      newRocks.forEach(rockId => {
+        if (!oldRocks.has(rockId)) {
+          const rock = ROCKS.find(r => r.id === rockId);
+          if (rock) {
+            addLayer(rockId as string, {
+              displayName: rock.name,
+              category: 'rock'
+            });
+          }
         }
-      }
-    });
+      });
 
-    // Remove deselected rocks
-    oldRocks.forEach(rockId => {
-      if (!newRocks.has(rockId)) {
-        removeLayer(rockId as string);
-      }
-    });
-
-    setSelectedRocks(keys);
-  };
-
-  const handleMineralSelection = (keys: Selection) => {
-    const oldMinerals = new Set(selectedMinerals);
-    const newMinerals = new Set(keys);
-
-    // Add newly selected minerals with metadata
-    newMinerals.forEach(mineralId => {
-      if (!oldMinerals.has(mineralId)) {
-        const mineral = MINERALS.find(m => m.id === mineralId);
-        if (mineral) {
-          addLayer(mineralId as string, {
-            displayName: mineral.name,
-            category: 'mineral'
-          });
+      // Remove deselected rocks
+      oldRocks.forEach(rockId => {
+        if (!newRocks.has(rockId)) {
+          removeLayer(rockId as string);
         }
-      }
-    });
+      });
 
-    // Remove deselected minerals
-    oldMinerals.forEach(mineralId => {
-      if (!newMinerals.has(mineralId)) {
-        removeLayer(mineralId as string);
-      }
+      return keys;
     });
+  }, [addLayer, removeLayer]);
 
-    setSelectedMinerals(keys);
-  };
+  const handleMineralSelection = useCallback((keys: Selection) => {
+    setSelectedMinerals(prevSelectedMinerals => {
+      const oldMinerals = new Set(prevSelectedMinerals);
+      const newMinerals = new Set(keys);
+
+      // Add newly selected minerals with metadata
+      newMinerals.forEach(mineralId => {
+        if (!oldMinerals.has(mineralId)) {
+          const mineral = MINERALS.find(m => m.id === mineralId);
+          if (mineral) {
+            addLayer(mineralId as string, {
+              displayName: mineral.name,
+              category: 'mineral'
+            });
+          }
+        }
+      });
+
+      // Remove deselected minerals
+      oldMinerals.forEach(mineralId => {
+        if (!newMinerals.has(mineralId)) {
+          removeLayer(mineralId as string);
+        }
+      });
+
+      return keys;
+    });
+  }, [addLayer, removeLayer]);
 
   return (
     <>
