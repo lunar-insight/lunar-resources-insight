@@ -57,7 +57,8 @@
   min-height: 8rem;
   will-change: contents;
   overflow-anchor: none;
-  contain: layout;
+  white-space: pre-wrap;
+  word-break: keep-all;
 }
 
 .scrambledChar {
