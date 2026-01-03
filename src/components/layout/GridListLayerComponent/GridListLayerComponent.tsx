@@ -137,7 +137,9 @@ export function GridListLayerItem<T extends { id: string | number }>({
     >
       {({ selectionMode, selectionBehavior }) => (
         <>
-          <Button slot="drag" className={styles.gridListItemHeaderDrag}>≡</Button>
+          <Button slot="drag" className={styles.gridListItemHeaderDrag}>
+            <i className="material-symbols-outlined">reorder</i>
+          </Button>
 
           {accordionContent ? (
             // With disclosure/accordion content
