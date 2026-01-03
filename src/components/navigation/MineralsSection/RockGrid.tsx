@@ -3,6 +3,7 @@ import { ListBox, ListBoxItem, Text } from 'react-aria-components';
 import { DataSourceBadge } from '../../ui/DataSourceBadge/DataSourceBadge';
 import { RockGridProps } from './types';
 import styles from './RockGrid.module.scss';
+import InfoButton from '../../layout/Button/InfoButton/InfoButton';
 
 export const RockGrid: React.FC<RockGridProps> = ({
   rocks,
@@ -22,6 +23,7 @@ export const RockGrid: React.FC<RockGridProps> = ({
     >
       {rocks.map((rock) => {
         const isHighlighted = highlightedRocks.has(rock.id);
+        const hasDescription = rock.description !== undefined;
 
         return (
           <ListBoxItem
@@ -35,6 +37,17 @@ export const RockGrid: React.FC<RockGridProps> = ({
             <div className={styles.rockItemContent}>
               {/* Data Source Badge */}
               <DataSourceBadge dataType={rock.dataType} />
+
+              {/* Info Button for rocks with descriptions */}
+              {hasDescription && (
+                <InfoButton
+                  tooltipText="More information"
+                  popoverTitle={rock.name}
+                  popoverBody={rock.description}
+                  placement="bottom"
+                  className={styles.rockInfoButton}
+                />
+              )}
 
               {/* Rock icon */}
               <div className={styles.rockIcon}>{rock.icon}</div>

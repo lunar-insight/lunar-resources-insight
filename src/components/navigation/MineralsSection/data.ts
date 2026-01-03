@@ -174,6 +174,7 @@ export const ROCKS: Rock[] = [
     rockType: 'Highland',
     composition: ['plagioclase', 'pyroxene', 'k-feldspar'],
     dataType: 'map+ground',
+    description: 'KREEP is a geochemical component of the Moon enriched in incompatible elements, especially potassium (K), rare earth elements (REE), and phosphorus (P). These elements were excluded from early-forming lunar minerals during crystallization of the lunar magma ocean and became concentrated in the residual melt. KREEP-rich rocks provide important clues to the Moon\’s magma ocean evolution and late-stage differentiation.',
   },
   {
     id: 'norite',

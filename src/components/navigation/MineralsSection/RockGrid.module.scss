@@ -92,3 +92,11 @@
   text-align: center;
   line-height: 1.1;
 }
+
+// Info button for individual rocks
+.rockInfoButton {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  z-index: 10;
+}
