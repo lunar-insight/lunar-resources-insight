@@ -44,7 +44,7 @@ export const RockGrid: React.FC<RockGridProps> = ({
                   tooltipText="More information"
                   popoverTitle={rock.name}
                   popoverBody={rock.description}
-                  placement="bottom"
+                  placement="top"
                   className={styles.rockInfoButton}
                 />
               )}
