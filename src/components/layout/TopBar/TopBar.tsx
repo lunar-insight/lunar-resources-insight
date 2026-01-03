@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './TopBar.module.scss';
-import ViewerIconButton from 'components/layout/Button/ViewerIconButton/ViewerIconButton';
+import TopBarButton from 'components/layout/Button/TopBarButton/TopBarButton';
 
 export interface TopBarProps {
   children?: React.ReactNode;
@@ -12,26 +12,29 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
     <div className={`${styles.topBar} ${className}`}>
       <div className={styles.leftSection}>
         <div className={styles.buttonGroup}>
-          <ViewerIconButton
+          <TopBarButton
             icon="point_scan"
-            ariaLabel="Point Selection Tool"
-            tooltipText="Select points"
+            ariaLabel="Point Drawing Tool"
+            tooltipText="Draw points"
             onPress={() => {}}
             tooltipPlacement="bottom"
+            isSelected={false}
           />
-          <ViewerIconButton
+          <TopBarButton
             icon="diagonal_line"
             ariaLabel="Line Drawing Tool"
             tooltipText="Draw lines"
             onPress={() => {}}
             tooltipPlacement="bottom"
+            isSelected={false}
           />
-          <ViewerIconButton
+          <TopBarButton
             icon="hexagon"
             ariaLabel="Polygon Drawing Tool"
             tooltipText="Draw polygons"
             onPress={() => {}}
             tooltipPlacement="bottom"
+            isSelected={false}
           />
         </div>
         {children}
