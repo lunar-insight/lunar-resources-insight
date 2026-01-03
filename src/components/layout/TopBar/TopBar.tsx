@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from './TopBar.module.scss';
 import TopBarButton from 'components/layout/Button/TopBarButton/TopBarButton';
+import { useSidebarContext } from 'utils/context/SidebarContext';
 
 export interface TopBarProps {
   children?: React.ReactNode;
@@ -8,8 +9,16 @@ export interface TopBarProps {
 }
 
 const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
+  const { isSidebarOpen } = useSidebarContext();
+  const sidebarWidth = 400;
+
   return (
-    <div className={`${styles.topBar} ${className}`}>
+    <div
+      className={`${styles.topBar} ${className}`}
+      style={{
+        '--topbar-left': isSidebarOpen ? `calc(5rem + ${sidebarWidth}px)` : '5rem'
+      } as React.CSSProperties}
+    >
       <div className={styles.leftSection}>
         <div className={styles.buttonGroup}>
           <TopBarButton
