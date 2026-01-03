@@ -136,84 +136,84 @@ export function GridListLayerItem<T extends { id: string | number }>({
       {...props}
     >
       {({ selectionMode, selectionBehavior }) => (
-        accordionContent ? (
-          // With disclosure/accordion content
-          <Disclosure className={styles.disclosure}>
-            {({ isExpanded }) => (
-              <>
-                <div className={styles.gridListItemHeader}>
-                  <div className={styles.gridListItemHeaderDrag}>≡</div>
-                  
-                  {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-                    <LayerVisibilityCheckbox
-                      slot="selection"
-                      isSelected={visibleLayers.has(layerId)}
-                      onChange={() => toggleLayerVisibility(layerId)}
-                    />
-                  )}
+        <>
+          <Button slot="drag" className={styles.gridListItemHeaderDrag}>≡</Button>
 
-                  <div
-                    className={styles.gridListItemHeaderItemText}
-                    title={typeof children === 'string' ? children : undefined}
-                  >
-                    {children}
-                  </div>
+          {accordionContent ? (
+            // With disclosure/accordion content
+            <Disclosure className={styles.disclosure}>
+              {({ isExpanded }) => (
+                <>
+                  <div className={styles.gridListItemHeader}>
+                    {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
+                      <LayerVisibilityCheckbox
+                        slot="selection"
+                        isSelected={visibleLayers.has(layerId)}
+                        onChange={() => toggleLayerVisibility(layerId)}
+                      />
+                    )}
 
-                  <Heading>
-                    <Button
-                      slot="trigger"
-                      className={styles.gridListItemHeaderAccordionHeader}
+                    <div
+                      className={styles.gridListItemHeaderItemText}
+                      title={typeof children === 'string' ? children : undefined}
                     >
-                      <i className={`${styles.gridListItemHeaderAccordionHeaderIcon} material-symbols-outlined`}>
-                        {isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'}
-                      </i>
-                      <span className={styles.gridListItemHeaderAccordionHeaderText}>
-                        {isExpanded ? 'Hide' : 'Show'}
-                      </span>
-                    </Button>
-                  </Heading>
+                      {children}
+                    </div>
 
-                  <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
-                    <RemoveLayerButton onPress={onRemove} />
+                    <Heading>
+                      <Button
+                        slot="trigger"
+                        className={styles.gridListItemHeaderAccordionHeader}
+                      >
+                        <i className={`${styles.gridListItemHeaderAccordionHeaderIcon} material-symbols-outlined`}>
+                          {isExpanded ? 'arrow_drop_up' : 'arrow_drop_down'}
+                        </i>
+                        <span className={styles.gridListItemHeaderAccordionHeaderText}>
+                          {isExpanded ? 'Hide' : 'Show'}
+                        </span>
+                      </Button>
+                    </Heading>
+
+                    <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
+                      <RemoveLayerButton onPress={onRemove} />
+                    </div>
                   </div>
-                </div>
 
-                <DisclosurePanel
-                  className={`${styles.gridListItemAccordionContentWrapper} ${
-                    isExpanded ? styles.expanded : ''
-                  }`}
-                >
-                  <div className={styles.gridListItemAccordionContentWrapperMain}>
-                    {accordionContent}
-                  </div>
-                </DisclosurePanel>
-              </>
-            )}
-          </Disclosure>
-        ) : (
-          <div className={styles.gridListItemHeader}>
-            <div className={styles.gridListItemHeaderDrag}>≡</div>
+                  <DisclosurePanel
+                    className={`${styles.gridListItemAccordionContentWrapper} ${
+                      isExpanded ? styles.expanded : ''
+                    }`}
+                  >
+                    <div className={styles.gridListItemAccordionContentWrapperMain}>
+                      {accordionContent}
+                    </div>
+                  </DisclosurePanel>
+                </>
+              )}
+            </Disclosure>
+          ) : (
+            <div className={styles.gridListItemHeader}>
+              {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
+                <LayerVisibilityCheckbox
+                  slot="selection"
+                  isSelected={visibleLayers.has(layerId)}
+                  onChange={() => toggleLayerVisibility(layerId)}
+                />
+              )}
 
-            {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-              <LayerVisibilityCheckbox
-                slot="selection"
-                isSelected={visibleLayers.has(layerId)}
-                onChange={() => toggleLayerVisibility(layerId)}
-              />
-            )}
+              <div
+                className={styles.gridListItemHeaderItemText}
+                title={typeof children === 'string' ? children : undefined}
+              >
+                {children}
+              </div>
 
-            <div
-              className={styles.gridListItemHeaderItemText}
-              title={typeof children === 'string' ? children : undefined}
-            >
-              {children}
+              <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
+                <RemoveLayerButton onPress={onRemove} />
+              </div>
             </div>
-
-            <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
-              <RemoveLayerButton onPress={onRemove} />
-            </div>
-          </div>
-        )
+          )}
+        </>
       )}
     </GridListItem>
   );
