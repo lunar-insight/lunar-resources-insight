@@ -1,0 +1,49 @@
+$border-radius: 0.25rem;
+$top-bar-height: 2rem;
+
+.topBar {
+  position: fixed;
+  top: 0;
+  left: 5rem; // SectionNavigation width
+  right: 0;
+  height: $top-bar-height;
+  z-index: 51;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(to right, rgba(35, 41, 53, 0.75), rgba(43, 53, 62, 0.75));
+  border-bottom: 1px solid rgba(35, 41, 53, 0.85);
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1rem;
+  gap: 1rem;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.centerSection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
