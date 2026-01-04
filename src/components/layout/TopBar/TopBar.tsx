@@ -52,13 +52,31 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
         <div className={styles.measurementGroup}>
           <TopBarButton
             icon="straighten"
-            ariaLabel='Measurement Tool'
-            tooltipText='Measure'
+            ariaLabel='Line Measurement Tool'
+            tooltipText='Line measurement'
+            onPress={() => {}}
+            tooltipPlacement='bottom'
+            isSelected={false}
+          />
+          <TopBarButton
+            icon="square_foot"
+            ariaLabel='Area Measurement Tool'
+            tooltipText='Area measurement'
             onPress={() => {}}
             tooltipPlacement='bottom'
             isSelected={false}
           />
         </div>
+        <div className={styles.separator}></div>
+        <span className={styles.selectionText}>Annotation</span>
+        <TopBarButton
+          icon="distance"
+          ariaLabel='Text Annotation Tool'
+          tooltipText='Text annotation'
+          onPress={() => {}}
+          tooltipPlacement='bottom'
+          isSelected={false}
+        />
         {children}
       </div>
       <div className={styles.centerSection}></div>
