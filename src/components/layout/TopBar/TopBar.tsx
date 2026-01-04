@@ -21,7 +21,7 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
     >
       <div className={styles.leftSection}>
         <span className={styles.selectionText}>Selection</span>
-        <div className={styles.buttonGroup}>
+        <div className={styles.drawGroup}>
           <TopBarButton
             icon="point_scan"
             ariaLabel="Point Drawing Tool"
@@ -44,6 +44,18 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
             tooltipText="Draw polygons"
             onPress={() => {}}
             tooltipPlacement="bottom"
+            isSelected={false}
+          />
+        </div>
+        <div className={styles.separator}></div>
+        <span className={styles.selectionText}>Measurement</span>
+        <div className={styles.measurementGroup}>
+          <TopBarButton
+            icon="straighten"
+            ariaLabel='Measurement Tool'
+            tooltipText='Measure'
+            onPress={() => {}}
+            tooltipPlacement='bottom'
             isSelected={false}
           />
         </div>

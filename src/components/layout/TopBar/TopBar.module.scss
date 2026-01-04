@@ -43,7 +43,13 @@ $top-bar-height: 2.5rem;
   justify-content: flex-end;
 }
 
-.buttonGroup {
+.drawGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.measurementGroup {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -52,4 +58,11 @@ $top-bar-height: 2.5rem;
 .selectionText {
   font-size: 0.875rem;
   color: var(--color-tertiary)
+}
+
+.separator {
+  width: 1px;
+  height: 1.5rem;
+  background-color: var(--color-secondary);
+  margin: 0 0.75rem;
 }
