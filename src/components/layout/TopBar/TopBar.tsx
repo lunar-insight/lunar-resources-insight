@@ -20,6 +20,7 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
       } as React.CSSProperties}
     >
       <div className={styles.leftSection}>
+        <span className={styles.selectionText}>Selection</span>
         <div className={styles.buttonGroup}>
           <TopBarButton
             icon="point_scan"
