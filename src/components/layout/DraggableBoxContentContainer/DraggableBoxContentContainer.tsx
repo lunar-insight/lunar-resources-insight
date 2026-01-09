@@ -4,9 +4,9 @@ import { useDialog } from '@react-aria/dialog';
 import { useMove, usePress } from '@react-aria/interactions';
 import { mergeProps } from '@react-aria/utils';
 import CloseButton from '../Button/CloseButton/CloseButton';
-import { pointValueService } from '../../../services/PointValueService';
 import { useZIndex } from '../../../utils/ZIndexProvider';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
+import { useInitialPosition } from '../../../hooks/useInitialPosition';
 
 export interface DraggableBoxContentContainerProps {
   className?: string;
@@ -19,6 +19,9 @@ export interface DraggableBoxContentContainerProps {
   onClose: () => void;
   boundaryRef: React.RefObject<HTMLDivElement>;
   id?: string;
+  cascadeIndex?: number;
+  hasBeenPositioned?: boolean;
+  onPositioned?: () => void;
 }
 
 interface ViewerContainerSize {
@@ -41,6 +44,9 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   onClose,
   boundaryRef,
   id = 'draggable-box-' + Math.random().toString(36).substring(2, 11),
+  cascadeIndex = 0,
+  hasBeenPositioned = false,
+  onPositioned,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
@@ -54,6 +60,23 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   const [isHovered, setIsHovered] = useState(false);
 
   useMouseTrackingControl(isDragging || isHovered, `draggable-box-${id}`);
+
+  // Calculate initial centered position with cascade
+  const initialPosition = useInitialPosition({
+    dialogRef,
+    boundaryRef,
+    isOpen,
+    cascadeIndex,
+    hasBeenPositioned
+  });
+
+  // Apply initial position when calculated
+  useEffect(() => {
+    if (initialPosition && !hasBeenPositioned) {
+      setTranslation(initialPosition);
+      onPositioned?.();
+    }
+  }, [initialPosition, hasBeenPositioned, onPositioned]);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -130,6 +153,10 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       });
     },
     onMoveEnd: () => {
+      // Mark as positioned after user drag
+      if (!hasBeenPositioned) {
+        onPositioned?.();
+      }
       setTimeout(() => {
         setIsDragging(false);
       }, 100);

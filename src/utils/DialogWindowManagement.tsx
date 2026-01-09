@@ -7,6 +7,8 @@ interface Dialog {
   isOpen: boolean;
   title: string;
   content: React.ReactNode | (() => React.ReactNode);
+  cascadeIndex?: number;
+  hasBeenPositioned?: boolean;
 }
 
 interface DialogContextValue {
@@ -16,6 +18,7 @@ interface DialogContextValue {
   isDialogOpen: (id: string) => boolean;
   renderDialog: (dialog: Dialog) => React.ReactElement;
   addDialog: (dialog: Dialog) => void;
+  markDialogAsPositioned: (id: string) => void;
 }
 
 const DialogContext = createContext<DialogContextValue | undefined>(undefined);
@@ -42,15 +45,36 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
   const [dialogsState, setDialogsState] = useState<Dialog[]>(dialogs);
   const boundaryRef = useBoundaryRef();
 
+  const calculateCascadeIndex = (dialogs: Dialog[]): number => {
+    return dialogs.filter(d => d.isOpen).length;
+  };
+
   const openDialog = (id: string, content?: React.ReactNode) => {
     setDialogsState(prevDialogs => {
-      const existingDialogs = prevDialogs.find(dialog => dialog.id === id);
-      if (existingDialogs) {
+      const cascadeIndex = calculateCascadeIndex(prevDialogs);
+
+      const existingDialog = prevDialogs.find(dialog => dialog.id === id);
+      if (existingDialog) {
         return prevDialogs.map(dialog =>
-          dialog.id === id ? { ...dialog, isOpen: true } : dialog
+          dialog.id === id
+            ? {
+                ...dialog,
+                isOpen: true,
+                cascadeIndex: dialog.hasBeenPositioned
+                  ? dialog.cascadeIndex
+                  : cascadeIndex
+              }
+            : dialog
         );
       } else {
-        const newDialog: Dialog = { id, isOpen: true, title: '', content: content || ''};
+        const newDialog: Dialog = {
+          id,
+          isOpen: true,
+          title: '',
+          content: content || '',
+          cascadeIndex,
+          hasBeenPositioned: false
+        };
         return [...prevDialogs, newDialog];
       }
     });
@@ -68,6 +92,14 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
     return dialogsState.some(dialog => dialog.id === id && dialog.isOpen);
   };
 
+  const markDialogAsPositioned = (id: string) => {
+    setDialogsState(prevDialogs =>
+      prevDialogs.map(dialog =>
+        dialog.id === id ? { ...dialog, hasBeenPositioned: true } : dialog
+      )
+    );
+  };
+
   const renderDialog = (dialog: Dialog): React.ReactElement => (
     <DraggableContentContainer
       key={dialog.id}
@@ -76,6 +108,9 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
       isOpen={dialog.isOpen}
       onClose={() => closeDialog(dialog.id)}
       boundaryRef={boundaryRef}
+      cascadeIndex={dialog.cascadeIndex ?? 0}
+      hasBeenPositioned={dialog.hasBeenPositioned ?? false}
+      onPositioned={() => markDialogAsPositioned(dialog.id)}
     >
       {typeof dialog.content === 'function' ? dialog.content() : dialog.content}
     </DraggableContentContainer>
@@ -93,13 +128,14 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
   };
 
   return (
-    <DialogContext.Provider value={{ 
-      dialogsState, 
-      openDialog, 
-      closeDialog, 
-      isDialogOpen, 
-      renderDialog, 
-      addDialog
+    <DialogContext.Provider value={{
+      dialogsState,
+      openDialog,
+      closeDialog,
+      isDialogOpen,
+      renderDialog,
+      addDialog,
+      markDialogAsPositioned
     }}>
       {children}
     </DialogContext.Provider>

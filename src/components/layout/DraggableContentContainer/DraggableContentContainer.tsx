@@ -5,8 +5,8 @@ import { useMove, usePress } from '@react-aria/interactions';
 import { mergeProps } from '@react-aria/utils';
 import CloseButton from '../Button/CloseButton/CloseButton';
 import { useZIndex } from '../../../utils/ZIndexProvider';
-import { pointValueService } from '../../../services/PointValueService';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
+import { useInitialPosition } from '../../../hooks/useInitialPosition';
 
 export interface DraggableContentContainerProps {
   title?: React.ReactNode;
@@ -17,6 +17,9 @@ export interface DraggableContentContainerProps {
   style?: React.CSSProperties;
   onFocus?: () => void;
   id?: string;
+  cascadeIndex?: number;
+  hasBeenPositioned?: boolean;
+  onPositioned?: () => void;
 }
 
 interface ViewerContainerSize {
@@ -37,6 +40,9 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   style = {},
   onFocus,
   id = 'draggable-content-' + Math.random().toString(36).substring(2, 11),
+  cascadeIndex = 0,
+  hasBeenPositioned = false,
+  onPositioned,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
@@ -48,6 +54,23 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const [isHovered, setIsHovered] = useState(false);
 
   useMouseTrackingControl(isDragging || isHovered, `draggable-content-${id}`);
+
+  // Calculate initial centered position with cascade
+  const initialPosition = useInitialPosition({
+    dialogRef,
+    boundaryRef,
+    isOpen,
+    cascadeIndex,
+    hasBeenPositioned
+  });
+
+  // Apply initial position when calculated
+  useEffect(() => {
+    if (initialPosition && !hasBeenPositioned) {
+      setTranslation(initialPosition);
+      onPositioned?.();
+    }
+  }, [initialPosition, hasBeenPositioned, onPositioned]);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -125,6 +148,10 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       });
     },
     onMoveEnd: () => {
+      // Mark as positioned after user drag
+      if (!hasBeenPositioned) {
+        onPositioned?.();
+      }
       setTimeout(() => {
         setIsDragging(false);
       }, 100);
