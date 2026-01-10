@@ -5,6 +5,7 @@ import ChemistrySection from '../ChemistrySection/ChemistrySection';
 import GeographicalLayersSection from '../GeographicalLayersSection/GeographicalLayersSection';
 import MineralsSection from '../MineralsSection/MineralsSection';
 import ViewerOptionsSection from '../ViewerOptionsSection/ViewerOptionsSection';
+import FeaturesSection from '../FeaturesSection/FeaturesSection';
 import { useDialogContext } from '../../../utils/DialogWindowManagement';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
@@ -35,12 +36,12 @@ const dialogsData: Icon[] = [
     dialogContent: 'Layer Management content goes here.',
     type: 'dock'
   },
-  { 
-    id: 'home-dialog', 
-    name: 'home', 
-    label: 'Home', 
-    dialogTitle: 'Home Dialog', 
-    dialogContent: 'Home dialog content goes here.' 
+  {
+    id: 'home-dialog',
+    name: 'home',
+    label: 'Home',
+    dialogTitle: 'Home Dialog',
+    dialogContent: 'Home dialog content goes here.'
   },
   {
     id: 'geospatial-layer-dialog',
@@ -62,6 +63,13 @@ const dialogsData: Icon[] = [
     label: 'Geology',
     dialogTitle: 'Geology',
     dialogContent: <MineralsSection />
+  },
+  {
+    id: 'features-dialog',
+    name: 'shapes',
+    label: 'Features',
+    dialogTitle: 'Features',
+    dialogContent: <FeaturesSection />
   },
   /*
   { 

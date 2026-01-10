@@ -1,0 +1,140 @@
+.section {
+  padding: 0;
+  color: var(--color-neutralVariant);
+  display: flex;
+  flex-direction: column;
+
+  &:not(:last-child) {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.title {
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  color: var(--color-tertiary);
+}
+
+.toolsWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toolsContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.icon {
+  font-size: 1.3125rem;
+  color: var(--color-tertiary);
+}
+
+.drawingToolRadio {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  &[data-focus-visible] .radioButton {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}
+
+.radioButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-quartenary);
+  box-shadow: inset 0 0 1px 1px black;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  svg {
+    font-size: 1.3125rem;
+    width: 1.3125rem;
+    height: 1.3125rem;
+    color: var(--color-tertiary);
+  }
+
+  &[data-selected] {
+    background-color: var(--color-quartenary);
+    border-color: var(--color-tertiary);
+
+    .icon,
+    svg {
+      color: var(--color-secondary);
+    }
+  }
+
+  .drawingToolRadio[data-hovered] & {
+    background-color: var(--color-quartenary);
+  }
+
+  .drawingToolRadio[data-pressed] & {
+    background-color: var(--color-neutral);
+  }
+}
+
+.selectionFrame {
+  padding: 1rem;
+  border: 1px solid var(--color-quartenary);
+  border-radius: 0.25rem;
+  background-color: rgba(35, 41, 53, 0.3);
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder {
+  color: var(--color-tertiary);
+  font-size: 0.875rem;
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.separator {
+  width: 1px;
+  height: 2rem;
+  background-color: var(--color-quartenary);
+  margin: 0 0.25rem;
+}
+
+.uploadButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background-color: var(--color-primary);
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-quartenary);
+  box-shadow: inset 0 0 1px 1px black;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+
+  .icon {
+    color: var(--color-tertiary);
+  }
+
+  &[data-hovered] {
+    background-color: var(--color-quartenary);
+  }
+
+  &[data-pressed] {
+    background-color: var(--color-neutral);
+  }
+
+  &[data-focus-visible] {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+}

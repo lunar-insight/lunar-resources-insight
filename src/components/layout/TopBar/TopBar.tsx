@@ -20,34 +20,6 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
       } as React.CSSProperties}
     >
       <div className={styles.leftSection}>
-        <span className={styles.selectionText}>Selection</span>
-        <div className={styles.drawGroup}>
-          <TopBarButton
-            icon="point_scan"
-            ariaLabel="Point Drawing Tool"
-            tooltipText="Draw points"
-            onPress={() => {}}
-            tooltipPlacement="bottom"
-            isSelected={false}
-          />
-          <TopBarButton
-            icon="diagonal_line"
-            ariaLabel="Line Drawing Tool"
-            tooltipText="Draw lines"
-            onPress={() => {}}
-            tooltipPlacement="bottom"
-            isSelected={false}
-          />
-          <TopBarButton
-            icon="hexagon"
-            ariaLabel="Polygon Drawing Tool"
-            tooltipText="Draw polygons"
-            onPress={() => {}}
-            tooltipPlacement="bottom"
-            isSelected={false}
-          />
-        </div>
-        <div className={styles.separator}></div>
         <span className={styles.selectionText}>Measurement</span>
         <div className={styles.measurementGroup}>
           <TopBarButton
