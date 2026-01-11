@@ -204,17 +204,8 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
-
-      const timer = setTimeout(() => {
-        // Only add visible class when position is ready
-        if (isPositionReady) {
-          dialogRef.current?.classList.add(styles.visible);
-        }
-        // Foreground when opening
-        bringToFront(id, 'box-container');
-      }, 50);
-
-      return () => clearTimeout(timer);
+      // Foreground when opening
+      bringToFront(id, 'box-container');
     } else {
       dialogRef.current?.classList.remove(styles.visible);
 
@@ -227,15 +218,12 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen, id, bringToFront, isPositionReady]);
+  }, [isOpen, id, bringToFront]);
 
   // Add visible class when position becomes ready
   useEffect(() => {
     if (isVisible && isPositionReady) {
-      const timer = setTimeout(() => {
-        dialogRef.current?.classList.add(styles.visible);
-      }, 50);
-      return () => clearTimeout(timer);
+      dialogRef.current?.classList.add(styles.visible);
     }
   }, [isVisible, isPositionReady]);
 

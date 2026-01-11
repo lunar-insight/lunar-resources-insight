@@ -56,12 +56,8 @@ export const useInitialPosition = (
       setPosition({ x: finalX, y: finalY });
     };
 
-    // Start calculation after a short delay to ensure DOM is rendered
-    const timeoutId = setTimeout(() => {
-      requestAnimationFrame(calculatePosition);
-    }, 60); // Slightly after visibility animation (50ms)
-
-    return () => clearTimeout(timeoutId);
+    // Start calculation immediately
+    requestAnimationFrame(calculatePosition);
   }, [isOpen, hasBeenPositioned, cascadeIndex, position, dialogRef, boundaryRef]);
 
   // Reset position when window is closed
