@@ -1,4 +1,4 @@
-import './DraggableBoxContentContainer.scss';
+import styles from './DraggableBoxContentContainer.module.scss';
 import React, { useRef, useState, useEffect } from 'react';
 import { useDialog } from '@react-aria/dialog';
 import { useMove, usePress } from '@react-aria/interactions';
@@ -208,7 +208,7 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       const timer = setTimeout(() => {
         // Only add visible class when position is ready
         if (isPositionReady) {
-          dialogRef.current?.classList.add('draggable-box-content-container__visible');
+          dialogRef.current?.classList.add(styles.visible);
         }
         // Foreground when opening
         bringToFront(id, 'box-container');
@@ -216,7 +216,7 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
 
       return () => clearTimeout(timer);
     } else {
-      dialogRef.current?.classList.remove('draggable-box-content-container__visible');
+      dialogRef.current?.classList.remove(styles.visible);
 
       const timer = setTimeout(() => {
         setIsVisible(false);
@@ -233,7 +233,7 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   useEffect(() => {
     if (isVisible && isPositionReady) {
       const timer = setTimeout(() => {
-        dialogRef.current?.classList.add('draggable-box-content-container__visible');
+        dialogRef.current?.classList.add(styles.visible);
       }, 50);
       return () => clearTimeout(timer);
     }
@@ -244,28 +244,28 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       {...dialogProps}
       {...pressProps}
       ref={dialogRef}
-      className={`draggable-box-content-container ${className} ${!isVisible ? 'draggable-box-content-container__hidden' : ''}`}
+      className={`${styles.draggableBoxContentContainer} ${className} ${!isVisible ? styles.hidden : ''}`}
       style={isVisible ? containerStyle : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {title && (
-        <div 
+        <div
           {...titleBarProps}
-          className="draggable-box-content-container__move-area"
+          className={styles.moveArea}
         >
-          <h3 {...titleProps} className="draggable-box-content-container__move-area__title">
+          <h3 {...titleProps} className={styles.title}>
             {title}
           </h3>
           <CloseButton
             onPress={onClose}
-            className="draggable-box-content-container__move-area__close-button"
+            className={styles.closeButton}
             light
           />
         </div>
       )}
-      
-      <div className="draggable-box-content-container__content-area">
+
+      <div className={styles.contentArea}>
         {children}
       </div>
     </div>

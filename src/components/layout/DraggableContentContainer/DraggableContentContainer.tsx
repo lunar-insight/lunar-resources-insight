@@ -1,4 +1,4 @@
-import './DraggableContentContainer.scss';
+import styles from './DraggableContentContainer.module.scss';
 import React, { useRef, useState, useEffect } from 'react';
 import { useDialog } from '@react-aria/dialog';
 import { useMove, usePress } from '@react-aria/interactions';
@@ -197,7 +197,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       const timer = setTimeout(() => {
         // Only add visible class when position is ready
         if (isPositionReady) {
-          dialogRef.current?.classList.add('draggable-content-container__visible');
+          dialogRef.current?.classList.add(styles.visible);
         }
         // Foreground when opening
         bringToFront(id, 'content-container');
@@ -205,7 +205,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
 
       return () => clearTimeout(timer);
     } else {
-      dialogRef.current?.classList.remove('draggable-content-container__visible');
+      dialogRef.current?.classList.remove(styles.visible);
 
       const timer = setTimeout(() => {
         setIsVisible(false);
@@ -222,7 +222,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   useEffect(() => {
     if (isVisible && isPositionReady) {
       const timer = setTimeout(() => {
-        dialogRef.current?.classList.add('draggable-content-container__visible');
+        dialogRef.current?.classList.add(styles.visible);
       }, 50);
       return () => clearTimeout(timer);
     }
@@ -233,24 +233,24 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       {...dialogProps}
       {...pressProps}
       ref={dialogRef}
-      className={`draggable-content-container ${!isVisible ? 'draggable-content-container__hidden' : ''}`}
+      className={`${styles.draggableContentContainer} ${!isVisible ? styles.hidden : ''}`}
       style={isVisible ? containerStyle : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div 
+      <div
         {...titleBarProps}
-        className="draggable-content-container__move-area"
+        className={styles.moveArea}
       >
-        <h3 {...titleProps} className="draggable-content-container__move-area__title">{title}</h3>
+        <h3 {...titleProps} className={styles.title}>{title}</h3>
 
         <CloseButton
           onPress={onClose}
-          className="draggable-content-container__move-area__close-button"
+          className={styles.closeButton}
         />
 
       </div>
-      <div className="draggable-content-container__content-area">
+      <div className={styles.contentArea}>
         {children}
       </div>
     </div>
