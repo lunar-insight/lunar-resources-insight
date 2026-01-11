@@ -1,0 +1,36 @@
+.feature-insights-box {
+  pointer-events: auto;
+  box-sizing: border-box;
+
+  &__content {
+    box-sizing: border-box;
+    padding: 15px;
+    color: white;
+    font-size: 0.85rem;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    p {
+      margin: 0 0 0.5rem 0;
+      color: white;
+    }
+
+    small {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.75rem;
+    }
+  }
+
+  &.draggable-box-content-container {
+    pointer-events: auto;
+
+    .feature-insights-box__content {
+      pointer-events: auto;
+    }
+  }
+}

@@ -9,6 +9,7 @@ import { SidebarProvider, useSidebarContext } from 'utils/context/SidebarContext
 import Sidebar from 'components/layout/Sidebar/Sidebar';
 import { LayerProvider } from 'utils/context/LayerContext';
 import { ViewerProvider } from 'utils/context/ViewerContext';
+import { FeaturesProvider } from 'utils/context/FeaturesContext';
 import { initializeLayerStats } from 'services/LayerStatsService';
 import { initializeColormapService } from 'services/ColormapService';
 import { ZIndexProvider } from 'utils/ZIndexProvider';
@@ -72,11 +73,13 @@ const MainPage = () => {
     <ViewerProvider>
       <MouseTrackingProvider>
         <LayerProvider>
-          <ZIndexProvider>
-            <SidebarProvider>
-              <MainPageContent />
-            </SidebarProvider>
-          </ZIndexProvider>  
+          <FeaturesProvider>
+            <ZIndexProvider>
+              <SidebarProvider>
+                <MainPageContent />
+              </SidebarProvider>
+            </ZIndexProvider>
+          </FeaturesProvider>
         </LayerProvider>
       </MouseTrackingProvider>
     </ViewerProvider>

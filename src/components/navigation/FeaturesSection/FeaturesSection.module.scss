@@ -38,6 +38,10 @@
   display: flex;
   align-items: center;
   cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  outline: none;
 
   &[data-focus-visible] .radioButton {
     outline: 2px solid var(--color-secondary);
