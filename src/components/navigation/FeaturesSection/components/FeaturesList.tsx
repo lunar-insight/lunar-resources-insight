@@ -1,7 +1,7 @@
 import React from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
-import { useFeaturesContext } from '../../../../utils/context/FeaturesContext';
-import RemoveLayerButton from '../../../layout/Button/RemoveLayerButton/RemoveLayerButton';
+import { useFeaturesContext } from 'utils/context/FeaturesContext';
+import RemoveLayerButton from 'components/layout/Button/RemoveLayerButton/RemoveLayerButton';
 import { FeatureInsightsButton } from './FeatureInsightsButton';
 import styles from './FeaturesList.module.scss';
 

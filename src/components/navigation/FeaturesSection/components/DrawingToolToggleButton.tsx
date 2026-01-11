@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react';
 import { ToggleButton, TooltipTrigger } from 'react-aria-components';
-import { ButtonTooltip } from '../../../layout/Tooltip/ButtonTooltip';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import styles from '../FeaturesSection.module.scss';
 
 interface DrawingToolToggleButtonProps {

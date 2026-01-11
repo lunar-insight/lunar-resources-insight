@@ -1,16 +1,16 @@
 import React, { useRef, useEffect } from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
-import { ButtonTooltip } from '../../layout/Tooltip/ButtonTooltip';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import { TwoPointCircleIcon } from './icons/TwoPointCircleIcon';
 import { ThreePointCircleIcon } from './icons/ThreePointCircleIcon';
 import { DrawingToolToggleButton } from './components/DrawingToolToggleButton';
 import { FeaturesList } from './components/FeaturesList';
-import { useFeaturesContext } from '../../../utils/context/FeaturesContext';
-import { useViewer } from '../../../utils/context/ViewerContext';
-import { useBoundaryRef } from '../../reference/BoundaryRefProvider';
-import { FeatureDrawingService } from '../../../services/FeatureDrawingService';
-import DraggableBoxContentContainer from '../../layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
-import { Portal } from '../../ui/Portal/Portal';
+import { useFeaturesContext } from 'utils/context/FeaturesContext';
+import { useViewer } from 'utils/context/ViewerContext';
+import { useBoundaryRef } from 'components/reference/BoundaryRefProvider';
+import { FeatureDrawingService } from 'services/FeatureDrawingService';
+import DraggableBoxContentContainer from 'components/layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
+import { Portal } from 'components/ui/Portal/Portal';
 import styles from './FeaturesSection.module.scss';
 import './FeatureInsightsBox.scss';
 
