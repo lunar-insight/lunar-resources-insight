@@ -20,7 +20,7 @@ const RemoveLayerButton: React.FC<RemoveLayerButtonProps> = ({ onPress, classNam
           remove
         </span>
       </Button>
-      <ButtonTooltip placement='left'>
+      <ButtonTooltip placement='right'>
         Remove layer
       </ButtonTooltip>
     </TooltipTrigger>

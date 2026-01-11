@@ -25,7 +25,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({
           close
         </span>
       </Button>
-      <ButtonTooltip placement='left'>
+      <ButtonTooltip placement='right'>
         Close
       </ButtonTooltip>
     </TooltipTrigger>

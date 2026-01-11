@@ -43,7 +43,7 @@ export const DrawingToolToggleButton: React.FC<DrawingToolToggleButtonProps> = (
           </div>
         )}
       </ToggleButton>
-      <ButtonTooltip placement="right">
+      <ButtonTooltip placement="bottom">
         {tooltip}
       </ButtonTooltip>
     </TooltipTrigger>

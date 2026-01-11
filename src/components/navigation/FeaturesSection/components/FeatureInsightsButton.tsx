@@ -24,7 +24,7 @@ export const FeatureInsightsButton: React.FC<FeatureInsightsButtonProps> = ({
           search_insights
         </span>
       </ToggleButton>
-      <ButtonTooltip placement="left">
+      <ButtonTooltip placement="bottom">
         Feature Insights
       </ButtonTooltip>
     </TooltipTrigger>
