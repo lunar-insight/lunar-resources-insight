@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { Feature } from '../../types/features';
+import { Feature } from '../../components/navigation/FeaturesSection/types';
 import { useViewer } from './ViewerContext';
 
 interface FeaturesContextType {

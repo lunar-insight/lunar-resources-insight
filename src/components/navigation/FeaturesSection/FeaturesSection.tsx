@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import { ButtonTooltip } from '../../layout/Tooltip/ButtonTooltip';
-import { TwoPointCircleIcon } from '../../ui/DrawingIcons/TwoPointCircleIcon';
-import { ThreePointCircleIcon } from '../../ui/DrawingIcons/ThreePointCircleIcon';
+import { TwoPointCircleIcon } from './icons/TwoPointCircleIcon';
+import { ThreePointCircleIcon } from './icons/ThreePointCircleIcon';
 import { DrawingToolToggleButton } from './components/DrawingToolToggleButton';
 import { FeaturesList } from './components/FeaturesList';
 import { useFeaturesContext } from '../../../utils/context/FeaturesContext';

@@ -1,6 +1,6 @@
 import * as Cesium from 'cesium';
 import { pointValueService } from './PointValueService';
-import { Feature } from '../types/features';
+import { Feature } from '../components/navigation/FeaturesSection/types';
 import { generateFeatureName } from '../utils/context/FeaturesContext';
 
 export class FeatureDrawingService {
