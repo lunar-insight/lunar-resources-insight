@@ -52,6 +52,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const [isVisible, setIsVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isPositionReady, setIsPositionReady] = useState(false);
 
   useMouseTrackingControl(isDragging || isHovered, `draggable-content-${id}`);
 
@@ -68,7 +69,11 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   useEffect(() => {
     if (initialPosition && !hasBeenPositioned) {
       setTranslation(initialPosition);
+      setIsPositionReady(true);
       onPositioned?.();
+    } else if (hasBeenPositioned) {
+      // If already positioned, mark as ready immediately
+      setIsPositionReady(true);
     }
   }, [initialPosition, hasBeenPositioned, onPositioned]);
 
@@ -190,7 +195,10 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       setIsVisible(true);
 
       const timer = setTimeout(() => {
-        dialogRef.current?.classList.add('draggable-content-container__visible');
+        // Only add visible class when position is ready
+        if (isPositionReady) {
+          dialogRef.current?.classList.add('draggable-content-container__visible');
+        }
         // Foreground when opening
         bringToFront(id, 'content-container');
       }, 50);
@@ -203,17 +211,28 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
         setIsVisible(false);
         setIsHovered(false);
         setIsDragging(false);
+        setIsPositionReady(false);
       }, 200);
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen, id, bringToFront]);
+  }, [isOpen, id, bringToFront, isPositionReady]);
+
+  // Add visible class when position becomes ready
+  useEffect(() => {
+    if (isVisible && isPositionReady) {
+      const timer = setTimeout(() => {
+        dialogRef.current?.classList.add('draggable-content-container__visible');
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, isPositionReady]);
 
   return (
-    <div 
-      {...dialogProps} 
+    <div
+      {...dialogProps}
       {...pressProps}
-      ref={dialogRef} 
+      ref={dialogRef}
       className={`draggable-content-container ${!isVisible ? 'draggable-content-container__hidden' : ''}`}
       style={isVisible ? containerStyle : undefined}
       onMouseEnter={handleMouseEnter}
