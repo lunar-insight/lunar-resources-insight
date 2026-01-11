@@ -12,7 +12,7 @@ import { FeatureDrawingService } from 'services/FeatureDrawingService';
 import DraggableBoxContentContainer from 'components/layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
 import { Portal } from 'components/ui/Portal/Portal';
 import styles from './FeaturesSection.module.scss';
-import './FeatureInsightsBox.scss';
+import insightsStyles from './FeatureInsightsBox.module.scss';
 
 const FeaturesSection: React.FC = () => {
   const {
@@ -155,7 +155,7 @@ const FeaturesSection: React.FC = () => {
         return (
           <Portal key={feature.id}>
             <DraggableBoxContentContainer
-              className='feature-insights-box'
+              className={insightsStyles.featureInsightsBox}
               isOpen={true}
               onClose={() => toggleFeatureInsights(feature.id)}
               title={`Insights: ${feature.name}`}
@@ -165,7 +165,7 @@ const FeaturesSection: React.FC = () => {
               height={300}
               id={`feature-insights-${feature.id}`}
             >
-              <div className='feature-insights-box__content'>
+              <div className={insightsStyles.content}>
                 <p>Insights content coming soon...</p>
                 <small>Feature: {feature.name}</small>
               </div>
