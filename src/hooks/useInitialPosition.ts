@@ -60,12 +60,5 @@ export const useInitialPosition = (
     requestAnimationFrame(calculatePosition);
   }, [isOpen, hasBeenPositioned, cascadeIndex, position, dialogRef, boundaryRef]);
 
-  // Reset position when window is closed
-  useEffect(() => {
-    if (!isOpen) {
-      setPosition(null);
-    }
-  }, [isOpen]);
-
   return position;
 };

@@ -146,8 +146,6 @@ const FeaturesSection: React.FC = () => {
 
       {/* Insights Boxes */}
       {features.map((feature) => {
-        if (!feature.insightsOpen) return null;
-
         // Calculate cascade index based only on currently open insights
         const openFeatures = features.filter(f => f.insightsOpen);
         const cascadeIndex = openFeatures.findIndex(f => f.id === feature.id);
@@ -156,7 +154,7 @@ const FeaturesSection: React.FC = () => {
           <Portal key={feature.id}>
             <DraggableBoxContentContainer
               className={insightsStyles.featureInsightsBox}
-              isOpen={true}
+              isOpen={feature.insightsOpen}
               onClose={() => toggleFeatureInsights(feature.id)}
               title={`Insights: ${feature.name}`}
               boundaryRef={boundaryRef}

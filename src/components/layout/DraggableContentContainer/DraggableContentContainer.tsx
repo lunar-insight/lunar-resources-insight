@@ -18,8 +18,6 @@ export interface DraggableContentContainerProps {
   onFocus?: () => void;
   id?: string;
   cascadeIndex?: number;
-  hasBeenPositioned?: boolean;
-  onPositioned?: () => void;
 }
 
 interface ViewerContainerSize {
@@ -41,8 +39,6 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   onFocus,
   id = 'draggable-content-' + Math.random().toString(36).substring(2, 11),
   cascadeIndex = 0,
-  hasBeenPositioned = false,
-  onPositioned,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
@@ -53,6 +49,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isPositionReady, setIsPositionReady] = useState(false);
+  const [hasBeenPositioned, setHasBeenPositioned] = useState(false);
 
   useMouseTrackingControl(isDragging || isHovered, `draggable-content-${id}`);
 
@@ -70,12 +67,12 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     if (initialPosition && !hasBeenPositioned) {
       setTranslation(initialPosition);
       setIsPositionReady(true);
-      onPositioned?.();
+      setHasBeenPositioned(true);
     } else if (hasBeenPositioned) {
       // If already positioned, mark as ready immediately
       setIsPositionReady(true);
     }
-  }, [initialPosition, hasBeenPositioned, onPositioned]);
+  }, [initialPosition, hasBeenPositioned]);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -155,7 +152,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
     onMoveEnd: () => {
       // Mark as positioned after user drag
       if (!hasBeenPositioned) {
-        onPositioned?.();
+        setHasBeenPositioned(true);
       }
       setTimeout(() => {
         setIsDragging(false);
@@ -195,6 +192,10 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
       setIsVisible(true);
       // Foreground when opening
       bringToFront(id, 'content-container');
+      // Restore position ready state if already positioned
+      if (hasBeenPositioned) {
+        setIsPositionReady(true);
+      }
     } else {
       dialogRef.current?.classList.remove(styles.visible);
 
@@ -207,7 +208,7 @@ export const DraggableContentContainer: React.FC<DraggableContentContainerProps>
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen, id, bringToFront]);
+  }, [isOpen, id, bringToFront, hasBeenPositioned]);
 
   // Add visible class when position becomes ready
   useEffect(() => {

@@ -8,7 +8,6 @@ interface Dialog {
   title: string;
   content: React.ReactNode | (() => React.ReactNode);
   cascadeIndex?: number;
-  hasBeenPositioned?: boolean;
 }
 
 interface DialogContextValue {
@@ -18,7 +17,6 @@ interface DialogContextValue {
   isDialogOpen: (id: string) => boolean;
   renderDialog: (dialog: Dialog) => React.ReactElement;
   addDialog: (dialog: Dialog) => void;
-  markDialogAsPositioned: (id: string) => void;
 }
 
 const DialogContext = createContext<DialogContextValue | undefined>(undefined);
@@ -60,9 +58,7 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
             ? {
                 ...dialog,
                 isOpen: true,
-                cascadeIndex: dialog.hasBeenPositioned
-                  ? dialog.cascadeIndex
-                  : cascadeIndex
+                cascadeIndex
               }
             : dialog
         );
@@ -72,8 +68,7 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
           isOpen: true,
           title: '',
           content: content || '',
-          cascadeIndex,
-          hasBeenPositioned: false
+          cascadeIndex
         };
         return [...prevDialogs, newDialog];
       }
@@ -92,14 +87,6 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
     return dialogsState.some(dialog => dialog.id === id && dialog.isOpen);
   };
 
-  const markDialogAsPositioned = (id: string) => {
-    setDialogsState(prevDialogs =>
-      prevDialogs.map(dialog =>
-        dialog.id === id ? { ...dialog, hasBeenPositioned: true } : dialog
-      )
-    );
-  };
-
   const renderDialog = (dialog: Dialog): React.ReactElement => (
     <DraggableContentContainer
       key={dialog.id}
@@ -109,8 +96,6 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
       onClose={() => closeDialog(dialog.id)}
       boundaryRef={boundaryRef}
       cascadeIndex={dialog.cascadeIndex ?? 0}
-      hasBeenPositioned={dialog.hasBeenPositioned ?? false}
-      onPositioned={() => markDialogAsPositioned(dialog.id)}
     >
       {typeof dialog.content === 'function' ? dialog.content() : dialog.content}
     </DraggableContentContainer>
@@ -134,8 +119,7 @@ const DialogProvider: React.FC<{ children: React.ReactNode; dialogs: Dialog[] }>
       closeDialog,
       isDialogOpen,
       renderDialog,
-      addDialog,
-      markDialogAsPositioned
+      addDialog
     }}>
       {children}
     </DialogContext.Provider>

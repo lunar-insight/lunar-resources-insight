@@ -20,8 +20,6 @@ export interface DraggableBoxContentContainerProps {
   boundaryRef: React.RefObject<HTMLDivElement>;
   id?: string;
   cascadeIndex?: number;
-  hasBeenPositioned?: boolean;
-  onPositioned?: () => void;
 }
 
 interface ViewerContainerSize {
@@ -45,20 +43,19 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   boundaryRef,
   id = 'draggable-box-' + Math.random().toString(36).substring(2, 11),
   cascadeIndex = 0,
-  hasBeenPositioned = false,
-  onPositioned,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
   const { bringToFront, getZIndex } = useZIndex();
   const [viewerContainerSize, setViewerContainerSize] = useState<ViewerContainerSize>({
-    x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 
+    x: 0, y: 0, width: 0, height: 0, left: 0, top: 0
   });
   const [translation, setTranslation] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [isPositionReady, setIsPositionReady] = useState(false);
+  const [hasBeenPositioned, setHasBeenPositioned] = useState(false);
 
   useMouseTrackingControl(isDragging || isHovered, `draggable-box-${id}`);
 
@@ -76,12 +73,12 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
     if (initialPosition && !hasBeenPositioned) {
       setTranslation(initialPosition);
       setIsPositionReady(true);
-      onPositioned?.();
+      setHasBeenPositioned(true);
     } else if (hasBeenPositioned) {
       // If already positioned, mark as ready immediately
       setIsPositionReady(true);
     }
-  }, [initialPosition, hasBeenPositioned, onPositioned]);
+  }, [initialPosition, hasBeenPositioned]);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -160,7 +157,7 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
     onMoveEnd: () => {
       // Mark as positioned after user drag
       if (!hasBeenPositioned) {
-        onPositioned?.();
+        setHasBeenPositioned(true);
       }
       setTimeout(() => {
         setIsDragging(false);
@@ -206,6 +203,10 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       setIsVisible(true);
       // Foreground when opening
       bringToFront(id, 'box-container');
+      // Restore position ready state if already positioned
+      if (hasBeenPositioned) {
+        setIsPositionReady(true);
+      }
     } else {
       dialogRef.current?.classList.remove(styles.visible);
 
@@ -218,7 +219,7 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen, id, bringToFront]);
+  }, [isOpen, id, bringToFront, hasBeenPositioned]);
 
   // Add visible class when position becomes ready
   useEffect(() => {

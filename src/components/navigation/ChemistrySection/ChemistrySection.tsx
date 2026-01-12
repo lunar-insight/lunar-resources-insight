@@ -191,24 +191,22 @@ const ChemistrySection: React.FC = () => {
         </div>
       )}
 
-      {showValueBox && (
-        <Portal>
-          <DraggableBoxContentContainer 
-            className='map-hover-values-box'
-            width={400}
-            height={350}
-            title="Element concentration"
-            isOpen={showValueBox}
-            onClose={() => handlePointFetchToggle(false)}
-            boundaryRef={boundaryRef}
-            id="element-concentration-box"
-          >
-            <div className='map-hover-values-box__content'>
-              {renderValueBoxContent()}
-            </div>
-          </DraggableBoxContentContainer>
-        </Portal>
-      )}
+      <Portal>
+        <DraggableBoxContentContainer
+          className='map-hover-values-box'
+          width={400}
+          height={350}
+          title="Element concentration"
+          isOpen={showValueBox}
+          onClose={() => handlePointFetchToggle(false)}
+          boundaryRef={boundaryRef}
+          id="element-concentration-box"
+        >
+          <div className='map-hover-values-box__content'>
+            {renderValueBoxContent()}
+          </div>
+        </DraggableBoxContentContainer>
+      </Portal>
 
       <ModalOverlayContainer
         isOpen={isModalOpen}
