@@ -15,6 +15,7 @@ import negativeY from 'assets/images/skybox/ny.jpg';
 import positiveZ from 'assets/images/skybox/pz.jpg';
 import negativeZ from 'assets/images/skybox/nz.jpg';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
+import { useFeaturesContext } from '../../../utils/context/FeaturesContext';
 
 interface CesiumComponentProps {
   className?: string;
@@ -26,9 +27,11 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
 
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
   const { setViewer } = useViewer();
+  const { activeDrawingTool } = useFeaturesContext();
 
   const isMovingRef = useRef<boolean>(false);
   const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const activeDrawingToolRef = useRef<string | null>(null);
 
   useMouseTrackingControl(isCameraMoving, 'cesium-camera');
 
@@ -127,6 +130,15 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         canvas.style.cursor = 'default';
       };
 
+      const mouseEnterHandler = () => {
+        // Restore correct cursor when entering canvas
+        if (activeDrawingToolRef.current) {
+          canvas.style.cursor = 'crosshair';
+        } else {
+          canvas.style.cursor = 'default';
+        }
+      };
+
       const moveStartRemover = viewer.camera.moveStart.addEventListener(startMovement);
       const moveEndRemover = viewer.camera.moveEnd.addEventListener(endMovement);
 
@@ -148,6 +160,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       });
 
       canvas.addEventListener('mouseleave', mouseLeaveHandler);
+      canvas.addEventListener('mouseenter', mouseEnterHandler);
 
       // Cleanup function
       return () => {
@@ -163,13 +176,65 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
           moveEndRemover();
         }
 
-        canvas.removeEventListener('mouseleave', mouseLeaveHandler)
+        canvas.removeEventListener('mouseleave', mouseLeaveHandler);
+        canvas.removeEventListener('mouseenter', mouseEnterHandler)
 
         // Re-enable mouse tracking on cleanup
         pointValueService.enableMouseTracking();
       };
     }
   }, [setViewer]);
+
+  // Update cursor based on active drawing tool
+  useEffect(() => {
+    if (!localViewer) return;
+
+    // Update ref so event handlers can access current value
+    activeDrawingToolRef.current = activeDrawingTool;
+
+    const canvas = localViewer.cesiumWidget.canvas;
+    const handler = localViewer.cesiumWidget.screenSpaceEventHandler;
+
+    if (activeDrawingTool) {
+      // In selection mode, use crosshair cursor
+      canvas.style.cursor = 'crosshair';
+
+      // Override the default grab/grabbing behavior during selection mode
+      const leftDownHandler = handler.getInputAction(Cesium.ScreenSpaceEventType.LEFT_DOWN);
+      const leftUpHandler = handler.getInputAction(Cesium.ScreenSpaceEventType.LEFT_UP);
+
+      // Remove default handlers
+      handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOWN);
+      handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_UP);
+
+      // Set handlers that maintain crosshair
+      handler.setInputAction(() => {
+        canvas.style.cursor = 'crosshair';
+      }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+      handler.setInputAction(() => {
+        canvas.style.cursor = 'crosshair';
+      }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
+      // Cleanup: restore original handlers when leaving selection mode
+      return () => {
+        handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOWN);
+        handler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_UP);
+
+        // Restore default grab/grabbing behavior
+        handler.setInputAction(() => {
+          canvas.style.cursor = 'grabbing';
+        }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+        handler.setInputAction(() => {
+          canvas.style.cursor = 'default';
+        }, Cesium.ScreenSpaceEventType.LEFT_UP);
+      };
+    } else {
+      // Not in selection mode, use default cursor
+      canvas.style.cursor = 'default';
+    }
+  }, [activeDrawingTool, localViewer]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
