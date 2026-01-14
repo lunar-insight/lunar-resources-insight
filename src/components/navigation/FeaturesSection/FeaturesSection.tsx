@@ -5,6 +5,7 @@ import { TwoPointCircleIcon } from './icons/TwoPointCircleIcon';
 import { ThreePointCircleIcon } from './icons/ThreePointCircleIcon';
 import { DrawingToolToggleButton } from './components/DrawingToolToggleButton';
 import { FeaturesList } from './components/FeaturesList';
+import { VisibilityToggleButton } from './components/VisibilityToggleButton';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useViewer } from 'utils/context/ViewerContext';
 import { useBoundaryRef } from 'components/reference/BoundaryRefProvider';
@@ -21,6 +22,10 @@ const FeaturesSection: React.FC = () => {
     setActiveDrawingTool,
     addFeature,
     toggleFeatureInsights,
+    showFeatures,
+    showLabels,
+    toggleFeatureVisibility,
+    toggleLabelVisibility,
   } = useFeaturesContext();
   const { viewer } = useViewer();
   const boundaryRef = useBoundaryRef();
@@ -53,6 +58,13 @@ const FeaturesSection: React.FC = () => {
       service.destroy();
     };
   }, [viewer, addFeature, setActiveDrawingTool]);
+
+  // Update drawing service visibility state
+  useEffect(() => {
+    if (featureDrawingServiceRef.current) {
+      featureDrawingServiceRef.current.setVisibility(showFeatures, showLabels);
+    }
+  }, [showFeatures, showLabels]);
 
   const handleToggleDrawingTool = (tool: string, selected: boolean) => {
     if (selected) {
@@ -141,6 +153,21 @@ const FeaturesSection: React.FC = () => {
       {/* Features List Section */}
       <div className={styles.section}>
         <h3 className={styles.title}>Selected Features</h3>
+        <div className={styles.visibilityControls}>
+          <VisibilityToggleButton
+            isSelected={showFeatures}
+            onChange={toggleFeatureVisibility}
+            label="Features"
+            tooltip="Show/hide features on globe"
+          />
+          <VisibilityToggleButton
+            isSelected={showLabels}
+            onChange={toggleLabelVisibility}
+            label="Labels"
+            tooltip="Show/hide feature labels"
+            isDisabled={!showFeatures}
+          />
+        </div>
         <FeaturesList />
       </div>
 
@@ -164,7 +191,7 @@ const FeaturesSection: React.FC = () => {
               id={`feature-insights-${feature.id}`}
             >
               <div className={insightsStyles.content}>
-                <p>Insights content coming soon...</p>
+                <p>Insights content</p>
                 <small>Feature: {feature.name}</small>
               </div>
             </DraggableBoxContentContainer>

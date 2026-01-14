@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { ConstantProperty } from 'cesium';
 import { Feature } from '../../components/navigation/FeaturesSection/types';
 import { useViewer } from './ViewerContext';
 
@@ -9,6 +10,10 @@ interface FeaturesContextType {
   removeFeature: (id: string) => void;
   setActiveDrawingTool: (tool: string | null) => void;
   toggleFeatureInsights: (id: string) => void;
+  showFeatures: boolean;
+  showLabels: boolean;
+  toggleFeatureVisibility: () => void;
+  toggleLabelVisibility: () => void;
 }
 
 const FeaturesContext = createContext<FeaturesContextType | undefined>(undefined);
@@ -26,6 +31,8 @@ export const generateFeatureName = (type: string): string => {
 export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [activeDrawingTool, setActiveDrawingTool] = useState<string | null>(null);
+  const [showFeatures, setShowFeatures] = useState<boolean>(true);
+  const [showLabels, setShowLabels] = useState<boolean>(true);
   const { viewer } = useViewer();
 
   const addFeature = useCallback((feature: Feature) => {
@@ -50,6 +57,14 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
   }, []);
 
+  const toggleFeatureVisibility = useCallback(() => {
+    setShowFeatures(prev => !prev);
+  }, []);
+
+  const toggleLabelVisibility = useCallback(() => {
+    setShowLabels(prev => !prev);
+  }, []);
+
   // Cleanup all entities on unmount
   useEffect(() => {
     return () => {
@@ -61,6 +76,28 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     };
   }, []);
 
+  // Synchronize visibility state with Cesium entities
+  useEffect(() => {
+    if (viewer && features.length > 0) {
+      features.forEach(feature => {
+        const entity = feature.entity;
+
+        // Control shape visibility
+        if (entity.point) {
+          entity.point.show = new ConstantProperty(showFeatures);
+        }
+        // Future: handle other entity types
+        // if (entity.polygon) entity.polygon.show = showFeatures;
+        // if (entity.polyline) entity.polyline.show = showFeatures;
+
+        // Control label visibility (depends on features being visible)
+        if (entity.label) {
+          entity.label.show = new ConstantProperty(showFeatures && showLabels);
+        }
+      });
+    }
+  }, [viewer, features, showFeatures, showLabels]);
+
   const value: FeaturesContextType = {
     features,
     activeDrawingTool,
@@ -68,6 +105,10 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     removeFeature,
     setActiveDrawingTool,
     toggleFeatureInsights,
+    showFeatures,
+    showLabels,
+    toggleFeatureVisibility,
+    toggleLabelVisibility,
   };
 
   return (

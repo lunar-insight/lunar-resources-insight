@@ -10,6 +10,8 @@ export class FeatureDrawingService {
   private currentTool: string | null = null;
   private onPointCreatedCallback: ((feature: Feature) => void) | null = null;
   private onDrawingCancelledCallback: (() => void) | null = null;
+  private showFeatures: boolean = true;
+  private showLabels: boolean = true;
 
   setViewer(viewer: Cesium.Viewer | null) {
     this.viewer = viewer;
@@ -21,6 +23,11 @@ export class FeatureDrawingService {
   ) {
     this.onPointCreatedCallback = onPointCreated;
     this.onDrawingCancelledCallback = onDrawingCancelled;
+  }
+
+  setVisibility(showFeatures: boolean, showLabels: boolean) {
+    this.showFeatures = showFeatures;
+    this.showLabels = showLabels;
   }
 
   startDrawing(tool: string) {
@@ -95,6 +102,7 @@ export class FeatureDrawingService {
         outlineWidth: 2,
         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
         disableDepthTestDistance: Number.POSITIVE_INFINITY,
+        show: this.showFeatures,
       },
       label: {
         text: name,
@@ -106,6 +114,7 @@ export class FeatureDrawingService {
         verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
         pixelOffset: new Cesium.Cartesian2(0, -15),
         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        show: this.showFeatures && this.showLabels,
       },
     });
 
