@@ -2,11 +2,12 @@ import React from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import RemoveLayerButton from 'components/layout/Button/RemoveLayerButton/RemoveLayerButton';
+import { FeatureVisibilityButton } from './FeatureVisibilityButton';
 import { FeatureInsightsButton } from './FeatureInsightsButton';
 import styles from './FeaturesList.module.scss';
 
 export const FeaturesList: React.FC = () => {
-  const { features, removeFeature, toggleFeatureInsights } = useFeaturesContext();
+  const { features, removeFeature, toggleFeatureInsights, toggleFeatureVisible } = useFeaturesContext();
 
   if (features.length === 0) {
     return (
@@ -34,6 +35,11 @@ export const FeaturesList: React.FC = () => {
               <span className={styles.featureName}>{feature.name}</span>
 
               <div className={styles.featureActions}>
+                <FeatureVisibilityButton
+                  isVisible={feature.visible}
+                  onChange={() => toggleFeatureVisible(feature.id)}
+                />
+
                 <FeatureInsightsButton
                   isSelected={feature.insightsOpen}
                   onChange={() => toggleFeatureInsights(feature.id)}

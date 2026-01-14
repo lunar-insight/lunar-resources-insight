@@ -11,4 +11,5 @@ export interface Feature {
     createdAt: Date;
   };
   insightsOpen: boolean;
+  visible: boolean;
 }

@@ -129,6 +129,7 @@ export class FeatureDrawingService {
         createdAt: new Date(),
       },
       insightsOpen: false,
+      visible: true,
     };
 
     // Notify callback

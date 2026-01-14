@@ -10,6 +10,7 @@ interface FeaturesContextType {
   removeFeature: (id: string) => void;
   setActiveDrawingTool: (tool: string | null) => void;
   toggleFeatureInsights: (id: string) => void;
+  toggleFeatureVisible: (id: string) => void;
   showFeatures: boolean;
   showLabels: boolean;
   toggleFeatureVisibility: () => void;
@@ -57,6 +58,14 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
   }, []);
 
+  const toggleFeatureVisible = useCallback((id: string) => {
+    setFeatures(prev =>
+      prev.map(f =>
+        f.id === id ? { ...f, visible: !f.visible } : f
+      )
+    );
+  }, []);
+
   const toggleFeatureVisibility = useCallback(() => {
     setShowFeatures(prev => !prev);
   }, []);
@@ -81,18 +90,19 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (viewer && features.length > 0) {
       features.forEach(feature => {
         const entity = feature.entity;
+        const shouldShowFeature = showFeatures && feature.visible;
 
         // Control shape visibility
         if (entity.point) {
-          entity.point.show = new ConstantProperty(showFeatures);
+          entity.point.show = new ConstantProperty(shouldShowFeature);
         }
         // Future: handle other entity types
-        // if (entity.polygon) entity.polygon.show = showFeatures;
-        // if (entity.polyline) entity.polyline.show = showFeatures;
+        // if (entity.polygon) entity.polygon.show = shouldShowFeature;
+        // if (entity.polyline) entity.polyline.show = shouldShowFeature;
 
         // Control label visibility (depends on features being visible)
         if (entity.label) {
-          entity.label.show = new ConstantProperty(showFeatures && showLabels);
+          entity.label.show = new ConstantProperty(shouldShowFeature && showLabels);
         }
       });
     }
@@ -105,6 +115,7 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     removeFeature,
     setActiveDrawingTool,
     toggleFeatureInsights,
+    toggleFeatureVisible,
     showFeatures,
     showLabels,
     toggleFeatureVisibility,
