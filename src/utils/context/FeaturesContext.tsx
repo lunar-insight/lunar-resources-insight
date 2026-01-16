@@ -8,6 +8,7 @@ interface FeaturesContextType {
   activeDrawingTool: string | null;
   addFeature: (feature: Feature) => void;
   removeFeature: (id: string) => void;
+  renameFeature: (id: string, newName: string) => void;
   setActiveDrawingTool: (tool: string | null) => void;
   toggleFeatureInsights: (id: string) => void;
   toggleFeatureVisible: (id: string) => void;
@@ -49,6 +50,20 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
       return prev.filter(f => f.id !== id);
     });
   }, [viewer]);
+
+  const renameFeature = useCallback((id: string, newName: string) => {
+    const trimmedName = newName.trim();
+
+    if (!trimmedName) {
+      return;
+    }
+
+    setFeatures(prev =>
+      prev.map(f =>
+        f.id === id ? { ...f, name: trimmedName } : f
+      )
+    );
+  }, []);
 
   const toggleFeatureInsights = useCallback((id: string) => {
     setFeatures(prev =>
@@ -103,6 +118,7 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
         // Control label visibility (depends on features being visible)
         if (entity.label) {
           entity.label.show = new ConstantProperty(shouldShowFeature && showLabels);
+          entity.label.text = new ConstantProperty(feature.name);
         }
       });
     }
@@ -113,6 +129,7 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     activeDrawingTool,
     addFeature,
     removeFeature,
+    renameFeature,
     setActiveDrawingTool,
     toggleFeatureInsights,
     toggleFeatureVisible,
