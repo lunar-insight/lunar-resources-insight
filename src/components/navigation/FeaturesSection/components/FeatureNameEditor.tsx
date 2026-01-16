@@ -39,6 +39,9 @@ export const FeatureNameEditor: React.FC<FeatureNameEditorProps> = ({
     } else if (e.key === 'Escape') {
       e.preventDefault();
       onCancel();
+    } else if (e.key === ' ') {
+      // Prevent space from being captured by parent GridListItem
+      e.stopPropagation();
     }
   };
 
