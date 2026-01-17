@@ -32,6 +32,9 @@ export const generateFeatureName = (type: string): string => {
   if (type === 'polygon') {
     return `Polygon ${pointCounter++}`;
   }
+  if (type === 'circle') {
+    return `Circle ${pointCounter++}`;
+  }
   // Future: handle other types
   return `Feature ${pointCounter++}`;
 };
@@ -122,6 +125,9 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
         if (entity.polygon) {
           entity.polygon.show = new ConstantProperty(shouldShowFeature);
+        }
+        if (entity.ellipse) {
+          entity.ellipse.show = new ConstantProperty(shouldShowFeature);
         }
 
         // Control label visibility (depends on features being visible)

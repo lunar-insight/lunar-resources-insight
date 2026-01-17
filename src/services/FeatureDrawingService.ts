@@ -26,6 +26,12 @@ export class FeatureDrawingService {
   private polygonPreviewLine: Cesium.Polyline | null = null;
   private polygonClosingLine: Cesium.Polyline | null = null;
 
+  // Circle drawing state
+  private circleCenter: Cesium.Cartesian3 | null = null;
+  private circlePreview: Cesium.Entity | null = null;
+  private hasCircleCenter: boolean = false;
+  private currentCircleRadius: number = 50; // Track current radius for dynamic callback
+
   setViewer(viewer: Cesium.Viewer | null) {
     this.viewer = viewer;
   }
@@ -50,6 +56,16 @@ export class FeatureDrawingService {
     }
 
     this.currentTool = tool;
+
+    // Reset circle state to ensure clean start
+    if (tool === 'circle') {
+      this.circleCenter = null;
+      this.hasCircleCenter = false;
+      if (this.circlePreview) {
+        this.viewer.entities.remove(this.circlePreview);
+        this.circlePreview = null;
+      }
+    }
 
     // Disable mouse tracking from PointValueService
     pointValueService.disableMouseTracking();
@@ -88,6 +104,8 @@ export class FeatureDrawingService {
       this.addLinePoint(screenPosition);
     } else if (this.currentTool === 'polygon') {
       this.addPolygonPoint(screenPosition);
+    } else if (this.currentTool === 'circle') {
+      this.handleCircleClick(screenPosition);
     }
   }
 
@@ -606,6 +624,180 @@ export class FeatureDrawingService {
     this.cancelDrawing();
   }
 
+  private handleCircleClick(screenPosition: Cesium.Cartesian2) {
+    if (!this.viewer) return;
+
+    const ellipsoid = this.viewer.scene.globe.ellipsoid;
+    const cartesian = this.viewer.camera.pickEllipsoid(screenPosition, ellipsoid);
+
+    if (!cartesian) {
+      console.warn('Could not pick position on globe');
+      return;
+    }
+
+    if (!this.hasCircleCenter) {
+      // First click: set center
+      this.circleCenter = Cesium.Cartesian3.clone(cartesian);
+      this.hasCircleCenter = true;
+      this.createCirclePreview();
+      this.setupCircleMoveHandler();
+    } else {
+      // Second click: finish circle
+      this.finishCircle(cartesian);
+    }
+  }
+
+  private createCirclePreview() {
+    if (!this.viewer || !this.circleCenter) return;
+
+    this.currentCircleRadius = 50; // Start with 50 meter radius for visibility
+
+    // Use CallbackProperty for dynamic radius updates during mouse movement
+    this.circlePreview = this.viewer.entities.add({
+      position: this.circleCenter,
+      ellipse: {
+        semiMinorAxis: new Cesium.CallbackProperty(() => this.currentCircleRadius, false),
+        semiMajorAxis: new Cesium.CallbackProperty(() => this.currentCircleRadius + 1, false),
+        material: Cesium.Color.CYAN.withAlpha(0.3),
+        outline: true,
+        outlineColor: Cesium.Color.CYAN.withAlpha(0.5),
+        outlineWidth: 3,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+      },
+    });
+  }
+
+  private setupCircleMoveHandler() {
+    if (!this.viewer || !this.handler || !this.circlePreview) return;
+
+    this.handler.setInputAction(
+      (movement: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
+        if (!this.circleCenter || !this.circlePreview || !this.viewer) return;
+
+        const ellipsoid = this.viewer.scene.globe.ellipsoid;
+        const cartesian = this.viewer.camera.pickEllipsoid(movement.endPosition, ellipsoid);
+
+        if (Cesium.defined(cartesian)) {
+          // Calculate geodesic distance
+          const centerCarto = ellipsoid.cartesianToCartographic(this.circleCenter);
+          const edgeCarto = ellipsoid.cartesianToCartographic(cartesian);
+          const geodesic = new Cesium.EllipsoidGeodesic(centerCarto, edgeCarto);
+          let radius = geodesic.surfaceDistance;
+
+          // Enforce minimum visible radius for preview
+          const minPreviewRadius = 50; // 50 meters minimum
+          radius = Math.max(radius, minPreviewRadius);
+
+          // Update the radius value - CallbackProperty will automatically pick up the change
+          this.currentCircleRadius = radius;
+        }
+      },
+      Cesium.ScreenSpaceEventType.MOUSE_MOVE
+    );
+  }
+
+  private finishCircle(edgePosition: Cesium.Cartesian3) {
+    if (!this.viewer || !this.circleCenter) {
+      console.warn('Circle center not set');
+      this.cancelCircleDrawing();
+      return;
+    }
+
+    const ellipsoid = this.viewer.scene.globe.ellipsoid;
+
+    // Calculate final radius
+    const centerCarto = ellipsoid.cartesianToCartographic(this.circleCenter);
+    const edgeCarto = ellipsoid.cartesianToCartographic(edgePosition);
+    const geodesic = new Cesium.EllipsoidGeodesic(centerCarto, edgeCarto);
+    const radius = geodesic.surfaceDistance;
+
+    // Minimum radius check
+    if (radius < 10) {
+      console.warn('Circle too small, minimum radius is 10 meters');
+      this.cancelCircleDrawing();
+      return;
+    }
+
+    // Generate feature name
+    const name = generateFeatureName('circle');
+
+    // Remove preview
+    if (this.circlePreview) {
+      this.viewer.entities.remove(this.circlePreview);
+      this.circlePreview = null;
+    }
+
+    // Create final circle entity
+    const entity = this.viewer.entities.add({
+      position: this.circleCenter,
+      ellipse: {
+        semiMinorAxis: radius,
+        semiMajorAxis: radius + 1, // Fixed offset to ensure semiMajor > semiMinor
+        material: Cesium.Color.CYAN.withAlpha(0.3),
+        outline: true,
+        outlineColor: Cesium.Color.CYAN,
+        outlineWidth: 3,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        show: this.showFeatures,
+      },
+      label: {
+        text: name,
+        font: '14px sans-serif',
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        fillColor: Cesium.Color.WHITE,
+        outlineColor: Cesium.Color.BLACK,
+        outlineWidth: 2,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        pixelOffset: new Cesium.Cartesian2(0, -15),
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        show: this.showFeatures && this.showLabels,
+      },
+    });
+
+    // Create feature object
+    const feature: Feature = {
+      id: entity.id,
+      type: 'circle',
+      name,
+      entity,
+      metadata: {
+        center: centerCarto,
+        radius: radius,
+        edgePosition: edgeCarto,
+        createdAt: new Date(),
+      },
+      insightsOpen: false,
+      visible: true,
+    };
+
+    // Notify callback
+    if (this.onPointCreatedCallback) {
+      this.onPointCreatedCallback(feature);
+    }
+
+    // Reset circle state and stop drawing
+    this.circleCenter = null;
+    this.hasCircleCenter = false;
+    this.stopDrawing();
+  }
+
+  private cancelCircleDrawing() {
+    if (!this.viewer) return;
+
+    // Remove preview circle
+    if (this.circlePreview) {
+      this.viewer.entities.remove(this.circlePreview);
+      this.circlePreview = null;
+    }
+
+    // Reset circle state
+    this.circleCenter = null;
+    this.hasCircleCenter = false;
+
+    // Call regular cancel
+    this.cancelDrawing();
+  }
+
   stopDrawing() {
     // Remove click handler
     if (this.handler) {
@@ -644,6 +836,14 @@ export class FeatureDrawingService {
       this.polygonClosingLine = null;
     }
     this.polygonPositions = [];
+
+    // Clean up circle drawing state
+    if (this.viewer && this.circlePreview) {
+      this.viewer.entities.remove(this.circlePreview);
+      this.circlePreview = null;
+    }
+    this.circleCenter = null;
+    this.hasCircleCenter = false;
 
     this.stopDrawing();
 

@@ -8,6 +8,9 @@ export interface Feature {
   metadata: {
     position?: Cesium.Cartographic;
     positions?: Cesium.Cartographic[];
+    center?: Cesium.Cartographic;
+    radius?: number;
+    edgePosition?: Cesium.Cartographic;
     createdAt: Date;
   };
   insightsOpen: boolean;
