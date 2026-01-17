@@ -26,6 +26,9 @@ export const generateFeatureName = (type: string): string => {
   if (type === 'point') {
     return `Point ${pointCounter++}`;
   }
+  if (type === 'line') {
+    return `Line ${pointCounter++}`;
+  }
   // Future: handle other types
   return `Feature ${pointCounter++}`;
 };
