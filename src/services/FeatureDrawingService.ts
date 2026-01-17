@@ -19,6 +19,13 @@ export class FeatureDrawingService {
   private mainPolyline: Cesium.Polyline | null = null;
   private tempPreviewLine: Cesium.Polyline | null = null;
 
+  // Polygon drawing state
+  private polygonPositions: Cesium.Cartesian3[] = [];
+  private polygonPolylineCollection: Cesium.PolylineCollection | null = null;
+  private polygonOutline: Cesium.Polyline | null = null;
+  private polygonPreviewLine: Cesium.Polyline | null = null;
+  private polygonClosingLine: Cesium.Polyline | null = null;
+
   setViewer(viewer: Cesium.Viewer | null) {
     this.viewer = viewer;
   }
@@ -79,8 +86,9 @@ export class FeatureDrawingService {
       this.createPoint(screenPosition);
     } else if (this.currentTool === 'line') {
       this.addLinePoint(screenPosition);
+    } else if (this.currentTool === 'polygon') {
+      this.addPolygonPoint(screenPosition);
     }
-    // Future: handle other drawing tools
   }
 
   private createPoint(screenPosition: Cesium.Cartesian2) {
@@ -219,6 +227,156 @@ export class FeatureDrawingService {
     }
   }
 
+  private addPolygonPoint(screenPosition: Cesium.Cartesian2) {
+    if (!this.viewer) return;
+
+    const ellipsoid = this.viewer.scene.globe.ellipsoid;
+    const cartesian = this.viewer.camera.pickEllipsoid(screenPosition, ellipsoid);
+
+    if (!cartesian) {
+      console.warn('Could not pick position on globe');
+      return;
+    }
+
+    // Check for duplicate position
+    const lastPosition = this.polygonPositions[this.polygonPositions.length - 1];
+    if (lastPosition && Cesium.Cartesian3.equals(lastPosition, cartesian)) {
+      return;
+    }
+
+    // Clone and add position to polygon
+    const clonedCartesian = Cesium.Cartesian3.clone(cartesian);
+    this.polygonPositions.push(clonedCartesian);
+
+    // Remove temp preview lines if they exist
+    if (this.polygonPreviewLine && this.polygonPolylineCollection) {
+      this.polygonPolylineCollection.remove(this.polygonPreviewLine);
+      this.polygonPreviewLine = null;
+    }
+    if (this.polygonClosingLine && this.polygonPolylineCollection) {
+      this.polygonPolylineCollection.remove(this.polygonClosingLine);
+      this.polygonClosingLine = null;
+    }
+
+    // Update or create polygon outline
+    if (this.polygonOutline) {
+      // Update existing outline with geodesic arcs
+      this.polygonOutline.positions = (Cesium as any).PolylinePipeline.generateCartesianArc({
+        positions: this.polygonPositions,
+      });
+    } else {
+      // Create polyline collection on first point
+      this.polygonPolylineCollection = new Cesium.PolylineCollection();
+      this.polygonOutline = this.polygonPolylineCollection.add({
+        positions: [],
+        width: 3,
+        material: Cesium.Material.fromType(Cesium.Material.ColorType, {
+          color: new Cesium.Color(0, 1, 1, 1.0), // Solid cyan
+        }),
+      });
+      this.viewer.scene.primitives.add(this.polygonPolylineCollection);
+    }
+
+    // Setup mouse move handler for preview (only after first point)
+    if (this.polygonPositions.length === 1) {
+      this.setupPolygonMoveHandler();
+
+      // Setup right-click to finish polygon
+      if (this.handler) {
+        this.handler.setInputAction(
+          () => {
+            this.finishPolygon();
+          },
+          Cesium.ScreenSpaceEventType.RIGHT_CLICK
+        );
+
+        // Also finish on double-click
+        this.handler.setInputAction(
+          () => {
+            this.finishPolygon();
+          },
+          Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
+        );
+      }
+    }
+
+    // Update closing line if we have 2+ points
+    if (this.polygonPositions.length >= 2 && this.polygonPolylineCollection) {
+      // Create/update line from last point back to first
+      const firstPosition = this.polygonPositions[0];
+      const lastPosition = this.polygonPositions[this.polygonPositions.length - 1];
+
+      if (this.polygonClosingLine) {
+        this.polygonPolylineCollection.remove(this.polygonClosingLine);
+      }
+
+      this.polygonClosingLine = this.polygonPolylineCollection.add({
+        positions: (Cesium as any).PolylinePipeline.generateCartesianArc({
+          positions: [lastPosition, firstPosition],
+        }),
+        width: 3,
+        material: Cesium.Material.fromType(Cesium.Material.ColorType, {
+          color: new Cesium.Color(0, 1, 1, 0.7), // Slightly transparent cyan
+        }),
+      });
+    }
+  }
+
+  private setupPolygonMoveHandler() {
+    if (!this.viewer || !this.handler || !this.polygonPolylineCollection) return;
+
+    this.handler.setInputAction(
+      (movement: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
+        if (this.polygonPositions.length === 0 || !this.polygonPolylineCollection) return;
+
+        const ellipsoid = this.viewer!.scene.globe.ellipsoid;
+        const cartesian = this.viewer!.camera.pickEllipsoid(
+          movement.endPosition,
+          ellipsoid
+        );
+
+        if (Cesium.defined(cartesian) && this.polygonPositions.length > 0) {
+          const lastPosition = this.polygonPositions[this.polygonPositions.length - 1];
+          const firstPosition = this.polygonPositions[0];
+
+          // Remove old preview line
+          if (this.polygonPreviewLine) {
+            this.polygonPolylineCollection.remove(this.polygonPreviewLine);
+          }
+
+          // Add new preview line from last point to cursor
+          this.polygonPreviewLine = this.polygonPolylineCollection.add({
+            positions: (Cesium as any).PolylinePipeline.generateCartesianArc({
+              positions: [lastPosition, cartesian],
+            }),
+            width: 3,
+            material: Cesium.Material.fromType(Cesium.Material.ColorType, {
+              color: new Cesium.Color(0, 1, 1, 0.5), // Semi-transparent cyan
+            }),
+          });
+
+          // Update closing line to connect cursor back to first point (if 2+ points)
+          if (this.polygonPositions.length >= 2) {
+            if (this.polygonClosingLine) {
+              this.polygonPolylineCollection.remove(this.polygonClosingLine);
+            }
+
+            this.polygonClosingLine = this.polygonPolylineCollection.add({
+              positions: (Cesium as any).PolylinePipeline.generateCartesianArc({
+                positions: [cartesian, firstPosition],
+              }),
+              width: 3,
+              material: Cesium.Material.fromType(Cesium.Material.ColorType, {
+                color: new Cesium.Color(0, 1, 1, 0.5), // Semi-transparent cyan
+              }),
+            });
+          }
+        }
+      },
+      Cesium.ScreenSpaceEventType.MOUSE_MOVE
+    );
+  }
+
   private setupLineMoveHandler() {
     if (!this.viewer || !this.handler || !this.polylineCollection) return;
 
@@ -335,6 +493,82 @@ export class FeatureDrawingService {
     this.stopDrawing();
   }
 
+  private finishPolygon() {
+    if (!this.viewer || this.polygonPositions.length < 3) {
+      console.warn('Need at least 3 points to create a polygon');
+      this.cancelPolygonDrawing();
+      return;
+    }
+
+    const ellipsoid = this.viewer.scene.globe.ellipsoid;
+
+    // Convert positions to cartographic for metadata
+    const cartographicPositions = this.polygonPositions.map((pos) =>
+      ellipsoid.cartesianToCartographic(pos)
+    );
+
+    // Generate feature name
+    const name = generateFeatureName('polygon');
+
+    // Remove temporary polyline collection from primitives
+    if (this.polygonPolylineCollection) {
+      this.viewer.scene.primitives.remove(this.polygonPolylineCollection);
+      this.polygonPolylineCollection = null;
+      this.polygonOutline = null;
+      this.polygonPreviewLine = null;
+      this.polygonClosingLine = null;
+    }
+
+    // Create final polygon entity
+    const entity = this.viewer.entities.add({
+      polygon: {
+        hierarchy: new Cesium.PolygonHierarchy(this.polygonPositions),
+        material: Cesium.Color.CYAN.withAlpha(0.3), // Semi-transparent fill
+        outline: true,
+        outlineColor: Cesium.Color.CYAN,
+        outlineWidth: 3,
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        show: this.showFeatures,
+      },
+      label: {
+        text: name,
+        font: '14px sans-serif',
+        style: Cesium.LabelStyle.FILL_AND_OUTLINE,
+        fillColor: Cesium.Color.WHITE,
+        outlineColor: Cesium.Color.BLACK,
+        outlineWidth: 2,
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        pixelOffset: new Cesium.Cartesian2(0, -15),
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        show: this.showFeatures && this.showLabels,
+      },
+      position: this.polygonPositions[0], // Position label at first point
+    });
+
+    // Create feature object
+    const feature: Feature = {
+      id: entity.id,
+      type: 'polygon',
+      name,
+      entity,
+      metadata: {
+        positions: cartographicPositions,
+        createdAt: new Date(),
+      },
+      insightsOpen: false,
+      visible: true,
+    };
+
+    // Notify callback
+    if (this.onPointCreatedCallback) {
+      this.onPointCreatedCallback(feature);
+    }
+
+    // Reset polygon state and stop drawing
+    this.polygonPositions = [];
+    this.stopDrawing();
+  }
+
   private cancelLineDrawing() {
     if (!this.viewer) return;
 
@@ -348,6 +582,25 @@ export class FeatureDrawingService {
 
     // Reset line state
     this.linePositions = [];
+
+    // Call regular cancel
+    this.cancelDrawing();
+  }
+
+  private cancelPolygonDrawing() {
+    if (!this.viewer) return;
+
+    // Remove polyline collection from primitives
+    if (this.polygonPolylineCollection) {
+      this.viewer.scene.primitives.remove(this.polygonPolylineCollection);
+      this.polygonPolylineCollection = null;
+      this.polygonOutline = null;
+      this.polygonPreviewLine = null;
+      this.polygonClosingLine = null;
+    }
+
+    // Reset polygon state
+    this.polygonPositions = [];
 
     // Call regular cancel
     this.cancelDrawing();
@@ -381,6 +634,16 @@ export class FeatureDrawingService {
       this.tempPreviewLine = null;
     }
     this.linePositions = [];
+
+    // Clean up polygon drawing state
+    if (this.viewer && this.polygonPolylineCollection) {
+      this.viewer.scene.primitives.remove(this.polygonPolylineCollection);
+      this.polygonPolylineCollection = null;
+      this.polygonOutline = null;
+      this.polygonPreviewLine = null;
+      this.polygonClosingLine = null;
+    }
+    this.polygonPositions = [];
 
     this.stopDrawing();
 
