@@ -53,6 +53,8 @@
 
 .featureName {
   flex: 1;
+  min-width: 0;
+  max-width: 10rem;
   color: var(--color-secondary);
   font-size: 0.9rem;
   overflow: hidden;
