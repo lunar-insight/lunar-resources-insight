@@ -53,10 +53,9 @@
 
 .featureName {
   flex: 1;
-  min-width: 0;
+  min-width: 10rem;
   max-width: 10rem;
-  color: var(--color-secondary);
-  font-size: 0.9rem;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
