@@ -35,6 +35,12 @@ export const generateFeatureName = (type: string): string => {
   if (type === 'circle') {
     return `Circle ${pointCounter++}`;
   }
+  if (type === 'two-point-circle') {
+    return `Circle ${pointCounter++}`;
+  }
+  if (type === 'three-point-circle') {
+    return `Circle ${pointCounter++}`;
+  }
   // Future: handle other types
   return `Feature ${pointCounter++}`;
 };

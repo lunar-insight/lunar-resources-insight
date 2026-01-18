@@ -11,6 +11,8 @@ export interface Feature {
     center?: Cesium.Cartographic;
     radius?: number;
     edgePosition?: Cesium.Cartographic;
+    diameterEndpoints?: Cesium.Cartographic[];
+    circumferencePoints?: Cesium.Cartographic[];
     createdAt: Date;
   };
   insightsOpen: boolean;
