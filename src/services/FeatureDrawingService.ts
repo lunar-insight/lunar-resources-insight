@@ -10,6 +10,8 @@ export class FeatureDrawingService {
   private currentTool: string | null = null;
   private onPointCreatedCallback: ((feature: Feature) => void) | null = null;
   private onDrawingCancelledCallback: (() => void) | null = null;
+  private onFeatureUpdatedCallback: ((id: string, newPosition: Cesium.Cartographic) => void) | null = null;
+  private draggedEntity: Cesium.Entity | null = null;
   private showFeatures: boolean = true;
   private showLabels: boolean = true;
 
@@ -47,14 +49,19 @@ export class FeatureDrawingService {
 
   setViewer(viewer: Cesium.Viewer | null) {
     this.viewer = viewer;
+    this.setupInteractionHandler();
   }
 
   setCallbacks(
     onPointCreated: (feature: Feature) => void,
-    onDrawingCancelled: () => void
+    onDrawingCancelled: () => void,
+    onFeatureUpdated?: (id: string, newPosition: Cesium.Cartographic) => void
   ) {
     this.onPointCreatedCallback = onPointCreated;
     this.onDrawingCancelledCallback = onDrawingCancelled;
+    if (onFeatureUpdated) {
+      this.onFeatureUpdatedCallback = onFeatureUpdated;
+    }
   }
 
   setVisibility(showFeatures: boolean, showLabels: boolean) {
@@ -121,6 +128,10 @@ export class FeatureDrawingService {
 
   private setupClickHandler() {
     if (!this.viewer) return;
+
+    if (this.handler) {
+      this.handler.destroy();
+    }
 
     this.handler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
 
@@ -1372,6 +1383,101 @@ export class FeatureDrawingService {
     this.cancelDrawing();
   }
 
+
+  // Interaction Handling
+  private setupInteractionHandler() {
+    if (!this.viewer) return;
+    if (this.currentTool) return; // Don't setup if drawing
+
+    if (this.handler) {
+      this.handler.destroy();
+    }
+
+    this.handler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
+
+    this.handler.setInputAction((click: Cesium.ScreenSpaceEventHandler.PositionedEvent) => {
+      this.handleLeftDown(click.position);
+    }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+    this.handler.setInputAction((movement: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
+      this.handleMouseMove(movement.endPosition);
+      this.handleHover(movement.endPosition);
+    }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
+
+    this.handler.setInputAction(() => {
+      this.handleLeftUp();
+    }, Cesium.ScreenSpaceEventType.LEFT_UP);
+  }
+
+  private handleLeftDown(position: Cesium.Cartesian2) {
+    if (!this.viewer) return;
+
+    const pickedObject = this.viewer.scene.pick(position);
+    if (Cesium.defined(pickedObject) && pickedObject.id instanceof Cesium.Entity) {
+      const entity = pickedObject.id as Cesium.Entity;
+      // Check if entity is a point with a position
+      if (entity.point && entity.position) {
+        this.draggedEntity = entity;
+        this.viewer.scene.screenSpaceCameraController.enableRotate = false;
+        // this.viewer.scene.screenSpaceCameraController.enableTranslate = false;
+        this.viewer.scene.screenSpaceCameraController.enableInputs = false;
+      }
+    }
+  }
+
+  private handleMouseMove(position: Cesium.Cartesian2) {
+    if (!this.viewer || !this.draggedEntity) return;
+
+    const ellipsoid = this.viewer.scene.globe.ellipsoid;
+    const cartesian = this.viewer.camera.pickEllipsoid(position, ellipsoid);
+
+    if (cartesian) {
+      this.draggedEntity.position = new Cesium.ConstantPositionProperty(cartesian);
+    }
+  }
+
+  private handleHover(position: Cesium.Cartesian2) {
+    if (!this.viewer) return;
+
+    if (this.draggedEntity) {
+      this.viewer.canvas.style.cursor = 'grabbing';
+      return;
+    }
+
+    const pickedObject = this.viewer.scene.pick(position);
+    if (Cesium.defined(pickedObject) && pickedObject.id instanceof Cesium.Entity) {
+      const entity = pickedObject.id as Cesium.Entity;
+      if (entity.point && entity.position) {
+        this.viewer.canvas.style.cursor = 'grab';
+        return;
+      }
+    }
+
+    this.viewer.canvas.style.cursor = 'default';
+  }
+
+  private handleLeftUp() {
+    if (this.draggedEntity && this.viewer) {
+      this.viewer.scene.screenSpaceCameraController.enableRotate = true;
+      // this.viewer.scene.screenSpaceCameraController.enableTranslate = true;
+      this.viewer.scene.screenSpaceCameraController.enableInputs = true;
+
+      if (this.onFeatureUpdatedCallback) {
+        const positionProperty = this.draggedEntity.position;
+        if (positionProperty) {
+          const time = this.viewer.clock.currentTime;
+          const position = positionProperty.getValue(time);
+          if (position) {
+            const cartographic = this.viewer.scene.globe.ellipsoid.cartesianToCartographic(position);
+            this.onFeatureUpdatedCallback(this.draggedEntity.id, cartographic);
+          }
+        }
+      }
+
+      this.draggedEntity = null;
+    }
+  }
+
   stopDrawing() {
     // Remove click handler
     if (this.handler) {
@@ -1389,6 +1495,8 @@ export class FeatureDrawingService {
     pointValueService.enableMouseTracking();
 
     this.currentTool = null;
+
+    this.setupInteractionHandler();
   }
 
   cancelDrawing() {
@@ -1451,7 +1559,14 @@ export class FeatureDrawingService {
 
   destroy() {
     this.cancelDrawing();
+    
+    if (this.handler) {
+      this.handler.destroy();
+      this.handler = null;
+    }
+
     this.onPointCreatedCallback = null;
     this.onDrawingCancelledCallback = null;
+    this.onFeatureUpdatedCallback = null;
   }
 }

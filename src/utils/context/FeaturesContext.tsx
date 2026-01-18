@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
-import { ConstantProperty } from 'cesium';
+import * as Cesium from 'cesium';
 import { Feature } from '../../components/navigation/FeaturesSection/types';
 import { useViewer } from './ViewerContext';
 
@@ -9,6 +9,7 @@ interface FeaturesContextType {
   addFeature: (feature: Feature) => void;
   removeFeature: (id: string) => void;
   renameFeature: (id: string, newName: string) => void;
+  updateFeaturePosition: (id: string, newPosition: Cesium.ConstantProperty | Cesium.Cartographic) => void;
   setActiveDrawingTool: (tool: string | null) => void;
   toggleFeatureInsights: (id: string) => void;
   toggleFeatureVisible: (id: string) => void;
@@ -80,6 +81,14 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
   }, []);
 
+  const updateFeaturePosition = useCallback((id: string, newPosition: Cesium.Cartographic) => {
+    setFeatures(prev =>
+      prev.map(f =>
+        f.id === id ? { ...f, metadata: { ...f.metadata, position: newPosition } } : f
+      )
+    );
+  }, []);
+
   const toggleFeatureInsights = useCallback((id: string) => {
     setFeatures(prev =>
       prev.map(f =>
@@ -124,22 +133,22 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
 
         // Control shape visibility
         if (entity.point) {
-          entity.point.show = new ConstantProperty(shouldShowFeature);
+          entity.point.show = new Cesium.ConstantProperty(shouldShowFeature);
         }
         if (entity.polyline) {
-          entity.polyline.show = new ConstantProperty(shouldShowFeature);
+          entity.polyline.show = new Cesium.ConstantProperty(shouldShowFeature);
         }
         if (entity.polygon) {
-          entity.polygon.show = new ConstantProperty(shouldShowFeature);
+          entity.polygon.show = new Cesium.ConstantProperty(shouldShowFeature);
         }
         if (entity.ellipse) {
-          entity.ellipse.show = new ConstantProperty(shouldShowFeature);
+          entity.ellipse.show = new Cesium.ConstantProperty(shouldShowFeature);
         }
 
         // Control label visibility (depends on features being visible)
         if (entity.label) {
-          entity.label.show = new ConstantProperty(shouldShowFeature && showLabels);
-          entity.label.text = new ConstantProperty(feature.name);
+          entity.label.show = new Cesium.ConstantProperty(shouldShowFeature && showLabels);
+          entity.label.text = new Cesium.ConstantProperty(feature.name);
         }
       });
     }
@@ -151,6 +160,7 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     addFeature,
     removeFeature,
     renameFeature,
+    updateFeaturePosition,
     setActiveDrawingTool,
     toggleFeatureInsights,
     toggleFeatureVisible,

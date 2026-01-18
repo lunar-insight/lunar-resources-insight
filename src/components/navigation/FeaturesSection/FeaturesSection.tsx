@@ -21,6 +21,7 @@ const FeaturesSection: React.FC = () => {
     activeDrawingTool,
     setActiveDrawingTool,
     addFeature,
+    updateFeaturePosition,
     toggleFeatureInsights,
     showFeatures,
     showLabels,
@@ -50,6 +51,9 @@ const FeaturesSection: React.FC = () => {
         () => {
           // Drawing cancelled callback
           setActiveDrawingTool(null);
+        },
+        (id, position) => {
+          updateFeaturePosition(id, position);
         }
       );
     }
@@ -57,7 +61,7 @@ const FeaturesSection: React.FC = () => {
     return () => {
       service.destroy();
     };
-  }, [viewer, addFeature, setActiveDrawingTool]);
+  }, [viewer, addFeature, setActiveDrawingTool, updateFeaturePosition]);
 
   // Update drawing service visibility state
   useEffect(() => {
