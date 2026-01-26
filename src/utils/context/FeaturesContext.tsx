@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import * as Cesium from 'cesium';
-import { Feature } from '../../components/navigation/FeaturesSection/types';
+import { Feature } from 'components/navigation/FeaturesSection/types';
 import { useViewer } from './ViewerContext';
 
 interface FeaturesContextType {
@@ -10,6 +10,7 @@ interface FeaturesContextType {
   removeFeature: (id: string) => void;
   renameFeature: (id: string, newName: string) => void;
   updateFeaturePosition: (id: string, newPosition: Cesium.ConstantProperty | Cesium.Cartographic) => void;
+  updateLinePositions: (id: string, newPositions: Cesium.Cartographic[]) => void;
   setActiveDrawingTool: (tool: string | null) => void;
   toggleFeatureInsights: (id: string) => void;
   toggleFeatureVisible: (id: string) => void;
@@ -23,27 +24,25 @@ const FeaturesContext = createContext<FeaturesContextType | undefined>(undefined
 
 let pointCounter = 1;
 
-export const generateFeatureName = (type: string): string => {
-  if (type === 'point') {
-    return `Point ${pointCounter++}`;
+export const generateFeatureName = (
+  type: 'point' | 'line' | 'polygon' | 'circle' | 'two-point-circle' | 'three-point-circle'
+): string => {
+  switch (type) {
+    case 'point':
+      return `Point ${pointCounter++}`;
+    case 'line':
+      return `Line ${pointCounter++}`;
+    case 'polygon':
+      return `Polygon ${pointCounter++}`;
+    case 'circle':
+    case 'two-point-circle':
+    case 'three-point-circle':
+      return `Circle ${pointCounter++}`;
+    default:
+      // Exhaustive check: if we reach here, TypeScript will error if a new type is added
+      const _exhaustiveCheck: never = type;
+      return _exhaustiveCheck;
   }
-  if (type === 'line') {
-    return `Line ${pointCounter++}`;
-  }
-  if (type === 'polygon') {
-    return `Polygon ${pointCounter++}`;
-  }
-  if (type === 'circle') {
-    return `Circle ${pointCounter++}`;
-  }
-  if (type === 'two-point-circle') {
-    return `Circle ${pointCounter++}`;
-  }
-  if (type === 'three-point-circle') {
-    return `Circle ${pointCounter++}`;
-  }
-  // Future: handle other types
-  return `Feature ${pointCounter++}`;
 };
 
 export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -85,6 +84,14 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     setFeatures(prev =>
       prev.map(f =>
         f.id === id ? { ...f, metadata: { ...f.metadata, position: newPosition } } : f
+      )
+    );
+  }, []);
+
+  const updateLinePositions = useCallback((id: string, newPositions: Cesium.Cartographic[]) => {
+    setFeatures(prev =>
+      prev.map(f =>
+        f.id === id ? { ...f, metadata: { ...f.metadata, positions: newPositions } } : f
       )
     );
   }, []);
@@ -161,6 +168,7 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     removeFeature,
     renameFeature,
     updateFeaturePosition,
+    updateLinePositions,
     setActiveDrawingTool,
     toggleFeatureInsights,
     toggleFeatureVisible,

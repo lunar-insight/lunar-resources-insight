@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import { TwoPointCircleIcon } from './icons/TwoPointCircleIcon';
@@ -22,6 +22,7 @@ const FeaturesSection: React.FC = () => {
     setActiveDrawingTool,
     addFeature,
     updateFeaturePosition,
+    updateLinePositions,
     toggleFeatureInsights,
     showFeatures,
     showLabels,
@@ -32,13 +33,25 @@ const FeaturesSection: React.FC = () => {
   const boundaryRef = useBoundaryRef();
   const featureDrawingServiceRef = useRef<FeatureDrawingService | null>(null);
 
-  // Initialize drawing service
+  // Initialize drawing service (once, destroy only on unmount)
   useEffect(() => {
     if (!featureDrawingServiceRef.current) {
       featureDrawingServiceRef.current = new FeatureDrawingService();
     }
 
+    return () => {
+      // Only destroy on actual unmount
+      if (featureDrawingServiceRef.current) {
+        featureDrawingServiceRef.current.destroy();
+        featureDrawingServiceRef.current = null;
+      }
+    };
+  }, []);
+
+  // Update viewer and callbacks (without destroying the service)
+  useEffect(() => {
     const service = featureDrawingServiceRef.current;
+    if (!service) return;
 
     if (viewer) {
       service.setViewer(viewer);
@@ -54,14 +67,14 @@ const FeaturesSection: React.FC = () => {
         },
         (id, position) => {
           updateFeaturePosition(id, position);
+        },
+        (id, positions) => {
+          // Line positions updated callback
+          updateLinePositions(id, positions);
         }
       );
     }
-
-    return () => {
-      service.destroy();
-    };
-  }, [viewer, addFeature, setActiveDrawingTool, updateFeaturePosition]);
+  }, [viewer, addFeature, setActiveDrawingTool, updateFeaturePosition, updateLinePositions]);
 
   // Update drawing service visibility state
   useEffect(() => {
@@ -69,6 +82,55 @@ const FeaturesSection: React.FC = () => {
       featureDrawingServiceRef.current.setVisibility(showFeatures, showLabels);
     }
   }, [showFeatures, showLabels]);
+
+  // Track line features for cleanup and visibility updates
+  const lineFeatures = useMemo(
+    () => features.filter(f => f.type === 'line'),
+    [features]
+  );
+  const lineFeatureIds = useMemo(
+    () => lineFeatures.map(f => f.id),
+    [lineFeatures]
+  );
+  const prevLineFeatureIdsRef = useRef<string[]>([]);
+
+  // Manage vertex markers when line features change or viewer becomes available
+  useEffect(() => {
+    const service = featureDrawingServiceRef.current;
+    if (!service) return;
+
+    const prevIds = prevLineFeatureIdsRef.current;
+    const currentIds = lineFeatureIds;
+
+    // Find removed line feature IDs - clean up their markers
+    const removedIds = prevIds.filter(id => !currentIds.includes(id));
+    removedIds.forEach(id => service.removeLineVertexMarkers(id));
+
+    // Ensure all current lines have vertex markers when viewer is available
+    // This handles both newly added lines and existing lines when viewer becomes ready
+    // The method internally skips lines that already have markers
+    if (viewer) {
+      currentIds.forEach(id => service.ensureVertexMarkersForLine(id));
+    }
+
+    // Update ref for next comparison
+    prevLineFeatureIdsRef.current = currentIds;
+  }, [lineFeatureIds, viewer]);
+
+  // Update vertex marker visibility when line feature visibility changes
+  useEffect(() => {
+    const service = featureDrawingServiceRef.current;
+    if (!service) return;
+
+    // Update vertex marker visibility for each line feature
+    lineFeatures.forEach(lineFeature => {
+      // Vertex markers should be visible only if:
+      // 1. Global showFeatures is true, AND
+      // 2. The specific line feature is visible
+      const shouldShow = showFeatures && lineFeature.visible;
+      service.updateLineVertexMarkersVisibility(lineFeature.id, shouldShow);
+    });
+  }, [lineFeatures, showFeatures]);
 
   const handleToggleDrawingTool = (tool: string, selected: boolean) => {
     if (selected) {
