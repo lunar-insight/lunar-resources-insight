@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
+import { useViewer } from 'utils/context/ViewerContext';
 import RemoveLayerButton from 'components/layout/Button/RemoveLayerButton/RemoveLayerButton';
 import { FeatureVisibilityButton } from './FeatureVisibilityButton';
 import { FeatureInsightsButton } from './FeatureInsightsButton';
+import { FeatureJumpButton } from './FeatureJumpButton';
 import { FeatureNameEditor } from './FeatureNameEditor';
+import { flyToFeature } from 'utils/featureUtils';
 import styles from './FeaturesList.module.scss';
 
 export const FeaturesList: React.FC = () => {
   const { features, removeFeature, toggleFeatureInsights, toggleFeatureVisible, renameFeature } = useFeaturesContext();
+  const { viewer } = useViewer();
   const [editingFeatureId, setEditingFeatureId] = useState<string | null>(null);
 
   const handleStartEdit = (featureId: string, e: React.MouseEvent) => {
@@ -70,6 +74,10 @@ export const FeaturesList: React.FC = () => {
                   </span>
 
                   <div className={styles.featureActions}>
+                    <FeatureJumpButton
+                      onPress={() => flyToFeature(viewer, feature)}
+                    />
+
                     <FeatureVisibilityButton
                       isVisible={feature.visible}
                       onChange={() => toggleFeatureVisible(feature.id)}
