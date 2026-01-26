@@ -16,7 +16,17 @@ export class FeatureDrawingService {
   private onPointCreatedCallback: ((feature: Feature) => void) | null = null;
   private onDrawingCancelledCallback: (() => void) | null = null;
   private onFeatureUpdatedCallback: ((id: string, newPosition: Cesium.Cartographic) => void) | null = null;
+  private onPolygonUpdatedCallback: ((id: string, positions: Cesium.Cartographic[]) => void) | null = null;
+  private onCircleUpdatedCallback: ((id: string, center: Cesium.Cartographic) => void) | null = null;
   private draggedEntity: Cesium.Entity | null = null;
+  private draggedShapeEntity: Cesium.Entity | null = null;
+  private draggedShapeType: 'polygon' | 'circle' | null = null;
+  private dragStartPosition: Cesium.Cartesian3 | null = null;
+  private initialShapePositions: Cesium.Cartesian3[] | null = null;
+  private initialShapeCenter: Cesium.Cartesian3 | null = null;
+  // Polyline overlay for real-time drag feedback
+  private dragPolylineCollection: Cesium.PolylineCollection | null = null;
+  private dragPolyline: Cesium.Polyline | null = null;
   private showFeatures: boolean = true;
   private showLabels: boolean = true;
 
@@ -57,7 +67,9 @@ export class FeatureDrawingService {
     onPointCreated: (feature: Feature) => void,
     onDrawingCancelled: () => void,
     onFeatureUpdated?: (id: string, newPosition: Cesium.Cartographic) => void,
-    onLineUpdated?: (id: string, positions: Cesium.Cartographic[]) => void
+    onLineUpdated?: (id: string, positions: Cesium.Cartographic[]) => void,
+    onPolygonUpdated?: (id: string, positions: Cesium.Cartographic[]) => void,
+    onCircleUpdated?: (id: string, center: Cesium.Cartographic) => void
   ) {
     this.onPointCreatedCallback = onPointCreated;
     this.onDrawingCancelledCallback = onDrawingCancelled;
@@ -74,6 +86,12 @@ export class FeatureDrawingService {
     }
     if (onLineUpdated) {
       this.lineVertexEditingService.setCallback(onLineUpdated);
+    }
+    if (onPolygonUpdated) {
+      this.onPolygonUpdatedCallback = onPolygonUpdated;
+    }
+    if (onCircleUpdated) {
+      this.onCircleUpdatedCallback = onCircleUpdated;
     }
   }
 
@@ -244,6 +262,44 @@ export class FeatureDrawingService {
     }, Cesium.ScreenSpaceEventType.RIGHT_CLICK);
   }
 
+  /**
+   * Generates positions for a circle approximation using a polyline
+   * @param center - The center position of the circle
+   * @param radius - The radius in meters
+   * @param numPoints - Number of points to approximate the circle (default 64)
+   * @returns Array of Cartesian3 positions forming a circle
+   */
+  private generateCirclePositions(center: Cesium.Cartesian3, radius: number, numPoints: number = 64): Cesium.Cartesian3[] {
+    if (!this.viewer) return [];
+
+    const ellipsoid = this.viewer.scene.globe.ellipsoid;
+    const centerCarto = ellipsoid.cartesianToCartographic(center);
+    const positions: Cesium.Cartesian3[] = [];
+
+    for (let i = 0; i <= numPoints; i++) {
+      const angle = (i / numPoints) * 2 * Math.PI;
+
+      // Calculate offset in meters, then convert to radians
+      const dx = Math.cos(angle) * radius;
+      const dy = Math.sin(angle) * radius;
+
+      // Convert meter offsets to angular offsets (approximate for small distances)
+      const deltaLon = dx / (ellipsoid.maximumRadius * Math.cos(centerCarto.latitude));
+      const deltaLat = dy / ellipsoid.maximumRadius;
+
+      const pointCarto = new Cesium.Cartographic(
+        centerCarto.longitude + deltaLon,
+        centerCarto.latitude + deltaLat,
+        centerCarto.height
+      );
+
+      const pointCartesian = ellipsoid.cartographicToCartesian(pointCarto);
+      positions.push(pointCartesian);
+    }
+
+    return positions;
+  }
+
   private handleLeftDown(position: Cesium.Cartesian2) {
     if (!this.viewer) return;
 
@@ -266,6 +322,70 @@ export class FeatureDrawingService {
         this.viewer.scene.screenSpaceCameraController.enableInputs = false;
         return;
       }
+
+      // Check for polygon entity
+      if (entity.polygon && entity.polygon.hierarchy) {
+        const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
+        this.initialShapePositions = hierarchy.positions.map((p: Cesium.Cartesian3) => Cesium.Cartesian3.clone(p));
+        this.dragStartPosition = this.pickGlobePosition(position);
+        this.draggedShapeEntity = entity;
+        this.draggedShapeType = 'polygon';
+
+        // Hide the actual polygon entity during drag
+        entity.polygon.show = new Cesium.ConstantProperty(false);
+
+        // Create polyline overlay for real-time feedback
+        this.dragPolylineCollection = new Cesium.PolylineCollection();
+        this.dragPolyline = this.dragPolylineCollection.add({
+          positions: (Cesium as any).PolylinePipeline.generateCartesianArc({
+            positions: [...this.initialShapePositions, this.initialShapePositions[0]], // Close the polygon
+          }),
+          width: 3,
+          material: Cesium.Material.fromType(Cesium.Material.ColorType, {
+            color: Cesium.Color.CYAN,
+          }),
+        });
+        this.viewer.scene.primitives.add(this.dragPolylineCollection);
+
+        this.viewer.scene.screenSpaceCameraController.enableRotate = false;
+        this.viewer.scene.screenSpaceCameraController.enableInputs = false;
+        return;
+      }
+
+      // Check for circle entity (ellipse)
+      if (entity.ellipse && entity.position) {
+        const center = entity.position.getValue(Cesium.JulianDate.now());
+        this.initialShapeCenter = Cesium.Cartesian3.clone(center);
+        this.dragStartPosition = this.pickGlobePosition(position);
+        this.draggedShapeEntity = entity;
+        this.draggedShapeType = 'circle';
+
+        // Hide the actual circle entity during drag
+        entity.ellipse.show = new Cesium.ConstantProperty(false);
+
+        // Get circle radius from the ellipse
+        const semiMajorAxis = entity.ellipse.semiMajorAxis?.getValue(Cesium.JulianDate.now()) ?? 0;
+
+        // Create circle approximation with polyline (64 points for smooth circle)
+        const circlePositions = this.generateCirclePositions(center, semiMajorAxis, 64);
+
+        // Create polyline overlay for real-time feedback
+        this.dragPolylineCollection = new Cesium.PolylineCollection();
+        this.dragPolyline = this.dragPolylineCollection.add({
+          positions: (Cesium as any).PolylinePipeline.generateCartesianArc({
+            positions: circlePositions,
+          }),
+          width: 3,
+          material: Cesium.Material.fromType(Cesium.Material.ColorType, {
+            color: Cesium.Color.CYAN,
+          }),
+        });
+        this.viewer.scene.primitives.add(this.dragPolylineCollection);
+
+        this.viewer.scene.screenSpaceCameraController.enableRotate = false;
+        this.viewer.scene.screenSpaceCameraController.enableInputs = false;
+        return;
+      }
     }
   }
 
@@ -279,11 +399,60 @@ export class FeatureDrawingService {
     }
 
     // Handle point feature dragging
-    if (!this.draggedEntity) return;
+    if (this.draggedEntity) {
+      const cartesian = this.pickGlobePosition(position);
+      if (cartesian) {
+        this.draggedEntity.position = new Cesium.ConstantPositionProperty(cartesian);
+      }
+      return;
+    }
 
-    const cartesian = this.pickGlobePosition(position);
-    if (cartesian) {
-      this.draggedEntity.position = new Cesium.ConstantPositionProperty(cartesian);
+    // Handle polygon dragging - update polyline overlay only
+    if (this.draggedShapeEntity && this.draggedShapeType === 'polygon' && this.initialShapePositions && this.dragStartPosition && this.dragPolyline) {
+      const currentPosition = this.pickGlobePosition(position);
+      if (!currentPosition) return;
+
+      const delta = Cesium.Cartesian3.subtract(currentPosition, this.dragStartPosition, new Cesium.Cartesian3());
+      const newPositions = this.initialShapePositions.map(initialPos => {
+        const newPos = Cesium.Cartesian3.add(initialPos, delta, new Cesium.Cartesian3());
+        return this.viewer!.scene.globe.ellipsoid.scaleToGeodeticSurface(newPos) ?? newPos;
+      });
+
+      // Update polyline overlay only (much faster than updating entity)
+      this.dragPolyline.positions = (Cesium as any).PolylinePipeline.generateCartesianArc({
+        positions: [...newPositions, newPositions[0]], // Close the polygon
+      });
+
+      // Update entity position for real-time label movement
+      if (this.draggedShapeEntity.position && newPositions.length > 0) {
+        this.draggedShapeEntity.position = new Cesium.ConstantPositionProperty(newPositions[0]);
+      }
+      return;
+    }
+
+    // Handle circle dragging - update polyline overlay only
+    if (this.draggedShapeEntity && this.draggedShapeType === 'circle' && this.initialShapeCenter && this.dragStartPosition && this.dragPolyline) {
+      const currentPosition = this.pickGlobePosition(position);
+      if (!currentPosition) return;
+
+      const delta = Cesium.Cartesian3.subtract(currentPosition, this.dragStartPosition, new Cesium.Cartesian3());
+      const newCenter = Cesium.Cartesian3.add(this.initialShapeCenter, delta, new Cesium.Cartesian3());
+      const surfaceCenter = this.viewer!.scene.globe.ellipsoid.scaleToGeodeticSurface(newCenter) ?? newCenter;
+
+      // Get the radius from the entity
+      const semiMajorAxis = this.draggedShapeEntity.ellipse!.semiMajorAxis?.getValue(Cesium.JulianDate.now()) ?? 0;
+
+      // Regenerate circle positions with new center
+      const circlePositions = this.generateCirclePositions(surfaceCenter, semiMajorAxis, 64);
+
+      // Update polyline overlay only (much faster than updating entity)
+      this.dragPolyline.positions = (Cesium as any).PolylinePipeline.generateCartesianArc({
+        positions: circlePositions,
+      });
+
+      // Update entity position for real-time label movement
+      this.draggedShapeEntity.position = new Cesium.ConstantPositionProperty(surfaceCenter);
+      return;
     }
   }
 
@@ -317,6 +486,12 @@ export class FeatureDrawingService {
       return;
     }
 
+    // Show grabbing cursor while dragging shapes
+    if (this.draggedShapeEntity) {
+      this.viewer.canvas.style.cursor = 'grabbing';
+      return;
+    }
+
     const pickedObject = this.viewer.scene.pick(position);
     if (Cesium.defined(pickedObject) && pickedObject.id instanceof Cesium.Entity) {
       const entity = pickedObject.id as Cesium.Entity;
@@ -325,6 +500,18 @@ export class FeatureDrawingService {
       if (entity.point && entity.position &&
           !entity.properties?.hasProperty('_isVertexMarker') &&
           !entity.properties?.hasProperty('_isHoverPreview')) {
+        this.viewer.canvas.style.cursor = 'grab';
+        return;
+      }
+
+      // Check for polygon hover
+      if (entity.polygon && entity.polygon.hierarchy) {
+        this.viewer.canvas.style.cursor = 'grab';
+        return;
+      }
+
+      // Check for circle hover (ellipse)
+      if (entity.ellipse && entity.position) {
         this.viewer.canvas.style.cursor = 'grab';
         return;
       }
@@ -360,7 +547,80 @@ export class FeatureDrawingService {
       this.draggedEntity = null;
       this.viewer.scene.screenSpaceCameraController.enableRotate = true;
       this.viewer.scene.screenSpaceCameraController.enableInputs = true;
+      return;
     }
+
+    // Handle polygon drag finish
+    if (this.draggedShapeEntity && this.draggedShapeType === 'polygon' && this.dragPolyline) {
+      // Extract final positions from the polyline (excluding the last point which is a duplicate of the first)
+      const polylinePositions = this.dragPolyline.positions;
+      const positions = polylinePositions.slice(0, -1); // Remove the closing point
+
+      // Update the actual polygon entity with final positions
+      this.draggedShapeEntity.polygon!.hierarchy = new Cesium.ConstantProperty(new Cesium.PolygonHierarchy(positions));
+      this.draggedShapeEntity.position = new Cesium.ConstantPositionProperty(positions[0]);
+
+      // Show the polygon again
+      this.draggedShapeEntity.polygon!.show = new Cesium.ConstantProperty(true);
+
+      // Convert to cartographic for callback
+      const ellipsoid = this.viewer.scene.globe.ellipsoid;
+      const cartographicPositions = positions.map((pos: Cesium.Cartesian3) => ellipsoid.cartesianToCartographic(pos));
+
+      if (this.onPolygonUpdatedCallback && this.draggedShapeEntity.id) {
+        this.onPolygonUpdatedCallback(this.draggedShapeEntity.id, cartographicPositions);
+      }
+
+      this.resetShapeDragState();
+      return;
+    }
+
+    // Handle circle drag finish
+    if (this.draggedShapeEntity && this.draggedShapeType === 'circle' && this.dragStartPosition && position) {
+      // Calculate final center position
+      const currentPosition = this.pickGlobePosition(position);
+      if (currentPosition && this.initialShapeCenter) {
+        const delta = Cesium.Cartesian3.subtract(currentPosition, this.dragStartPosition, new Cesium.Cartesian3());
+        const newCenter = Cesium.Cartesian3.add(this.initialShapeCenter, delta, new Cesium.Cartesian3());
+        const surfaceCenter = this.viewer.scene.globe.ellipsoid.scaleToGeodeticSurface(newCenter) ?? newCenter;
+
+        // Update the actual circle entity with final position
+        this.draggedShapeEntity.position = new Cesium.ConstantPositionProperty(surfaceCenter);
+
+        // Show the circle again
+        this.draggedShapeEntity.ellipse!.show = new Cesium.ConstantProperty(true);
+
+        // Convert to cartographic for callback
+        const ellipsoid = this.viewer.scene.globe.ellipsoid;
+        const centerCarto = ellipsoid.cartesianToCartographic(surfaceCenter);
+
+        if (this.onCircleUpdatedCallback && this.draggedShapeEntity.id) {
+          this.onCircleUpdatedCallback(this.draggedShapeEntity.id, centerCarto);
+        }
+      }
+
+      this.resetShapeDragState();
+      return;
+    }
+  }
+
+  private resetShapeDragState() {
+    if (!this.viewer) return;
+
+    // Cleanup polyline overlay
+    if (this.dragPolylineCollection) {
+      this.viewer.scene.primitives.remove(this.dragPolylineCollection);
+      this.dragPolylineCollection = null;
+      this.dragPolyline = null;
+    }
+
+    this.draggedShapeEntity = null;
+    this.draggedShapeType = null;
+    this.dragStartPosition = null;
+    this.initialShapePositions = null;
+    this.initialShapeCenter = null;
+    this.viewer.scene.screenSpaceCameraController.enableRotate = true;
+    this.viewer.scene.screenSpaceCameraController.enableInputs = true;
   }
 
 

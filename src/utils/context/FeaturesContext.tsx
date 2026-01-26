@@ -11,6 +11,8 @@ interface FeaturesContextType {
   renameFeature: (id: string, newName: string) => void;
   updateFeaturePosition: (id: string, newPosition: Cesium.ConstantProperty | Cesium.Cartographic) => void;
   updateLinePositions: (id: string, newPositions: Cesium.Cartographic[]) => void;
+  updatePolygonPositions: (id: string, newPositions: Cesium.Cartographic[]) => void;
+  updateCircleCenter: (id: string, newCenter: Cesium.Cartographic) => void;
   setActiveDrawingTool: (tool: string | null) => void;
   toggleFeatureInsights: (id: string) => void;
   toggleFeatureVisible: (id: string) => void;
@@ -96,6 +98,51 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
   }, []);
 
+  const updatePolygonPositions = useCallback((id: string, newPositions: Cesium.Cartographic[]) => {
+    setFeatures(prev =>
+      prev.map(f =>
+        f.id === id ? { ...f, metadata: { ...f.metadata, positions: newPositions } } : f
+      )
+    );
+  }, []);
+
+  const updateCircleCenter = useCallback((id: string, newCenter: Cesium.Cartographic) => {
+    setFeatures(prev =>
+      prev.map(f => {
+        if (f.id !== id) return f;
+
+        // Calculate delta for shifting related metadata points
+        const oldCenter = f.metadata.centerPosition || f.metadata.center;
+        if (!oldCenter) return { ...f, metadata: { ...f.metadata, center: newCenter, centerPosition: newCenter } };
+
+        const deltaLon = newCenter.longitude - oldCenter.longitude;
+        const deltaLat = newCenter.latitude - oldCenter.latitude;
+
+        const updatedMetadata = { ...f.metadata };
+
+        // Update center/centerPosition
+        if (f.type === 'circle') {
+          updatedMetadata.center = newCenter;
+        } else {
+          updatedMetadata.centerPosition = newCenter;
+        }
+
+        // Shift related points based on circle type
+        if (f.type === 'two-point-circle' && f.metadata.diameterEndpoints) {
+          updatedMetadata.diameterEndpoints = f.metadata.diameterEndpoints.map(ep =>
+            new Cesium.Cartographic(ep.longitude + deltaLon, ep.latitude + deltaLat, ep.height)
+          );
+        } else if (f.type === 'three-point-circle' && f.metadata.circumferencePoints) {
+          updatedMetadata.circumferencePoints = f.metadata.circumferencePoints.map(cp =>
+            new Cesium.Cartographic(cp.longitude + deltaLon, cp.latitude + deltaLat, cp.height)
+          );
+        }
+
+        return { ...f, metadata: updatedMetadata };
+      })
+    );
+  }, []);
+
   const toggleFeatureInsights = useCallback((id: string) => {
     setFeatures(prev =>
       prev.map(f =>
@@ -169,6 +216,8 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     renameFeature,
     updateFeaturePosition,
     updateLinePositions,
+    updatePolygonPositions,
+    updateCircleCenter,
     setActiveDrawingTool,
     toggleFeatureInsights,
     toggleFeatureVisible,

@@ -23,6 +23,8 @@ const FeaturesSection: React.FC = () => {
     addFeature,
     updateFeaturePosition,
     updateLinePositions,
+    updatePolygonPositions,
+    updateCircleCenter,
     toggleFeatureInsights,
     showFeatures,
     showLabels,
@@ -71,10 +73,18 @@ const FeaturesSection: React.FC = () => {
         (id, positions) => {
           // Line positions updated callback
           updateLinePositions(id, positions);
+        },
+        (id, positions) => {
+          // Polygon positions updated callback
+          updatePolygonPositions(id, positions);
+        },
+        (id, center) => {
+          // Circle center updated callback
+          updateCircleCenter(id, center);
         }
       );
     }
-  }, [viewer, addFeature, setActiveDrawingTool, updateFeaturePosition, updateLinePositions]);
+  }, [viewer, addFeature, setActiveDrawingTool, updateFeaturePosition, updateLinePositions, updatePolygonPositions, updateCircleCenter]);
 
   // Update drawing service visibility state
   useEffect(() => {

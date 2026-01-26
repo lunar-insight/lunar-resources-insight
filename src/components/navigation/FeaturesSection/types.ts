@@ -9,6 +9,7 @@ export interface Feature {
     position?: Cesium.Cartographic;
     positions?: Cesium.Cartographic[];
     center?: Cesium.Cartographic;
+    centerPosition?: Cesium.Cartographic;
     radius?: number;
     edgePosition?: Cesium.Cartographic;
     diameterEndpoints?: Cesium.Cartographic[];
