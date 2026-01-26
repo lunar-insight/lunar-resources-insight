@@ -5,6 +5,7 @@ export interface Feature {
   type: 'point' | 'line' | 'polygon' | 'circle' | 'two-point-circle' | 'three-point-circle';
   name: string;
   entity: Cesium.Entity;
+  color: string;
   metadata: {
     position?: Cesium.Cartographic;
     positions?: Cesium.Cartographic[];

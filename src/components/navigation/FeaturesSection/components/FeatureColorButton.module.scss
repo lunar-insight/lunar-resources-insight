@@ -1,0 +1,227 @@
+.colorButton {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-quartenary);
+  background-color: transparent;
+  overflow: hidden;
+
+  &[data-hovered] {
+    border-color: var(--color-tertiary);
+  }
+
+  &[data-pressed] {
+    border-color: var(--color-secondary);
+  }
+}
+
+.colorSwatch {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.125rem;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  // Ensure the swatch fills the button properly
+  & > div {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.125rem;
+  }
+}
+
+.colorPickerPopover {
+  background-color: transparent;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(to right, rgba(35, 41, 53, 0.75), rgba(43, 53, 62, 0.75));
+  border: 1px solid rgba(35, 41, 53, 0.85);
+
+  border-radius: 0.5rem;
+  box-shadow: 0px 0px 3px black; 
+  outline: none;
+
+  &[data-entering] {
+    animation: popover-slide 200ms;
+  }
+
+  &[data-exiting] {
+    animation: popover-slide 200ms reverse ease-in;
+  }
+}
+
+.dialog {
+  padding: 1rem;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 250px;
+}
+
+.colorArea {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 0.25rem;
+  flex-shrink: 0;
+
+  // Style the thumb (cursor) in the color area
+  :global(.react-aria-ColorThumb) {
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.8), inset 0 0 4px rgba(0, 0, 0, 0.3);
+    background: currentColor;
+    outline: none;
+
+    // Use a pseudo-element for the focus ring
+    &::after {
+      content: "";
+      box-sizing: border-box;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--color-secondary);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    &[data-focused] {
+      outline: none; // Extra safety
+    }
+
+    &[data-focus-visible] {
+      outline: none; 
+      &::after {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.colorSlider {
+  display: grid;
+  grid-template-areas:
+    "label output"
+    "track track";
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem;
+}
+
+.sliderLabel {
+  grid-area: label;
+  font-size: 0.75rem;
+  color: var(--color-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sliderOutput {
+  grid-area: output;
+  text-align: end;
+  font-size: 0.75rem;
+  color: var(--color-tertiary);
+  font-family: 'Roboto Mono', monospace;
+}
+
+.sliderTrack {
+  grid-area: track;
+  height: 24px;
+  border-radius: 0.25rem;
+  position: relative;
+
+  // Style the thumb (slider handle)
+  :global(.react-aria-ColorThumb) {
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    border: 2px solid white;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.8), inset 0 0 4px rgba(0, 0, 0, 0.3);
+    background: currentColor;
+    top: 50%;
+    transform: translateY(-50%); 
+    margin-top: 0; 
+    outline: none;
+
+    // Use a pseudo-element for the focus ring
+    &::after {
+      content: "";
+      box-sizing: border-box;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--color-secondary);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    &[data-focused] {
+      outline: none; // Extra safety
+    }
+
+    &[data-focus-visible] {
+      outline: none; 
+      &::after {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.colorField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  color: var(--color-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.fieldInput {
+  padding: 0.5rem;
+  background-color: rgba(35, 41, 53, 0.5);
+  border: 1px solid var(--color-quartenary);
+  border-radius: 0.25rem;
+  color: var(--color-tertiary);
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.875rem;
+
+  &:focus {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 1px;
+  }
+}
+
+@keyframes popover-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

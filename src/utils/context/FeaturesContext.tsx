@@ -13,6 +13,7 @@ interface FeaturesContextType {
   updateLinePositions: (id: string, newPositions: Cesium.Cartographic[]) => void;
   updatePolygonPositions: (id: string, newPositions: Cesium.Cartographic[]) => void;
   updateCircleCenter: (id: string, newCenter: Cesium.Cartographic) => void;
+  updateFeatureColor: (id: string, newColor: string) => void;
   setActiveDrawingTool: (tool: string | null) => void;
   toggleFeatureInsights: (id: string) => void;
   toggleFeatureVisible: (id: string) => void;
@@ -143,6 +144,14 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
   }, []);
 
+  const updateFeatureColor = useCallback((id: string, newColor: string) => {
+    setFeatures(prev =>
+      prev.map(f =>
+        f.id === id ? { ...f, color: newColor } : f
+      )
+    );
+  }, []);
+
   const toggleFeatureInsights = useCallback((id: string) => {
     setFeatures(prev =>
       prev.map(f =>
@@ -218,6 +227,7 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     updateLinePositions,
     updatePolygonPositions,
     updateCircleCenter,
+    updateFeatureColor,
     setActiveDrawingTool,
     toggleFeatureInsights,
     toggleFeatureVisible,

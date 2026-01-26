@@ -256,6 +256,7 @@ export class PolygonDrawingService extends DrawingServiceBase {
       type: 'polygon',
       name,
       entity,
+      color: '#00FFFFFF',
       metadata: {
         positions: cartographicPositions,
         createdAt: new Date(),

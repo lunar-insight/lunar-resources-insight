@@ -18,7 +18,7 @@ export const FeatureJumpButton: React.FC<FeatureJumpButtonProps> = ({
         className={styles.insightsButton}
       >
         <span className="material-symbols-outlined">
-          crop_free
+          location_searching
         </span>
       </Button>
       <ButtonTooltip placement="bottom">

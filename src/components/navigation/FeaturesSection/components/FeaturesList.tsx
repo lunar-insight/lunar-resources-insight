@@ -3,6 +3,7 @@ import { GridList, GridListItem } from 'react-aria-components';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useViewer } from 'utils/context/ViewerContext';
 import RemoveLayerButton from 'components/layout/Button/RemoveLayerButton/RemoveLayerButton';
+import { FeatureColorButton } from './FeatureColorButton';
 import { FeatureVisibilityButton } from './FeatureVisibilityButton';
 import { FeatureInsightsButton } from './FeatureInsightsButton';
 import { FeatureJumpButton } from './FeatureJumpButton';
@@ -65,6 +66,11 @@ export const FeaturesList: React.FC = () => {
                 />
               ) : (
                 <>
+                  <FeatureColorButton
+                    featureId={feature.id}
+                    currentColor={feature.color}
+                  />
+
                   <span
                     className={styles.featureName}
                     onClick={(e) => handleStartEdit(feature.id, e)}

@@ -608,6 +608,7 @@ export class CircleDrawingService extends DrawingServiceBase {
       type,
       name,
       entity,
+      color: '#00FFFFFF',
       metadata: {
         ...metadata,
         createdAt: new Date(),

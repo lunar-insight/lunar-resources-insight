@@ -206,6 +206,7 @@ export class LineDrawingService extends DrawingServiceBase {
       type: 'line',
       name,
       entity,
+      color: '#00FFFFFF',
       metadata: {
         positions: cartographicPositions,
         createdAt: new Date(),

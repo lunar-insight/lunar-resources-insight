@@ -70,6 +70,7 @@ export class PointDrawingService extends DrawingServiceBase {
       type: 'point',
       name,
       entity,
+      color: '#00FFFFFF',
       metadata: {
         position: cartographic,
         createdAt: new Date(),
