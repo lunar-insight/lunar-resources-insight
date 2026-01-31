@@ -119,6 +119,10 @@ export class FeatureDrawingService {
     this.lineVertexEditingService.updateLineVertexMarkersVisibility(lineId, visible);
   }
 
+  updateLineVertexMarkersColor(lineId: string, color: Cesium.Color): void {
+    this.lineVertexEditingService.updateLineVertexMarkersColor(lineId, color);
+  }
+
   startDrawing(tool: string) {
     if (!this.viewer) {
       console.error('Viewer not available');

@@ -10,6 +10,7 @@ import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useViewer } from 'utils/context/ViewerContext';
 import { useBoundaryRef } from 'components/reference/BoundaryRefProvider';
 import { FeatureDrawingService } from 'services/FeatureDrawingService';
+import { hexaToCesiumColor } from 'utils/colorUtils';
 import DraggableBoxContentContainer from 'components/layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
 import { Portal } from 'components/ui/Portal/Portal';
 import styles from './FeaturesSection.module.scss';
@@ -141,6 +142,18 @@ const FeaturesSection: React.FC = () => {
       service.updateLineVertexMarkersVisibility(lineFeature.id, shouldShow);
     });
   }, [lineFeatures, showFeatures]);
+
+  // Update vertex marker colors when line feature colors change
+  useEffect(() => {
+    const service = featureDrawingServiceRef.current;
+    if (!service) return;
+
+    // Update vertex marker colors for each line feature
+    lineFeatures.forEach(lineFeature => {
+      const cesiumColor = hexaToCesiumColor(lineFeature.color);
+      service.updateLineVertexMarkersColor(lineFeature.id, cesiumColor);
+    });
+  }, [lineFeatures]);
 
   const handleToggleDrawingTool = (tool: string, selected: boolean) => {
     if (selected) {

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, Rea
 import * as Cesium from 'cesium';
 import { Feature } from 'components/navigation/FeaturesSection/types';
 import { useViewer } from './ViewerContext';
+import { hexaToCesiumColor } from 'utils/colorUtils';
 
 interface FeaturesContextType {
   features: Feature[];
@@ -216,6 +217,40 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
       });
     }
   }, [viewer, features, showFeatures, showLabels]);
+
+  // Synchronize color changes with Cesium entities
+  useEffect(() => {
+    if (viewer && features.length > 0) {
+      features.forEach(feature => {
+        const entity = feature.entity;
+        const cesiumColor = hexaToCesiumColor(feature.color);
+
+        // Apply color based on feature type
+        if (entity.point) {
+          entity.point.color = new Cesium.ConstantProperty(cesiumColor);
+          // Keep white outline for better visibility/contrast
+        }
+
+        if (entity.polyline) {
+          entity.polyline.material = new Cesium.ColorMaterialProperty(cesiumColor);
+        }
+
+        if (entity.polygon) {
+          // Use semi-transparent fill (50% alpha) for better map readability
+          const fillColor = cesiumColor.withAlpha(cesiumColor.alpha * 0.5);
+          entity.polygon.material = new Cesium.ColorMaterialProperty(fillColor);
+          entity.polygon.outlineColor = new Cesium.ConstantProperty(cesiumColor);
+        }
+
+        if (entity.ellipse) {
+          // Use semi-transparent fill (50% alpha) for better map readability
+          const fillColor = cesiumColor.withAlpha(cesiumColor.alpha * 0.5);
+          entity.ellipse.material = new Cesium.ColorMaterialProperty(fillColor);
+          entity.ellipse.outlineColor = new Cesium.ConstantProperty(cesiumColor);
+        }
+      });
+    }
+  }, [viewer, features]);
 
   const value: FeaturesContextType = {
     features,

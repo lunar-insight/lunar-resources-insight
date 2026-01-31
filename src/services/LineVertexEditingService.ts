@@ -65,6 +65,23 @@ export class LineVertexEditingService {
   }
 
   /**
+   * Updates the color of vertex markers for a specific line.
+   * @param lineId - The ID of the line feature
+   * @param color - Cesium Color object to apply to the markers
+   */
+  updateLineVertexMarkersColor(lineId: string, color: Cesium.Color): void {
+    const markers = this.lineVertexMarkers.get(lineId);
+    if (!markers) return;
+
+    markers.forEach(marker => {
+      if (marker.point) {
+        // Update the outline color to match the line color
+        marker.point.outlineColor = new Cesium.ConstantProperty(color);
+      }
+    });
+  }
+
+  /**
    * Updates visibility for all vertex markers based on global visibility settings.
    * This is called when global visibility changes.
    */
