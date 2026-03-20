@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
 import 'cesium/Source/Widgets/widgets.css';
 import './CesiumComponent.module.scss';
-import { useViewer } from '../../../utils/context/ViewerContext';
-import { pointValueService } from '../../../services/PointValueService';
+import { useViewer } from 'utils/context/ViewerContext';
+import { pointValueService } from 'services/PointValueService';
 import BottomRightControls from '../BottomRightControls/BottomRightControls';
 import TopRightControls from '../TopRightControls/TopRightControls';
+import { TerrainService } from 'services/TerrainService';
 
 // Skybox images
 import positiveX from 'assets/images/skybox/px.jpg';
@@ -24,12 +25,12 @@ interface CesiumComponentProps {
 const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const [isCameraMoving, setIsCameraMoving] = useState(false);
   const [localViewer, setLocalViewer] = useState<Cesium.Viewer | null>(null);
+  const [terrainLoaded, setTerrainLoaded] = useState(false);
 
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
   const { setViewer } = useViewer();
   const { activeDrawingTool } = useFeaturesContext();
 
-  const isMovingRef = useRef<boolean>(false);
   const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const activeDrawingToolRef = useRef<string | null>(null);
 
@@ -48,6 +49,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       const viewer = new Cesium.Viewer(cesiumContainerRef.current, {
         globe: globe,
         mapProjection: mapProjection,
+        baseLayer: false,            // Disable default Ion imagery (empty token)
         timeline: false,
         animation: false,
         baseLayerPicker: false,
@@ -70,6 +72,10 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
           More Cesium option
       */
       globe.baseColor = Cesium.Color.GRAY;
+
+      // Terrain
+      globe.depthTestAgainstTerrain = false;
+      globe.showWaterEffect = false;
 
       // Remove the default double click of Cesium that can conflict with custom selection tools
       viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
@@ -151,6 +157,38 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         canvas.style.cursor = 'default';
       }, Cesium.ScreenSpaceEventType.LEFT_UP);
 
+      // Initialize terrain async
+      let isMounted = true;
+      const initTerrain = async () => {
+        try {
+          // Quantized mesh terrain
+          const terrainUrl = process.env.REACT_APP_TERRAIN_URL || 'http://localhost:3001';
+          const terrainProvider = await TerrainService.initializeLocalTerrain(terrainUrl);
+        
+          // Check if component if still mounted before updating state
+          if (!isMounted) return;
+          
+          viewer.terrainProvider = terrainProvider;
+
+          console.log('Terrain loaded successfully');
+          setTerrainLoaded(true);
+
+          // Request render after terrain loads
+          viewer.scene.requestRender();
+        } catch (error) {
+          // Check if component is still mounted before updating state
+          if (!isMounted) return;
+
+          console.error('Failed to load terrain, using ellipsoid:', error);
+
+          // Fallback to ellipsoid terrain (flat terrain)
+          viewer.terrainProvider = TerrainService.createEllipsoidTerrain();
+          setTerrainLoaded(false);
+        }
+      };
+
+      initTerrain();
+
       setViewer(viewer);
       setLocalViewer(viewer);
 
@@ -184,7 +222,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       };
     }
   }, [setViewer]);
-
+  
   // Update cursor based on active drawing tool
   useEffect(() => {
     if (!localViewer) return;
