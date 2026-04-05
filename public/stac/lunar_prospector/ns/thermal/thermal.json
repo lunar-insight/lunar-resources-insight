@@ -1,0 +1,72 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "lp-thermal-neutron-ns",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[
+      [-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]
+    ]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2000-11-03T00:00:00Z",
+    "title": "LP NS Thermal Neutron Counting Rate",
+    "mission": "Lunar Prospector",
+    "instruments": ["Neutron Spectrometer"],
+    "platform": "lunar-prospector",
+    "parameter": "thermal-neutron-count-rate",
+    "units": "counts/32s",
+    "scale_factor": 0.1,
+    "energy_range_eV": "0 – 0.4",
+    "grid_size_km": 60,
+    "observation_period_start": "1998-01-16",
+    "observation_period_end": "1999-07-31",
+    "quality_note": "Thermal neutron suppression is sensitive to hydrogen AND to other neutron absorbers (Fe, Ti, Gd, Sm, Cl). Cannot be used as a standalone hydrogen proxy - cross-reference with epithermal neutron map and LP GRS Fe/Ti maps to isolate hydrogen signature. See Feldman et al. 2000a and Maurice et al. 2001a.",
+    "processing:lineage": "Raw INT16 binary (therms.dat) scaled ÷10 via gdal_calc.py to obtain thermal neutron counts/32s as Float32. Binary values are 10× the ASCII count rate values. Counting rate defined as difference between Sn and Cd-covered ³He detector rates per 32 s. Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.8.4"
+    },
+    "processing:level": "L3"
+  },
+  "assets": {
+    "data": {
+      "href": "thermal_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Thermal neutron counts/32s COG - IAU:30100",
+      "roles": ["data"]
+    },
+    "vrt": {
+      "href": "thermal.vrt",
+      "type": "application/xml",
+      "title": "GDAL VRT - raw binary geometry description",
+      "roles": ["metadata", "source"]
+    },
+    "processing_script": {
+      "href": "thermal.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": ["metadata", "reproducibility"]
+    },
+    "source_data": {
+      "href": "therms.dat",
+      "type": "application/octet-stream",
+      "title": "Original PDS binary - INT16 MSB, scale ×10",
+      "roles": ["data", "source"]
+    }
+  },
+  "links": [
+    { "rel": "self",       "href": "./thermal.json" },
+    { "rel": "root",       "href": "../../../catalog.json" },
+    { "rel": "parent",     "href": "../catalog.json" },
+    {
+      "rel": "derived_from",
+      "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
+      "type": "text/html",
+      "title": "PDS source - therms.dat, version Nov. 3, 2000"
+    }
+  ]
+}

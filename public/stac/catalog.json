@@ -1,0 +1,14 @@
+{
+  "type": "Catalog",
+  "id": "lunar-resources-insight",
+  "stac_version": "1.0.0",
+  "title": "Lunar Resources Insight - STAC Catalog",
+  "description": "Root catalog for Lunar Prospector reduced spectrometer data products. Contains elemental abundance maps derived from the Gamma Ray Spectrometer (GRS), Alpha Particle Spectrometer (APS), and Neutron Spectrometer (NS). Source: PDS Geosciences Node.",
+  "links": [
+    { "rel": "self", "href": "./catalog.json" },
+    { "rel": "root", "href": "./catalog.json" },
+    { "rel": "child", "href": "./lunar_prospector/grs/catalog.json", "title": "LP Gamma Ray Spectrometer" },
+    { "rel": "child", "href": "./lunar_prospector/aps/catalog.json", "title": "LP Alpha Particle Spectrometer" },
+    { "rel": "child", "href": "./lunar_prospector/ns/catalog.json",  "title": "LP Neutron Spectrometer" }
+  ]
+}
