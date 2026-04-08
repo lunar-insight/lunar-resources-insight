@@ -1,0 +1,92 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "lp-epithermal-neutron-wilson2018",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[
+      [-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]
+    ]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2018-06-19T00:00:00Z",
+    "title": "LP NS Epithermal Neutron – Pixon Reconstruction (Wilson et al., 2018)",
+    "mission": "Lunar Prospector",
+    "instruments": ["Neutron Spectrometer"],
+    "platform": "lunar-prospector",
+    "parameter": "epithermal-neutron-count-rate",
+    "units": "counts/32s",
+    "lri:data_use": "spatial-targeting",
+    "lri:data_use_note": "Spatial targeting, not quantitative estimate. Values are neutron count rates — use this map to identify WHERE hydrogen enrichment is highest. Low count rate = more hydrogen. For quantitative hydrogen abundance, cross-reference with grs/0.5deg/hydrogen/.",
+    "energy_range_eV": "0.4 eV – 500 keV",
+    "grid_size_deg": 0.3515625,
+    "grid_cols": 1024,
+    "grid_rows": 512,
+    "observation_period_start": "1998-12-19",
+    "observation_period_end": "1999-07-31",
+    "data_collection_orbit": "LP low-altitude orbit (~30 km, ~7 months)",
+    "pixon_method": "MEP (Maximum Entropy Pixon)",
+    "achieved_resolution_km": 61,
+    "original_psf_fwhm_km": 45,
+    "psf_function": "kappa function (Lawrence et al., 2003; Maurice et al., 2004)",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
+    "publication_date": "2018-06-19",
+    "doi": "10.1029/2018JE005589",
+    "authors": "J. T. Wilson, D. J. Lawrence, P. N. Peplowski, J. T. S. Cahill, V. R. Eke, R. J. Massey, L. F. A. Teodoro",
+    "lri:quality_note": "MEP reconstruction of the LP-NS epithermal neutron map (Wilson et al., 2018). Effective resolution 61 km vs. ~45 km FWHM original PSF; improvement is primarily noise suppression given the low SNR of this channel. Cd-coated ³He detector screens thermal neutrons, making this channel nearly exclusively sensitive to hydrogen. Prefer over the original PDS epithermal map (ns/epithermal/) for feature identification and ISRU prospecting.",
+    "processing:lineage": "Upstream NS data reduction: Maurice et al. (2004). PSF determined from kappa function (Lawrence et al., 2003; Maurice et al., 2004) accounting for spacecraft motion (Wilson et al., 2015). Pixon reconstruction applied by Wilson et al. (2018). COG production: source jgre20969-sup-0002-supplementary.txt (Dataset S1); comment lines stripped; 524288 space-delimited float64 values parsed and reshaped to 512×1024 (row-major, north→south); written as raw Float32 LSB binary via Python struct; GDAL VRT (epithermal_wilson.vrt) used to assign CRS (IAU:30100) and geotransform; gdal_translate to COG with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.12.2",
+      "PROJ": "9.8.0",
+      "Python": "3.12.13 (OSGeo4W)"
+    },
+    "processing:level": "L4"
+  },
+  "assets": {
+    "data": {
+      "href": "epithermal_wilson_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Pixon epithermal neutron counts/32s COG – IAU:30100",
+      "roles": ["data"]
+    },
+    "processing_script": {
+      "href": "epithermal_wilson.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": ["metadata", "reproducibility"]
+    },
+    "source_data": {
+      "href": "jgre20969-sup-0002-supplementary.txt",
+      "type": "text/plain",
+      "title": "Original supplementary txt – Dataset S1, Wilson et al. 2018",
+      "roles": ["data", "source"]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./epithermal_wilson.json" },
+    { "rel": "root",   "href": "../../../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    {
+      "rel": "derived_from",
+      "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
+      "type": "text/html",
+      "title": "PDS source – LP-NS epithermal (epis.dat)"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://doi.org/10.1029/2018JE005589",
+      "type": "text/html",
+      "title": "Wilson et al. 2018 – JGR Planets"
+    },
+    {
+      "rel": "alternate",
+      "href": "../../ns/epithermal/epithermal.json",
+      "type": "application/json",
+      "title": "Original PDS epithermal product (lower resolution)"
+    }
+  ]
+}
