@@ -8,7 +8,6 @@
 # GDAL      : 3.12.2
 # PROJ      : 9.8.0
 # Python    : 3.12.13 (OSGeo4W)
-# OSGeo4W   : 2024 (64-bit)
 # Requires  : GDAL >= 3.4, PROJ >= 8.1
 # NOTE      : Hydrogen abundances are not necessarily reliable in regions of
 #             high thorium and rare-earth element abundances (Maurice et al.

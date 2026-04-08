@@ -8,7 +8,6 @@
 # GDAL      : 3.12.2
 # PROJ      : 9.8.0
 # Python    : 3.12.13 (OSGeo4W)
-# OSGeo4W   : 2024 (64-bit)
 # Requires  : GDAL >= 3.4, PROJ >= 8.1
 # NOTE      : Counting rate is the difference between the Sn and Cd-covered
 #             ³He detector rates per 32 s, corresponding to neutrons with

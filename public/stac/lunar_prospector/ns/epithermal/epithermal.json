@@ -7,16 +7,44 @@
   "id": "lp-epithermal-neutron-ns",
   "geometry": {
     "type": "Polygon",
-    "coordinates": [[
-      [-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]
-    ]]
+    "coordinates": [
+      [
+        [
+          -180,
+          -90
+        ],
+        [
+          180,
+          -90
+        ],
+        [
+          180,
+          90
+        ],
+        [
+          -180,
+          90
+        ],
+        [
+          -180,
+          -90
+        ]
+      ]
+    ]
   },
-  "bbox": [-180, -90, 180, 90],
+  "bbox": [
+    -180,
+    -90,
+    180,
+    90
+  ],
   "properties": {
     "datetime": "2000-11-03T00:00:00Z",
     "title": "LP NS Epithermal Neutron Counting Rate",
     "mission": "Lunar Prospector",
-    "instruments": ["Neutron Spectrometer"],
+    "instruments": [
+      "Neutron Spectrometer"
+    ],
     "platform": "lunar-prospector",
     "parameter": "epithermal-neutron-count-rate",
     "units": "counts/32s",
@@ -25,7 +53,8 @@
     "grid_size_km": 60,
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",
-    "quality_note": "Epithermal neutron suppression is the primary hydrogen/water-ice proxy from LP NS. Hydrogen moderates fast neutrons to thermal energies, reducing epithermal flux. Suppression is nearly uniquely sensitive to hydrogen compared to thermal neutrons. This is the canonical dataset used to identify enhanced polar hydrogen deposits (Feldman et al. 2000b, 2001c; Maurice et al. 2001b). Hydrogen abundance maps derived from this product are available in the LP GRS/NS 0.5° and 2° collections.",
+    "lri:quality_note": "Epithermal neutron suppression is the primary hydrogen/water-ice proxy from LP NS. Hydrogen moderates fast neutrons to thermal energies, reducing epithermal flux. Suppression is nearly uniquely sensitive to hydrogen compared to thermal neutrons. This is the canonical dataset used to identify enhanced polar hydrogen deposits (Feldman et al. 2000b, 2001c; Maurice et al. 2001b). Hydrogen abundance maps derived from this product are available in the LP GRS/NS 0.5° and 2° collections.",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
     "processing:lineage": "Raw INT16 binary (epis.dat) scaled ÷10 via gdal_calc.py to obtain epithermal neutron counts/32s as Float32. Binary values are 10× the ASCII count rate values. Counting rate from Cd-covered ³He detector per 32 s. Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {
       "GDAL": "3.8.4"
@@ -37,31 +66,51 @@
       "href": "epithermal_COG.tif",
       "type": "image/tiff; application=geotiff; profile=cloud-optimized",
       "title": "Epithermal neutron counts/32s COG - IAU:30100",
-      "roles": ["data"]
+      "roles": [
+        "data"
+      ]
     },
     "vrt": {
       "href": "epithermal.vrt",
       "type": "application/xml",
       "title": "GDAL VRT - raw binary geometry description",
-      "roles": ["metadata", "source"]
+      "roles": [
+        "metadata",
+        "source"
+      ]
     },
     "processing_script": {
       "href": "epithermal.sh",
       "type": "application/x-sh",
       "title": "Exact processing commands used to generate the COG",
-      "roles": ["metadata", "reproducibility"]
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
     },
     "source_data": {
       "href": "epis.dat",
       "type": "application/octet-stream",
       "title": "Original PDS binary - INT16 MSB, scale ×10",
-      "roles": ["data", "source"]
+      "roles": [
+        "data",
+        "source"
+      ]
     }
   },
   "links": [
-    { "rel": "self",       "href": "./epithermal.json" },
-    { "rel": "root",       "href": "../../../catalog.json" },
-    { "rel": "parent",     "href": "../catalog.json" },
+    {
+      "rel": "self",
+      "href": "./epithermal.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json"
+    },
     {
       "rel": "derived_from",
       "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",

@@ -7,16 +7,44 @@
   "id": "lp-potassium-2deg",
   "geometry": {
     "type": "Polygon",
-    "coordinates": [[
-      [-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]
-    ]]
+    "coordinates": [
+      [
+        [
+          -180,
+          -90
+        ],
+        [
+          180,
+          -90
+        ],
+        [
+          180,
+          90
+        ],
+        [
+          -180,
+          90
+        ],
+        [
+          -180,
+          -90
+        ]
+      ]
+    ]
   },
-  "bbox": [-180, -90, 180, 90],
+  "bbox": [
+    -180,
+    -90,
+    180,
+    90
+  ],
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Potassium 2° Elemental Abundance",
     "mission": "Lunar Prospector",
-    "instruments": ["Gamma Ray Spectrometer"],
+    "instruments": [
+      "Gamma Ray Spectrometer"
+    ],
     "platform": "lunar-prospector",
     "element": "K",
     "units": "ppm",
@@ -25,6 +53,7 @@
     "grid_size_km": 60,
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
     "processing:lineage": "Raw INT16 binary (potassium2d.dat) converted to Float32 K ppm via gdal_calc.py - NO rescaling applied; potassium binary values equal the ASCII ppm values directly (unlike other elements which are ×10). Derived from LP gamma ray spectrometer observations (Prettyman et al. 2002). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {
       "GDAL": "3.8.4"
@@ -36,31 +65,51 @@
       "href": "potassium2d_COG.tif",
       "type": "image/tiff; application=geotiff; profile=cloud-optimized",
       "title": "K ppm COG - IAU:30100",
-      "roles": ["data"]
+      "roles": [
+        "data"
+      ]
     },
     "vrt": {
       "href": "potassium2d.vrt",
       "type": "application/xml",
       "title": "GDAL VRT - raw binary geometry description",
-      "roles": ["metadata", "source"]
+      "roles": [
+        "metadata",
+        "source"
+      ]
     },
     "processing_script": {
       "href": "potassium2d.sh",
       "type": "application/x-sh",
       "title": "Exact processing commands used to generate the COG",
-      "roles": ["metadata", "reproducibility"]
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
     },
     "source_data": {
       "href": "potassium2d.dat",
       "type": "application/octet-stream",
       "title": "Original PDS binary - INT16 MSB, no scale factor (binary = ASCII ppm)",
-      "roles": ["data", "source"]
+      "roles": [
+        "data",
+        "source"
+      ]
     }
   },
   "links": [
-    { "rel": "self",       "href": "./potassium2d.json" },
-    { "rel": "root",       "href": "../../../../catalog.json" },
-    { "rel": "parent",     "href": "../collection.json" },
+    {
+      "rel": "self",
+      "href": "./potassium2d.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
     {
       "rel": "derived_from",
       "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",

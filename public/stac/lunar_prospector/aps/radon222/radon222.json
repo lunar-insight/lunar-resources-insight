@@ -7,16 +7,44 @@
   "id": "lp-radon222-aps",
   "geometry": {
     "type": "Polygon",
-    "coordinates": [[
-      [-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]
-    ]]
+    "coordinates": [
+      [
+        [
+          -180,
+          -90
+        ],
+        [
+          180,
+          -90
+        ],
+        [
+          180,
+          90
+        ],
+        [
+          -180,
+          90
+        ],
+        [
+          -180,
+          -90
+        ]
+      ]
+    ]
   },
-  "bbox": [-180, -90, 180, 90],
+  "bbox": [
+    -180,
+    -90,
+    180,
+    90
+  ],
   "properties": {
     "datetime": "2002-01-03T00:00:00Z",
     "title": "LP APS Radon-222 Relative Count Rate",
     "mission": "Lunar Prospector",
-    "instruments": ["Alpha Particle Spectrometer"],
+    "instruments": [
+      "Alpha Particle Spectrometer"
+    ],
     "platform": "lunar-prospector",
     "element": "Rn-222",
     "units": "counts/s",
@@ -36,31 +64,51 @@
       "href": "radon222_COG.tif",
       "type": "image/tiff; application=geotiff; profile=cloud-optimized",
       "title": "²²²Rn counts/s COG - IAU:30100",
-      "roles": ["data"]
+      "roles": [
+        "data"
+      ]
     },
     "vrt": {
       "href": "radon222.vrt",
       "type": "application/xml",
       "title": "GDAL VRT - raw binary geometry description",
-      "roles": ["metadata", "source"]
+      "roles": [
+        "metadata",
+        "source"
+      ]
     },
     "processing_script": {
       "href": "radon222.sh",
       "type": "application/x-sh",
       "title": "Exact processing commands used to generate the COG",
-      "roles": ["metadata", "reproducibility"]
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
     },
     "source_data": {
       "href": "radon222.dat",
       "type": "application/octet-stream",
       "title": "Original PDS binary - INT16 MSB, scale ×1000",
-      "roles": ["data", "source"]
+      "roles": [
+        "data",
+        "source"
+      ]
     }
   },
   "links": [
-    { "rel": "self",       "href": "./radon222.json" },
-    { "rel": "root",       "href": "../../../catalog.json" },
-    { "rel": "parent",     "href": "../catalog.json" },
+    {
+      "rel": "self",
+      "href": "./radon222.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json"
+    },
     {
       "rel": "derived_from",
       "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
