@@ -1,0 +1,113 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "lp-hydrogen-abundance-ppm-lawrence2022",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[
+      [-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]
+    ]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2022-07-20T00:00:00Z",
+    "title": "LP NS Global Hydrogen Abundance - Calibrated ppm (Lawrence et al., 2022)",
+    "mission": "Lunar Prospector",
+    "instruments": ["Neutron Spectrometer"],
+    "platform": "lunar-prospector",
+    "parameter": "hydrogen-abundance-ppm",
+    "units": "ppm (parts per million by weight)",
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "Quantitative global H abundance in ppm, calibrated to Apollo sample hydrogen measurements. This is the most accurately calibrated global H map available from LP-NS data. Use for resource estimation, spatial prospecting, and regional comparison. Wilson et al. 2018 is the upstream spatial input to this map — both have the same effective resolution (~50-61 km). Average global H: 47 ± ~10 ppm (systematic uncertainty from Apollo calibration).",
+    "h_global_average_ppm": 47,
+    "h_global_uncertainty_ppm": 10,
+    "h_max_ppm": 117,
+    "ree_correction": true,
+    "apollo_calibration": true,
+    "apollo_calibration_note": "H abundance calibrated using Apollo soil and regolith breccia hydrogen abundances compiled by Haskin & Warren (1991). These materials best represent the bulk soils sampled by orbital neutron data. Calibration links REE-corrected epithermal count rates to absolute ppm values.",
+    "polar_h_enhancement_lat_deg": 75,
+    "polar_h_enhancement_note": "Bulk hydrogen abundances only increase clearly poleward of 75°-80° latitude (Lawrence et al. 2022, Section 4 / Figure 8). Equatorward of this threshold, H is relatively flat at 30-50 ppm driven by solar wind implantation, with no significant latitude dependence.",
+    "h_kreep_absolute_range_ppm": {"min": 61, "max": 83},
+    "h_kreep_excess_ppm": {"min": 14, "max": 36},
+    "h_kreep_note": "KREEP-rich regions (Th > 8 ppm) show absolute H of 61-83 ppm, with 14-36 ppm excess above the 47 ppm solar-wind baseline. Enhancement persists across soil maturities, indicating endogenous origin not solar-wind accumulation (Section 6.2). High-KREEP prospecting targets should expect H in this range.",
+    "h_omat_deficit_ppm": 20,
+    "h_omat_note": "Immature surfaces (fresh impact ejecta, high OMAT) show ~20 ppm lower H than the global mean due to insufficient solar-wind implantation time (Section 5.3). When prospecting near young craters, expect H significantly below the 47 ppm baseline. Cross-reference with optical maturity maps before targeting.",
+    "h_reservoirs": [
+      {"type": "pyroclastic-deposits", "source": "endogenous", "confirmed_bulk": true, "h_range_ppm": "50-68", "aristarchus_water_mass_metric_tons": 800000000, "aristarchus_water_mass_note": "Estimated from 50-68 ppm H, ~20 m deposit thickness, 49013 km² area, 1.5 g/cm³ soil density (Section 6.1). Comparable in order of magnitude to polar PSR estimates (2×10⁸ - 2.5×10¹⁰ t). Paper identifies Aristarchus as an attractive ISRU landing site target.", "note": "Other deposits (Humorum, Rima Bode, Sulpicius Gallus) too small to detect with LP 50 km footprint"},
+      {"type": "kreep-rich-materials", "source": "endogenous", "confirmed_bulk": true, "h_range_ppm": "61-83", "h_excess_ppm": "14-36"},
+      {"type": "bulk-solar-wind", "source": "exogenous", "confirmed_bulk": true, "h_range_ppm": "0-~100", "note": "Dominant H source for non-polar non-pyroclastic regions; correlated with surface maturity (OMAT)"},
+      {"type": "surface-oh-h2o", "source": "exogenous", "confirmed_bulk": false, "note": "Latitude-dependent, near-zero equatorward of 30°; rises to ~56-80 ppm H equivalent poleward; stable above ~60° latitude"},
+      {"type": "permanently-shaded-regions", "source": "mostly-exogenous", "confirmed_bulk": true, "note": "Up to few wt% WEH; LP 50 km footprint cannot resolve individual PSRs — bulk values include footprint averaging with surrounding terrain"}
+    ],
+    "grid_size_deg": 0.5,
+    "spatial_resolution_km": 50,
+    "grid_cols": 720,
+    "grid_rows": 360,
+    "observation_period_start": "1998-12-19",
+    "observation_period_end": "1999-07-31",
+    "data_collection_orbit": "LP low-altitude orbit (~30 km, ~7 months)",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
+    "publication_date": "2022-07-20",
+    "doi": "10.1029/2022JE007197",
+    "authors": "D. J. Lawrence, P. N. Peplowski, J. T. Wilson, R. C. Elphic",
+    "lri:quality_note": "Global hydrogen abundance map in ppm from Lawrence et al. (2022, Figure 6). This is the primary scientific result of the paper and the most accurately calibrated global H product from LP-NS data. The processing chain is: (1) raw LP-NS epithermal count rates (Maurice et al. 2004) → (2) Wilson et al. 2018 pixon reconstruction (noise suppression, same ~50-61 km effective resolution) → (3) REE-corrected count rates (removes neutron absorption bias from Sm/Gd in KREEP terranes) → (4) calibrated H ppm using Apollo sample measurements (this map). Global average H is 47 ± ~10 ppm, max 117 ppm — values ~25% lower than Lawrence et al. (2006) and significantly lower than Lawrence et al. (2015) which had polar values up to 180 ppm; difference attributed to the improved REE correction and Apollo calibration. Consistent with solar wind implantation as the dominant H source for non-polar, non-pyroclastic regions. Key features: Aristarchus Plateau shows confirmed bulk H enhancement (50-68 ppm) extending to tens of cm depth (not merely surficial); KREEP-rich regions show absolute H of 61-83 ppm (14-36 ppm excess above solar-wind baseline); immature surfaces (young craters, fresh ejecta) show ~20 ppm deficit below global mean; polar enhancements present but LP 50 km footprint cannot resolve individual PSRs. Five distinct H reservoirs identified: pyroclastic deposits, KREEP-rich materials, bulk solar-wind, surface OH/H2O, and PSRs (see h_reservoirs field). ISRU relevance: unlike count-rate maps, these ppm values can be directly used in resource estimation calculations. However, at 47 ppm bulk average, global regolith H is a marginal ISRU feedstock — polar PSR enhancements (not fully resolved here) represent the primary water-ice ISRU target. This map is most useful for: (1) establishing baseline H inventory for non-polar sites; (2) identifying regionally elevated H (pyroclastic deposits, polar regions) for prospecting prioritization; (3) cross-correlating H with Th/REE/OMAT to disentangle source mechanisms.",
+    "processing:lineage": "Upstream NS data reduction: Maurice et al. (2004). Pixon spatial reconstruction: Wilson et al. (2018) — adopted as the base epithermal map for all Lawrence et al. (2022) analyses (Section 2). REE correction applied to reconstructed count rates using macroscopic absorption cross-section map (Peplowski et al. 2016) to remove Sm/Gd absorption bias. H ppm calibration applied using Apollo soil and regolith breccia hydrogen abundances (Haskin & Warren 1991) following Lawrence et al. (2022, Sections 3-4). Source file: figure6.txt from JHU-APL data repository (https://lib.jhuapl.edu//papers/global-hydrogen-abundances-on-the-moon/). COG production: comment lines stripped; (MAPLON, MAPLAT, HMAP) triplets sorted north→south, west→east; reshaped to 360×720; written as AAIGrid; gdal_translate to COG with IAU:30100 CRS, DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.8.4",
+      "Python": "3.x"
+    },
+    "processing:level": "L4"
+  },
+  "assets": {
+    "data": {
+      "href": "hydrogen_abundance_lawrence_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Global H abundance in ppm COG - IAU:30100",
+      "roles": ["data"]
+    },
+    "processing_script": {
+      "href": "hydrogen_abundance_lawrence.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": ["metadata", "reproducibility"]
+    },
+    "source_data": {
+      "href": "figure6.txt",
+      "type": "text/plain",
+      "title": "Original data file - Figure 6, Lawrence et al. 2022",
+      "roles": ["data", "source"]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./hydrogen_abundance_lawrence.json" },
+    { "rel": "root",   "href": "../../../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    {
+      "rel": "derived_from",
+      "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
+      "type": "text/html",
+      "title": "PDS source - LP-NS epithermal data"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://doi.org/10.1029/2022JE007197",
+      "type": "text/html",
+      "title": "Lawrence et al. 2022 - JGR Planets"
+    },
+    {
+      "rel": "related",
+      "href": "../../grs/0.5deg/hydrogen/hydrogenhd.json",
+      "type": "application/json",
+      "title": "LP GRS H 0.5° - alternative H product from gamma-ray data"
+    },
+    {
+      "rel": "derived_from",
+      "href": "../../wilson2018/epithermal/epithermal_wilson.json",
+      "type": "application/json",
+      "title": "Wilson et al. 2018 pixon epithermal - upstream spatial input used as base map for REE correction and Apollo calibration"
+    }
+  ]
+}
