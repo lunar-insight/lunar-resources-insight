@@ -49,7 +49,7 @@
     "parameter": "thermal-neutron-count-rate",
     "units": "counts/32s",
     "scale_factor": 0.1,
-    "energy_range_eV": "0 – 0.4",
+    "energy_range_eV": "0 - 0.4",
     "grid_size_km": 60,
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",

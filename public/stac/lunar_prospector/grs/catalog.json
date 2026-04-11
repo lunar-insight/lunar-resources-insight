@@ -3,7 +3,7 @@
   "id": "lp-spectrometer",
   "stac_version": "1.0.0",
   "title": "Lunar Prospector Reduced Spectrometer Data",
-  "description": "Elemental abundance maps derived from the Lunar Prospector Gamma Ray Spectrometer (January 1998 – July 1999). Special products prepared by the LP Spectrometer Team, LANL. Source: PDS Geosciences Node, June 2002.",
+  "description": "Elemental abundance maps derived from the Lunar Prospector Gamma Ray Spectrometer (January 1998 - July 1999). Special products prepared by the LP Spectrometer Team, LANL. Source: PDS Geosciences Node, June 2002.",
   "links": [
     { "rel": "self",   "href": "./catalog.json" },
     { "rel": "root",   "href": "../../catalog.json" },

@@ -14,7 +14,7 @@
   "bbox": [-180, -90, 180, 90],
   "properties": {
     "datetime": "2018-06-19T00:00:00Z",
-    "title": "LP NS Sn-Covered Sensor (Thermal + Epithermal) – Pixon Reconstruction (Wilson et al., 2018)",
+    "title": "LP NS Sn-Covered Sensor (Thermal + Epithermal) - Pixon Reconstruction (Wilson et al., 2018)",
     "mission": "Lunar Prospector",
     "instruments": ["Neutron Spectrometer"],
     "platform": "lunar-prospector",
@@ -22,7 +22,7 @@
     "units": "counts/32s",
     "lri:data_use": "spatial-targeting",
     "lri:data_use_note": "Spatial targeting, not quantitative estimate. Values are blended neutron count rates (thermal + epithermal) — use this map for bulk composition context and cross-referencing, not as a standalone hydrogen proxy. For hydrogen prospecting, prefer epithermal_wilson.json.",
-    "energy_range_eV": "0 eV – 500 keV",
+    "energy_range_eV": "0 eV - 500 keV",
     "grid_size_deg": 0.3515625,
     "grid_cols": 1024,
     "grid_rows": 512,
@@ -37,7 +37,7 @@
     "publication_date": "2018-06-19",
     "doi": "10.1029/2018JE005589",
     "authors": "J. T. Wilson, D. J. Lawrence, P. N. Peplowski, J. T. S. Cahill, V. R. Eke, R. J. Massey, L. F. A. Teodoro",
-    "lri:quality_note": "MEP reconstruction of the LP-NS Sn-covered sensor (Wilson et al., 2018, Dataset S3). Effective resolution 38 km vs. ~45 km FWHM original PSF. The Sn detector records blended thermal + epithermal neutrons — NOT a standalone hydrogen proxy, as thermal neutrons are sensitive to multiple absorbers (Fe, Ti, Gd, Sm, Cl). Note: the PDS 'thermal' product (therms.dat) is the Sn–Cd difference; this is the raw Sn signal before that subtraction. Use for bulk composition context alongside the epithermal product.",
+    "lri:quality_note": "MEP reconstruction of the LP-NS Sn-covered sensor (Wilson et al., 2018, Dataset S3). Effective resolution 38 km vs. ~45 km FWHM original PSF. The Sn detector records blended thermal + epithermal neutrons — NOT a standalone hydrogen proxy, as thermal neutrons are sensitive to multiple absorbers (Fe, Ti, Gd, Sm, Cl). Note: the PDS 'thermal' product (therms.dat) is the Sn-Cd difference; this is the raw Sn signal before that subtraction. Use for bulk composition context alongside the epithermal product.",
     "processing:lineage": "Upstream NS data reduction: Maurice et al. (2004). PSF determined from kappa function (Lawrence et al., 2003; Maurice et al., 2004) accounting for spacecraft motion (Wilson et al., 2015). Pixon reconstruction applied by Wilson et al. (2018). COG production: source jgre20969-sup-0004-supplementary.txt (Dataset S3); comment lines stripped; 524288 space-delimited values parsed as column-major layout (1024 longitude-bins × 512 latitude-bins, longitude -180→+180, latitude south→north); transposed to row-major (512 lat-rows × 1024 lon-cols) then V-flipped to north→south for GDAL north-up convention; written as AAIGrid (ncols=1024, nrows=512, cellsize=0.3515625°); gdal_translate to COG with IAU:30100, DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {
       "GDAL": "3.12.2",
@@ -50,7 +50,7 @@
     "data": {
       "href": "sn_thermal_epithermal_wilson_COG.tif",
       "type": "image/tiff; application=geotiff; profile=cloud-optimized",
-      "title": "Pixon Sn-sensor (thermal+epithermal) counts/32s COG – IAU:30100",
+      "title": "Pixon Sn-sensor (thermal+epithermal) counts/32s COG - IAU:30100",
       "roles": ["data"]
     },
     "processing_script": {
@@ -62,7 +62,7 @@
     "source_data": {
       "href": "jgre20969-sup-0004-supplementary.txt",
       "type": "text/plain",
-      "title": "Original supplementary txt – Dataset S3, Wilson et al. 2018",
+      "title": "Original supplementary txt - Dataset S3, Wilson et al. 2018",
       "roles": ["data", "source"]
     }
   },
@@ -74,19 +74,19 @@
       "rel": "derived_from",
       "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
       "type": "text/html",
-      "title": "PDS source – LP-NS Sn-covered sensor data"
+      "title": "PDS source - LP-NS Sn-covered sensor data"
     },
     {
       "rel": "derived_from",
       "href": "https://doi.org/10.1029/2018JE005589",
       "type": "text/html",
-      "title": "Wilson et al. 2018 – JGR Planets"
+      "title": "Wilson et al. 2018 - JGR Planets"
     },
     {
       "rel": "related",
       "href": "../epithermal/epithermal_wilson.json",
       "type": "application/json",
-      "title": "Pixon epithermal map – preferred H/water-ice proxy"
+      "title": "Pixon epithermal map - preferred H/water-ice proxy"
     }
   ]
 }

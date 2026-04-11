@@ -6,7 +6,7 @@
     "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
   ],
   "title": "LP GRS/NS 2° Elemental Abundance Special Products (60 km grid)",
-  "description": "Elemental abundance maps (Sm, Ti, K, H, Th) at 2° bin size (~60 km), derived from LP gamma ray and neutron spectrometer data acquired during both high- and low-altitude mission phases (January 1998 – July 1999). Sm in ug/g (GRS+NS); Ti in wt% (GRS); K in ppm (GRS); H in ppm (NS, low-altitude only); Th in ug/g (GRS, separate high- and low-altitude versions). Note: hydrogen abundances are not necessarily reliable in regions of high thorium and rare-earth element abundances (Maurice et al. 2001a).",
+  "description": "Elemental abundance maps (Sm, Ti, K, H, Th) at 2° bin size (~60 km), derived from LP gamma ray and neutron spectrometer data acquired during both high- and low-altitude mission phases (January 1998 - July 1999). Sm in ug/g (GRS+NS); Ti in wt% (GRS); K in ppm (GRS); H in ppm (NS, low-altitude only); Th in ug/g (GRS, separate high- and low-altitude versions). Note: hydrogen abundances are not necessarily reliable in regions of high thorium and rare-earth element abundances (Maurice et al. 2001a).",
   "license": "proprietary",
   "extent": {
     "spatial": {

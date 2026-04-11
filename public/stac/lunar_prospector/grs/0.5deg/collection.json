@@ -6,7 +6,7 @@
     "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
   ],
   "title": "LP GRS/NS 0.5° Elemental Abundance Special Products (15 km grid)",
-  "description": "Elemental abundance maps (Th, Fe, H) at 0.5° bin size (~15 km), derived from LP gamma ray and neutron spectrometer data acquired during the low-altitude mission phase (January 1998 – July 1999). Th in ppm (GRS); Fe as FeO wt% (GRS); H in ppm (NS). Note: hydrogen abundances are not necessarily reliable in regions of high thorium and rare-earth element abundances (Maurice et al. 2001a).",
+  "description": "Elemental abundance maps (Th, Fe, H) at 0.5° bin size (~15 km), derived from LP gamma ray and neutron spectrometer data acquired during the low-altitude mission phase (January 1998 - July 1999). Th in ppm (GRS); Fe as FeO wt% (GRS); H in ppm (NS). Note: hydrogen abundances are not necessarily reliable in regions of high thorium and rare-earth element abundances (Maurice et al. 2001a).",
   "license": "proprietary",
   "extent": {
     "spatial": {

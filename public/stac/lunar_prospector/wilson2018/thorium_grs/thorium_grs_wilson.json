@@ -14,12 +14,12 @@
   "bbox": [-180, -90, 180, 90],
   "properties": {
     "datetime": "2018-06-19T00:00:00Z",
-    "title": "LP GRS Th-Line Count Rate – Pixon Reconstruction (Wilson et al., 2018)",
+    "title": "LP GRS Th-Line Count Rate - Pixon Reconstruction (Wilson et al., 2018)",
     "mission": "Lunar Prospector",
     "instruments": ["Gamma Ray Spectrometer"],
     "platform": "lunar-prospector",
     "parameter": "thorium-grs-count-rate",
-    "units": "count rate (Th 2.61 MeV line excess over 2.5–2.7 MeV background)",
+    "units": "count rate (Th 2.61 MeV line excess over 2.5-2.7 MeV background)",
     "lri:data_use": "spatial-targeting",
     "lri:data_use_note": "Spatial targeting, not quantitative estimate. Values are count rates — use this map to identify WHERE Th/KREEP enrichment is highest. For quantitative Th abundance in ppm, use the grs/ products.",
     "gamma_line_MeV": 2.61,
@@ -34,13 +34,13 @@
     "original_psf_fwhm_km": 45,
     "psf_function": "kappa function (Lawrence et al., 2003; Maurice et al., 2004)",
     "psf_smoothed_resolution_km": 63,
-    "gamma_background_window_MeV": "2.5 – 2.7",
+    "gamma_background_window_MeV": "2.5 - 2.7",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
     "publication_date": "2018-06-19",
     "doi": "10.1029/2018JE005589",
     "authors": "J. T. Wilson, D. J. Lawrence, P. N. Peplowski, J. T. S. Cahill, V. R. Eke, R. J. Massey, L. F. A. Teodoro",
     "lri:quality_note": "LAP reconstruction of the LP-GRS Th-line count rate map (Wilson et al., 2018, Dataset S4). Most dramatic resolution improvement in this dataset: 26 km effective resolution vs. 63 km PSF-smoothed. Values are raw count rates, NOT ppm — for quantitative Th abundance use grs/0.5deg/thorium/ or grs/2deg/. Supersedes the prior MEP pixon Th reconstruction by Lawrence et al. (2007). Th is a direct tracer of the Procellarum KREEP Terrane (PKT) and serves as an indirect proxy for REE enrichment.",
-    "processing:lineage": "Upstream GRS data reduction: Lawrence et al. (2004); Th count rate defined as excess counts in the 2.61 MeV line over background in the 2.5–2.7 MeV range. PSF determined from kappa function (Lawrence et al., 2003; Maurice et al., 2004) accounting for spacecraft motion (Wilson et al., 2015). LAP pixon reconstruction applied by Wilson et al. (2018), superseding prior MEP pixon reconstruction of Lawrence et al. (2007). COG production: source jgre20969-sup-0005-supplementary.txt (Dataset S4); comment lines stripped; 524288 space-delimited float64 values parsed and reshaped to 512×1024 (row-major, north→south); written as raw Float32 LSB binary via Python struct; GDAL VRT (thorium_grs_wilson.vrt) used to assign CRS (IAU:30100) and geotransform; gdal_translate to COG with DEFLATE/PREDICTOR=3 compression.",
+    "processing:lineage": "Upstream GRS data reduction: Lawrence et al. (2004); Th count rate defined as excess counts in the 2.61 MeV line over background in the 2.5-2.7 MeV range. PSF determined from kappa function (Lawrence et al., 2003; Maurice et al., 2004) accounting for spacecraft motion (Wilson et al., 2015). LAP pixon reconstruction applied by Wilson et al. (2018), superseding prior MEP pixon reconstruction of Lawrence et al. (2007). COG production: source jgre20969-sup-0005-supplementary.txt (Dataset S4); comment lines stripped; 524288 space-delimited float64 values parsed and reshaped to 512×1024 (row-major, north→south); written as raw Float32 LSB binary via Python struct; GDAL VRT (thorium_grs_wilson.vrt) used to assign CRS (IAU:30100) and geotransform; gdal_translate to COG with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {
       "GDAL": "3.12.2",
       "PROJ": "9.8.0",
@@ -52,7 +52,7 @@
     "data": {
       "href": "thorium_grs_wilson_COG.tif",
       "type": "image/tiff; application=geotiff; profile=cloud-optimized",
-      "title": "Pixon Th-line GRS count rate COG – IAU:30100",
+      "title": "Pixon Th-line GRS count rate COG - IAU:30100",
       "roles": ["data"]
     },
     "processing_script": {
@@ -64,7 +64,7 @@
     "source_data": {
       "href": "jgre20969-sup-0005-supplementary.txt",
       "type": "text/plain",
-      "title": "Original supplementary txt – Dataset S4, Wilson et al. 2018",
+      "title": "Original supplementary txt - Dataset S4, Wilson et al. 2018",
       "roles": ["data", "source"]
     }
   },
@@ -76,19 +76,19 @@
       "rel": "derived_from",
       "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
       "type": "text/html",
-      "title": "PDS source – LP-GRS Th-line data"
+      "title": "PDS source - LP-GRS Th-line data"
     },
     {
       "rel": "derived_from",
       "href": "https://doi.org/10.1029/2018JE005589",
       "type": "text/html",
-      "title": "Wilson et al. 2018 – JGR Planets"
+      "title": "Wilson et al. 2018 - JGR Planets"
     },
     {
       "rel": "related",
       "href": "../../grs/0.5deg/thorium/thoriumhd.json",
       "type": "application/json",
-      "title": "LP GRS Th 0.5° – quantitative ppm product"
+      "title": "LP GRS Th 0.5° - quantitative ppm product"
     }
   ]
 }

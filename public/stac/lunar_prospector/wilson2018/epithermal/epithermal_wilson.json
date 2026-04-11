@@ -14,7 +14,7 @@
   "bbox": [-180, -90, 180, 90],
   "properties": {
     "datetime": "2018-06-19T00:00:00Z",
-    "title": "LP NS Epithermal Neutron – Pixon Reconstruction (Wilson et al., 2018)",
+    "title": "LP NS Epithermal Neutron - Pixon Reconstruction (Wilson et al., 2018)",
     "mission": "Lunar Prospector",
     "instruments": ["Neutron Spectrometer"],
     "platform": "lunar-prospector",
@@ -22,7 +22,7 @@
     "units": "counts/32s",
     "lri:data_use": "spatial-targeting",
     "lri:data_use_note": "Spatial targeting, not quantitative estimate. Values are neutron count rates — use this map to identify WHERE hydrogen enrichment is highest. Low count rate = more hydrogen. For quantitative hydrogen abundance, cross-reference with grs/0.5deg/hydrogen/.",
-    "energy_range_eV": "0.4 eV – 500 keV",
+    "energy_range_eV": "0.4 eV - 500 keV",
     "grid_size_deg": 0.3515625,
     "grid_cols": 1024,
     "grid_rows": 512,
@@ -50,7 +50,7 @@
     "data": {
       "href": "epithermal_wilson_COG.tif",
       "type": "image/tiff; application=geotiff; profile=cloud-optimized",
-      "title": "Pixon epithermal neutron counts/32s COG – IAU:30100",
+      "title": "Pixon epithermal neutron counts/32s COG - IAU:30100",
       "roles": ["data"]
     },
     "processing_script": {
@@ -62,7 +62,7 @@
     "source_data": {
       "href": "jgre20969-sup-0002-supplementary.txt",
       "type": "text/plain",
-      "title": "Original supplementary txt – Dataset S1, Wilson et al. 2018",
+      "title": "Original supplementary txt - Dataset S1, Wilson et al. 2018",
       "roles": ["data", "source"]
     }
   },
@@ -74,13 +74,13 @@
       "rel": "derived_from",
       "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
       "type": "text/html",
-      "title": "PDS source – LP-NS epithermal (epis.dat)"
+      "title": "PDS source - LP-NS epithermal (epis.dat)"
     },
     {
       "rel": "derived_from",
       "href": "https://doi.org/10.1029/2018JE005589",
       "type": "text/html",
-      "title": "Wilson et al. 2018 – JGR Planets"
+      "title": "Wilson et al. 2018 - JGR Planets"
     },
     {
       "rel": "alternate",
