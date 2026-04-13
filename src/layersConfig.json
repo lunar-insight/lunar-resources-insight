@@ -71,6 +71,13 @@
         "source": "NASA",
         "resolution": "20ppd"
       }
+    },
+    "hydrogen_lawrence2022": {
+      "filename": "chemical_elements/hydrogen_abundance_lawrence_COG.tif",
+      "category": "chemical",
+      "element": "hydrogen",
+      "displayName": "Hydrogen Abundance ppm (Lawrence 2022)",
+      "stac": "lunar_prospector/lawrence2022/hydrogen_abundance/hydrogen_abundance_lawrence.json"
     }
   }
 }
