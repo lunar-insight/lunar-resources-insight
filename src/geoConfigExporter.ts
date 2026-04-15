@@ -26,6 +26,7 @@ export type LayerConfig = {
   displayName?: string;
   available?: boolean;
   stac?: string;
+  layerType?: 'raster' | 'point';
   metadata?: {
     source?: string;
     resolution?: string;

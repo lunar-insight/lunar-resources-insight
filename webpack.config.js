@@ -47,6 +47,7 @@ module.exports = {
       'services': path.resolve(__dirname, 'src/services'),
       'pages': path.resolve(__dirname, 'src/pages'),
       'fonts': path.resolve(__dirname, 'src/fonts'),
+      'geoConfigExporter': path.resolve(__dirname, 'src/geoConfigExporter'),
     },
     extensions: ['.*', '.js', '.jsx', '.ts', '.tsx'],
   },

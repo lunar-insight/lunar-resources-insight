@@ -4,6 +4,8 @@
     "esModuleInterop": true,
     "jsx": "react-jsx",
     "paths": {
+      "@/*":["./*"],
+      "geoConfigExporter": ["./geoConfigExporter"],
       "*": ["./*"]
     },
     "strictNullChecks": false,

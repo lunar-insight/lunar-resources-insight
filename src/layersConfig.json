@@ -34,6 +34,7 @@
     },
     "calcium_primary": {
       "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Ca_IAU2015_COG.tif",
+      "layerType": "raster",
       "category": "chemical",
       "element": "calcium",
       "displayName": "Calcium (Primary)",
@@ -44,6 +45,7 @@
     },
     "iron_primary": {
       "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Fe_IAU2015_COG.tif",
+      "layerType": "raster",
       "category": "chemical",
       "element": "iron",
       "displayName": "Iron (Primary)",
@@ -54,6 +56,7 @@
     },
     "magnesium_primary": {
       "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Mg_IAU2015_COG.tif",
+      "layerType": "raster",
       "category": "chemical",
       "element": "magnesium",
       "displayName": "Magnesium (Primary)",
@@ -64,6 +67,7 @@
     },
     "titanium_primary": {
       "filename": "chemical_elements/Global20ppd_LPGRS_geotiff_Ti_IAU2015_COG.tif",
+      "layerType": "raster",
       "category": "chemical",
       "element": "titanium",
       "displayName": "Titanium (Primary)",
@@ -74,6 +78,7 @@
     },
     "hydrogen_lawrence2022": {
       "filename": "chemical_elements/hydrogen_abundance_lawrence_COG.tif",
+      "layerType": "raster",
       "category": "chemical",
       "element": "hydrogen",
       "displayName": "Hydrogen Abundance ppm (Lawrence 2022)",
