@@ -4,6 +4,7 @@ import { DataAvailability } from '../../../../types/dataSource';
 import { DataSourceBadge } from '../../../ui/DataSourceBadge/DataSourceBadge';
 import { DataSourceLegend } from '../../../ui/DataSourceLegend/DataSourceLegend';
 import { layersConfig } from 'geoConfigExporter';
+import type { Selection } from '@react-types/shared';
 import styles from './PeriodicTable.module.scss';
 
 export interface Element {
@@ -241,7 +242,7 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
     [selectedElements]
   );
 
-  const handleSelectionChange = useCallback((keys) => {
+  const handleSelectionChange = useCallback((keys: Selection) => {
     const newKeys = new Set(keys);
     ALL_ELEMENTS.forEach(element => {
       const elementKey = `${element.row}-${element.column}`;

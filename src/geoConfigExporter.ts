@@ -79,7 +79,7 @@ export interface CogStatistics {
 }
 
 import layersConfigJson from './layersConfig.json';
-export const layersConfig: LayersConfig = layersConfigJson;
+export const layersConfig: LayersConfig = layersConfigJson as LayersConfig;
 
 export function buildCogTileUrl(filename: string, options: {
   colormap?: string;
