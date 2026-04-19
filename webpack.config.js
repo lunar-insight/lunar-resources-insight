@@ -2,21 +2,29 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopywebpackPlugin = require('copy-webpack-plugin');
-const fs = require('fs');
 const cesiumSource = 'node_modules/cesium/Source';
 const cesiumWorkers = '../Build/Cesium/Workers';
 const dotenv = require('dotenv');
 dotenv.config();
 
-module.exports = {
+module.exports = (env, argv) => ({
   context: __dirname,
-  mode: 'development',
+  mode: argv.mode || 'development',
   devtool: 'source-map',
   entry: {
     app: './src/index.tsx'
   },
   optimization: {
     runtimeChunk: 'single',
+    splitChunks: {
+      cacheGroups: {
+        cesium: {
+          name: 'cesium',
+          chunks: 'all',
+          test: /cesium/i,
+        }
+      }
+    }
   },
   output: {
     filename: '[name].js',
@@ -85,31 +93,11 @@ module.exports = {
       type: 'asset',
     }, {
       test: /\.workers\.js$/,           // Cesium >1.100 workers files is now integrated in the main js bundle,
-      use: { loader: 'worker-loader '}  // This transform the worker files into a web worker object to ensure correct loading
+      use: { loader: 'worker-loader'}  // This transform the worker files into a web worker object to ensure correct loading
     }, {
       test: /\.(ts|tsx)$/,
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: [
-            ['@babel/preset-env', {
-              "targets": {
-                "browsers": [
-                  "last 2 versions",
-                  "not ie <= 11"
-                ]
-              }
-            }],
-            '@babel/react',
-            '@babel/preset-typescript'
-          ],
-        },
-      },
+      use: 'ts-loader',
       exclude: /node_modules/,
-    }, {
-      test: /\.(js|jsx)$/,
-      exclude: /node_modules/,
-      use: ['babel-loader'],
     }, {
       // Strip cesium pragmas
       test: /\.js$/,
@@ -151,17 +139,13 @@ module.exports = {
       // Define relative base path in cesium for loading assets
       CESIUM_BASE_URL: JSON.stringify('')
     }),
-    new webpack.optimize.SplitChunksPlugin({
-      name: 'cesium',
-      minChunks: module => module.context && module.context.indexOf('cesium') !== -1
-    }),
     new webpack.DefinePlugin({
       ...Object.keys(process.env).reduce((env, key) => {
-        env[`process.env.${key}`] = JSON.stringify(process.env[key]);
+        if (key !== 'NODE_ENV') env[`process.env.${key}`] = JSON.stringify(process.env[key]);
         return env;
       }, {})
       //'process.env.MAP_SERVER_URL': JSON.stringify(process.env.MAP_SERVER_URL),
     }),
     //new webpack.HotModuleReplacementPlugin(),
   ]
-};
+});

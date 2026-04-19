@@ -1,0 +1,12 @@
+{
+  "extends": "./src/tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": true,
+    "noEmit": true,
+    "allowJs": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["dom", "dom.iterable", "ES2022"]
+  },
+  "include": ["src"]
+}
