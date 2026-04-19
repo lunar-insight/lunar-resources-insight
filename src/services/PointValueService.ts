@@ -28,6 +28,7 @@ export class PointValueService {
   private currentMousePosition: Cesium.Cartesian2 | null = null;
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
   private isMouseTrackingEnabled: boolean = true;
+  private isLeftButtonDown: boolean = false;
   private lastFetchTime: number = 0;
   private fetchThrottleMs: number = 100; // in ms, between requests. Can be 16, 33, 50-100
   private pendingFetch: NodeJS.Timeout | null = null;
@@ -136,8 +137,17 @@ export class PointValueService {
 
     this.mouseMoveHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
 
+    this.mouseMoveHandler.setInputAction(() => {
+      this.isLeftButtonDown = true;
+      this.scanIndicator.hide();
+    }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+    this.mouseMoveHandler.setInputAction(() => {
+      this.isLeftButtonDown = false;
+    }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
     this.mouseMoveHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
-      if (this.isMouseTrackingEnabled && this.isActive) {
+      if (this.isMouseTrackingEnabled && this.isActive && !this.isLeftButtonDown) {
         this.currentMousePosition = event.endPosition;
         this.scanIndicator.updatePosition(event.endPosition);
 

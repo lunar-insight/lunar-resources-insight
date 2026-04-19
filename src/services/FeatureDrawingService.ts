@@ -317,6 +317,8 @@ export class FeatureDrawingService {
     if (Cesium.defined(pickedObject) && pickedObject.id instanceof Cesium.Entity) {
       const entity = pickedObject.id as Cesium.Entity;
 
+      if (entity.properties?.hasProperty('_isScanIndicator')) return;
+
       // Check if entity is a point feature with a position
       if (entity.point && entity.position &&
           !entity.properties?.hasProperty('_isVertexMarker') &&
@@ -500,24 +502,26 @@ export class FeatureDrawingService {
     if (Cesium.defined(pickedObject) && pickedObject.id instanceof Cesium.Entity) {
       const entity = pickedObject.id as Cesium.Entity;
 
-      // Check if it's a draggable point feature
-      if (entity.point && entity.position &&
-          !entity.properties?.hasProperty('_isVertexMarker') &&
-          !entity.properties?.hasProperty('_isHoverPreview')) {
-        this.viewer.canvas.style.cursor = 'grab';
-        return;
-      }
+      if (!entity.properties?.hasProperty('_isScanIndicator')) {
+        // Check if it's a draggable point feature
+        if (entity.point && entity.position &&
+            !entity.properties?.hasProperty('_isVertexMarker') &&
+            !entity.properties?.hasProperty('_isHoverPreview')) {
+          this.viewer.canvas.style.cursor = 'grab';
+          return;
+        }
 
-      // Check for polygon hover
-      if (entity.polygon && entity.polygon.hierarchy) {
-        this.viewer.canvas.style.cursor = 'grab';
-        return;
-      }
+        // Check for polygon hover
+        if (entity.polygon && entity.polygon.hierarchy) {
+          this.viewer.canvas.style.cursor = 'grab';
+          return;
+        }
 
-      // Check for circle hover (ellipse)
-      if (entity.ellipse && entity.position) {
-        this.viewer.canvas.style.cursor = 'grab';
-        return;
+        // Check for circle hover (ellipse)
+        if (entity.ellipse && entity.position) {
+          this.viewer.canvas.style.cursor = 'grab';
+          return;
+        }
       }
     }
 
