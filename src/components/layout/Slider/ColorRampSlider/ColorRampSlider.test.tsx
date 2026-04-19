@@ -14,12 +14,12 @@ jest.mock('utils/context/LayerContext', () => ({
       }
     }
   }),
-  LayerProvider: ({ children }) => <div>{children}</div>
+  LayerProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
 }));
 
 jest.mock('utils/context/ViewerContext', () => ({
-  ViewerProvider: ({ children }) => <div>{children}</div>,
-  useViewer: () => ({
+  ViewerProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  useViewer: (): { viewer: null; setViewer: jest.Mock } => ({
     viewer: null,
     setViewer: jest.fn()
   })

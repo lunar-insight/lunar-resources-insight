@@ -10,7 +10,7 @@ interface FeaturesContextType {
   addFeature: (feature: Feature) => void;
   removeFeature: (id: string) => void;
   renameFeature: (id: string, newName: string) => void;
-  updateFeaturePosition: (id: string, newPosition: Cesium.ConstantProperty | Cesium.Cartographic) => void;
+  updateFeaturePosition: (id: string, newPosition: Cesium.Cartographic) => void;
   updateLinePositions: (id: string, newPositions: Cesium.Cartographic[]) => void;
   updatePolygonPositions: (id: string, newPositions: Cesium.Cartographic[]) => void;
   updateCircleCenter: (id: string, newCenter: Cesium.Cartographic) => void;

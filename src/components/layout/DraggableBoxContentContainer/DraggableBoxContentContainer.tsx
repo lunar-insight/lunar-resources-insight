@@ -1,8 +1,6 @@
 import styles from './DraggableBoxContentContainer.module.scss';
 import React, { useRef, useState, useEffect } from 'react';
-import { useDialog } from '@react-aria/dialog';
-import { useMove, usePress } from '@react-aria/interactions';
-import { mergeProps } from '@react-aria/utils';
+import { useDialog, useMove, usePress, mergeProps } from 'react-aria';
 import CloseButton from '../Button/CloseButton/CloseButton';
 import { useZIndex } from '../../../utils/ZIndexProvider';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';

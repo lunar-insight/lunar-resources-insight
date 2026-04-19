@@ -26,9 +26,12 @@
       "^pages/(.*)$": "<rootDir>/src/pages/$1"
     },
     "transform": {
-      "^.+\\.(ts|tsx|js|jsx)$": ["ts-jest", {
-        "tsconfig": "tsconfig.jest.json"
-      }]
+      "^.+\\.(ts|tsx|js|jsx)$": [
+        "ts-jest",
+        {
+          "tsconfig": "tsconfig.jest.json"
+        }
+      ]
     },
     "transformIgnorePatterns": [
       "node_modules/(?!(react-aria|react-stately)/)"
@@ -49,40 +52,40 @@
   "license": "ISC",
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.1",
+    "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/d3": "^7.4.3",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.0.3",
-    "@types/react": "^19.2.7",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "copy-webpack-plugin": "^13.0.1",
-    "css-loader": "^7.1.2",
-    "dotenv": "^17.2.3",
-    "html-webpack-plugin": "^5.6.5",
+    "copy-webpack-plugin": "^14.0.0",
+    "css-loader": "^7.1.4",
+    "dotenv": "^17.4.2",
+    "html-webpack-plugin": "^5.6.7",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.2.0",
-    "jest-environment-jsdom": "^30.2.0",
-    "react-aria": "^3.45.0",
-    "react-aria-components": "^1.14.0",
-    "react-stately": "^3.43.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0",
+    "react-aria": "^3.48.0",
+    "react-aria-components": "^1.17.0",
+    "react-stately": "^3.46.0",
     "resolve-url-loader": "^5.0.0",
-    "sass": "^1.97.1",
-    "sass-loader": "^16.0.6",
+    "sass": "^1.99.0",
+    "sass-loader": "^16.0.7",
     "strip-pragma-loader": "^1.0.1",
     "style-loader": "^4.0.0",
     "ts-jest": "^29.4.9",
     "ts-loader": "^9.5.7",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "url-loader": "^4.1.1",
-    "webpack": "^5.104.1",
-    "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.2"
+    "webpack": "^5.106.2",
+    "webpack-cli": "^7.0.2",
+    "webpack-dev-server": "^5.2.3"
   },
   "dependencies": {
-    "cesium": "^1.136.0",
+    "cesium": "^1.140.0",
     "d3": "^7.9.0",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
   }
 }

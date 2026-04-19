@@ -216,7 +216,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     const yAxis = d3.axisLeft(yScale)
       .tickValues([0, 0.25, 0.5, 0.75, 1])
       .tickFormat((d) => {
-        const labels = {
+        const labels: Record<number, string> = {
           0: 'LOW',
           0.25: '0.25%',
           0.5: 'MED',
