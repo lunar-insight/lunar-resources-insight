@@ -1,86 +1,37 @@
 {
-  "name": "lunar-resources-webpack",
+  "name": "lunar-resources-insight",
   "version": "1.0.0",
   "description": "",
   "private": true,
   "scripts": {
-    "test": "jest",
-    "build": "webpack --config webpack.config.js --mode production",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
     "prestart": "node scripts/check-outdated.js",
-    "start": "webpack serve --config webpack.config.js --mode development --open"
-  },
-  "jest": {
-    "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": [
-      "<rootDir>/src/setupTests.ts"
-    ],
-    "moduleNameMapper": {
-      "\\.(css|scss)$": "identity-obj-proxy",
-      "\\.module\\.(css|scss)$": "identity-obj-proxy",
-      "^utils/(.*)$": "<rootDir>/src/utils/$1",
-      "^components/(.*)$": "<rootDir>/src/components/$1",
-      "^assets/(.*)$": "<rootDir>/src/assets/$1",
-      "^types/(.*)$": "<rootDir>/src/types/$1",
-      "^hooks/(.*)$": "<rootDir>/src/hooks/$1",
-      "^services/(.*)$": "<rootDir>/src/services/$1",
-      "^pages/(.*)$": "<rootDir>/src/pages/$1"
-    },
-    "transform": {
-      "^.+\\.(ts|tsx|js|jsx)$": [
-        "ts-jest",
-        {
-          "tsconfig": "tsconfig.jest.json"
-        }
-      ]
-    },
-    "transformIgnorePatterns": [
-      "node_modules/(?!(react-aria|react-stately)/)"
-    ],
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx"
-    ],
-    "testMatch": [
-      "<rootDir>/src/**/__tests__/**/*.(ts|tsx|js)",
-      "<rootDir>/src/**/*.(test|spec).(ts|tsx|js)"
-    ]
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/d3": "^7.4.3",
-    "@types/jest": "^30.0.0",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "copy-webpack-plugin": "^14.0.0",
-    "css-loader": "^7.1.4",
-    "dotenv": "^17.4.2",
-    "html-webpack-plugin": "^5.6.7",
+    "@vitejs/plugin-react": "^6.0.1",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^30.3.0",
-    "jest-environment-jsdom": "^30.3.0",
+    "jsdom": "^29.0.2",
     "react-aria": "^3.48.0",
     "react-aria-components": "^1.17.0",
     "react-stately": "^3.46.0",
-    "resolve-url-loader": "^5.0.0",
     "sass": "^1.99.0",
-    "sass-loader": "^16.0.7",
-    "strip-pragma-loader": "^1.0.1",
-    "style-loader": "^4.0.0",
-    "ts-jest": "^29.4.9",
-    "ts-loader": "^9.5.7",
     "typescript": "^6.0.3",
-    "url-loader": "^4.1.1",
-    "webpack": "^5.106.2",
-    "webpack-cli": "^7.0.2",
-    "webpack-dev-server": "^5.2.3"
+    "vite": "^8.0.8",
+    "vite-plugin-static-copy": "^4.0.1",
+    "vitest": "^4.1.4"
   },
   "dependencies": {
     "cesium": "^1.140.0",

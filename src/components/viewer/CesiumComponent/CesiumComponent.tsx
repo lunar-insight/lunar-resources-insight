@@ -162,7 +162,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       const initTerrain = async () => {
         try {
           // Quantized mesh terrain
-          const terrainUrl = process.env.REACT_APP_TERRAIN_URL || 'http://localhost:3001';
+          const terrainUrl = import.meta.env.VITE_TERRAIN_URL || 'http://localhost:3001';
           const terrainProvider = await TerrainService.initializeLocalTerrain(terrainUrl);
         
           // Check if component if still mounted before updating state

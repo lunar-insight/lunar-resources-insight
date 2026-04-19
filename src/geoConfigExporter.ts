@@ -1,5 +1,5 @@
-export const mapServerUrl = process.env.REACT_APP_SERVER_URL;
-export const workspacePath = process.env.REACT_APP_WORKSPACE_PATH;
+export const mapServerUrl = import.meta.env.VITE_SERVER_URL;
+export const workspacePath = import.meta.env.VITE_WORKSPACE_PATH;
 
 export const tilerEndpoints = {
   tiles: `${mapServerUrl}/cog/tiles/MoonGeographicSphere/{z}/{x}/{y}`,
@@ -12,11 +12,11 @@ export const tilerEndpoints = {
 };
 
 if (!mapServerUrl) {
-  throw new Error('REACT_APP_SERVER_URL is not defined in environment variables.');
+  throw new Error('VITE_SERVER_URL is not defined in environment variables.');
 }
 
 if (!workspacePath) {
-  throw new Error('REACT_APP_WORKSPACE_PATH is not defined in environment variables.');
+  throw new Error('VITE_WORKSPACE_PATH is not defined in environment variables.');
 }
 
 export type LayerConfig = {
