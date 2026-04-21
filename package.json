@@ -9,7 +9,8 @@
     "prestart": "node scripts/check-outdated.js",
     "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "terrain": "node --env-file=.env terrain-server.js"
   },
   "keywords": [],
   "author": "",

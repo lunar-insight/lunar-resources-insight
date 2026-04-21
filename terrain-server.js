@@ -4,8 +4,6 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-require('dotenv').config();
-
 const PORT = process.env.TERRAIN_PORT || 3001;
 const TERRAIN_PATH = process.env.TERRAIN_PATH || path.join('D:', 'Terrain', 'cesium-terrain');
 
