@@ -33,6 +33,10 @@ interface LayerContextType {
   updateLayerOpacity: (layer: string, opacity: number) => void;
   updateLayerRangeFilter: (layer: string, enabled: boolean) => void;
   getLayerStyle: (layer: string) => StyleConfig | undefined;
+  activeVariants: Map<string, number>;
+  swappingLayers: Set<string>;
+  swapLayerVariant: (layerId: string, variantIndex: number) => Promise<void>;
+  statsVersion: number;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -45,6 +49,7 @@ class CesiumLayerManager {
   private tileCache = new Map<string, string>();
   private rangeFilterEnabled: Map<string, boolean>;
   private hasDisableRequests: (() => boolean) | null = null;
+  private activeFilenames: Map<string, string>
 
   constructor(
     private viewer: Cesium.Viewer | null,
@@ -55,6 +60,7 @@ class CesiumLayerManager {
     this.layerStats = new Map();
     this.rangeFilterEnabled = new Map();
     this.hasDisableRequests = hasDisableRequestsFn || null;
+    this.activeFilenames = new Map();
   }
 
   async addLayer(layerId: string) {
@@ -109,6 +115,7 @@ class CesiumLayerManager {
       });
       this.viewer.imageryLayers.add(layer);
       this.layerMap.set(layerId, layer);
+      this.activeFilenames.set(layerId, layerConfig.filename);
 
       this.forceResumeMouseTracking();
     } catch (error) {
@@ -125,6 +132,97 @@ class CesiumLayerManager {
     if (layer) {
       this.viewer.imageryLayers.remove(layer, true) // True to delete layer
       this.layerMap.delete(layerId); // Remove ref
+      this.activeFilenames.delete(layerId);
+    }
+  }
+
+
+  async swapVariant(layerId: string, newFilename: string) {
+    if (!this.viewer) return;
+
+    const existingLayer = this.layerMap.get(layerId);
+    if (!existingLayer) throw new Error(`Layer ${layerId} is not active in Cesium`);
+
+    const layerConfig = layersConfig.layers[layerId];
+    const layerIndex = this.viewer.imageryLayers.indexOf(existingLayer);
+    const currentAlpha = existingLayer.alpha;
+    const currentShow = existingLayer.show;
+    const currentStyle = this.layerStyleConfig.get(layerId);
+    const rangeFilterEnabled = this.rangeFilterEnabled.get(layerId) || false;
+
+    this.viewer.imageryLayers.remove(existingLayer, false);
+
+    try {
+      const { bounds } = await fetchCogInfo(newFilename);
+      await pointValueService.setLayerBounds(layerId, bounds);
+
+      // Prefer the style's explicit min/max; fall back to cached stats then safe default
+      const cachedStats = this.layerStats.get(layerId);
+      const min = currentStyle?.min ?? cachedStats?.min ?? 0;
+      const max = currentStyle?.max ?? cachedStats?.max ?? 100;
+
+      const rectangle = Cesium.Rectangle.fromDegrees(
+        bounds[0], bounds[1], bounds[2], bounds[3]
+      );
+
+      // Build full style option in one pass
+      // (versus plain layer creation with updateLayerStyle)
+      const options: any = {
+        colormap: currentStyle?.type === 'gray' ? undefined : currentStyle?.type,
+        rescale: [min, max],
+      };
+
+      if (rangeFilterEnabled) {
+        const nodataValue = -9999;
+        options.expression = `where((b1 >= ${min}) & (b1 <= ${max}), b1, ${nodataValue})`;
+        options.nodata = nodataValue;
+        options.return_mask = true;
+        options.format = 'png';
+      }
+
+      const imageryProvider = new Cesium.UrlTemplateImageryProvider({
+        url: buildCogTileUrl(newFilename, options),
+        tilingScheme: new Cesium.GeographicTilingScheme(),
+        minimumLevel: 0,
+        maximumLevel: 20,
+        rectangle,
+        hasAlphaChannel: rangeFilterEnabled,
+        credit: layerConfig?.displayName ?? layerId,
+      });
+
+      const layerOptions: any = {
+        show: currentShow,
+        alpha: currentAlpha,
+      };
+
+      if (rangeFilterEnabled) {
+        layerOptions.colorToAlpha = colormapService.getColormapFirstColor(currentStyle?.type ?? 'gray');
+        layerOptions.colorToAlphaThreshold = 0.0001;
+      }
+
+      const newLayer = new Cesium.ImageryLayer(imageryProvider, layerOptions);
+
+      this.viewer.imageryLayers.add(newLayer, layerIndex >= 0 ? layerIndex : undefined);
+      this.layerMap.set(layerId, newLayer);
+      this.activeFilenames.set(layerId, newFilename);
+      // Keep internal layerStats in sync so updateRampValues uses correct defaults
+      this.layerStats.set(layerId, { min, max });
+      // Sync layerStyleConfig min/max so future updateLayerStyle calls use the new variant's range.
+      // Preserves the user's chosen colormap; only the ramp bounds are updated.
+      if (currentStyle) {
+        this.layerStyleConfig.set(layerId, { ...currentStyle, min, max });
+      }
+      // Destroy the old layer now that the swap succeeded, remove(false) above preserved it
+      // for the error-recovery path; without this explicit destroy the layer object leaks.
+      existingLayer.destroy();
+
+      this.forceResumeMouseTracking();
+    } catch (error) {
+      // Restore the original layer so the map doesn't go blank
+      this.viewer.imageryLayers.add(existingLayer, layerIndex >= 0 ? layerIndex : undefined);
+      this.layerMap.set(layerId, existingLayer);
+      console.error(`Failed to swap variant for ${layerId}:`, error);
+      throw error;
     }
   }
 
@@ -208,7 +306,7 @@ class CesiumLayerManager {
       }
 
       const newProvider = new Cesium.UrlTemplateImageryProvider({
-        url: buildCogTileUrl(layerConfig.filename, options),
+        url: buildCogTileUrl(this.activeFilenames.get(layerId) ?? layerConfig.filename, options),
         tilingScheme: new Cesium.GeographicTilingScheme(),
         minimumLevel: 0,
         maximumLevel: 20,
@@ -252,24 +350,6 @@ class CesiumLayerManager {
     .join(';');
   }
 
-  // TODO need to see if necessary
-  private getCachedTileUrl(layerId: string, style: StyleConfig): string {
-    const cacheKey = `${layerId}-${JSON.stringify(style)}`;
-
-    if (this.tileCache.has(cacheKey)) {
-      return this.tileCache.get(cacheKey)!;
-    }
-
-    const layerConfig = layersConfig.layers[layerId];
-    const url = buildCogTileUrl(layerConfig.filename, {
-      colormap: style.type === 'gray' ? undefined : style.type,
-      rescale: [style.min, style.max]
-    });
-
-    this.tileCache.set(cacheKey, url);
-    return url;
-  }
-
 
   updateLayerOpacity(layerId: string, opacity: number) {
     if (!this.viewer) return;
@@ -309,6 +389,9 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [selectedLayers, setSelectedLayers] = useState<string[]>([]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set());
   const [dynamicLayerMetadata, setDynamicLayerMetadata] = useState<Map<string, DynamicLayerMetadata>>(new Map());
+  const [activeVariants, setActiveVariants] = useState<Map<string, number>>(new Map());
+  const [swappingLayers, setSwappingLayers] = useState<Set<string>>(new Set());
+  const [statsVersion, setStatsVersion] = useState(0);
   const { viewer } = useViewer();
   const { hasDisableRequests } = useMouseTracking();
   const cesiumManagerRef = useRef<CesiumLayerManager | null>(null);
@@ -351,6 +434,18 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const newSet = new Set(prev);
       newSet.delete(layer);
       return newSet;
+    });
+    // Prevents stale pill highlight if the layer is re-added later
+    setActiveVariants(prev => {
+      const next = new Map(prev);
+      next.delete(layer);
+      return next;
+    });
+    // Clears any in-progress swap indicator for this layer
+    setSwappingLayers(prev => {
+      const next = new Set(prev);
+      next.delete(layer);
+      return next;
     });
     cesiumManagerRef.current?.removeLayer(layer);
   }, []);
@@ -415,6 +510,55 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return cesiumManagerRef.current?.getLayerStyleConfig(layer);
   }, []);
 
+  const swappingRef = useRef<Set<string>>(new Set());
+
+  const swapLayerVariant = useCallback(async (layerId: string, variantIndex: number) => {
+    // Guard against concurrent swaps for the same layer (e.g. rapid pill clicks)
+    if (swappingRef.current.has(layerId)) return;
+
+    // Guard: manager must be initialised before we can attempt the swap
+    if (!cesiumManagerRef.current) return;
+
+    const config = layersConfig.layers[layerId];
+    const variant = config?.variants?.[variantIndex];
+    if (!variant) return;
+
+    swappingRef.current.add(layerId);
+    setSwappingLayers(prev => new Set(prev).add(layerId));
+
+    try {
+      await cesiumManagerRef.current.swapVariant(layerId, variant.filename);
+    } catch (error) {
+      console.error(`Variant swap failed for ${layerId}:`, error);
+      swappingRef.current.delete(layerId);
+      setSwappingLayers(prev => {
+        const next = new Set(prev);
+        next.delete(layerId);
+        return next;
+      });
+      return; // Swap was rolled back leaving activeVariants unchanged
+    }
+
+    swappingRef.current.delete(layerId);
+    setSwappingLayers(prev => {
+      const next = new Set(prev);
+      next.delete(layerId);
+      return next;
+    });
+
+    setActiveVariants(prev => {
+      const next = new Map(prev);
+      next.set(layerId, variantIndex);
+      return next;
+    });
+
+    // Re-fetch stats for the new variant file. The old stats remain visible
+    // until the new ones arrive, avoiding a "not loaded" flash.
+    layerStatsService.refreshStats(layerId, variant.filename)
+      .then(() => setStatsVersion(v => v + 1))
+      .catch(console.error);
+  }, []);
+
   const contextValue = useMemo(() => ({
     selectedLayers,
     visibleLayers,
@@ -427,7 +571,11 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     updateRampValues,
     updateLayerOpacity,
     updateLayerRangeFilter,
-    getLayerStyle
+    getLayerStyle,
+    activeVariants,
+    swappingLayers,
+    swapLayerVariant,
+    statsVersion,
   }), [
     selectedLayers,
     visibleLayers,
@@ -440,7 +588,11 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     updateRampValues,
     updateLayerOpacity,
     updateLayerRangeFilter,
-    getLayerStyle
+    getLayerStyle,
+    activeVariants,
+    swappingLayers,
+    swapLayerVariant,
+    statsVersion,
   ]);
 
   return (

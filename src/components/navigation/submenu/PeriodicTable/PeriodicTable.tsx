@@ -169,7 +169,9 @@ Object.values(layersConfig.layers).forEach(layer => {
   }
 })
 
-const ALL_ELEMENTS = [...elements, ...lanthanides, ...actinides].map(el => {
+export const ALL_ELEMENTS_FLAT = [...elements, ...lanthanides, ...actinides];
+
+const ALL_ELEMENTS = ALL_ELEMENTS_FLAT.map(el => {
   const availability = elementAvailabilityMap.get(el.name.toLowerCase());
   return {
     ...el,

@@ -54,6 +54,7 @@
     "altitude_phase": "low-altitude",
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",
+    "lri:quality_note_short": "Highest spatial resolution thorium map from LP GRS low-altitude data. Increased noise at high latitudes due to reduced counting statistics.",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
     "processing:lineage": "Raw INT16 binary (thoriumhd.dat) scaled ÷10 via gdal_calc.py to obtain Th ppm as Float32. Absolute thorium abundances derived from LP gamma ray spectrometer low-altitude observations (Lawrence et al. 2002a, 2002b). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {

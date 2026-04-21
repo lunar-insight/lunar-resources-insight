@@ -83,6 +83,44 @@
       "element": "hydrogen",
       "displayName": "Hydrogen Abundance ppm (Lawrence 2022)",
       "stac": "lunar_prospector/lawrence2022/hydrogen_abundance/hydrogen_abundance_lawrence.json"
+    },
+    "thorium_grs": {
+      "filename": "chemical_elements/thorium/thoriumhd_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "thorium",
+      "displayName": "Thorium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/0.5deg/thorium/thoriumhd.json",
+      "variants": [
+        {
+          "label": "0.5° low-alt",
+          "filename": "chemical_elements/thorium/thoriumhd_COG.tif",
+          "stac": "lunar_prospector/grs/0.5deg/thorium/thoriumhd.json"
+        },
+        {
+          "label": "2° high-alt",
+          "filename": "chemical_elements/thorium/thoriumhigh2d_COG.tif",
+          "stac": "lunar_prospector/grs/2deg/thoriumhigh/thoriumhigh2d.json"
+        },
+        {
+          "label": "2° low-alt",
+          "filename": "chemical_elements/thorium/thoriumlow2d_COG.tif",
+          "stac": "lunar_prospector/grs/2deg/thoriumlow/thoriumlow2d.json"
+        },
+        {
+          "label": "5°",
+          "filename": "chemical_elements/thorium/thorium5d_COG.tif",
+          "stac": "lunar_prospector/grs/5deg/thorium/thorium5d.json"
+        }
+      ]
+    },
+    "thorium_count_rate_wilson": {
+      "filename": "chemical_elements/thorium/thorium_grs_wilson_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "thorium",
+      "displayName": "Thorium Count Rate · Wilson 2018",
+      "stac": "lunar_prospector/wilson2018/thorium_grs/thorium_grs_wilson.json"
     }
   }
 }

@@ -19,6 +19,12 @@ if (!workspacePath) {
   throw new Error('VITE_WORKSPACE_PATH is not defined in environment variables.');
 }
 
+export type LayerVariant = {
+  label: string; // Pill label, e.g. "0.5° low-alt"
+  filename: string; // COG path, same format as LayerConfig.filename
+  stac: string; // Path relative to public/stac/, used to fetch metadata
+}
+
 export type LayerConfig = {
   filename: string;
   category: string;
@@ -26,6 +32,7 @@ export type LayerConfig = {
   displayName?: string;
   available?: boolean;
   stac?: string;
+  variants?: LayerVariant[];
   layerType?: 'raster' | 'point';
   metadata?: {
     source?: string;
@@ -94,10 +101,6 @@ export function buildCogTileUrl(filename: string, options: {
   const encodedFileUrl = safeEncodeURI(fileUrl);
   
   let url = `${tilerEndpoints.tiles}?url=${encodedFileUrl}`;
-
-  if (options.colormap) {
-    url += `&colormap=${encodeURIComponent(options.colormap)}`;
-  }
 
   if (options.colormap) {
     url += `&colormap_name=${options.colormap}`;

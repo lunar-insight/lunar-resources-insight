@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import styles from './ChemistrySection.module.scss';
 import { Button } from 'react-aria-components';
 import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
-import PeriodicTable, { Element, elements } from '../submenu/PeriodicTable/PeriodicTable';
+import PeriodicTable, { Element, ALL_ELEMENTS_FLAT } from '../submenu/PeriodicTable/PeriodicTable';
 import Compound from '../submenu/Compound/Compound';
 import { useLayerContext } from '../../../utils/context/LayerContext';
 import { layersConfig } from '../../../geoConfigExporter';
@@ -160,7 +160,7 @@ const ChemistrySection: React.FC = () => {
   // selectedElements to table for PeriodicTable
   const selectedElementsArray = Array.from(selectedElements)
     .map(atomicNumber => {
-      return elements.find(el => el.atomicNumber === atomicNumber);
+      return ALL_ELEMENTS_FLAT.find(el => el.atomicNumber === atomicNumber);
     })
     .filter((el): el is Element => el !== undefined);
 

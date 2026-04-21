@@ -53,6 +53,7 @@
     "grid_size_km": 150,
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",
+    "lri:quality_note_short": "Coarsest spatial binning, lowest noise. Best suited for global elemental abundance patterns and inter-element comparisons.",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
     "processing:lineage": "Raw INT16 binary (thorium5d.dat) scaled ÷10 via gdal_calc.py to obtain Th ppm as Float32. Thorium derived using full modeling and response function analysis (Prettyman et al. 2002). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {

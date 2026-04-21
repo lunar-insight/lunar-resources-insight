@@ -1,0 +1,94 @@
+.pillGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.55rem;
+}
+
+.pill {
+  background: rgba(0, 0, 0, 0.30);
+  border: 1px solid var(--chemical-border);
+  border-radius: 4px;
+  color: var(--color-tertiary);
+  font-size: 0.72rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+
+  &:hover {
+    background: rgba(147, 51, 234, 0.25);
+    border-color: rgba(147, 51, 234, 0.55);
+    color: #d8b4fe;
+  }
+
+  &.active {
+    background: var(--chemical-active-bg);
+    border-color: var(--chemical-active-border);
+    color: #e9d5ff;
+    font-weight: 500;
+  }
+
+  &[data-disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-top: 1px solid rgba(133, 162, 175, 0.12);
+  padding-top: 0.5rem;
+}
+
+.infoItem {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.infoLabel {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(151, 165, 171, 0.6);
+}
+
+.infoValue {
+  font-size: 0.75rem;
+  color: var(--color-neutralVariant);
+  font-weight: 500;
+}
+
+.divider {
+  width: 1px;
+  height: 1rem;
+  background: var(--color-quartenary);
+}
+
+.spacer { flex-grow: 1; }
+
+.stacLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--color-quartenary);
+  border-radius: 4px;
+  color: var(--color-tertiary);
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: rgba(133, 162, 175, 0.1);
+    border-color: var(--color-secondary);
+    color: var(--color-secondary);
+  }
+
+  span { font-size: 0.9rem; }
+}

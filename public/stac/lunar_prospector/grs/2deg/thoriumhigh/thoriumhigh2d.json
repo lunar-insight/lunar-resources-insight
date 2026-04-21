@@ -54,6 +54,7 @@
     "altitude_phase": "high-altitude",
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",
+    "lri:quality_note_short": "High-altitude phase data with improved global coverage and reduced noise. Lower spatial resolution than the 0.5° map.",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
     "processing:lineage": "Raw INT16 binary (thoriumhigh.dat) scaled ÷10 via gdal_calc.py to obtain Th ug/g as Float32. Absolute thorium abundances derived from LP gamma ray spectrometer high-altitude observations (Lawrence et al. 2000, 2001b). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {

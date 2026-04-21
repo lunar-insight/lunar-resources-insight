@@ -1,4 +1,4 @@
-import { layersConfig, fetchCogStatistics, CogStatistics } from '../geoConfigExporter';
+import { layersConfig, fetchCogStatistics, CogStatistics, LayerConfig } from '../geoConfigExporter';
 
 export interface LayerStats {
   min: number;
@@ -13,15 +13,6 @@ export interface LayerStats {
   percentile_95?: number;
   percentile_98?: number;
   loaded: boolean;
-}
-
-export interface LayerConfig {
-  filename: string;
-  category: string;
-  element?: string;
-  displayName?: string;
-  metadata?: Record<string, any>;
-  [key: string]: any;
 }
 
 export type GeochemicalClass =
@@ -123,6 +114,14 @@ class LayerStatsService {
 
   getLayerStats(layerId: string): LayerStats {
     return this.statsMap.get(layerId) || { min: 0, max: 100, loaded: false};
+  }
+
+  clearStats(layerId: string): void {
+    this.statsMap.set(layerId, { min: 0, max: 100, loaded: false });
+  }
+
+  async refreshStats(layerId: string, filename: string): Promise<void> {
+    await this.fetchAndStoreStats(layerId, filename);
   }
 
   getLayerConfig(layerId: string): LayerConfig | undefined {

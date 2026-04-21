@@ -9,6 +9,7 @@ import { ColorRampSlider } from '../Slider/ColorRampSlider/ColorRampSlider';
 import OpacitySlider from '../Slider/OpacitySlider/OpacitySlider';
 import { RangeFilterCheckbox } from '../Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
 import CloseButton from '../Button/CloseButton/CloseButton';
+import { VariantSelector } from '../../ui/VariantSelector/VariantSelector';
 import styles from './Sidebar.module.scss';
 
 interface SidebarProps {
@@ -23,7 +24,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
     removeLayer,
     reorderLayers,
     updateRampValues,
-    updateLayerOpacity
+    updateLayerOpacity,
+    statsVersion: _statsVersion,
   } = useLayerContext();
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -137,6 +139,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
                 isFirstOfNewCategory={item.isFirstOfNewCategory}
                 accordionContent={
                   <div className={styles.accordionContent}>
+                    <VariantSelector layerId={layerId} />
                     <LayerGradientSelect layerId={layerId}/>
 
                     <div className={styles.rampContainer}>

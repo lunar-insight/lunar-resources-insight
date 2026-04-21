@@ -40,6 +40,11 @@
   --color-selection-unavailable-bg: #191d25; /* Background for unavailable items */
   --color-selection-unavailable-bg-rgb: 25, 29, 37;
 
+  /* Chemical Layer Variant Pill Colors - Violet theme, used in VariantSelector */
+  --chemical-border: rgba(147, 51, 234, 0.3);
+  --chemical-active-bg: rgba(147, 51, 234, 0.50);
+  --chemical-active-border: rgba(147, 51, 234, 0.85);
+
   /* Data Source Badge Colors. Used in DataSourceBadge and DataSourceLegend components */
   --color-badge-global: rgba(34, 185, 67, 0.55); /* Green for map+ground data */
   --color-badge-map: rgba(59, 130, 246, 0.55); /* Blue for map-only data */
