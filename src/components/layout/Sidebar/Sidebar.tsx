@@ -101,7 +101,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
         <GridListLayer
           items={layerItems}
           aria-label='Layer Selection'
-          selectionMode="multiple"
+          selectionMode="none"
           onReorder={handleReorder}
           centerText={
             <>

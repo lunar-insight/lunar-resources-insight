@@ -135,7 +135,7 @@ export function GridListLayerItem<T extends { id: string | number }>({
       data-first-of-category={isFirstOfNewCategory ? "true" : "false"}
       {...props}
     >
-      {({ selectionMode, selectionBehavior }) => (
+      {() => (
         <>
           <Button slot="drag" className={styles.gridListItemHeaderDrag}>
             <i className="material-symbols-outlined">reorder</i>
@@ -147,13 +147,10 @@ export function GridListLayerItem<T extends { id: string | number }>({
               {({ isExpanded }) => (
                 <>
                   <div className={styles.gridListItemHeader}>
-                    {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-                      <LayerVisibilityCheckbox
-                        slot="selection"
-                        isSelected={visibleLayers.has(layerId)}
-                        onChange={() => toggleLayerVisibility(layerId)}
-                      />
-                    )}
+                    <LayerVisibilityCheckbox
+                      isSelected={visibleLayers.has(layerId)}
+                      onChange={() => toggleLayerVisibility(layerId)}
+                    />
 
                     <div
                       className={styles.gridListItemHeaderItemText}
@@ -195,13 +192,10 @@ export function GridListLayerItem<T extends { id: string | number }>({
             </Disclosure>
           ) : (
             <div className={styles.gridListItemHeader}>
-              {selectionMode === 'multiple' && selectionBehavior === 'toggle' && (
-                <LayerVisibilityCheckbox
-                  slot="selection"
-                  isSelected={visibleLayers.has(layerId)}
-                  onChange={() => toggleLayerVisibility(layerId)}
-                />
-              )}
+              <LayerVisibilityCheckbox
+                isSelected={visibleLayers.has(layerId)}
+                onChange={() => toggleLayerVisibility(layerId)}
+              />
 
               <div
                 className={styles.gridListItemHeaderItemText}
