@@ -26,6 +26,56 @@ function hexaToRgba(hexaColor: string): { r: number; g: number; b: number; a: nu
  * @param hexaColor - Color in HEXA format (#RRGGBBAA or #RRGGBB)
  * @returns Cesium Color object
  */
+function djb2Hash(str: string): number {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash) + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+const ELEMENT_SYMBOLS: Record<string, string> = {
+  aluminium: 'Al', calcium:   'Ca', gadolinium: 'Gd', helium:    'He',
+  hydrogen:  'H',  iron:      'Fe', magnesium:  'Mg', oxygen:    'O',
+  polonium:  'Po', potassium: 'K',  radon:      'Rn', samarium:  'Sm',
+  silicon:   'Si', sodium:    'Na', thorium:    'Th', titanium:  'Ti',
+  uranium:   'U',
+};
+
+// 17 elements distributed ~21° apart across the hue wheel
+const ELEMENT_COLORS: Record<string, number> = {
+  iron:      5,    // red
+  uranium:   25,   // orange-red
+  calcium:   50,   // golden
+  sodium:    70,   // yellow-orange
+  potassium: 90,   // yellow-green
+  silicon:   110,  // lime
+  magnesium: 130,  // green
+  aluminium: 150,  // teal-green
+  oxygen:    170,  // teal
+  thorium:   190,  // cyan
+  samarium:  210,  // sky
+  titanium:  230,  // blue
+  gadolinium:250,  // blue-purple
+  radon:     270,  // purple
+  hydrogen:  300,  // magenta
+  polonium:  320,  // pink
+  helium:    340,  // rose
+};
+
+export function elementToAccentColor(elementName: string): string {
+  const name = elementName.toLowerCase();
+  const hue = ELEMENT_COLORS[name] ?? djb2Hash(name) % 360;
+  return `hsl(${hue}, 70%, 62%)`;
+}
+
+export function elementToSymbol(elementName: string): string {
+  const name = elementName.toLowerCase();
+  return ELEMENT_SYMBOLS[name]
+    ?? (name.length > 1 ? name[0].toUpperCase() + name[1] : name[0].toUpperCase());
+}
+
 export function hexaToCesiumColor(hexaColor: string): Cesium.Color {
   try {
     const { r, g, b, a } = hexaToRgba(hexaColor);

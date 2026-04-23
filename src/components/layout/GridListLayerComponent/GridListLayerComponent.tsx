@@ -8,6 +8,7 @@ import styles from './GridListLayerComponent.module.scss';
 import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
 import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox/LayerVisibilityCheckbox';
 import { useLayerContext } from 'utils/context/LayerContext';
+import { elementToAccentColor, elementToSymbol } from 'utils/colorUtils';
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
   items: T[];
@@ -21,6 +22,7 @@ interface GridListLayerItemProps<T> extends Omit<GridListItemProps, 'children'> 
   accordionContent?: ReactNode;
   onRemove?: () => void;
   category?: string;
+  element?: string;
   isFirstOfNewCategory?: boolean;
 }
 
@@ -119,6 +121,7 @@ export function GridListLayerItem<T extends { id: string | number }>({
   layerId,
   textValue,
   category,
+  element,
   isFirstOfNewCategory,
   ...props
 }: GridListLayerItemProps<T> & { textValue: string; layerId: string }) {
@@ -132,7 +135,9 @@ export function GridListLayerItem<T extends { id: string | number }>({
       textValue={effectiveTextValue}
       className={styles.gridListItem}
       data-category={category}
+      data-element={element ?? undefined}
       data-first-of-category={isFirstOfNewCategory ? "true" : "false"}
+      style={element ? { '--el-accent-color': elementToAccentColor(element) } as React.CSSProperties : undefined}
       {...props}
     >
       {() => (
@@ -151,6 +156,12 @@ export function GridListLayerItem<T extends { id: string | number }>({
                       isSelected={visibleLayers.has(layerId)}
                       onChange={() => toggleLayerVisibility(layerId)}
                     />
+
+                    {element && (
+                      <span className={styles.elBadge} aria-label={element}>
+                        {elementToSymbol(element)}
+                      </span>
+                    )}
 
                     <div
                       className={styles.gridListItemHeaderItemText}
@@ -196,6 +207,12 @@ export function GridListLayerItem<T extends { id: string | number }>({
                 isSelected={visibleLayers.has(layerId)}
                 onChange={() => toggleLayerVisibility(layerId)}
               />
+
+              {element && (
+                <span className={styles.elBadge} aria-label={element}>
+                  {elementToSymbol(element)}
+                </span>
+              )}
 
               <div
                 className={styles.gridListItemHeaderItemText}

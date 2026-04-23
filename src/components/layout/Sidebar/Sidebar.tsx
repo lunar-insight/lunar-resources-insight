@@ -136,6 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
                 onRemove={() => removeLayer(layerId)}
                 layerId={layerId}
                 category={item.category}
+                element={item.element}
                 isFirstOfNewCategory={item.isFirstOfNewCategory}
                 accordionContent={
                   <div className={styles.accordionContent}>

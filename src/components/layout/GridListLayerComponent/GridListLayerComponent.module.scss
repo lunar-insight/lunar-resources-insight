@@ -88,6 +88,21 @@ $heading-item-min-height: 3rem;
     border-bottom: none;
   }
 
+  // Element accent — left border using per-element color set as CSS custom property
+  &[data-element] {
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--el-accent-color);
+      opacity: 0.55;
+      border-radius: 0 2px 2px 0;
+    }
+  }
+
   // Chemical elements - Violet
   &[data-category="chemical"] {
     background-color: rgba(147, 51, 234, 0.15);
@@ -152,6 +167,23 @@ $heading-item-min-height: 3rem;
   &[data-first-of-category="true"] {
     margin-top: 12px;
   }
+}
+
+.elBadge {
+  font-size: 0.64rem;
+  font-weight: 600;
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  border-radius: 3px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+  border: 1px solid var(--el-accent-color);
+  color: var(--el-accent-color);
+  background: transparent;
+  opacity: 0.85;
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .gridListItemHeader {
