@@ -12,7 +12,7 @@
     "target": "ES2022",
     "module": "ESNext",
     "lib": ["dom", "dom.iterable", "ES2022"],
-    "types": ["node"],
+    "types": ["node", "vitest/globals"],
     "moduleResolution": "bundler",
     "sourceMap": true,
     "noEmit": true,
