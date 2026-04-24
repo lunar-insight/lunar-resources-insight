@@ -1,9 +1,9 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { ListBox, ListBoxItem, Text, Selection } from 'react-aria-components';
-import { useLayerContext } from '../../../../utils/context/LayerContext';
-import { DataSourceBadge } from '../../../ui/DataSourceBadge/DataSourceBadge';
-import { DataSourceLegend } from '../../../ui/DataSourceLegend/DataSourceLegend';
-import InfoButton from '../../../layout/Button/InfoButton/InfoButton';
+import { useLayerContext } from 'utils/context/LayerContext';
+import { DataSourceBadge } from 'components/ui/DataSourceBadge/DataSourceBadge';
+import { DataSourceLegend } from 'components/ui/DataSourceLegend/DataSourceLegend';
+import InfoButton from 'components/layout/Button/InfoButton/InfoButton';
 import { COMPOUNDS, COMPOUND_LAYER_MAP, CATEGORY_INFO, DISABLED_COMPOUND_KEYS, Compound } from './data';
 import styles from './Compound.module.scss';
 

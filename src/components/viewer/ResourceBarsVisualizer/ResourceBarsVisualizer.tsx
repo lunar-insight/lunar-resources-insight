@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
-import { layersConfig } from '../../../geoConfigExporter';
-import { LunarTerrainClassifier, TerrainClassification } from '../../../utils/LunarTerrainClassifier';
+import { layersConfig } from 'geoConfigExporter';
+import { LunarTerrainClassifier, TerrainClassification } from 'utils/LunarTerrainClassifier';
 import { elements } from 'constants/periodicTableData';
 import './ResourceBarsVisualizer.scss';
 

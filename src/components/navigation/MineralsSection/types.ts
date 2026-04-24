@@ -1,5 +1,5 @@
 import { Selection } from 'react-aria-components';
-import { DataAvailability } from '../../../types/dataSource';
+import { DataAvailability } from 'types/dataSource';
 
 export type MineralCategory = 'silicate' | 'oxide' | 'moon-discovered';
 

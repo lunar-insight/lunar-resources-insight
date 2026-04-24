@@ -6,7 +6,7 @@ import GeographicalLayersSection from '../GeographicalLayersSection/Geographical
 import MineralsSection from '../MineralsSection/MineralsSection';
 import ViewerOptionsSection from '../ViewerOptionsSection/ViewerOptionsSection';
 import FeaturesSection from '../FeaturesSection/FeaturesSection';
-import { useDialogContext } from '../../../utils/DialogWindowManagement';
+import { useDialogContext } from 'utils/DialogWindowManagement';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 import logo from 'assets/images/logo/lunar-resources-insight-logo-100x100.jpg'

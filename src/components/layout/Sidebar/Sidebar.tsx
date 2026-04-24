@@ -1,15 +1,15 @@
 import React, { useCallback, useRef } from 'react';
-import { useSidebarContext } from '../../../utils/context/SidebarContext';
-import { useLayerContext } from '../../../utils/context/LayerContext';
-import { layersConfig } from '../../../geoConfigExporter';
+import { useSidebarContext } from 'utils/context/SidebarContext';
+import { useLayerContext } from 'utils/context/LayerContext';
+import { layersConfig } from 'geoConfigExporter';
 import { GridListLayer, GridListLayerItem } from '../GridListLayerComponent/GridListLayerComponent';
-import { layerStatsService } from '../../../services/LayerStatsService';
-import LayerGradientSelect from '../../ui/LayerGradientSelect/LayerGradientSelect';
+import { layerStatsService } from 'services/LayerStatsService';
+import LayerGradientSelect from 'components/ui/LayerGradientSelect/LayerGradientSelect';
 import { ColorRampSlider } from '../Slider/ColorRampSlider/ColorRampSlider';
 import OpacitySlider from '../Slider/OpacitySlider/OpacitySlider';
 import { RangeFilterCheckbox } from '../Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
 import CloseButton from '../Button/CloseButton/CloseButton';
-import { VariantSelector } from '../../ui/VariantSelector/VariantSelector';
+import { VariantSelector } from 'components/ui/VariantSelector/VariantSelector';
 import styles from './Sidebar.module.scss';
 
 interface SidebarProps {

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Popover, Dialog, Heading } from 'react-aria-components';
-import { useTextScramble } from '../../../../hooks/useTextScramble';
+import { useTextScramble } from 'hooks/useTextScramble';
 import styles from './InfoPopover.module.scss';
 
 interface InfoPopoverProps {

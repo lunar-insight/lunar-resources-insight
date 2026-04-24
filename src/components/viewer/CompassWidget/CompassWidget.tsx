@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import * as Cesium from 'cesium';
 import { Button, TooltipTrigger } from 'react-aria-components';
-import { ButtonTooltip } from '../../layout/Tooltip/ButtonTooltip';
-import { useViewer } from '../../../utils/context/ViewerContext';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
+import { useViewer } from 'utils/context/ViewerContext';
 import styles from './CompassWidget.module.scss';
 
 /**

@@ -2,9 +2,9 @@ import styles from './DraggableContentContainer.module.scss';
 import React, { useRef, useState, useEffect } from 'react';
 import { useDialog, useMove, usePress, mergeProps } from 'react-aria';
 import CloseButton from '../Button/CloseButton/CloseButton';
-import { useZIndex } from '../../../utils/ZIndexProvider';
+import { useZIndex } from 'utils/ZIndexProvider';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
-import { useInitialPosition } from '../../../hooks/useInitialPosition';
+import { useInitialPosition } from 'hooks/useInitialPosition';
 
 export interface DraggableContentContainerProps {
   title?: React.ReactNode;

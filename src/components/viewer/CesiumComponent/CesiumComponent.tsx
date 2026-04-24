@@ -16,7 +16,7 @@ import negativeY from 'assets/images/skybox/ny.jpg';
 import positiveZ from 'assets/images/skybox/pz.jpg';
 import negativeZ from 'assets/images/skybox/nz.jpg';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
-import { useFeaturesContext } from '../../../utils/context/FeaturesContext';
+import { useFeaturesContext } from 'utils/context/FeaturesContext';
 
 interface CesiumComponentProps {
   className?: string;

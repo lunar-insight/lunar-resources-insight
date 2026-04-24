@@ -1,6 +1,6 @@
 import React from 'react';
 import * as Cesium from 'cesium';
-import ViewerIconButton from '../../layout/Button/ViewerIconButton/ViewerIconButton';
+import ViewerIconButton from 'components/layout/Button/ViewerIconButton/ViewerIconButton';
 
 interface ZoomOutButtonProps {
   viewer: Cesium.Viewer | null;

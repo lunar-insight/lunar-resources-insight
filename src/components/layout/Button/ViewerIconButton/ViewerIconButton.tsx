@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
-import { ButtonTooltip } from '../../Tooltip/ButtonTooltip';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import styles from './ViewerIconButton.module.scss';
 
 interface ViewerIconButtonProps {

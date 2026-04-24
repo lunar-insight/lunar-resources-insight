@@ -1,9 +1,9 @@
 import React from 'react';
 import { ListBox, ListBoxItem, Text } from 'react-aria-components';
-import { DataSourceBadge } from '../../ui/DataSourceBadge/DataSourceBadge';
+import { DataSourceBadge } from 'components/ui/DataSourceBadge/DataSourceBadge';
 import { MineralGridProps } from './types';
 import styles from './MineralGrid.module.scss';
-import InfoButton from '../../layout/Button/InfoButton/InfoButton';
+import InfoButton from 'components/layout/Button/InfoButton/InfoButton';
 
 export const MineralGrid: React.FC<MineralGridProps> = ({
   minerals,

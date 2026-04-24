@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './GeographicalLayersSection.module.scss';
 import { Button, GridList, GridListItem } from 'react-aria-components';
-import { useLayerContext } from '../../../utils/context/LayerContext';
-import { layersConfig } from '../../../geoConfigExporter';
-import { buildLayerPreviewUrl } from '../../../geoConfigExporter';
-import { layerPreviewCache } from '../../../services/LayerPreviewCache';
+import { useLayerContext } from 'utils/context/LayerContext';
+import { layersConfig } from 'geoConfigExporter';
+import { buildLayerPreviewUrl } from 'geoConfigExporter';
+import { layerPreviewCache } from 'services/LayerPreviewCache';
 
 interface GeographicalLayer {
   id: string;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import ViewerIconButton from '../../layout/Button/ViewerIconButton/ViewerIconButton';
+import ViewerIconButton from 'components/layout/Button/ViewerIconButton/ViewerIconButton';
 
 const FullscreenButton: React.FC = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);

@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import styles from './MineralsSection.module.scss';
 import { Button, Selection } from 'react-aria-components';
-import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
-import { DataSourceLegend } from '../../ui/DataSourceLegend/DataSourceLegend';
-import { useZIndex } from '../../../utils/ZIndexProvider';
-import { useLayerContext } from '../../../utils/context/LayerContext';
+import ModalOverlayContainer from 'components/layout/ModalOverlayContainer/ModalOverlayContainer';
+import { DataSourceLegend } from 'components/ui/DataSourceLegend/DataSourceLegend';
+import { useZIndex } from 'utils/ZIndexProvider';
+import { useLayerContext } from 'utils/context/LayerContext';
 import { RockGrid } from './RockGrid';
 import { MineralGrid } from './MineralGrid';
 import { ROCKS, MINERALS } from './data';

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as Cesium from 'cesium';
-import { useViewer } from '../../../utils/context/ViewerContext';
-import { CheckboxWithInfo } from '../../layout/Checkbox/CheckboxWithInfo/CheckboxWithInfo';
+import { useViewer } from 'utils/context/ViewerContext';
+import { CheckboxWithInfo } from 'components/layout/Checkbox/CheckboxWithInfo/CheckboxWithInfo';
 import styles from './ViewerOptionsSection.module.scss';
 
 const ViewerOptionsSection: React.FC = () => {

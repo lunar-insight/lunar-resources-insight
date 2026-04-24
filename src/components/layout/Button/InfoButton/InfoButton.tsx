@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, TooltipTrigger, DialogTrigger } from 'react-aria-components';
-import { ButtonTooltip } from '../../Tooltip/ButtonTooltip';
-import { InfoPopover } from '../../Popover/InfoPopover/InfoPopover';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
+import { InfoPopover } from 'components/layout/Popover/InfoPopover/InfoPopover';
 import styles from './InfoButton.module.scss';
 
 interface InfoButtonProps {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import './TopBarButton.scss';
-import { ButtonTooltip } from '../../Tooltip/ButtonTooltip';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 
 interface TopBarButtonProps {
   icon: string;

@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import styles from './ChemistrySection.module.scss';
 import { Button } from 'react-aria-components';
-import ModalOverlayContainer from '../../layout/ModalOverlayContainer/ModalOverlayContainer';
-import PeriodicTable, { Element, ALL_ELEMENTS_FLAT } from '../submenu/PeriodicTable/PeriodicTable';
+import ModalOverlayContainer from 'components/layout/ModalOverlayContainer/ModalOverlayContainer';
+import PeriodicTable, { ALL_ELEMENTS_FLAT } from '../submenu/PeriodicTable/PeriodicTable';
+import { Element } from 'constants/periodicTableData';
 import Compound from '../submenu/Compound/Compound';
-import { useLayerContext } from '../../../utils/context/LayerContext';
-import { layersConfig } from '../../../geoConfigExporter';
-import { FeatureCheckbox } from '../../layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
-import { pointValueService } from '../../../services/PointValueService';
-import { useViewer } from '../../../utils/context/ViewerContext';
-import { DraggableBoxContentContainer } from '../../layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
-import { Portal } from '../../ui/Portal/Portal';
+import { useLayerContext } from 'utils/context/LayerContext';
+import { layersConfig } from 'geoConfigExporter';
+import { FeatureCheckbox } from 'components/layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
+import { pointValueService } from 'services/PointValueService';
+import { useViewer } from 'utils/context/ViewerContext';
+import { DraggableBoxContentContainer } from 'components/layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
+import { Portal } from 'components/ui/Portal/Portal';
 import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
-import { ResourceBarsVisualizer } from '../../viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
-import { useBoundaryRef } from '../../reference/BoundaryRefProvider';
-import { useZIndex } from '../../../utils/ZIndexProvider';
+import { ResourceBarsVisualizer } from 'components/viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
+import { useBoundaryRef } from 'components/reference/BoundaryRefProvider';
+import { useZIndex } from 'utils/ZIndexProvider';
 
 const ChemistrySection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { DataAvailability } from '../../../types/dataSource';
+import { DataAvailability } from 'types/dataSource';
 import styles from './DataSourceBadge.module.scss';
 
 export interface DataSourceBadgeProps {

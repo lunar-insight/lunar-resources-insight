@@ -1,4 +1,4 @@
-import { DataAvailability } from '../../../../types/dataSource';
+import { DataAvailability } from 'types/dataSource';
 
 export type CompoundCategory = 'ice' | 'lunar-soil-oxides' | 'gases-volatiles';
 

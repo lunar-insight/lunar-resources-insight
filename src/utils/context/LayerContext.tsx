@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useState, useRef, useCallback, useMemo } from 'react';
 import { useViewer } from './ViewerContext';
 import * as Cesium from 'cesium';
-import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics } from '../../geoConfigExporter';
-import { colormapService } from '../../services/ColormapService';
-import { layerStatsService } from '../../services/LayerStatsService';
+import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics } from 'geoConfigExporter';
+import { colormapService } from 'services/ColormapService';
+import { layerStatsService } from 'services/LayerStatsService';
 import { pointValueService } from 'services/PointValueService';
 import { useMouseTracking } from 'utils/MouseTrackingProvider';
 

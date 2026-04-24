@@ -1,6 +1,6 @@
 import React from 'react';
-import { useViewer } from '../../../utils/context/ViewerContext';
-import ViewerIconButton from '../../layout/Button/ViewerIconButton/ViewerIconButton';
+import { useViewer } from 'utils/context/ViewerContext';
+import ViewerIconButton from 'components/layout/Button/ViewerIconButton/ViewerIconButton';
 
 const HomeButton: React.FC = () => {
   const { viewer } = useViewer();

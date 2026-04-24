@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Checkbox, Label } from 'react-aria-components';
-import InfoButton from '../../Button/InfoButton/InfoButton';
+import InfoButton from 'components/layout/Button/InfoButton/InfoButton';
 import styles from './CheckboxWithInfo.module.scss';
 
 interface CheckboxWithInfoProps {
