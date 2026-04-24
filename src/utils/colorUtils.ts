@@ -1,4 +1,6 @@
 import * as Cesium from 'cesium';
+import { elements, lanthanides, actinides } from 'constants/periodicTableData';
+import { layersConfig } from 'geoConfigExporter';
 
 /**
  * Extracts RGBA components from a HEXA color string
@@ -43,30 +45,35 @@ const ELEMENT_SYMBOLS: Record<string, string> = {
   uranium:   'U',
 };
 
-// 17 elements distributed ~21° apart across the hue wheel
-const ELEMENT_COLORS: Record<string, number> = {
-  iron:      5,    // red
-  uranium:   25,   // orange-red
-  calcium:   50,   // golden
-  sodium:    70,   // yellow-orange
-  potassium: 90,   // yellow-green
-  silicon:   110,  // lime
-  magnesium: 130,  // green
-  aluminium: 150,  // teal-green
-  oxygen:    170,  // teal
-  thorium:   190,  // cyan
-  samarium:  210,  // sky
-  titanium:  230,  // blue
-  gadolinium:250,  // blue-purple
-  radon:     270,  // purple
-  hydrogen:  300,  // magenta
-  polonium:  320,  // pink
-  helium:    340,  // rose
-};
+const GOLDEN_ANGLE = 137.5;
+
+const allElementsByAtomicNumber = new Map<string, number>(
+  [...elements, ...lanthanides, ...actinides].map(el => [el.name.toLowerCase(), el.atomicNumber])
+);
+
+const configuredElementNames = new Set<string>();
+Object.values(layersConfig.layers).forEach(layer => {
+  if (layer.category === 'chemical' && layer.element) {
+    configuredElementNames.add(layer.element.toLowerCase());
+  }
+});
+
+const elementColorIndexMap = new Map<string, number>(
+  [...configuredElementNames]
+    .map(name => ({ name, atomicNumber: allElementsByAtomicNumber.get(name) ?? Infinity }))
+    .sort((a, b) => a.atomicNumber - b.atomicNumber)
+    .map((el, i) => [el.name, i])
+);
 
 export function elementToAccentColor(elementName: string): string {
   const name = elementName.toLowerCase();
-  const hue = ELEMENT_COLORS[name] ?? djb2Hash(name) % 360;
+  const index = elementColorIndexMap.get(name);
+
+  const hue =
+    index !== undefined
+      ? Math.round((index * GOLDEN_ANGLE) % 360)
+      : djb2Hash(name) % 360;
+
   return `hsl(${hue}, 70%, 62%)`;
 }
 

@@ -65,6 +65,7 @@ export default defineConfig(({ mode }) => ({
       'pages':             path.resolve(__dirname, 'src/pages'),
       'fonts':             path.resolve(__dirname, 'src/fonts'),
       'geoConfigExporter': path.resolve(__dirname, 'src/geoConfigExporter.ts'),
+      'constants':         path.resolve(__dirname, 'src/constants'),
     },
   },
   build: {
