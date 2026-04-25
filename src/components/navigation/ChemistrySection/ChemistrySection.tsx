@@ -12,7 +12,7 @@ import { pointValueService } from 'services/PointValueService';
 import { useViewer } from 'utils/context/ViewerContext';
 import { DraggableBoxContentContainer } from 'components/layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
 import { Portal } from 'components/ui/Portal/Portal';
-import '../../layout/BoxContentContainer/MapHoverValuesBox.scss';
+import './MapHoverValuesBox.scss';
 import { ResourceBarsVisualizer } from 'components/viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
 import { useBoundaryRef } from 'components/reference/BoundaryRefProvider';
 import { useZIndex } from 'utils/ZIndexProvider';
