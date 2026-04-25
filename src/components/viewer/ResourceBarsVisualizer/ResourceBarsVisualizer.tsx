@@ -81,24 +81,10 @@ function renderBarsPanel(
   data: ResourceData[],
   nodataData: NodataResourceData[],
   getColor: (d: ResourceData) => string,
-  valueTextFill: string,
-  patternId: string
+  valueTextFill: string
 ): void {
   const svg = d3.select(svgEl);
   svg.selectAll('*').remove();
-
-  const defs = svg.append('defs');
-  defs.append('pattern')
-    .attr('id', patternId)
-    .attr('patternUnits', 'userSpaceOnUse')
-    .attr('width', 6)
-    .attr('height', 6)
-    .attr('patternTransform', 'rotate(45)')
-    .append('line')
-      .attr('x1', 0).attr('y1', 0)
-      .attr('x2', 0).attr('y2', 6)
-      .attr('stroke', '#888888')
-      .attr('stroke-width', 2.5);
 
   const actualWidth = svgEl.clientWidth;
   const actualHeight = svgEl.clientHeight;
@@ -237,12 +223,13 @@ function renderBarsPanel(
     .style('font-family', 'Courier New, monospace')
     .text(d => d.value.toFixed(2));
 
-  const nodataGroups = g.selectAll('.nodata-group')
+  const nodataGroups = g.selectAll<SVGGElement, NodataResourceData>('.nodata-group')
     .data(nodataData)
     .enter()
     .append('g')
     .attr('class', 'nodata-group')
-    .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`);
+    .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`)
+    .style('opacity', 0.2);
 
   nodataGroups.append('rect')
     .attr('class', 'nodata-bar')
@@ -250,10 +237,23 @@ function renderBarsPanel(
     .attr('y', 0)
     .attr('width', xScale.bandwidth())
     .attr('height', innerHeight)
-    .attr('fill', `url(#${patternId})`)
+    .attr('fill', 'none')
     .attr('stroke', '#666')
-    .attr('stroke-width', 1)
-    .attr('opacity', 0.5);
+    .attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '5,3');
+
+  nodataGroups.append('text')
+    .attr('class', 'nodata-label')
+    .attr('x', xScale.bandwidth() / 2)
+    .attr('y', innerHeight / 2)
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .style('font-size', '11px')
+    .style('font-weight', 'bold')
+    .style('fill', '#bbb')
+    .style('font-family', 'Courier New, monospace')
+    .style('letter-spacing', '0.08em')
+    .text('N/A');
 
   nodataGroups.append('rect')
     .attr('class', 'element-symbol-square')
@@ -287,6 +287,23 @@ function renderBarsPanel(
     .style('fill', '#555')
     .style('font-family', 'Courier New, monospace')
     .text('—');
+
+  nodataGroups.each(function() {
+    const node = this;
+    function pulse() {
+      d3.select(node)
+        .transition()
+        .duration(1200)
+        .ease(d3.easeSinInOut)
+        .style('opacity', 0.8)
+        .transition()
+        .duration(1200)
+        .ease(d3.easeSinInOut)
+        .style('opacity', 0.2)
+        .on('end', pulse);
+    }
+    pulse();
+  });
 }
 
 export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
@@ -419,7 +436,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
 
   useEffect(() => {
     if (!svgWtRef.current || (wtResourceData.length === 0 && nodataWtLayerData.length === 0)) return;
-    renderBarsPanel(svgWtRef.current, wtResourceData, nodataWtLayerData, d => d.color, '#e0e0e0', 'nodata-hatch-wt');
+    renderBarsPanel(svgWtRef.current, wtResourceData, nodataWtLayerData, d => d.color, '#e0e0e0');
   }, [wtResourceData, nodataWtLayerData]);
 
   useEffect(() => {
@@ -429,8 +446,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       ppmResourceData,
       nodataPpmLayerData,
       d => ppmColorScale(1 - d.continuousPosition),
-      '#e0e0e0',
-      'nodata-hatch-ppm'
+      '#e0e0e0'
     );
   }, [ppmResourceData, nodataPpmLayerData, ppmColorScale]);
 
