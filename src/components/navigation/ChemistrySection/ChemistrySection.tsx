@@ -196,7 +196,6 @@ const ChemistrySection: React.FC = () => {
         <DraggableBoxContentContainer
           className='map-hover-values-box'
           width={400}
-          height={350}
           title="Element concentration"
           isOpen={showValueBox}
           onClose={() => handlePointFetchToggle(false)}
