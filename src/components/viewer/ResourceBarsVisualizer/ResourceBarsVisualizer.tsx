@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { layersConfig } from 'geoConfigExporter';
 import { LunarTerrainClassifier, TerrainClassification } from 'utils/LunarTerrainClassifier';
 import { elements } from 'constants/periodicTableData';
+import { ELEMENT_REFERENCE_RANGES } from 'constants/elementReferenceRanges';
 import './ResourceBarsVisualizer.scss';
 
 export interface ResourceData {
@@ -22,36 +23,6 @@ interface ResourceBarsVisalizerProps {
   height?: number;
 }
 
-// Data for Ca, Fe, Ti, Mg from gamma spectrometry, magnetometry and isotope analysis
-const LUNAR_ELEMENTAL_RANGES: Record<string, { min: number; max: number }> = {
-
-  /**
-   * (Ca) Source:
-   * https://www.sciencedirect.com/science/article/abs/pii/S0012821X21003344
-   * https://www.lpi.usra.edu/publications/books/lunar_sourcebook/pdf/Chapter08.pdf
-   */
-  'calcium': { min: 0, max: 14.3 },
-
-  /**
-   * (Fe) Source:
-   * https://ntrs.nasa.gov/api/citations/19740018168/downloads/19740018168.pdf
-   * https://ntrs.nasa.gov/api/citations/19740018189/downloads/19740018189.pdf?attachment=true
-   */
-  'iron': { min: 0, max: 15.2 },
-
-  /**
-   * (Ti) Source:
-   * https://ntrs.nasa.gov/citations/19800026504
-   */
-  'titanium': { min: 0, max: 6.0 },
-
-  /**
-   * (Mg) Source:
-   * https://ui.adsabs.harvard.edu/abs/2013GeCoA.120....1S
-   * https://pmc.ncbi.nlm.nih.gov/articles/PMC8974359/
-   */
-  'magnesium': { min: 0, max: 13.0 }
-};
 
 /* PeriodicTable element mapping with layersConfig */
 function getElementSymbol(elementName: string): string {
@@ -81,10 +52,10 @@ function calculateGeochemicalScore(layerName: string, value: number): number {
     return 50;
   }
 
-  const range = LUNAR_ELEMENTAL_RANGES[elementName];
+  const range = ELEMENT_REFERENCE_RANGES[elementName];
 
   if (!range) {
-    console.warn(`No elemental range defined for element: ${elementName}. Supported elements: ${Object.keys(LUNAR_ELEMENTAL_RANGES).join(', ')}`);
+    console.warn(`No elemental range defined for element: ${elementName}. Supported elements: ${Object.keys(ELEMENT_REFERENCE_RANGES).join(', ')}`);
     return 50;
   }
 
