@@ -44,6 +44,10 @@ $count-rate-color: #fcd34d;
       pointer-events: none;
     }
 
+    .nodata-bar {
+      pointer-events: none;
+    }
+
     .element-symbol-square {
       pointer-events: none;
     }
@@ -209,5 +213,14 @@ $count-rate-color: #fcd34d;
     font-family: 'Courier New', monospace;
     color: $count-rate-color;
     white-space: nowrap;
+  }
+
+  .countRateRowNodata {
+    opacity: 0.55;
+  }
+
+  .nodataMuted {
+    color: #555555;
+    border-color: rgba(85, 85, 85, 0.4);
   }
 }

@@ -25,9 +25,17 @@ export interface CountRateData {
   displayName: string;
 }
 
+export interface NodataResourceData {
+  layerName: string;
+  symbol: string;
+  elementName: string;
+  units: string;
+}
+
 interface ResourceBarsVisalizerProps {
   values: { [key: string]: number };
   allValues?: { [key: string]: number };
+  nodataLayerIds?: string[];
   width?: number;
   height?: number;
 }
@@ -71,11 +79,26 @@ export function calculateGeochemicalScore(layerName: string, value: number): num
 function renderBarsPanel(
   svgEl: SVGSVGElement,
   data: ResourceData[],
+  nodataData: NodataResourceData[],
   getColor: (d: ResourceData) => string,
-  valueTextFill: string
+  valueTextFill: string,
+  patternId: string
 ): void {
   const svg = d3.select(svgEl);
   svg.selectAll('*').remove();
+
+  const defs = svg.append('defs');
+  defs.append('pattern')
+    .attr('id', patternId)
+    .attr('patternUnits', 'userSpaceOnUse')
+    .attr('width', 6)
+    .attr('height', 6)
+    .attr('patternTransform', 'rotate(45)')
+    .append('line')
+      .attr('x1', 0).attr('y1', 0)
+      .attr('x2', 0).attr('y2', 6)
+      .attr('stroke', '#888888')
+      .attr('stroke-width', 2.5);
 
   const actualWidth = svgEl.clientWidth;
   const actualHeight = svgEl.clientHeight;
@@ -140,8 +163,13 @@ function renderBarsPanel(
     .style('stroke', '#ffffff')
     .style('opacity', 0.4);
 
+  const allLayerNames = [
+    ...data.map(d => d.layerName),
+    ...nodataData.map(d => d.layerName),
+  ];
+
   const xScale = d3.scaleBand()
-    .domain(data.map(d => d.layerName))
+    .domain(allLayerNames)
     .range([axisWidth, innerWidth])
     .padding(0.3);
 
@@ -208,11 +236,63 @@ function renderBarsPanel(
     .style('fill', valueTextFill)
     .style('font-family', 'Courier New, monospace')
     .text(d => d.value.toFixed(2));
+
+  const nodataGroups = g.selectAll('.nodata-group')
+    .data(nodataData)
+    .enter()
+    .append('g')
+    .attr('class', 'nodata-group')
+    .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`);
+
+  nodataGroups.append('rect')
+    .attr('class', 'nodata-bar')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('width', xScale.bandwidth())
+    .attr('height', innerHeight)
+    .attr('fill', `url(#${patternId})`)
+    .attr('stroke', '#666')
+    .attr('stroke-width', 1)
+    .attr('opacity', 0.5);
+
+  nodataGroups.append('rect')
+    .attr('class', 'element-symbol-square')
+    .attr('x', xScale.bandwidth() / 2 - 12)
+    .attr('y', innerHeight + 8)
+    .attr('width', 24)
+    .attr('height', 24)
+    .attr('fill', 'none')
+    .attr('stroke', '#666')
+    .attr('stroke-width', 1.5)
+    .attr('rx', 2);
+
+  nodataGroups.append('text')
+    .attr('class', 'element-symbol')
+    .attr('x', xScale.bandwidth() / 2)
+    .attr('y', innerHeight + 20)
+    .attr('dy', '0.32em')
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('font-weight', 'bold')
+    .style('fill', '#666')
+    .style('font-family', 'Arial, sans-serif')
+    .text(d => d.symbol);
+
+  nodataGroups.append('text')
+    .attr('class', 'resource-value')
+    .attr('x', xScale.bandwidth() / 2)
+    .attr('y', innerHeight + 45)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('fill', '#555')
+    .style('font-family', 'Courier New, monospace')
+    .text('—');
 }
 
 export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   values,
   allValues,
+  nodataLayerIds = [],
   width: propWidth
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -293,20 +373,66 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const wtResourceData = useMemo(() => resourceData.filter(d => d.units === 'wt%'), [resourceData]);
   const ppmResourceData = useMemo(() => resourceData.filter(d => d.units === 'ppm'), [resourceData]);
 
-  useEffect(() => {
-    if (!svgWtRef.current || wtResourceData.length === 0) return;
-    renderBarsPanel(svgWtRef.current, wtResourceData, d => d.color, '#e0e0e0');
-  }, [wtResourceData]);
+  const nodataWtLayerData = useMemo((): NodataResourceData[] => {
+    const realSymbols = new Set(resourceData.map(d => d.symbol));
+    const seenSymbols = new Set<string>();
+    return nodataLayerIds.flatMap(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (!layerConfig || layerConfig.units === 'count_rate') return [];
+      const elementName = layerConfig.element ?? '';
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
+      seenSymbols.add(symbol);
+      const range = ELEMENT_REFERENCE_RANGES[elementName];
+      const units = range?.units ?? 'wt%';
+      if (units !== 'wt%') return [];
+      return [{ layerName, symbol, elementName, units }];
+    });
+  }, [nodataLayerIds, resourceData]);
+
+  const nodataPpmLayerData = useMemo((): NodataResourceData[] => {
+    const realSymbols = new Set(resourceData.map(d => d.symbol));
+    const seenSymbols = new Set<string>();
+    return nodataLayerIds.flatMap(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (!layerConfig || layerConfig.units === 'count_rate') return [];
+      const elementName = layerConfig.element ?? '';
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
+      seenSymbols.add(symbol);
+      const range = ELEMENT_REFERENCE_RANGES[elementName];
+      const units = range?.units ?? 'wt%';
+      if (units !== 'ppm') return [];
+      return [{ layerName, symbol, elementName, units }];
+    });
+  }, [nodataLayerIds, resourceData]);
+
+  const nodataCountRateData = useMemo((): NodataResourceData[] => {
+    return nodataLayerIds.flatMap(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (layerConfig?.units !== 'count_rate') return [];
+      const elementName = layerConfig.element ?? '';
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      return [{ layerName, symbol, elementName, units: 'count_rate' }];
+    });
+  }, [nodataLayerIds]);
 
   useEffect(() => {
-    if (!svgPpmRef.current || ppmResourceData.length === 0) return;
+    if (!svgWtRef.current || (wtResourceData.length === 0 && nodataWtLayerData.length === 0)) return;
+    renderBarsPanel(svgWtRef.current, wtResourceData, nodataWtLayerData, d => d.color, '#e0e0e0', 'nodata-hatch-wt');
+  }, [wtResourceData, nodataWtLayerData]);
+
+  useEffect(() => {
+    if (!svgPpmRef.current || (ppmResourceData.length === 0 && nodataPpmLayerData.length === 0)) return;
     renderBarsPanel(
       svgPpmRef.current,
       ppmResourceData,
+      nodataPpmLayerData,
       d => ppmColorScale(1 - d.continuousPosition),
-      '#e0e0e0'
+      '#e0e0e0',
+      'nodata-hatch-ppm'
     );
-  }, [ppmResourceData, ppmColorScale]);
+  }, [ppmResourceData, nodataPpmLayerData, ppmColorScale]);
 
   return (
     <div ref={containerRef} className={styles.resourceBarsVisualizer}>
@@ -316,9 +442,9 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
         <div className={styles.panelRule} />
         <span className={`${styles.unitBadge} ${styles.wt}`}>wt%</span>
       </div>
-      {wtResourceData.length > 0 && <svg ref={svgWtRef} width={width} height={PANEL_HEIGHT} />}
+      {(wtResourceData.length > 0 || nodataWtLayerData.length > 0) && <svg ref={svgWtRef} width={width} height={PANEL_HEIGHT} />}
 
-      {ppmResourceData.length > 0 && (
+      {(ppmResourceData.length > 0 || nodataPpmLayerData.length > 0) && (
         <>
           <div className={styles.panelSep} />
           <div className={styles.panelHeader}>
@@ -330,7 +456,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
         </>
       )}
 
-      {countRateData.length > 0 && (
+      {(countRateData.length > 0 || nodataCountRateData.length > 0) && (
         <>
           <div className={styles.panelSep} />
           <div className={styles.panelHeader}>
@@ -344,6 +470,13 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
                 <span className={styles.countRateSymbol}>{d.symbol}</span>
                 <span className={styles.countRateLabel}>{d.displayName}</span>
                 <span className={styles.countRateValue}>{d.value.toFixed(4)}</span>
+              </div>
+            ))}
+            {nodataCountRateData.map(d => (
+              <div key={d.layerName} className={`${styles.countRateRow} ${styles.countRateRowNodata}`}>
+                <span className={`${styles.countRateSymbol} ${styles.nodataMuted}`}>{d.symbol}</span>
+                <span className={styles.countRateLabel}>{d.elementName}</span>
+                <span className={`${styles.countRateValue} ${styles.nodataMuted}`}>—</span>
               </div>
             ))}
           </div>

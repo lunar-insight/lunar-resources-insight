@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import styles from './ChemistrySection.module.scss';
 import { Button } from 'react-aria-components';
 import ModalOverlayContainer from 'components/layout/ModalOverlayContainer/ModalOverlayContainer';
@@ -31,20 +31,19 @@ const ChemistrySection: React.FC = () => {
   const { registerModal, unregisterModal } = useZIndex();
   const { viewer } = useViewer();
 
+  const selectedChemicalLayerIds = useMemo(
+    () => selectedLayers.filter(id => layersConfig.layers[id]?.category === 'chemical'),
+    [selectedLayers]
+  );
+
   // Initialize the service with the viewer and selected layers
   useEffect(() => {
     pointValueService.setViewer(viewer);
   }, [viewer]);
 
   useEffect(() => {
-    // Update the service with current selected layers (only chemical ones)
-    const chemicalLayers = selectedLayers.filter(layerId => {
-      const config = layersConfig.layers[layerId];
-      return config?.category === 'chemical';
-    });
-
-    pointValueService.setSelectedLayers(chemicalLayers);
-  }, [selectedLayers]);
+    pointValueService.setSelectedLayers(selectedChemicalLayerIds);
+  }, [selectedChemicalLayerIds]);
 
   useEffect(() => {
     if (showValueBox) {
@@ -143,19 +142,23 @@ const ChemistrySection: React.FC = () => {
         </div>
       );
     }
-    
-    if (hoverValues && Object.keys(hoverValues).length > 0) {
-      return (
-        <ResourceBarsVisualizer 
-          values={hoverValues} 
-          allValues={allHoverValues}
-          width={270} 
-          height={250} 
-        />
-      );
+
+    if (hoverValues === null) {
+      return <p>Hover over the map to scan resources</p>;
     }
-    
-    return <p>Hover over the map to scan resources</p>;
+
+    const presentIds = new Set(Object.keys(hoverValues));
+    const nodataLayerIds = selectedChemicalLayerIds.filter(id => !presentIds.has(id));
+
+    return (
+      <ResourceBarsVisualizer
+        values={hoverValues}
+        allValues={allHoverValues ?? undefined}
+        nodataLayerIds={nodataLayerIds}
+        width={270}
+        height={250}
+      />
+    );
   };
 
   // selectedElements to table for PeriodicTable
