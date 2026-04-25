@@ -26,7 +26,7 @@
   transition: background-size 0.3s ease-out, box-shadow 0.3s ease-out, font-size 0.3s ease-out;
 
   &[data-hovered] {
-    background-color: var(--color-quartenary);
+    background-color: var(--color-quaternary);
     background-size: 110% 110%;
     box-shadow: inset 0 0 10px 1px var(--color-tertiary);
   }
@@ -56,7 +56,7 @@
   transition: background-size 0.3s ease-out, box-shadow 0.3s ease-out, font-size 0.3s ease-out;
 
   &[data-hovered] {
-    background-color: var(--color-quartenary);
+    background-color: var(--color-quaternary);
     background-size: 110% 110%;
     box-shadow: inset 0 0 10px 1px var(--color-tertiary);
   }

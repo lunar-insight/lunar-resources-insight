@@ -97,7 +97,7 @@ $color-background-unavailable: rgba(var(--color-selection-unavailable-bg-rgb), 0
     border-radius: $border-radius;
 
     &:hover {
-      background: var(--color-quartenary);
+      background: var(--color-quaternary);
     }
   }
 }
@@ -157,7 +157,7 @@ $color-background-unavailable: rgba(var(--color-selection-unavailable-bg-rgb), 0
   // Hover effect with zoom only the background map
   &[data-hovered] {
     box-shadow: inset 0 0 10px 1px var(--color-tertiary);
-    border-color: var(--color-quartenary);
+    border-color: var(--color-quaternary);
 
     &::before {
       transform: scale(1.1);
@@ -174,15 +174,15 @@ $color-background-unavailable: rgba(var(--color-selection-unavailable-bg-rgb), 0
 
   // Selected state
   &.selected {
-    border-color: var(--color-quartenary);
-    box-shadow: 0 0 8px 2px rgba(var(--color-quartenary-rgb, 100, 200, 255), 0.5);
+    border-color: var(--color-quaternary);
+    box-shadow: 0 0 8px 2px rgba(var(--color-quaternary-rgb, 100, 200, 255), 0.5);
 
     .layerOverlay {
       background-color: rgba(0, 0, 0, 0.4);
     }
 
     .layerCheckbox input {
-      accent-color: var(--color-quartenary);
+      accent-color: var(--color-quaternary);
     }
   }
 

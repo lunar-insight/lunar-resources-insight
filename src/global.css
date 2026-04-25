@@ -2,7 +2,7 @@
   --color-primary: #232935; /* dark color 35 41 53*/
   --color-secondary: #85a2af; /* light color */
   --color-tertiary: #97a5ab; /* light color */
-  --color-quartenary: #324049; /* dark color 50 64 73*/
+  --color-quaternary: #324049; /* dark color 50 64 73*/
   --color-red: #ff5449; /* red for error or cancel */
   --color-green: #2eaf2e; /* green for validation */
   --color-dark-intermediary: #2d3a42; /* 45 58 66 dark color, used for sidebar for "is-active + pressed" state */
@@ -16,7 +16,7 @@
   --color-primary-rgb: 35, 41, 53;
   --color-secondary-rgb: 133, 162, 175;
   --color-tertiary-rgb: 151, 165, 171;
-  --color-quartenary-rgb: 50, 64, 73;
+  --color-quaternary-rgb: 50, 64, 73;
   --color-red-rgb: 255, 84, 73;
   --color-green-rgb: 46, 175, 46;
   --color-dark-intermediary-rgb: 45, 58, 66;
@@ -72,11 +72,11 @@ body {
   height: 100%;
   overflow: hidden;
 
-  scrollbar-color: var(--color-quartenary) var(--color-primary);
+  scrollbar-color: var(--color-quaternary) var(--color-primary);
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--color-quartenary);
+  background-color: var(--color-quaternary);
 }
 
 ::-webkit-scrollbar-thumb {
