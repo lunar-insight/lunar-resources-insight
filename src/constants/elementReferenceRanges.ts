@@ -43,4 +43,22 @@ export const ELEMENT_REFERENCE_RANGES: Record<string, ElementReferenceRange> = {
       'https://pmc.ncbi.nlm.nih.gov/articles/PMC8974359/',
     ],
   },
+  hydrogen: {
+    min: 0,
+    max: 150,
+    units: 'ppm',
+    sources: [
+      'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2022JE007197', // Lawrence et al. 2022 – Global Hydrogen Abundances on the Lunar Surface (LP NS), JGR Planets
+      'https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2005JE002637', // Lawrence et al. 2006 – Improved modeling of LP NS data, polar H 100–150 ppm, JGR Planets
+    ],
+  },
+  thorium: {
+    min: 0,
+    max: 14.0,
+    units: 'ppm',
+    sources: [
+      'https://agupubs.onlinelibrary.wiley.com/doi/abs/10.1029/1999JE001177', // Lawrence et al. 2000 – Thorium abundances on the lunar surface (LP GRS), JGR Planets
+      'https://iopscience.iop.org/article/10.1088/1674-4527/19/6/76', // Zhu et al. 2019 – Thorium distribution on the Moon (Chang'E-2 GRS), RAA
+    ],
+  },
 };

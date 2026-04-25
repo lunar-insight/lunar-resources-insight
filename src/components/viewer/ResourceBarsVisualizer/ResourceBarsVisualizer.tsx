@@ -119,19 +119,11 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     return null;
   }, [allValues, values]);
 
-  // Convert elemental values to geochemical scores
+  // Convert elemental values to geochemical scores, one bar per unique element symbol
   const resourceData = useMemo(() => {
-    const data = Object.entries(values).map(([layerName, value]) => {
-      // Calculate base geochemical score using literature elemental ranges
-      const geochemicalScore = calculateGeochemicalScore(layerName, value);
+    const seenSymbols = new Set<string>();
 
-      // Apply terrain context adjustment
-      const enrichmentScore = geochemicalScore;
-
-      const continuousPosition = enrichmentScore / 100;
-      const color = colorScale(1 - continuousPosition);
-
-      // Get element symbol from layersConfig
+    return Object.entries(values).flatMap(([layerName, value]) => {
       const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
         return layerId === layerName || config.element === layerName;
       });
@@ -139,18 +131,16 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       const elementName = layerEntry?.[1]?.element;
       const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
 
-      return {
-        layerName,
-        value,
-        geochemicalScore,
-        enrichmentScore,
-        continuousPosition,
-        color,
-        symbol,
-      };
-    }).filter(Boolean) as ResourceData[];
+      if (seenSymbols.has(symbol)) return [];
+      seenSymbols.add(symbol);
 
-    return data;
+      const geochemicalScore = calculateGeochemicalScore(layerName, value);
+      const enrichmentScore = geochemicalScore;
+      const continuousPosition = enrichmentScore / 100;
+      const color = colorScale(1 - continuousPosition);
+
+      return [{ layerName, value, geochemicalScore, enrichmentScore, continuousPosition, color, symbol }];
+    }) as ResourceData[];
   }, [values, colorScale]);
 
   useEffect(() => {
