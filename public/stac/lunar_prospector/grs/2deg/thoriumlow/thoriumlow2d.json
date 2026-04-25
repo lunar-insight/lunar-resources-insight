@@ -47,7 +47,7 @@
     ],
     "platform": "lunar-prospector",
     "element": "Th",
-    "units": "ug/g",
+    "units": "ppm",
     "scale_factor": 0.1,
     "grid_size_deg": 2.0,
     "grid_size_km": 60,
@@ -56,7 +56,7 @@
     "observation_period_end": "1999-07-31",
     "lri:quality_note_short": "Low-altitude phase binned at 2° for better counting statistics. Good balance between resolution and noise.",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
-    "processing:lineage": "Raw INT16 binary (thoriumlow.dat) scaled ÷10 via gdal_calc.py to obtain Th ug/g as Float32. Absolute thorium abundances derived from LP gamma ray spectrometer low-altitude observations (Lawrence et al. 2000, 2001b). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:lineage": "Raw INT16 binary (thoriumlow.dat) scaled ÷10 via gdal_calc.py to obtain Th ppm as Float32. Absolute thorium abundances derived from LP gamma ray spectrometer low-altitude observations (Lawrence et al. 2000, 2001b). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {
       "GDAL": "3.8.4"
     },
@@ -66,7 +66,7 @@
     "data": {
       "href": "thoriumlow2d_COG.tif",
       "type": "image/tiff; application=geotiff; profile=cloud-optimized",
-      "title": "Th ug/g COG - IAU:30100",
+      "title": "Th ppm COG - IAU:30100",
       "roles": [
         "data"
       ]
