@@ -130,7 +130,7 @@ $ppm-color: #93c5fd;
   .panelRule {
     flex: 1;
     height: 1px;
-    background: rgba(0, 0, 0, 0.15);
+    background: transparent;
   }
 
   .unitBadge {
@@ -158,6 +158,6 @@ $ppm-color: #93c5fd;
     height: 1px;
     width: 100%;
     margin: 0.35rem 0;
-    background: rgba(0, 0, 0, 0.12);
+    background: var(--color-secondary);
   }
 }
