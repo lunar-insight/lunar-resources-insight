@@ -18,6 +18,13 @@ export interface ResourceData {
   units: string;
 }
 
+export interface CountRateData {
+  layerName: string;
+  value: number;
+  symbol: string;
+  displayName: string;
+}
+
 interface ResourceBarsVisalizerProps {
   values: { [key: string]: number };
   allValues?: { [key: string]: number };
@@ -251,7 +258,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
         return layerId === layerName || config.element === layerName;
       });
 
-      const elementName = layerEntry?.[1]?.element ?? '';
+      const layerConfig = layerEntry?.[1];
+      if (layerConfig?.units === 'count_rate') return [];
+
+      const elementName = layerConfig?.element ?? '';
       const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
 
       if (seenSymbols.has(symbol)) return [];
@@ -268,6 +278,17 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       return [{ layerName, value, geochemicalScore, enrichmentScore, continuousPosition, color, symbol, elementName, units }];
     }) as ResourceData[];
   }, [values, colorScale]);
+
+  const countRateData = useMemo((): CountRateData[] => {
+    return Object.entries(values).flatMap(([layerName, value]) => {
+      const layerEntry = Object.entries(layersConfig.layers).find(([layerId]) => layerId === layerName);
+      const layerConfig = layerEntry?.[1];
+      if (layerConfig?.units !== 'count_rate') return [];
+      const elementName = layerConfig.element ?? '';
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      return [{ layerName, value, symbol, displayName: layerConfig.displayName ?? layerName }];
+    });
+  }, [values]);
 
   const wtResourceData = useMemo(() => resourceData.filter(d => d.units === 'wt%'), [resourceData]);
   const ppmResourceData = useMemo(() => resourceData.filter(d => d.units === 'ppm'), [resourceData]);
@@ -306,6 +327,26 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
             <span className={`${styles.unitBadge} ${styles.ppm}`}>ppm</span>
           </div>
           <svg ref={svgPpmRef} width={width} height={PANEL_HEIGHT} />
+        </>
+      )}
+
+      {countRateData.length > 0 && (
+        <>
+          <div className={styles.panelSep} />
+          <div className={styles.panelHeader}>
+            <span className={`${styles.panelTitle} ${styles.countRate}`}>Spatial Signal</span>
+            <div className={styles.panelRule} />
+            <span className={`${styles.unitBadge} ${styles.countRate}`}>count rate</span>
+          </div>
+          <div className={styles.countRateRows}>
+            {countRateData.map(d => (
+              <div key={d.layerName} className={styles.countRateRow}>
+                <span className={styles.countRateSymbol}>{d.symbol}</span>
+                <span className={styles.countRateLabel}>{d.displayName}</span>
+                <span className={styles.countRateValue}>{d.value.toFixed(4)}</span>
+              </div>
+            ))}
+          </div>
         </>
       )}
 

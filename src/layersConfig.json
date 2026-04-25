@@ -119,6 +119,7 @@
       "layerType": "raster",
       "category": "chemical",
       "element": "thorium",
+      "units": "count_rate",
       "displayName": "Thorium Count Rate · Wilson 2018",
       "stac": "lunar_prospector/wilson2018/thorium_grs/thorium_grs_wilson.json"
     }

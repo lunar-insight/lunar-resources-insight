@@ -35,7 +35,8 @@ export class PointValueService {
   private isCurrentlyFetching: boolean = false;
   private scanIndicator: ScanIndicator = new ScanIndicator();
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
-  private layerBounds: Map<string, Cesium.Rectangle> = new Map(); // Store bounds for each layer
+  private layerBounds: Map<string, Cesium.Rectangle> = new Map();
+  private activeFilenames: Map<string, string> = new Map();
 
   constructor() {}
 
@@ -373,7 +374,8 @@ export class PointValueService {
       throw new Error(`Layer config not found for ${layerId}`);
     }
 
-    const url = getPointValueUrl(layerConfig.filename, lon, lat, { 
+    const filename = this.activeFilenames.get(layerId) ?? layerConfig.filename;
+    const url = getPointValueUrl(filename, lon, lat, {
       bidx: [1],
       coord_crs: 'IAU:30100'
     });
@@ -390,14 +392,22 @@ export class PointValueService {
 
       return {
         layerId,
-        filename: layerConfig.filename,
+        filename,
         lon,
         lat,
-        value: typeof value === 'number' ? value :  null
+        value: typeof value === 'number' ? value : null
       };
     } catch (error) {
       throw new Error(`Failed to fetch point value: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  updateActiveFilename(layerId: string, filename: string) {
+    this.activeFilenames.set(layerId, filename);
+  }
+
+  clearActiveFilename(layerId: string) {
+    this.activeFilenames.delete(layerId);
   }
 
   // Clean up
@@ -406,6 +416,7 @@ export class PointValueService {
     this.callbacks = [];
     this.scanIndicator.destroy();
     this.layerBounds.clear();
+    this.activeFilenames.clear();
 
     if (this.pendingFetch) {
       clearTimeout(this.pendingFetch);

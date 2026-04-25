@@ -1,6 +1,7 @@
 // Component-specific color tokens
-$wt-color:  #6ee7b7;
-$ppm-color: #93c5fd;
+$wt-color:         #6ee7b7;
+$ppm-color:        #93c5fd;
+$count-rate-color: #fcd34d;
 
 .resourceBarsVisualizer {
   position: relative;
@@ -124,7 +125,8 @@ $ppm-color: #93c5fd;
     white-space: nowrap;
 
     &.wt  { color: $wt-color; }
-    &.ppm { color: $ppm-color; }
+    &.ppm       { color: $ppm-color; }
+    &.countRate { color: $count-rate-color; }
   }
 
   .panelRule {
@@ -152,6 +154,12 @@ $ppm-color: #93c5fd;
       border-color: rgba(147, 197, 253, 0.75);
       background: rgba(147, 197, 253, 0.15);
     }
+
+    &.countRate {
+      color: $count-rate-color;
+      border-color: rgba(252, 211, 77, 0.75);
+      background: rgba(252, 211, 77, 0.15);
+    }
   }
 
   .panelSep {
@@ -159,5 +167,47 @@ $ppm-color: #93c5fd;
     width: 100%;
     margin: 0.35rem 0;
     background: var(--color-secondary);
+  }
+
+  .countRateRows {
+    width: 100%;
+    padding: 0.2rem 0.5rem 0.4rem 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .countRateRow {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .countRateSymbol {
+    font-size: 0.65rem;
+    font-weight: 700;
+    font-family: 'Arial', sans-serif;
+    color: $count-rate-color;
+    min-width: 1.4rem;
+    text-align: center;
+    border: 1px solid rgba(252, 211, 77, 0.5);
+    border-radius: 2px;
+    padding: 1px 3px;
+  }
+
+  .countRateLabel {
+    flex: 1;
+    font-size: 0.6rem;
+    color: #ccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .countRateValue {
+    font-size: 0.65rem;
+    font-family: 'Courier New', monospace;
+    color: $count-rate-color;
+    white-space: nowrap;
   }
 }

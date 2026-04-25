@@ -205,6 +205,7 @@ class CesiumLayerManager {
       this.viewer.imageryLayers.add(newLayer, layerIndex >= 0 ? layerIndex : undefined);
       this.layerMap.set(layerId, newLayer);
       this.activeFilenames.set(layerId, newFilename);
+      pointValueService.updateActiveFilename(layerId, newFilename);
       // Keep internal layerStats in sync so updateRampValues uses correct defaults
       this.layerStats.set(layerId, { min, max });
       // Sync layerStyleConfig min/max so future updateLayerStyle calls use the new variant's range.
