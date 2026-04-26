@@ -329,6 +329,43 @@ function renderBarsPanel(
     .style('font-family', 'Courier New, monospace')
     .text('—');
 
+  const rollDur = 40;
+  const rollPts = 30;
+  const rollBaseY = innerHeight * 0.96;
+  const rollAmp = innerHeight * 0.038;
+  const rollLineGen = d3.line<{ x: number; y: number }>()
+    .x(d => d.x)
+    .y(d => d.y)
+    .curve(d3.curveBasis);
+  const genRollPts = () =>
+    Array.from({ length: rollPts }, (_, i) => ({
+      x: xOffset + (i / (rollPts - 1)) * effectiveBandwidth,
+      y: rollBaseY + (Math.random() - 0.5) * rollAmp * 2,
+    }));
+
+  nodataGroups.each(function() {
+    const rollGroup = this;
+    const rollPath = d3.select(rollGroup)
+      .append('path')
+      .attr('fill', 'none')
+      .attr('stroke', '#aaa')
+      .attr('stroke-width', 1)
+      .attr('stroke-linecap', 'round')
+      .style('opacity', 0.75)
+      .attr('d', rollLineGen(genRollPts()) ?? '');
+
+    function rollMorph() {
+      if (!rollGroup.isConnected) return;
+      rollPath
+        .transition()
+        .duration(rollDur + Math.random() * rollDur * 0.25)
+        .ease(d3.easeSinInOut)
+        .attr('d', rollLineGen(genRollPts()) ?? '')
+        .on('end', rollMorph);
+    }
+    rollMorph();
+  });
+
   nodataGroups.each(function() {
     const node = this;
     function pulse() {
