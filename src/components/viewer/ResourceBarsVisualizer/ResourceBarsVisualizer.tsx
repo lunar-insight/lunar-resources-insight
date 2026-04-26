@@ -194,6 +194,12 @@ function renderBarsPanel(
     .range([axisWidth, innerWidth])
     .padding(0.3);
 
+  const effectiveBandwidth = Math.min(
+    xScale.bandwidth(),
+    (innerWidth - axisWidth) * (1 - xScale.padding()) / 4
+  );
+  const xOffset = (xScale.bandwidth() - effectiveBandwidth) / 2;
+
   const resourceGroups = g.selectAll('.resource-group')
     .data(data)
     .enter()
@@ -203,9 +209,9 @@ function renderBarsPanel(
 
   resourceGroups.append('rect')
     .attr('class', 'resource-bar')
-    .attr('x', 0)
+    .attr('x', xOffset)
     .attr('y', d => yScale(d.continuousPosition))
-    .attr('width', xScale.bandwidth())
+    .attr('width', effectiveBandwidth)
     .attr('height', d => yScale(0) - yScale(d.continuousPosition))
     .attr('fill', d => getColor(d))
     .attr('stroke', '#fff')
@@ -227,7 +233,7 @@ function renderBarsPanel(
 
   resourceGroups.append('rect')
     .attr('class', 'element-symbol-square')
-    .attr('x', xScale.bandwidth() / 2 - 12)
+    .attr('x', xOffset + effectiveBandwidth / 2 - 12)
     .attr('y', innerHeight + 8)
     .attr('width', 24)
     .attr('height', 24)
@@ -238,7 +244,7 @@ function renderBarsPanel(
 
   resourceGroups.append('text')
     .attr('class', 'element-symbol')
-    .attr('x', xScale.bandwidth() / 2)
+    .attr('x', xOffset + effectiveBandwidth / 2)
     .attr('y', innerHeight + 8 + 12)
     .attr('dy', '0.32em')
     .attr('text-anchor', 'middle')
@@ -250,7 +256,7 @@ function renderBarsPanel(
 
   resourceGroups.append('text')
     .attr('class', 'resource-value data-value')
-    .attr('x', xScale.bandwidth() / 2)
+    .attr('x', xOffset + effectiveBandwidth / 2)
     .attr('y', innerHeight + 45)
     .attr('text-anchor', 'middle')
     .style('font-size', '12px')
@@ -268,9 +274,9 @@ function renderBarsPanel(
 
   nodataGroups.append('rect')
     .attr('class', 'nodata-bar')
-    .attr('x', 0)
+    .attr('x', xOffset)
     .attr('y', 0)
-    .attr('width', xScale.bandwidth())
+    .attr('width', effectiveBandwidth)
     .attr('height', innerHeight)
     .attr('fill', 'none')
     .attr('stroke', '#666')
@@ -279,7 +285,7 @@ function renderBarsPanel(
 
   nodataGroups.append('text')
     .attr('class', 'nodata-label')
-    .attr('x', xScale.bandwidth() / 2)
+    .attr('x', xOffset + effectiveBandwidth / 2)
     .attr('y', innerHeight / 2)
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'middle')
@@ -292,7 +298,7 @@ function renderBarsPanel(
 
   nodataGroups.append('rect')
     .attr('class', 'element-symbol-square')
-    .attr('x', xScale.bandwidth() / 2 - 12)
+    .attr('x', xOffset + effectiveBandwidth / 2 - 12)
     .attr('y', innerHeight + 8)
     .attr('width', 24)
     .attr('height', 24)
@@ -303,7 +309,7 @@ function renderBarsPanel(
 
   nodataGroups.append('text')
     .attr('class', 'element-symbol')
-    .attr('x', xScale.bandwidth() / 2)
+    .attr('x', xOffset + effectiveBandwidth / 2)
     .attr('y', innerHeight + 20)
     .attr('dy', '0.32em')
     .attr('text-anchor', 'middle')
@@ -315,7 +321,7 @@ function renderBarsPanel(
 
   nodataGroups.append('text')
     .attr('class', 'resource-value')
-    .attr('x', xScale.bandwidth() / 2)
+    .attr('x', xOffset + effectiveBandwidth / 2)
     .attr('y', innerHeight + 45)
     .attr('text-anchor', 'middle')
     .style('font-size', '12px')
