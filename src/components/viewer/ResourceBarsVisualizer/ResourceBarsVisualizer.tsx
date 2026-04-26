@@ -76,13 +76,48 @@ export function calculateGeochemicalScore(layerName: string, value: number): num
   return Math.min(100, Math.max(0, score));
 }
 
+interface ScaleRefs {
+  yScale: d3.ScaleLinear<number, number>;
+  xScale: d3.ScaleBand<string>;
+  innerHeight: number;
+}
+
+function shallowEqualNodataLayers(a: NodataResourceData[], b: NodataResourceData[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((item, i) => item.layerName === b[i].layerName);
+}
+
+function updateBarsOnly(
+  svgEl: SVGSVGElement,
+  data: ResourceData[],
+  getColor: (d: ResourceData) => string,
+  valueTextFill: string,
+  scales: ScaleRefs
+): void {
+  const { yScale } = scales;
+  const svg = d3.select(svgEl);
+
+  svg.selectAll<SVGGElement, ResourceData>('.resource-group')
+    .data(data, d => d.layerName)
+    .select<SVGRectElement>('.resource-bar')
+    .attr('y', d => yScale(d.continuousPosition))
+    .attr('height', d => yScale(0) - yScale(d.continuousPosition))
+    .attr('fill', d => getColor(d));
+
+  svg.selectAll<SVGGElement, ResourceData>('.resource-group')
+    .data(data, d => d.layerName)
+    .select<SVGTextElement>('.data-value')
+    .style('fill', valueTextFill)
+    .text(d => d.value.toFixed(2));
+}
+
 function renderBarsPanel(
   svgEl: SVGSVGElement,
   data: ResourceData[],
   nodataData: NodataResourceData[],
   getColor: (d: ResourceData) => string,
   valueTextFill: string
-): void {
+): ScaleRefs {
   const svg = d3.select(svgEl);
   svg.selectAll('*').remove();
 
@@ -214,7 +249,7 @@ function renderBarsPanel(
     .text(d => d.symbol);
 
   resourceGroups.append('text')
-    .attr('class', 'resource-value')
+    .attr('class', 'resource-value data-value')
     .attr('x', xScale.bandwidth() / 2)
     .attr('y', innerHeight + 45)
     .attr('text-anchor', 'middle')
@@ -304,6 +339,8 @@ function renderBarsPanel(
     }
     pulse();
   });
+
+  return { yScale, xScale, innerHeight };
 }
 
 export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
@@ -316,6 +353,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const svgWtRef = useRef<SVGSVGElement>(null);
   const svgPpmRef = useRef<SVGSVGElement>(null);
   const [width, setWidth] = useState(propWidth);
+  const wtScalesRef = useRef<ScaleRefs | null>(null);
+  const ppmScalesRef = useRef<ScaleRefs | null>(null);
+  const prevNodataWt = useRef<NodataResourceData[]>([]);
+  const prevNodataPpm = useRef<NodataResourceData[]>([]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -436,18 +477,23 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
 
   useEffect(() => {
     if (!svgWtRef.current || (wtResourceData.length === 0 && nodataWtLayerData.length === 0)) return;
-    renderBarsPanel(svgWtRef.current, wtResourceData, nodataWtLayerData, d => d.color, '#e0e0e0');
+    if (!wtScalesRef.current || !shallowEqualNodataLayers(prevNodataWt.current, nodataWtLayerData)) {
+      prevNodataWt.current = nodataWtLayerData;
+      wtScalesRef.current = renderBarsPanel(svgWtRef.current, wtResourceData, nodataWtLayerData, d => d.color, '#e0e0e0');
+    } else {
+      updateBarsOnly(svgWtRef.current, wtResourceData, d => d.color, '#e0e0e0', wtScalesRef.current);
+    }
   }, [wtResourceData, nodataWtLayerData]);
 
   useEffect(() => {
     if (!svgPpmRef.current || (ppmResourceData.length === 0 && nodataPpmLayerData.length === 0)) return;
-    renderBarsPanel(
-      svgPpmRef.current,
-      ppmResourceData,
-      nodataPpmLayerData,
-      d => ppmColorScale(1 - d.continuousPosition),
-      '#e0e0e0'
-    );
+    const getColor = (d: ResourceData) => ppmColorScale(1 - d.continuousPosition);
+    if (!ppmScalesRef.current || !shallowEqualNodataLayers(prevNodataPpm.current, nodataPpmLayerData)) {
+      prevNodataPpm.current = nodataPpmLayerData;
+      ppmScalesRef.current = renderBarsPanel(svgPpmRef.current, ppmResourceData, nodataPpmLayerData, getColor, '#e0e0e0');
+    } else {
+      updateBarsOnly(svgPpmRef.current, ppmResourceData, getColor, '#e0e0e0', ppmScalesRef.current);
+    }
   }, [ppmResourceData, nodataPpmLayerData, ppmColorScale]);
 
   return (
