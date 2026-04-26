@@ -90,23 +90,14 @@ function shallowEqualNodataLayers(a: NodataResourceData[], b: NodataResourceData
 function updateBarsOnly(
   svgEl: SVGSVGElement,
   data: ResourceData[],
-  getColor: (d: ResourceData) => string,
-  valueTextFill: string,
-  scales: ScaleRefs
+  valueTextFill: string
 ): void {
-  const { yScale } = scales;
   const svg = d3.select(svgEl);
 
-  svg.selectAll<SVGGElement, ResourceData>('.resource-group')
-    .data(data, d => d.layerName)
-    .select<SVGRectElement>('.resource-bar')
-    .attr('y', d => yScale(d.continuousPosition))
-    .attr('height', d => yScale(0) - yScale(d.continuousPosition))
-    .attr('fill', d => getColor(d));
+  const groups = svg.selectAll<SVGGElement, ResourceData>('.resource-group')
+    .data(data, d => d.layerName);
 
-  svg.selectAll<SVGGElement, ResourceData>('.resource-group')
-    .data(data, d => d.layerName)
-    .select<SVGTextElement>('.data-value')
+  groups.select<SVGTextElement>('.data-value')
     .style('fill', valueTextFill)
     .text(d => d.value.toFixed(2));
 }
@@ -207,16 +198,55 @@ function renderBarsPanel(
     .attr('class', 'resource-group')
     .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`);
 
-  resourceGroups.append('rect')
-    .attr('class', 'resource-bar')
-    .attr('x', xOffset)
-    .attr('y', d => yScale(d.continuousPosition))
-    .attr('width', effectiveBandwidth)
-    .attr('height', d => yScale(0) - yScale(d.continuousPosition))
-    .attr('fill', d => getColor(d))
-    .attr('stroke', '#fff')
-    .attr('stroke-width', 1)
-    .attr('opacity', 0.9);
+  const NOISE_COUNT = 5;
+  const noiseBarW = (effectiveBandwidth / NOISE_COUNT) * 0.65;
+  const noiseStep = effectiveBandwidth / NOISE_COUNT;
+
+  const noiseGroups = resourceGroups.append('g')
+    .attr('class', 'resource-noise-group');
+
+  noiseGroups.each(function(d) {
+    const noiseGroup = d3.select(this);
+    for (let i = 0; i < NOISE_COUNT; i++) {
+      noiseGroup.append('rect')
+        .attr('class', 'noise-bar')
+        .attr('x', xOffset + i * noiseStep + (noiseStep - noiseBarW) / 2)
+        .attr('width', noiseBarW)
+        .attr('fill', getColor(d))
+        .attr('opacity', 0.75)
+        .attr('y', yScale(0))
+        .attr('height', 0);
+    }
+  });
+
+  noiseGroups.each(function() {
+    const groupEl = this;
+    const resourceGroupEl = groupEl.parentElement!;
+
+    d3.select(groupEl).selectAll<SVGRectElement, unknown>('.noise-bar').each(function() {
+      const barEl = this;
+      const bar = d3.select(this);
+
+      function animateNoise() {
+        if (!barEl.isConnected) return;
+        const datum = d3.select<SVGGElement, ResourceData>(resourceGroupEl as unknown as SVGGElement).datum();
+        const maxH = Math.max(
+          yScale(0) - yScale(datum.continuousPosition),
+          innerHeight * 0.08
+        );
+        const jitter = 0.15;
+        const h = maxH * (1 - jitter + Math.random() * jitter);
+        bar.transition()
+          .duration(150 + Math.random() * 200)
+          .ease(d3.easeSinInOut)
+          .attr('fill', getColor(datum))
+          .attr('y', yScale(0) - h)
+          .attr('height', h)
+          .on('end', animateNoise);
+      }
+      animateNoise();
+    });
+  });
 
   g.selectAll('.element-separator')
     .data(data.slice(0, -1))
@@ -524,7 +554,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       prevNodataWt.current = nodataWtLayerData;
       wtScalesRef.current = renderBarsPanel(svgWtRef.current, wtResourceData, nodataWtLayerData, d => d.color, '#e0e0e0');
     } else {
-      updateBarsOnly(svgWtRef.current, wtResourceData, d => d.color, '#e0e0e0', wtScalesRef.current);
+      updateBarsOnly(svgWtRef.current, wtResourceData, '#e0e0e0');
     }
   }, [wtResourceData, nodataWtLayerData]);
 
@@ -535,7 +565,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       prevNodataPpm.current = nodataPpmLayerData;
       ppmScalesRef.current = renderBarsPanel(svgPpmRef.current, ppmResourceData, nodataPpmLayerData, getColor, '#e0e0e0');
     } else {
-      updateBarsOnly(svgPpmRef.current, ppmResourceData, getColor, '#e0e0e0', ppmScalesRef.current);
+      updateBarsOnly(svgPpmRef.current, ppmResourceData, '#e0e0e0');
     }
   }, [ppmResourceData, nodataPpmLayerData, ppmColorScale]);
 
