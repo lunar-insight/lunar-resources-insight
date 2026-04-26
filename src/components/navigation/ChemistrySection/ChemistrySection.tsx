@@ -20,7 +20,6 @@ import { useZIndex } from 'utils/ZIndexProvider';
 const ChemistrySection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCompoundModalOpen, setIsCompoundModalOpen] = useState(false);
-  const [selectedElements, setSelectedElements] = useState<Set<number>>(new Set());
   const [showValueBox, setShowValueBox] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
@@ -35,6 +34,18 @@ const ChemistrySection: React.FC = () => {
     () => selectedLayers.filter(id => layersConfig.layers[id]?.category === 'chemical'),
     [selectedLayers]
   );
+
+  const selectedElements = useMemo(() => {
+    const atomicNumbers = new Set<number>();
+    selectedChemicalLayerIds.forEach(layerId => {
+      const config = layersConfig.layers[layerId];
+      if (config?.element) {
+        const element = ALL_ELEMENTS_FLAT.find(el => el.name.toLowerCase() === config.element);
+        if (element) atomicNumbers.add(element.atomicNumber);
+      }
+    });
+    return atomicNumbers;
+  }, [selectedChemicalLayerIds]);
 
   // Initialize the service with the viewer and selected layers
   useEffect(() => {
@@ -118,17 +129,10 @@ const ChemistrySection: React.FC = () => {
       availableLayers.forEach(([layerId, _]) => {
         addLayer(layerId);
       });
-      setSelectedElements(prev => new Set(prev).add(element.atomicNumber));
     } else {
       // Delete layers from that element
       availableLayers.forEach(([layerId, _]) => {
         removeLayer(layerId);
-      });
-
-      setSelectedElements(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(element.atomicNumber);
-        return newSet;
       });
     }
   };
