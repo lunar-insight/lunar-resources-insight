@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { layersConfig } from 'geoConfigExporter';
-import { LunarTerrainClassifier, TerrainClassification } from 'utils/LunarTerrainClassifier';
 import { elements } from 'constants/periodicTableData';
 import { ELEMENT_REFERENCE_RANGES } from 'constants/elementReferenceRanges';
 import styles from './ResourceBarsVisualizer.module.scss';
@@ -34,7 +33,6 @@ export interface NodataResourceData {
 
 interface ResourceBarsVisalizerProps {
   values: { [key: string]: number };
-  allValues?: { [key: string]: number };
   nodataLayerIds?: string[];
   width?: number;
   height?: number;
@@ -486,7 +484,6 @@ function renderBarsPanel(
 
 export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   values,
-  allValues,
   nodataLayerIds = [],
   width: propWidth
 }) => {
@@ -519,15 +516,6 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const ppmColorScale = useMemo(() =>
     d3.scaleSequential(d3.interpolateBlues).domain([1, 0])
   , []);
-
-  const terrainClassification = useMemo((): TerrainClassification | null => {
-    const valuesForCalculation = allValues || values;
-    const els = LunarTerrainClassifier.extractElements(valuesForCalculation);
-    if (els) {
-      return LunarTerrainClassifier.classifyTerrain(els.calcium, els.iron, els.titanium);
-    }
-    return null;
-  }, [allValues, values]);
 
   const resourceData = useMemo(() => {
     const seenSymbols = new Set<string>();
@@ -686,13 +674,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
         </>
       )}
 
-      {terrainClassification && (
-        <div className={styles.terrainContext}>
-          <small>
-            <strong>{terrainClassification.type.charAt(0).toUpperCase() + terrainClassification.type.slice(1)}</strong> terrain
-          </small>
-        </div>
-      )}
+      {/* terrainClassification display disabled */}
     </div>
   );
 };
