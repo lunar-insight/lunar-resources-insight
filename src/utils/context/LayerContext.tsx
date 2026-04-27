@@ -37,6 +37,7 @@ interface LayerContextType {
   swappingLayers: Set<string>;
   swapLayerVariant: (layerId: string, variantIndex: number) => Promise<void>;
   statsVersion: number;
+  setBulkLayerVisibility: (ids: Set<string>) => void;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -232,6 +233,14 @@ class CesiumLayerManager {
     const layer = this.layerMap.get(layerId);
     if (layer) {
       layer.show = !layer.show;
+    }
+  }
+
+
+  setLayerVisibility(layerId: string, visible: boolean) {
+    const layer = this.layerMap.get(layerId);
+    if (layer) {
+      layer.show = visible;
     }
   }
 
@@ -466,6 +475,14 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
 
+  const setBulkLayerVisibility = useCallback((ids: Set<string>) => {
+    selectedLayers.forEach(id => {
+      cesiumManagerRef.current?.setLayerVisibility(id, ids.has(id));
+    });
+    setVisibleLayers(new Set(ids));
+  }, [selectedLayers]);
+
+
   const reorderLayers = useCallback((layers: string[]) => {
     setSelectedLayers(layers);
     cesiumManagerRef.current?.reorderLayers(layers);
@@ -568,6 +585,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     removeLayer,
     reorderLayers,
     toggleLayerVisibility,
+    setBulkLayerVisibility,
     updateStyle,
     updateRampValues,
     updateLayerOpacity,
@@ -585,6 +603,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     removeLayer,
     reorderLayers,
     toggleLayerVisibility,
+    setBulkLayerVisibility,
     updateStyle,
     updateRampValues,
     updateLayerOpacity,

@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useLayerContext } from 'utils/context/LayerContext';
 import { layersConfig } from 'geoConfigExporter';
@@ -8,6 +8,7 @@ import LayerGradientSelect from 'components/ui/LayerGradientSelect/LayerGradient
 import { ColorRampSlider } from '../Slider/ColorRampSlider/ColorRampSlider';
 import OpacitySlider from '../Slider/OpacitySlider/OpacitySlider';
 import { RangeFilterCheckbox } from '../Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
+import { Button } from 'react-aria-components';
 import CloseButton from '../Button/CloseButton/CloseButton';
 import { VariantSelector } from 'components/ui/VariantSelector/VariantSelector';
 import styles from './Sidebar.module.scss';
@@ -20,13 +21,53 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
   const { isSidebarOpen, closeSidebar } = useSidebarContext();
   const {
     selectedLayers,
+    visibleLayers,
     dynamicLayerMetadata,
     removeLayer,
     reorderLayers,
     updateRampValues,
     updateLayerOpacity,
+    setBulkLayerVisibility,
     statsVersion: _statsVersion,
   } = useLayerContext();
+
+  const [snapshot, setSnapshot] = useState<Set<string> | null>(null);
+
+  const showAll = () => {
+    const allHidden = selectedLayers.length > 0 &&
+      selectedLayers.every(id => !visibleLayers.has(id));
+
+    if (allHidden && snapshot !== null) {
+      const restored = new Set([...snapshot].filter(id => selectedLayers.includes(id)));
+      setBulkLayerVisibility(restored);
+      setSnapshot(null);
+      return;
+    }
+
+    const anyHidden = selectedLayers.some(id => !visibleLayers.has(id));
+    if (!anyHidden) return;
+
+    setSnapshot(new Set(visibleLayers));
+    setBulkLayerVisibility(new Set(selectedLayers));
+  };
+
+  const hideAll = () => {
+    const allVisible = selectedLayers.length > 0 &&
+      selectedLayers.every(id => visibleLayers.has(id));
+
+    if (allVisible && snapshot !== null) {
+      const restored = new Set([...snapshot].filter(id => selectedLayers.includes(id)));
+      setBulkLayerVisibility(restored);
+      setSnapshot(null);
+      return;
+    }
+
+    const anyVisible = selectedLayers.some(id => visibleLayers.has(id));
+    if (!anyVisible) return;
+
+    setSnapshot(new Set(visibleLayers));
+    setBulkLayerVisibility(new Set());
+  };
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -95,6 +136,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
           onPress={closeSidebar}
           className={styles.closeButton}
         />
+      </div>
+
+      <div className={styles.bulkControls}>
+        <Button
+          className={styles.bulkButton}
+          isDisabled={selectedLayers.length === 0}
+          onPress={showAll}
+        >
+          <span className={`material-symbols-outlined ${styles.icon} ${styles.iconVisible}`}>visibility</span>
+          <span className={styles.label}>Show All</span>
+        </Button>
+        <Button
+          className={styles.bulkButton}
+          isDisabled={selectedLayers.length === 0}
+          onPress={hideAll}
+        >
+          <span className={`material-symbols-outlined ${styles.icon} ${styles.iconHidden}`}>visibility_off</span>
+          <span className={styles.label}>Hide All</span>
+        </Button>
       </div>
 
       <div className={styles.content}>
