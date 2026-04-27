@@ -41,6 +41,7 @@ interface ResourceBarsVisalizerProps {
 }
 
 const PANEL_HEIGHT = 220;
+const MAX_HATCH_OPACITY = 0.35;
 
 function getElementSymbol(elementName: string): string {
   const element = elements.find(el => el.name.toLowerCase() === elementName.toLowerCase());
@@ -100,6 +101,14 @@ function updateBarsOnly(
   groups.select<SVGTextElement>('.data-value')
     .style('fill', valueTextFill)
     .text(d => d.value.toFixed(2));
+
+  groups.each(function(d) {
+    const groupId = d.layerName.replace(/[^a-zA-Z0-9]/g, '-');
+    d3.select(svgEl)
+      .selectAll(`#hatch-grad-${groupId} stop`)
+      .filter((_, i) => i === 1)
+      .attr('stop-opacity', d.continuousPosition * MAX_HATCH_OPACITY);
+  });
 }
 
 function renderBarsPanel(
@@ -111,6 +120,18 @@ function renderBarsPanel(
 ): ScaleRefs {
   const svg = d3.select(svgEl);
   svg.selectAll('*').remove();
+
+  const defs = svg.append('defs');
+  defs.append('pattern')
+    .attr('id', 'resource-hatch-white')
+    .attr('patternUnits', 'userSpaceOnUse')
+    .attr('width', 4)
+    .attr('height', 4)
+    .append('line')
+    .attr('x1', 0).attr('y1', 0)
+    .attr('x2', 4).attr('y2', 4)
+    .attr('stroke', 'white')
+    .attr('stroke-width', 0.75);
 
   const actualWidth = svgEl.clientWidth;
   const actualHeight = svgEl.clientHeight;
@@ -197,6 +218,53 @@ function renderBarsPanel(
     .append('g')
     .attr('class', 'resource-group')
     .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`);
+
+  const HATCH_BOTTOM_Y = innerHeight + 56;
+
+  resourceGroups.each(function(d) {
+    const groupId = d.layerName.replace(/[^a-zA-Z0-9]/g, '-');
+    const gradId  = `hatch-grad-${groupId}`;
+    const maskId  = `hatch-mask-${groupId}`;
+
+    const grad = defs.append('linearGradient')
+      .attr('id', gradId)
+      .attr('gradientUnits', 'userSpaceOnUse')
+      .attr('x1', 0).attr('y1', 0)
+      .attr('x2', 0).attr('y2', HATCH_BOTTOM_Y);
+
+    grad.append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', 'white')
+      .attr('stop-opacity', 0);
+
+    grad.append('stop')
+      .attr('offset', `${((innerHeight / HATCH_BOTTOM_Y) * 100).toFixed(1)}%`)
+      .attr('stop-color', 'white')
+      .attr('stop-opacity', d.continuousPosition * MAX_HATCH_OPACITY);
+
+    grad.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', 'white')
+      .attr('stop-opacity', 0);
+
+    const mask = defs.append('mask').attr('id', maskId);
+    mask.append('rect')
+      .attr('x', xOffset)
+      .attr('y', 0)
+      .attr('width', effectiveBandwidth)
+      .attr('height', HATCH_BOTTOM_Y)
+      .attr('fill', `url(#${gradId})`);
+
+    d3.select(this)
+      .insert('rect', ':first-child')
+      .attr('class', 'resource-hatch-bg')
+      .attr('x', xOffset)
+      .attr('y', 0)
+      .attr('width', effectiveBandwidth)
+      .attr('height', HATCH_BOTTOM_Y)
+      .attr('fill', 'url(#resource-hatch-white)')
+      .attr('mask', `url(#${maskId})`);
+  });
 
   const NOISE_COUNT = 5;
   const noiseBarW = (effectiveBandwidth / NOISE_COUNT) * 0.65;
