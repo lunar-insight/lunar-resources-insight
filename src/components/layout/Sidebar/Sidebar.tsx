@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useLayerContext } from 'utils/context/LayerContext';
 import { layersConfig } from 'geoConfigExporter';
@@ -8,9 +8,11 @@ import LayerGradientSelect from 'components/ui/LayerGradientSelect/LayerGradient
 import { ColorRampSlider } from '../Slider/ColorRampSlider/ColorRampSlider';
 import OpacitySlider from '../Slider/OpacitySlider/OpacitySlider';
 import { RangeFilterCheckbox } from '../Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
-import { Button } from 'react-aria-components';
+import { Button, TooltipTrigger } from 'react-aria-components';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import CloseButton from '../Button/CloseButton/CloseButton';
 import { VariantSelector } from 'components/ui/VariantSelector/VariantSelector';
+import { useLayerBulkVisibility } from './useLayerBulkVisibility';
 import styles from './Sidebar.module.scss';
 
 interface SidebarProps {
@@ -31,43 +33,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
     statsVersion: _statsVersion,
   } = useLayerContext();
 
-  const [snapshot, setSnapshot] = useState<Set<string> | null>(null);
-
-  const showAll = () => {
-    const allHidden = selectedLayers.length > 0 &&
-      selectedLayers.every(id => !visibleLayers.has(id));
-
-    if (allHidden && snapshot !== null) {
-      const restored = new Set([...snapshot].filter(id => selectedLayers.includes(id)));
-      setBulkLayerVisibility(restored);
-      setSnapshot(null);
-      return;
-    }
-
-    const anyHidden = selectedLayers.some(id => !visibleLayers.has(id));
-    if (!anyHidden) return;
-
-    setSnapshot(new Set(visibleLayers));
-    setBulkLayerVisibility(new Set(selectedLayers));
-  };
-
-  const hideAll = () => {
-    const allVisible = selectedLayers.length > 0 &&
-      selectedLayers.every(id => visibleLayers.has(id));
-
-    if (allVisible && snapshot !== null) {
-      const restored = new Set([...snapshot].filter(id => selectedLayers.includes(id)));
-      setBulkLayerVisibility(restored);
-      setSnapshot(null);
-      return;
-    }
-
-    const anyVisible = selectedLayers.some(id => visibleLayers.has(id));
-    if (!anyVisible) return;
-
-    setSnapshot(new Set(visibleLayers));
-    setBulkLayerVisibility(new Set());
-  };
+  const { showAll, hideAll } = useLayerBulkVisibility(
+    selectedLayers,
+    visibleLayers,
+    setBulkLayerVisibility,
+  );
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -125,6 +95,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
     updateLayerOpacity(layerId, opacityValue);
   };
 
+  const handleRemoveAll = useCallback(() => {
+    selectedLayers.forEach(layerId => removeLayer(layerId));
+  }, [selectedLayers, removeLayer]);
+
   return (
     <div
       className={`${styles.sidebar} ${isSidebarOpen ? styles.open : styles.closed}`}
@@ -155,6 +129,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
           <span className={`material-symbols-outlined ${styles.icon} ${styles.iconHidden}`}>visibility_off</span>
           <span className={styles.label}>Hide All</span>
         </Button>
+        <TooltipTrigger>
+          <Button
+            className={styles.deleteButton}
+            isDisabled={selectedLayers.length === 0}
+            onPress={handleRemoveAll}
+            aria-label="Remove all layers"
+          >
+            <span className={`material-symbols-outlined ${styles.icon} ${styles.iconDelete}`}>delete_sweep</span>
+          </Button>
+          <ButtonTooltip placement="right">Remove all layers</ButtonTooltip>
+        </TooltipTrigger>
       </div>
 
       <div className={styles.content}>
