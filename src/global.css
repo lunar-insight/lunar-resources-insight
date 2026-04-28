@@ -3,7 +3,8 @@
   --color-secondary: #85a2af; /* light color */
   --color-tertiary: #97a5ab; /* light color */
   --color-quaternary: #324049; /* dark color 50 64 73*/
-  --color-red: #ff5449; /* red for error or cancel */
+  --color-red: #ff5449;/* red for error or cancel */
+  --color-redVariant: #e05353; /* Less flashy but still red */
   --color-green: #2eaf2e; /* green for validation */
   --color-dark-intermediary: #2d3a42; /* 45 58 66 dark color, used for sidebar for "is-active + pressed" state */
   --color-neutral: #2b353e; /* dark color 43 53 62 */
@@ -18,6 +19,7 @@
   --color-tertiary-rgb: 151, 165, 171;
   --color-quaternary-rgb: 50, 64, 73;
   --color-red-rgb: 255, 84, 73;
+  --color-redVariant-rgb: 224, 83, 83;
   --color-green-rgb: 46, 175, 46;
   --color-dark-intermediary-rgb: 45, 58, 66;
   --color-neutral-rgb: 43, 53, 62;
@@ -44,6 +46,10 @@
   --chemical-border: rgba(147, 51, 234, 0.3);
   --chemical-active-bg: rgba(147, 51, 234, 0.50);
   --chemical-active-border: rgba(147, 51, 234, 0.85);
+
+  /* Muted accent colors, soft, non-flashy tones suitable for subtle UI indicators */
+  --color-muted-green: rgba(66, 191, 66, 0.5);
+  --color-muted-red: rgba(224, 83, 83, 0.5);
 
   /* Data Source Badge Colors. Used in DataSourceBadge and DataSourceLegend components */
   --color-badge-global: rgba(34, 185, 67, 0.55); /* Green for map+ground data */
