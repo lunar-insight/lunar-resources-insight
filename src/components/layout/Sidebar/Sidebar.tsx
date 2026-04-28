@@ -129,6 +129,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
           <span className={`material-symbols-outlined ${styles.icon} ${styles.iconHidden}`}>visibility_off</span>
           <span className={styles.label}>Hide All</span>
         </Button>
+        <div className={styles.separator} />
         <TooltipTrigger>
           <Button
             className={styles.deleteButton}
