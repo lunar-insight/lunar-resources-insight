@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Calcium 5° Elemental Abundance",
+    "lri:data_use_note": "Calcium elemental abundance (wt%) from LP GRS at 5° resolution (~150 km). High Ca is associated with plagioclase-rich highland anorthosite; useful for mapping anorthositic crust extent.",
     "mission": "Lunar Prospector",
     "instruments": [
       "Gamma Ray Spectrometer"

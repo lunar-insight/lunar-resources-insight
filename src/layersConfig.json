@@ -32,52 +32,8 @@
         "description": "Surface slope derived from LOLA data"
       }
     },
-    "calcium_primary": {
-      "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Ca_IAU2015_COG.tif",
-      "layerType": "raster",
-      "category": "chemical",
-      "element": "calcium",
-      "displayName": "Calcium (Primary)",
-      "metadata": {
-        "source": "NASA",
-        "resolution": "20ppd"
-      }
-    },
-    "iron_primary": {
-      "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Fe_IAU2015_COG.tif",
-      "layerType": "raster",
-      "category": "chemical",
-      "element": "iron",
-      "displayName": "Iron (Primary)",
-      "metadata": {
-        "source": "NASA",
-        "resolution": "20ppd"
-      }
-    },
-    "magnesium_primary": {
-      "filename": "chemical_elements/Global20ppd_SVR_LPGRS_geotiff_Mg_IAU2015_COG.tif",
-      "layerType": "raster",
-      "category": "chemical",
-      "element": "magnesium",
-      "displayName": "Magnesium (Primary)",
-      "metadata": {
-        "source": "NASA",
-        "resolution": "20ppd"
-      }
-    },
-    "titanium_primary": {
-      "filename": "chemical_elements/Global20ppd_LPGRS_geotiff_Ti_IAU2015_COG.tif",
-      "layerType": "raster",
-      "category": "chemical",
-      "element": "titanium",
-      "displayName": "Titanium (Primary)",
-      "metadata": {
-        "source": "NASA",
-        "resolution": "20ppd"
-      }
-    },
     "hydrogen_lawrence2022": {
-      "filename": "chemical_elements/hydrogen_abundance_lawrence_COG.tif",
+      "filename": "chemical_elements/hydrogen/hydrogen_abundance_lawrence_COG.tif",
       "layerType": "raster",
       "category": "chemical",
       "element": "hydrogen",
@@ -122,6 +78,138 @@
       "units": "count_rate",
       "displayName": "Thorium Count Rate · Wilson 2018",
       "stac": "lunar_prospector/wilson2018/thorium_grs/thorium_grs_wilson.json"
+    },
+    "uranium_lp_grs": {
+      "filename": "chemical_elements/uranium/uranium5d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "uranium",
+      "units": "ppm",
+      "displayName": "Uranium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/5deg/uranium/uranium5d.json"
+    },
+    "titanium_lp_grs": {
+      "filename": "chemical_elements/titanium/titanium2d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "titanium",
+      "units": "wt%",
+      "displayName": "Titanium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/2deg/titanium/titanium2d.json",
+      "variants": [
+        {
+          "label": "2°",
+          "filename": "chemical_elements/titanium/titanium2d_COG.tif",
+          "stac": "lunar_prospector/grs/2deg/titanium/titanium2d.json"
+        },
+        {
+          "label": "5°",
+          "filename": "chemical_elements/titanium/titanium5d_COG.tif",
+          "stac": "lunar_prospector/grs/5deg/titanium/titanium5d.json"
+        }
+      ]
+    },
+    "silicon_lp_grs": {
+      "filename": "chemical_elements/silicon/silicon5d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "silicon",
+      "units": "wt%",
+      "displayName": "Silicon Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/5deg/silicon/silicon5d.json"
+    },
+    "samarium_lp_grs": {
+      "filename": "chemical_elements/samarium/samarium2d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "samarium",
+      "units": "ppm",
+      "displayName": "Samarium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/2deg/samarium/samarium2d.json"
+    },
+    "radon222_lp_aps": {
+      "filename": "chemical_elements/radon/radon222_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "radon",
+      "units": "count_rate",
+      "displayName": "Radon-222 Count Rate · LP APS",
+      "stac": "lunar_prospector/aps/radon222/radon222.json"
+    },
+    "potassium_lp_grs": {
+      "filename": "chemical_elements/potassium/potassium2d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "potassium",
+      "units": "ppm",
+      "displayName": "Potassium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/2deg/potassium/potassium2d.json",
+      "variants": [
+        {
+          "label": "2°",
+          "filename": "chemical_elements/potassium/potassium2d_COG.tif",
+          "stac": "lunar_prospector/grs/2deg/potassium/potassium2d.json"
+        },
+        {
+          "label": "5°",
+          "filename": "chemical_elements/potassium/potassium5d_COG.tif",
+          "stac": "lunar_prospector/grs/5deg/potassium/potassium5d.json"
+        }
+      ]
+    },
+    "polonium210_lp_aps": {
+      "filename": "chemical_elements/polonium/polonium210_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "polonium",
+      "units": "count_rate",
+      "displayName": "Polonium-210 Count Rate · LP APS",
+      "stac": "lunar_prospector/aps/polonium210/polonium210.json"
+    },
+    "oxygen_lp_grs": {
+      "filename": "chemical_elements/oxygen/oxygen5d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "oxygen",
+      "units": "wt%",
+      "displayName": "Oxygen Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/5deg/oxygen/oxygen5d.json"
+    },
+    "magnesium_lp_grs": {
+      "filename": "chemical_elements/magnesium/magnesium5d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "magnesium",
+      "units": "wt%",
+      "displayName": "Magnesium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/5deg/magnesium/magnesium5d.json"
+    },
+    "iron_lp_grs": {
+      "filename": "chemical_elements/iron/iron5d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "iron",
+      "units": "wt%",
+      "displayName": "Iron Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/5deg/iron/iron5d.json"
+    },
+    "calcium_lp_grs": {
+      "filename": "chemical_elements/calcium/calcium5d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "calcium",
+      "units": "wt%",
+      "displayName": "Calcium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/5deg/calcium/calcium5d.json"
+    },
+    "aluminum_lp_grs": {
+      "filename": "chemical_elements/aluminum/aluminum5d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "aluminum",
+      "units": "wt%",
+      "displayName": "Aluminium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/5deg/aluminum/aluminum5d.json"
     }
   }
 }

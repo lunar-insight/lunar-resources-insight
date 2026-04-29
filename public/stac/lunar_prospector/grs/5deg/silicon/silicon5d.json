@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Silicon 5° Elemental Abundance",
+    "lri:data_use_note": "Silicon elemental abundance (wt%) from LP GRS at 5° resolution (~150 km). Ubiquitous in lunar regolith (~20 wt%); useful as a context layer for bulk regolith composition.",
     "mission": "Lunar Prospector",
     "instruments": [
       "Gamma Ray Spectrometer"

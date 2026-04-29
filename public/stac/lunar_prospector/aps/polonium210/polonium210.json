@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-01-03T00:00:00Z",
     "title": "LP APS Polonium-210 Relative Count Rate",
+    "lri:data_use_note": "²¹⁰Po relative count rate from the LP Alpha Particle Spectrometer. Polonium-210 is a decay product of radon-222; its distribution traces past radon outgassing and is evidence for recent or ongoing volcanic activity. Distinct from any GRS count rate products.",
     "mission": "Lunar Prospector",
     "instruments": [
       "Alpha Particle Spectrometer"
