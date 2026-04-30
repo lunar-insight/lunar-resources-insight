@@ -25,14 +25,15 @@ OUT_COG="$SCRIPT_DIR/epithermal_wilson_COG.tif"
 COUNT=$(grep -v '^#' "$SRC_TXT" | wc -w)
 [ "$COUNT" -eq 524288 ] || { echo "ERROR: expected 524288 values, got $COUNT"; exit 1; }
 
-# ── Step 2 – Prepend AAIGrid header and strip comments ──────────────────────
-# The epithermal source data is already stored north→south / -180→180 (lon-first),
-# so no V-flip or H-roll is needed (unlike thorium_grs which requires both).
+# ── Step 2 – Prepend AAIGrid header, strip comments, and flip V ─────────────
+# The epithermal source data is stored south→north / -180→180 (lon-first).
+# V-flip corrects the latitude inversion. No H-roll needed (already -180→180).
 python3 -c "
 src='$SRC_TXT'; out='$TMP_ASC'
 with open(src) as f:
     words = [w for l in f if not l.startswith('#') for w in l.split()]
 rows = [words[i*1024:(i+1)*1024] for i in range(512)]
+rows = rows[::-1]                          # V flip: south→north stored → north→south
 hdr = 'ncols        1024\nnrows        512\nxllcorner    -180\nyllcorner    -90\ncellsize     0.3515625\nNODATA_value -9999\n'
 with open(out, 'w') as f:
     f.write(hdr)

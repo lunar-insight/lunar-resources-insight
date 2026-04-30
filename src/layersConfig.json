@@ -185,13 +185,25 @@
       "stac": "lunar_prospector/grs/5deg/magnesium/magnesium5d.json"
     },
     "iron_lp_grs": {
-      "filename": "chemical_elements/iron/iron5d_COG.tif",
+      "filename": "chemical_elements/iron/ironhd_COG.tif",
       "layerType": "raster",
       "category": "chemical",
       "element": "iron",
       "units": "wt%",
       "displayName": "Iron Abundance · LP GRS",
-      "stac": "lunar_prospector/grs/5deg/iron/iron5d.json"
+      "stac": "lunar_prospector/grs/0.5deg/iron/ironhd.json",
+      "variants": [
+        {
+          "label": "0.5°",
+          "filename": "chemical_elements/iron/ironhd_COG.tif",
+          "stac": "lunar_prospector/grs/0.5deg/iron/ironhd.json"
+        },
+        {
+          "label": "5°",
+          "filename": "chemical_elements/iron/iron5d_COG.tif",
+          "stac": "lunar_prospector/grs/5deg/iron/iron5d.json"
+        }
+      ]
     },
     "calcium_lp_grs": {
       "filename": "chemical_elements/calcium/calcium5d_COG.tif",

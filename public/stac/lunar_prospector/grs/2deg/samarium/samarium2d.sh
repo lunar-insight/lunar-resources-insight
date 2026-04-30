@@ -11,16 +11,32 @@
 # Requires  : GDAL >= 3.4, PROJ >= 8.1
 # ============================================================
 
-# Step 1 - Scale raw INT16 → Float32 Sm ug/g
+# Step 1 - Scale raw INT16 → Float32 Sm ug/g; mask clamped noise-floor sentinel (raw -40)
+# Values -39 to -1 are valid GRS counting noise and are kept as-is.
 gdal_calc.py \
   -A samarium2d.vrt \
   --outfile=samarium_scaled.tif \
-  --calc="A/10.0" \
+  --calc="where(A == -40, -9999, A/10.0)" \
   --type=Float32 \
   --NoDataValue=-9999 \
   --overwrite
 
-# Step 2 - Write Cloud Optimised GeoTIFF (north-up: UL=-180,90 LR=180,-90)
+# Step 2 - Mask polar caps (rows 0-37 = lat >+71°, rows 322-359 = lat <-71°)
+# These rows are all-zero in the source binary: no LP GRS coverage, not measured zero abundance.
+python3 -c "
+from osgeo import gdal
+import numpy as np
+ds = gdal.Open('samarium_scaled.tif', gdal.GA_Update)
+band = ds.GetRasterBand(1)
+arr = band.ReadAsArray()
+arr[:38, :] = -9999
+arr[322:, :] = -9999
+band.WriteArray(arr)
+band.SetNoDataValue(-9999)
+ds = None
+"
+
+# Step 3 - Write Cloud Optimised GeoTIFF (VRT reads rows in reverse → already north-up)
 gdal_translate \
   -of COG \
   -a_ullr -180 90 180 -90 \
@@ -32,7 +48,7 @@ gdal_translate \
   samarium_scaled.tif \
   samarium2d_COG.tif
 
-# Step 3 - Remove intermediate file
+# Step 4 - Remove intermediate file
 rm samarium_scaled.tif
 
 echo "Done → samarium2d_COG.tif"

@@ -25,16 +25,16 @@ OUT_COG="$SCRIPT_DIR/thorium_grs_wilson_COG.tif"
 COUNT=$(grep -v '^#' "$SRC_TXT" | wc -w)
 [ "$COUNT" -eq 524288 ] || { echo "ERROR: expected 524288 values, got $COUNT"; exit 1; }
 
-# ── Step 2 – Prepend AAIGrid header, strip comments, and flip 180° ──────────
-# The Wilson 2018 source data is stored south→north / east→west, so reversing
-# all values (equivalent to a 180° rotation) corrects both H and V inversion.
+# ── Step 2 – Prepend AAIGrid header, strip comments, and roll longitude ──────
+# The Wilson 2018 source data is stored north→south / 0°→360° longitude.
+# No V flip is needed (row 0 is already the north pole).
+# H roll by 512 shifts longitude from 0→360° storage to -180→180° convention.
 python3 -c "
 src='$SRC_TXT'; out='$TMP_ASC'
 with open(src) as f:
     words = [w for l in f if not l.startswith('#') for w in l.split()]
 rows = [words[i*1024:(i+1)*1024] for i in range(512)]
-rows = rows[::-1]                          # V flip: south→north stored → north→south
-rows = [r[512:] + r[:512] for r in rows]  # H roll +180°: lon 0→360 stored → -180→180
+rows = [r[512:] + r[:512] for r in rows]  # H roll +180: lon 0-360 stored -> -180-180
 hdr = 'ncols        1024\nnrows        512\nxllcorner    -180\nyllcorner    -90\ncellsize     0.3515625\nNODATA_value -9999\n'
 with open(out, 'w') as f:
     f.write(hdr)
@@ -45,7 +45,7 @@ with open(out, 'w') as f:
 # ── Step 3 – AAIGrid → Cloud Optimised GeoTIFF ──────────────────────────────
 # -a_srs  : assign IAU:30100 (Moon 2015 / Ocentric)
 # -a_ullr : north-up orientation (UL=-180,90  LR=180,-90)
-#           pixel data has already been flipped 180° in Step 2
+#           pixel data is already north-up; Step 2 only rolls longitude
 gdal_translate \
   -of COG \
   -a_srs IAU:30100 \

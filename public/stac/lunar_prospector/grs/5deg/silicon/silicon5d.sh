@@ -20,7 +20,7 @@ gdal_calc.py \
   --NoDataValue=-9999 \
   --overwrite
 
-# Step 2 - Write Cloud Optimised GeoTIFF (north-up: UL=-180,90 LR=180,-90)
+# Step 2 - Write Cloud Optimised GeoTIFF (VRT reads rows in reverse → already north-up)
 gdal_translate \
   -of COG \
   -a_ullr -180 90 180 -90 \

@@ -42,6 +42,7 @@
     "datetime": "2001-07-06T00:00:00Z",
     "title": "LP GRS Samarium 2° Elemental Abundance (low-altitude)",
     "lri:data_use_note": "Samarium abundance in µg/g (equivalent to ppm) from LP GRS at 2° resolution (~60 km), low-altitude phase. Rare earth element elevated in KREEP-rich terrains. Note: µg/g and ppm are equivalent units by mass.",
+    "lri:quality_note_short": "Coverage limited to ~±71° latitude (polar caps masked as NoData). Negative pixel values within the data band are valid GRS counting-noise estimates, not missing data.",
     "mission": "Lunar Prospector",
     "instruments": [
       "Gamma Ray Spectrometer",
@@ -57,7 +58,7 @@
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
-    "processing:lineage": "Raw INT16 binary (samarium2d.dat) scaled ÷10 via gdal_calc.py to obtain Sm ug/g as Float32. Samarium derived from LP neutron and gamma ray spectrometer data (Elphic et al. 2000). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:lineage": "Raw INT16 binary (samarium2d.dat) scaled ÷10 via gdal_calc.py to obtain Sm ug/g as Float32; clamped noise-floor sentinel (raw -40) set to -9999 NoData (values -39 to -1 are valid counting noise and retained). Polar caps beyond ±71° latitude (rows 0–37 and 322–359, all-zero in source binary) set to -9999 NoData via Python/GDAL. Samarium derived from LP neutron and gamma ray spectrometer data (Elphic et al. 2000). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {
       "GDAL": "3.8.4"
     },
