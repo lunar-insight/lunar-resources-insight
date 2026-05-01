@@ -42,6 +42,12 @@ interface LayerContextType {
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
 
+function getLayersByCompound(compoundId: string): string[] {
+  return Object.entries(layersConfig.layers)
+    .filter(([, config]) => config.compound === compoundId)
+    .map(([id]) => id);
+}
+
 class CesiumLayerManager {
 
   private layerMap: Map<string, Cesium.ImageryLayer>;
@@ -412,52 +418,76 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }
 
 
-  const addLayer = useCallback((layer: string, metadata?: DynamicLayerMetadata) => {
-    // Store dynamic metadata if provided
-    if (metadata) {
-      setDynamicLayerMetadata(prev => new Map(prev).set(layer, metadata));
+  const addLayer = useCallback((layerOrCompound: string, metadata?: DynamicLayerMetadata) => {
+    const directConfig = layersConfig.layers[layerOrCompound];
+
+    if (directConfig) {
+      if (metadata) {
+        setDynamicLayerMetadata(prev => new Map(prev).set(layerOrCompound, metadata));
+      }
+      setSelectedLayers(prev => [layerOrCompound, ...prev]);
+      setVisibleLayers(prev => new Set(prev).add(layerOrCompound));
+      if (directConfig.filename) {
+        cesiumManagerRef.current?.addLayer(layerOrCompound);
+      } else {
+        console.log(`Layer ${layerOrCompound} has no COG file. Added to management list only.`);
+      }
+      return;
     }
 
-    setSelectedLayers(prev => [layer, ...prev]);
-    setVisibleLayers(prev => new Set(prev).add(layer));
-
-    // Only add to Cesium if layer has config with filename
-    const layerConfig = layersConfig.layers[layer];
-    if (layerConfig?.filename) {
-      cesiumManagerRef.current?.addLayer(layer);
+    // Resolve compound ID to all matching layer entries
+    const resolvedIds = getLayersByCompound(layerOrCompound);
+    if (resolvedIds.length > 0) {
+      resolvedIds.forEach(layerId => {
+        if (metadata) {
+          setDynamicLayerMetadata(prev => new Map(prev).set(layerId, metadata));
+        }
+        setSelectedLayers(prev => prev.includes(layerId) ? prev : [layerId, ...prev]);
+        setVisibleLayers(prev => new Set(prev).add(layerId));
+        cesiumManagerRef.current?.addLayer(layerId);
+      });
     } else {
-      console.log(`Layer ${layer} has no COG file. Added to management list only.`);
+      // No config and no compound match, ground-data-only entry
+      if (metadata) {
+        setDynamicLayerMetadata(prev => new Map(prev).set(layerOrCompound, metadata));
+      }
+      setSelectedLayers(prev => [layerOrCompound, ...prev]);
+      setVisibleLayers(prev => new Set(prev).add(layerOrCompound));
+      console.log(`Layer ${layerOrCompound} has no COG file. Added to management list only.`);
     }
   }, []);
 
 
-  const removeLayer = useCallback((layer: string) => {
-    // Clean up dynamic metadata
-    setDynamicLayerMetadata(prev => {
-      const newMap = new Map(prev);
-      newMap.delete(layer);
-      return newMap;
-    });
+  const removeLayer = useCallback((layerOrCompound: string) => {
+    const resolved = layersConfig.layers[layerOrCompound]
+      ? [layerOrCompound]
+      : getLayersByCompound(layerOrCompound);
+    const idsToRemove = resolved.length > 0 ? resolved : [layerOrCompound];
 
-    setSelectedLayers(prev => prev.filter(l => l !== layer));
-    setVisibleLayers(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(layer);
-      return newSet;
+    idsToRemove.forEach(layerId => {
+      setDynamicLayerMetadata(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(layerId);
+        return newMap;
+      });
+      setSelectedLayers(prev => prev.filter(l => l !== layerId));
+      setVisibleLayers(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(layerId);
+        return newSet;
+      });
+      setActiveVariants(prev => {
+        const next = new Map(prev);
+        next.delete(layerId);
+        return next;
+      });
+      setSwappingLayers(prev => {
+        const next = new Set(prev);
+        next.delete(layerId);
+        return next;
+      });
+      cesiumManagerRef.current?.removeLayer(layerId);
     });
-    // Prevents stale pill highlight if the layer is re-added later
-    setActiveVariants(prev => {
-      const next = new Map(prev);
-      next.delete(layer);
-      return next;
-    });
-    // Clears any in-progress swap indicator for this layer
-    setSwappingLayers(prev => {
-      const next = new Set(prev);
-      next.delete(layer);
-      return next;
-    });
-    cesiumManagerRef.current?.removeLayer(layer);
   }, []);
 
 

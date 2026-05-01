@@ -29,6 +29,7 @@ export type LayerConfig = {
   filename: string;
   category: string;
   element?: string;
+  compound?: string;
   units?: string;
   displayName?: string;
   available?: boolean;
