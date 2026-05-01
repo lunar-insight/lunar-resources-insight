@@ -1,19 +1,28 @@
-import React, { useState, useMemo, useCallback } from "react";
-import { ListBox, ListBoxItem, Text, Selection } from 'react-aria-components';
+import React, { useMemo, useCallback } from "react";
+import { ListBox, ListBoxItem, Text, Selection, Key } from 'react-aria-components';
 import { useLayerContext } from 'utils/context/LayerContext';
+import { getLayersByCompound } from 'geoConfigExporter';
 import { DataSourceBadge } from 'components/ui/DataSourceBadge/DataSourceBadge';
 import { DataSourceLegend } from 'components/ui/DataSourceLegend/DataSourceLegend';
 import InfoButton from 'components/layout/Button/InfoButton/InfoButton';
-import { COMPOUNDS, COMPOUND_LAYER_MAP, CATEGORY_INFO, DISABLED_COMPOUND_KEYS, Compound } from './data';
+import { COMPOUNDS, COMPOUND_LAYER_MAP, CATEGORY_INFO, Compound } from './data';
 import styles from './Compound.module.scss';
 
 export interface CompoundProps {
   // Placeholder (onCompoundSelect callback for map integration)
 }
 
+const DISABLED_COMPOUND_KEYS = new Set(
+  COMPOUNDS
+    .filter(c => {
+      const layerInfo = COMPOUND_LAYER_MAP[c.id];
+      return !layerInfo || getLayersByCompound(layerInfo.id).length === 0;
+    })
+    .map(c => c.id)
+);
+
 const CompoundComponent: React.FC<CompoundProps> = () => {
-  const [selectedCompounds, setSelectedCompounds] = useState<Selection>(new Set());
-  const { addLayer, removeLayer } = useLayerContext();
+  const { selectedLayers, addLayer, removeLayer } = useLayerContext();
 
   // Group compounds by category
   const iceCompounds = useMemo(
@@ -29,36 +38,44 @@ const CompoundComponent: React.FC<CompoundProps> = () => {
     []
   );
 
+  // Derive selected state from context so it persists across modal open/close
+  const selectedCompounds = useMemo((): Selection => {
+    const selected = new Set<Key>();
+    COMPOUNDS.forEach(compound => {
+      const layerInfo = COMPOUND_LAYER_MAP[compound.id];
+      if (layerInfo) {
+        const resolvedIds = getLayersByCompound(layerInfo.id);
+        if (resolvedIds.length > 0 && resolvedIds.some(id => selectedLayers.includes(id))) {
+          selected.add(compound.id);
+        }
+      }
+    });
+    return selected;
+  }, [selectedLayers]);
+
   // Selection handler
   const handleCompoundSelection = useCallback((keys: Selection) => {
-    setSelectedCompounds(prevSelectedCompounds => {
-      const oldCompounds = new Set(prevSelectedCompounds);
-      const newCompounds = new Set(keys);
+    const newCompounds = keys === 'all' ? new Set<string>() : new Set(keys as Set<string>);
+    const currentCompounds = selectedCompounds === 'all'
+      ? new Set<string>()
+      : new Set(selectedCompounds as Set<string>);
 
-      // Add newly selected compounds with metadata
-      newCompounds.forEach(compoundId => {
-        if (!oldCompounds.has(compoundId)) {
-          const layerInfo = COMPOUND_LAYER_MAP[compoundId as string];
-          if (layerInfo) {
-            addLayer(layerInfo.id, {
-              displayName: layerInfo.displayName,
-              category: 'compound'
-            });
-          }
+    newCompounds.forEach(compoundId => {
+      if (!currentCompounds.has(compoundId as string)) {
+        const layerInfo = COMPOUND_LAYER_MAP[compoundId as string];
+        if (layerInfo) {
+          addLayer(layerInfo.id, { displayName: layerInfo.displayName, category: 'compound' });
         }
-      });
-
-      // Remove deselected compounds
-      oldCompounds.forEach(compoundId => {
-        if (!newCompounds.has(compoundId)) {
-          const layerInfo = COMPOUND_LAYER_MAP[compoundId as string];
-          if (layerInfo) removeLayer(layerInfo.id);
-        }
-      });
-
-      return keys;
+      }
     });
-  }, [addLayer, removeLayer]);
+
+    currentCompounds.forEach(compoundId => {
+      if (!newCompounds.has(compoundId)) {
+        const layerInfo = COMPOUND_LAYER_MAP[compoundId];
+        if (layerInfo) removeLayer(layerInfo.id);
+      }
+    });
+  }, [selectedCompounds, addLayer, removeLayer]);
 
   // Compound item renderer
   const renderCompoundItem = useCallback((compound: Compound) => {

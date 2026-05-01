@@ -69,4 +69,3 @@ export const CATEGORY_INFO = {
   }
 };
 
-export const DISABLED_COMPOUND_KEYS = new Set(['H₂']);

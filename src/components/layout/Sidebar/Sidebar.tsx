@@ -63,6 +63,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
       displayName: config?.displayName || dynamicMeta?.displayName || layerId,
       category: config?.category || dynamicMeta?.category,
       element: config?.element || dynamicMeta?.element,
+      compound: config?.compound,
       isFirstOfNewCategory
     };
   });
@@ -183,6 +184,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
                 layerId={layerId}
                 category={item.category}
                 element={item.element}
+                compound={item.compound}
                 isFirstOfNewCategory={item.isFirstOfNewCategory}
                 accordionContent={
                   <div className={styles.accordionContent}>

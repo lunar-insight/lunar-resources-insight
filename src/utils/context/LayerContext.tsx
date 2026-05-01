@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useRef, useCallback, useMemo } from 'react';
 import { useViewer } from './ViewerContext';
 import * as Cesium from 'cesium';
-import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics } from 'geoConfigExporter';
+import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics, getLayersByCompound } from 'geoConfigExporter';
 import { colormapService } from 'services/ColormapService';
 import { layerStatsService } from 'services/LayerStatsService';
 import { pointValueService } from 'services/PointValueService';
@@ -41,12 +41,6 @@ interface LayerContextType {
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
-
-function getLayersByCompound(compoundId: string): string[] {
-  return Object.entries(layersConfig.layers)
-    .filter(([, config]) => config.compound === compoundId)
-    .map(([id]) => id);
-}
 
 class CesiumLayerManager {
 

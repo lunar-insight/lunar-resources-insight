@@ -1,4 +1,4 @@
-import React, {ReactNode, useState } from 'react';
+import React, { ReactNode } from 'react';
 import {
   GridListItemProps, GridListProps,
   Button, GridList, GridListItem, useDragAndDrop,
@@ -8,7 +8,7 @@ import styles from './GridListLayerComponent.module.scss';
 import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
 import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox/LayerVisibilityCheckbox';
 import { useLayerContext } from 'utils/context/LayerContext';
-import { elementToAccentColor, elementToSymbol } from 'utils/colorUtils';
+import { elementToAccentColor, elementToSymbol, compoundToAccentColor, compoundToFormula } from 'utils/colorUtils';
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
   items: T[];
@@ -23,6 +23,7 @@ interface GridListLayerItemProps<T> extends Omit<GridListItemProps, 'children'> 
   onRemove?: () => void;
   category?: string;
   element?: string;
+  compound?: string;
   isFirstOfNewCategory?: boolean;
 }
 
@@ -122,13 +123,29 @@ export function GridListLayerItem<T extends { id: string | number }>({
   textValue,
   category,
   element,
+  compound,
   isFirstOfNewCategory,
   ...props
 }: GridListLayerItemProps<T> & { textValue: string; layerId: string }) {
   const { visibleLayers, toggleLayerVisibility } = useLayerContext();
 
-  // Ensure textValue is always a valid string for drag and drop to work
   const effectiveTextValue = textValue || (typeof children === 'string' ? children : String(layerId));
+
+  const accentColor = element
+    ? elementToAccentColor(element)
+    : compound
+      ? compoundToAccentColor(compound)
+      : undefined;
+
+  const badge = element ? (
+    <span className={styles.elBadge} aria-label={element}>
+      {elementToSymbol(element)}
+    </span>
+  ) : compound ? (
+    <span className={styles.elBadge} aria-label={compound}>
+      {compoundToFormula(compound)}
+    </span>
+  ) : null;
 
   return (
     <GridListItem
@@ -136,8 +153,9 @@ export function GridListLayerItem<T extends { id: string | number }>({
       className={styles.gridListItem}
       data-category={category}
       data-element={element ?? undefined}
+      data-compound={compound ?? undefined}
       data-first-of-category={isFirstOfNewCategory ? "true" : "false"}
-      style={element ? { '--el-accent-color': elementToAccentColor(element) } as React.CSSProperties : undefined}
+      style={accentColor ? { '--el-accent-color': accentColor } as React.CSSProperties : undefined}
       {...props}
     >
       {() => (
@@ -147,7 +165,6 @@ export function GridListLayerItem<T extends { id: string | number }>({
           </Button>
 
           {accordionContent ? (
-            // With disclosure/accordion content
             <Disclosure className={styles.disclosure}>
               {({ isExpanded }) => (
                 <>
@@ -157,11 +174,7 @@ export function GridListLayerItem<T extends { id: string | number }>({
                       onChange={() => toggleLayerVisibility(layerId)}
                     />
 
-                    {element && (
-                      <span className={styles.elBadge} aria-label={element}>
-                        {elementToSymbol(element)}
-                      </span>
-                    )}
+                    {badge}
 
                     <div
                       className={styles.gridListItemHeaderItemText}
@@ -208,11 +221,7 @@ export function GridListLayerItem<T extends { id: string | number }>({
                 onChange={() => toggleLayerVisibility(layerId)}
               />
 
-              {element && (
-                <span className={styles.elBadge} aria-label={element}>
-                  {elementToSymbol(element)}
-                </span>
-              )}
+              {badge}
 
               <div
                 className={styles.gridListItemHeaderItemText}

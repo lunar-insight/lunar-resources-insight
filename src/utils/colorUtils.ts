@@ -77,6 +77,22 @@ export function elementToAccentColor(elementName: string): string {
   return `hsl(${hue}, 70%, 62%)`;
 }
 
+const COMPOUND_FORMULAS: Record<string, string> = {
+  feo: 'FeO', h2o: 'H₂O', tio2: 'TiO₂', al2o3: 'Al₂O₃',
+  mgo: 'MgO', cao: 'CaO', sio2: 'SiO₂', co2: 'CO₂',
+  nh3: 'NH₃', ch4: 'CH₄', so2: 'SO₂', h2s: 'H₂S',
+  c2h4: 'C₂H₄', ch3oh: 'CH₃OH', co: 'CO', h2: 'H₂',
+};
+
+export function compoundToFormula(compoundId: string): string {
+  return COMPOUND_FORMULAS[compoundId.toLowerCase()] ?? compoundId.toUpperCase();
+}
+
+export function compoundToAccentColor(compoundId: string): string {
+  const hue = (djb2Hash(compoundId.toLowerCase()) + 180) % 360;
+  return `hsl(${hue}, 70%, 62%)`;
+}
+
 export function elementToSymbol(elementName: string): string {
   const name = elementName.toLowerCase();
   return ELEMENT_SYMBOLS[name]

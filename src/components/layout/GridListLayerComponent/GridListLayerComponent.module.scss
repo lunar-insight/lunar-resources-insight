@@ -88,8 +88,9 @@ $heading-item-min-height: 3rem;
     border-bottom: none;
   }
 
-  // Element accent — left border using per-element color set as CSS custom property
-  &[data-element] {
+  // Element/compound accent — left border using per-layer color set as CSS custom property
+  &[data-element],
+  &[data-compound] {
     &::before {
       content: '';
       position: absolute;

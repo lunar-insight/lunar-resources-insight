@@ -90,6 +90,12 @@ export interface CogStatistics {
 import layersConfigJson from './layersConfig.json';
 export const layersConfig: LayersConfig = layersConfigJson as LayersConfig;
 
+export function getLayersByCompound(compoundId: string): string[] {
+  return Object.entries(layersConfig.layers)
+    .filter(([, config]) => config.compound === compoundId)
+    .map(([id]) => id);
+}
+
 export function buildCogTileUrl(filename: string, options: {
   colormap?: string;
   rescale?: [number, number];
