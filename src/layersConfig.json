@@ -127,6 +127,15 @@
       "displayName": "Samarium Abundance · LP GRS",
       "stac": "lunar_prospector/grs/2deg/samarium/samarium2d.json"
     },
+    "gadolinium_lp_grs": {
+      "filename": "chemical_elements/gadolinium/gadolinium2d_COG.tif",
+      "layerType": "raster",
+      "category": "chemical",
+      "element": "gadolinium",
+      "units": "ppm",
+      "displayName": "Gadolinium Abundance · LP GRS",
+      "stac": "lunar_prospector/grs/2deg/gadolinium/gadolinium2d.json"
+    },
     "radon222_lp_aps": {
       "filename": "chemical_elements/radon/radon222_COG.tif",
       "layerType": "raster",
