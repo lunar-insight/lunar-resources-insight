@@ -19,36 +19,7 @@ if (!workspacePath) {
   throw new Error('VITE_WORKSPACE_PATH is not defined in environment variables.');
 }
 
-export type LayerVariant = {
-  label: string; // Pill label, e.g. "0.5° low-alt"
-  filename: string; // COG path, same format as LayerConfig.filename
-  stac: string; // Path relative to public/stac/, used to fetch metadata
-}
-
-export type LayerConfig = {
-  filename: string;
-  category: string;
-  element?: string;
-  compound?: string;
-  units?: string;
-  displayName?: string;
-  available?: boolean;
-  stac?: string;
-  variants?: LayerVariant[];
-  layerType?: 'raster' | 'point';
-  metadata?: {
-    source?: string;
-    resolution?: string;
-    [key: string]: any;
-  };
-  [key: string]: any;
-};
-
-export type LayersConfig = {
-  layers: {
-    [layerId: string]: LayerConfig;
-  }
-}
+export type { LayerVariant, LayerConfig, LayersConfig } from './types/layers';
 
 export interface CogBandStatistics {
   min: number;
@@ -87,8 +58,8 @@ export interface CogStatistics {
   histogram?: [number[], number[]];
 }
 
-import layersConfigJson from './layersConfig.json';
-export const layersConfig: LayersConfig = layersConfigJson as LayersConfig;
+import { layersConfig } from './layersConfig';
+export { layersConfig };
 
 export function getLayersByCompound(compoundId: string): string[] {
   return Object.entries(layersConfig.layers)
