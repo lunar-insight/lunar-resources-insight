@@ -1,0 +1,121 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "lp-gadolinium-2deg",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -180,
+          -90
+        ],
+        [
+          180,
+          -90
+        ],
+        [
+          180,
+          90
+        ],
+        [
+          -180,
+          90
+        ],
+        [
+          -180,
+          -90
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -180,
+    -90,
+    180,
+    90
+  ],
+  "properties": {
+    "datetime": "2001-07-06T00:00:00Z",
+    "title": "LP GRS/NS Gadolinium 2° Elemental Abundance (low-altitude)",
+    "lri:data_use_note": "Gadolinium abundance in µg/g (equivalent to ppm) derived by multiplying the LP Samarium map by 1.17 — the mean Gd/Sm ratio in Apollo mafic impact melt breccias (Korotev 2000). Gd and Sm are co-derived from the same LP neutron spectrometer measurement (excess neutron absorption AΣeff); neither element can be independently resolved without this geochemical ratio as a constraint. Elevated in KREEP-rich terrains.",
+    "lri:quality_note_short": "Coverage limited to ~±71° latitude (polar caps masked as NoData). Negative pixel values within the data band are propagated from Sm counting-noise estimates, not missing data. The 1.17 Gd/Sm ratio is an approximation based on returned samples; the ratio varies between ~1.13 and ~1.38 across Apollo and Luna sites.",
+    "mission": "Lunar Prospector",
+    "instruments": [
+      "Gamma Ray Spectrometer",
+      "Neutron Spectrometer"
+    ],
+    "platform": "lunar-prospector",
+    "element": "Gd",
+    "units": "ug/g",
+    "grid_size_deg": 2.0,
+    "grid_size_km": 60,
+    "altitude_phase": "low-altitude",
+    "observation_period_start": "1998-01-16",
+    "observation_period_end": "1999-07-31",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
+    "processing:lineage": "Derived from lp-samarium-2deg COG (samarium2d_COG.tif) by multiplying each valid pixel by 1.17 (mean Gd/Sm ratio from Apollo mafic impact melt breccias, Korotev 2000). NoData sentinel (-9999) propagated unchanged. No independent Gd binary exists in the PDS archive — the LP neutron spectrometer measures combined Gd+Sm absorption (AΣeff) and cannot resolve the two elements separately; the 1.17 ratio is the required constraint (Elphic et al. 2000). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.8.4"
+    },
+    "processing:level": "L3"
+  },
+  "assets": {
+    "data": {
+      "href": "gadolinium2d_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Gd ug/g COG - IAU:30100",
+      "roles": [
+        "data"
+      ]
+    },
+    "processing_script": {
+      "href": "gadolinium2d.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./gadolinium2d.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "derived_from",
+      "href": "../samarium/samarium2d.json",
+      "type": "application/json",
+      "title": "LP Samarium 2° item — direct source for Gd = Sm × 1.17"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
+      "type": "text/html",
+      "title": "PDS source — samarium2d.dat, version July 6, 2001 (ultimate source)"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1029/1999JE001176",
+      "title": "Elphic et al. 2000, JGR — Lunar rare earth element distribution (Sm/Gd methodology)"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1029/1999JE001063",
+      "title": "Korotev 2000, JGR — Apollo mafic impact melt breccias (cited by Elphic et al. 2000 as basis for Gd/Sm ≈ 1.17)"
+    }
+  ]
+}
