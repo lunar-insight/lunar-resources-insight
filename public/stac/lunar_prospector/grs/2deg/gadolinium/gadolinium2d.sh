@@ -20,7 +20,7 @@
 gdal_calc.py \
   -A ../samarium/samarium2d_COG.tif \
   --outfile=gadolinium_scaled.tif \
-  --calc="where(A == -9999, -9999, A * 1.17)" \
+  --calc="where(A == -9999, -9999, where(A < 0, A, A * 1.17))" \
   --type=Float32 \
   --NoDataValue=-9999 \
   --overwrite

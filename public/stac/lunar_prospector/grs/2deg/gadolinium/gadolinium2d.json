@@ -57,7 +57,7 @@
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
-    "processing:lineage": "Derived from lp-samarium-2deg COG (samarium2d_COG.tif) by multiplying each valid pixel by 1.17 (mean Gd/Sm ratio from Apollo mafic impact melt breccias, Korotev 2000). NoData sentinel (-9999) propagated unchanged. No independent Gd binary exists in the PDS archive — the LP neutron spectrometer measures combined Gd+Sm absorption (AΣeff) and cannot resolve the two elements separately; the 1.17 ratio is the required constraint (Elphic et al. 2000). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:lineage": "Derived from lp-samarium-2deg COG (samarium2d_COG.tif) by applying Gd = Sm × 1.17 (mean Gd/Sm ratio from Apollo mafic impact melt breccias, Korotev 2000) to positive pixels only. Negative pixels (counting-noise artefacts inherited from Sm) and the NoData sentinel (-9999) are propagated unchanged. No independent Gd binary exists in the PDS archive — the LP neutron spectrometer measures combined Gd+Sm absorption (AΣeff) and cannot resolve the two elements separately; the 1.17 ratio is the required constraint (Elphic et al. 2000). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
     "processing:software": {
       "GDAL": "3.8.4"
     },
