@@ -1,69 +1,68 @@
 .buttonsContainer {
   display: flex;
-  flex-direction: row;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
   width: 100%;
-  height: 4rem;
 }
 
-.openPeriodicTableButton {
+.buttonGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sectionButton {
   height: 4rem;
   min-height: 4rem;
-  max-height: 4rem;
-  flex: 1;
+  flex-shrink: 0;
+  width: 12rem;
+  white-space: normal;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-color: var(--color-neutral);
+  background-blend-mode: overlay;
+  border-radius: 0.25rem;
+  border-width: 0.0625rem;
+  border-color: var(--color-tertiary);
+  cursor: pointer;
+  color: var(--color-neutralVariant);
+  font-size: 1rem;
+  transition: background-size 0.3s ease-out, box-shadow 0.3s ease-out, font-size 0.3s ease-out;
+
+  &[data-hovered] {
+    background-color: var(--color-quaternary);
+    background-size: 110% 110%;
+    box-shadow: inset 0 0 10px 1px var(--color-tertiary);
+  }
+
+  &[data-pressed] {
+    background-color: var(--color-dark-intermediary);
+  }
+}
+
+.periodicTableButton {
   background-image: url('../../../assets/images/button/periodic-table-element.jpg');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: var(--color-neutral);
-  background-blend-mode: overlay;
-  border-radius: 0.25rem;
-  border-width: 0.0625rem;
-  border-color: var(--color-tertiary);
-  cursor: pointer;
-  color: var(--color-neutralVariant);
-  font-size: 1rem;
-  transition: background-size 0.3s ease-out, box-shadow 0.3s ease-out, font-size 0.3s ease-out;
-
-  &[data-hovered] {
-    background-color: var(--color-quaternary);
-    background-size: 110% 110%;
-    box-shadow: inset 0 0 10px 1px var(--color-tertiary);
-  }
-
-  &[data-pressed] {
-    background-color: var(--color-dark-intermediary);
-  }
 }
 
-.openCompoundButton {
-  height: 4rem;
-  min-height: 4rem;
-  max-height: 4rem;
-  flex: 1;
+.compoundButton {
   background-image: url('../../../assets/images/button/chemistry-compound.jpg');
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-color: var(--color-neutral);
-  background-blend-mode: overlay;
-  border-radius: 0.25rem;
-  border-width: 0.0625rem;
-  border-color: var(--color-tertiary);
-  cursor: pointer;
+}
+
+.derivedIndicesButton {
+  background-image: url('../../../assets/images/button/derived-indice.jpg');
+}
+
+.buttonDescription {
+  flex: 1;
+  min-width: 0;
+  max-width: 15rem;
+  font-size: 0.6875rem;
   color: var(--color-neutralVariant);
-  font-size: 1rem;
-  transition: background-size 0.3s ease-out, box-shadow 0.3s ease-out, font-size 0.3s ease-out;
-
-  &[data-hovered] {
-    background-color: var(--color-quaternary);
-    background-size: 110% 110%;
-    box-shadow: inset 0 0 10px 1px var(--color-tertiary);
-  }
-
-  &[data-pressed] {
-    background-color: var(--color-dark-intermediary);
-  }
+  opacity: 0.75;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .accordionContent {

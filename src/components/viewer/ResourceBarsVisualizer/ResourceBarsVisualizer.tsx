@@ -33,6 +33,7 @@ export interface NodataResourceData {
 
 interface ResourceBarsVisalizerProps {
   values: { [key: string]: number };
+  allValues?: { [key: string]: number };
   nodataLayerIds?: string[];
   width?: number;
   height?: number;

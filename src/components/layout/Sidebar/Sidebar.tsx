@@ -13,6 +13,7 @@ import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import CloseButton from '../Button/CloseButton/CloseButton';
 import { VariantSelector } from 'components/ui/VariantSelector/VariantSelector';
 import { useLayerBulkVisibility } from './useLayerBulkVisibility';
+import { DERIVED_INDEX_BY_LAYER_ID } from 'components/navigation/submenu/DerivedIndices/data';
 import styles from './Sidebar.module.scss';
 
 interface SidebarProps {
@@ -190,6 +191,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
                   <div className={styles.accordionContent}>
                     <VariantSelector layerId={layerId} />
                     <LayerGradientSelect layerId={layerId}/>
+
+                    {(() => {
+                      const labels = layersConfig.layers[layerId]?.isDerivedIndex
+                        ? DERIVED_INDEX_BY_LAYER_ID[layerId]
+                        : undefined;
+                      if (!labels) return null;
+                      return (
+                        <div className={styles.interpretationBar}>
+                          <span className={styles.interpretationLabel}>{labels.lowLabel}</span>
+                          <span className={styles.interpretationArrow}>{'◄' + '─'.repeat(20) + '►'}</span>
+                          <span className={styles.interpretationLabel}>{labels.highLabel}</span>
+                        </div>
+                      );
+                    })()}
 
                     <div className={styles.rampContainer}>
                       {stats.loaded ? (

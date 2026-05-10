@@ -230,6 +230,19 @@ export const layersConfig: LayersConfig = {
       units: "wt%",
       displayName: "Aluminium Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/aluminum/aluminum5d.json"
+    },
+    mg_number: {
+      filename: "derived/mg_number/mg_number_COG.tif",
+      layerType: "raster",
+      category: "derived-index",
+      displayName: "Mg# Magnesium Number",
+      isDerivedIndex: true,
+      units: "Mg# (0 to 100)",
+      metadata: {
+        source: "Clementine UVVIS + CNN model",
+        resolution: "100m/pixel",
+        description: "Magnesium Number derived from CNN-predicted MgO and FeO maps"
+      }
     }
   }
 } satisfies LayersConfig;

@@ -12,6 +12,7 @@ export type LayerConfig = {
   compound?: string;
   units?: string;
   available?: boolean;
+  isDerivedIndex?: boolean;
   stac?: string;
   layerType?: 'raster' | 'point';
   variants?: LayerVariant[];

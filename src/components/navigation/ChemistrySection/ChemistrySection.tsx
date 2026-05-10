@@ -5,6 +5,7 @@ import ModalOverlayContainer from 'components/layout/ModalOverlayContainer/Modal
 import PeriodicTable, { ALL_ELEMENTS_FLAT } from '../submenu/PeriodicTable/PeriodicTable';
 import { Element } from 'constants/periodicTableData';
 import Compound from '../submenu/Compound/Compound';
+import DerivedIndices from '../submenu/DerivedIndices/DerivedIndices';
 import { useLayerContext } from 'utils/context/LayerContext';
 import { layersConfig } from 'geoConfigExporter';
 import { FeatureCheckbox } from 'components/layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
@@ -20,6 +21,7 @@ import { useZIndex } from 'utils/ZIndexProvider';
 const ChemistrySection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCompoundModalOpen, setIsCompoundModalOpen] = useState(false);
+  const [isDerivedIndicesModalOpen, setIsDerivedIndicesModalOpen] = useState(false);
   const [showValueBox, setShowValueBox] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
@@ -109,6 +111,16 @@ const ChemistrySection: React.FC = () => {
     unregisterModal('compound-modal');
   }
 
+  const handleOpenDerivedIndices = () => {
+    setIsDerivedIndicesModalOpen(true);
+    registerModal('derived-indices-modal');
+  };
+
+  const handleCloseDerivedIndices = () => {
+    setIsDerivedIndicesModalOpen(false);
+    unregisterModal('derived-indices-modal');
+  };
+
   const handleElementSelection = (element: Element) => {
     const elementName = element.name.toLowerCase();
     const availableLayers = Object.entries(layersConfig.layers)
@@ -175,19 +187,41 @@ const ChemistrySection: React.FC = () => {
   return (
     <>
       <div className={styles.buttonsContainer}>
-        <Button
-          className={styles.openPeriodicTableButton}
-          onPress={handleOpenPeriodicTable}
-        >
-          Open Periodic Table
-        </Button>
+        <div className={styles.buttonGroup}>
+          <Button
+            className={`${styles.sectionButton} ${styles.periodicTableButton}`}
+            onPress={handleOpenPeriodicTable}
+          >
+            Periodic Table
+          </Button>
+          <p className={styles.buttonDescription}>
+            Select chemical elements to overlay their surface abundance maps on the Moon.
+          </p>
+        </div>
 
-        <Button
-          className={styles.openCompoundButton}
-          onPress={handleOpenCompound}
-        >
-          Open Compound
-        </Button>
+        <div className={styles.buttonGroup}>
+          <Button
+            className={`${styles.sectionButton} ${styles.compoundButton}`}
+            onPress={handleOpenCompound}
+          >
+            Compound
+          </Button>
+          <p className={styles.buttonDescription}>
+            A compound is a substance formed when two or more elements chemically bond. Explore how they appear as minerals in the lunar regolith.
+          </p>
+        </div>
+
+        <div className={styles.buttonGroup}>
+          <Button
+            className={`${styles.sectionButton} ${styles.derivedIndicesButton}`}
+            onPress={handleOpenDerivedIndices}
+          >
+            Derived Indices
+          </Button>
+          <p className={styles.buttonDescription}>
+            Ratios computed from oxide maps that highlight terrain types. Each index condenses multiple element layers into one.
+          </p>
+        </div>
       </div>
 
       {selectedElements.size > 0 && (
@@ -234,6 +268,15 @@ const ChemistrySection: React.FC = () => {
         modalId='compound-modal'
       >
         <Compound />
+      </ModalOverlayContainer>
+
+      <ModalOverlayContainer
+        isOpen={isDerivedIndicesModalOpen}
+        onOpenChange={handleCloseDerivedIndices}
+        title='Derived Indices'
+        modalId='derived-indices-modal'
+      >
+        <DerivedIndices />
       </ModalOverlayContainer>
     </>
   );
