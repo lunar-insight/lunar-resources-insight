@@ -1,0 +1,80 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "clementine-feo-cnn-qiu2025",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2025-10-14T00:00:00Z",
+    "title": "FeO Abundance · Clementine 1D-CNN (Qiu et al., 2025)",
+    "mission": "Clementine",
+    "instruments": ["UVVIS"],
+    "platform": "clementine",
+    "compound": "FeO",
+    "units": "wt%",
+    "spatial_resolution_m": 100,
+    "observation_period_start": "1994-02-19",
+    "observation_period_end": "1994-05-03",
+    "doi": "10.1038/s43247-025-02914-w",
+    "authors": "Denggao Qiu, Jianguo Yan, Bin Liu",
+    "publication_date": "2025-10-14",
+    "processing:level": "L4",
+    "processing:lineage": "Clementine UVVIS DIM Mosaic (5 bands: 415, 750, 900, 950, 1000 nm, 100 m/pixel) combined with OMAT as a 6-element input vector. 1D CNN: two Conv1D layers (32 filters, kernel=2, ReLU), MaxPooling1D (pool=2), Dense(64, ReLU), single linear output. L2 regularization (0.001) on all layers. Adam optimizer (lr=0.01), max 400 epochs, early stopping (patience=30), z-score normalization. Trained on 49 ground-truth points from Apollo, Luna, and Chang'E missions including Chang'E-6 (first farside samples). R²=0.96+ on training set; LOOCV R²=0.897.",
+    "loocv_r2": 0.897,
+    "global_mean_wt_pct": 8.48,
+    "maria_mean_wt_pct": 17.71,
+    "non_maria_mean_wt_pct": 6.66,
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "High-resolution FeO abundance at 100 m/pixel — 600× finer than LP GRS (60 km). Primary indicator for iron-rich basaltic maria. Combined with TiO₂ identifies ilmenite-rich zones (FeTiO₃), the leading ISRU target for oxygen and metal extraction. CNN model outperforms classical equation approaches in high-FeO regions (>24 wt%), confirmed by LP GRS and Chang'E-5 sample measurements.",
+    "lri:quality_note_short": "1D CNN inversion from Clementine UVVIS, calibrated with Chang'E-6 samples. LOOCV R²=0.897. Global mean 8.48 wt%; maria 17.71 wt%. Higher accuracy than classical equation model in high-FeO regions (>24 wt%), consistent with LP GRS observations.",
+    "lri:quality_note": "FeO abundance derived from 1D CNN inversion of Clementine UVVIS 5-band reflectance (Qiu et al. 2025, Communications Earth & Environment). The model uses 49 ground-truth samples including the first farside samples from Chang'E-6, providing a calibration point previously unavailable for the lunar far side. LOOCV R²=0.897, RMSE=1.37 wt% (leave-one-out cross-validation). Global mean 8.48 wt%, unimodal distribution with mode 5.28 wt% — consistent with LP GRS global measurement of 4.7 wt%. CNN FeO estimates are ~0.25 wt% higher globally than the companion equation model, and ~0.88 wt% higher in maria. The CNN model captures nonlinear reflectance-composition relationships missed by classical equations, yielding more accurate estimates in high-FeO maria such as Oceanus Procellarum (CNN: >24 wt%; Equation: ~21 wt%), consistent with LP GRS and Chang'E-5 sample measurements (FeO: 24.7 wt%). High-FeO material (>15 wt%) in the lunar south polar region (>65°S) is identified in basin floors, crater walls, and central peaks — the first FeO mapping with full polar coverage beyond 65°. Key limitation: ground truth remains sparse at high latitudes; calibration is extrapolated from mid-to-low latitude sample sites."
+  },
+  "assets": {
+    "data": {
+      "href": "feo_clementine_cnn_qiu2025_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "FeO wt% · Clementine CNN — IAU:30100",
+      "roles": ["data"]
+    },
+    "zenodo_record": {
+      "href": "https://zenodo.org/records/15742746",
+      "type": "text/html",
+      "title": "Zenodo record — download source GeoTIFF",
+      "roles": ["source"]
+    },
+    "processing_script": {
+      "href": "../process_qiu2025.sh",
+      "type": "application/x-sh",
+      "title": "Processing commands used to generate the COG (shared for all Qiu 2025 items)",
+      "roles": ["metadata", "reproducibility"]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./feo_clementine_cnn_qiu2025.json" },
+    { "rel": "root",   "href": "../../../catalog.json" },
+    { "rel": "parent", "href": "../collection.json" },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1038/s43247-025-02914-w",
+      "title": "Qiu et al. 2025 — Communications Earth & Environment"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://pdsimage2.wr.usgs.gov/Clementine/PDS4/data/",
+      "type": "text/html",
+      "title": "Clementine UVVIS DIM Mosaic (PDS4)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../../lunar_prospector/grs/0.5deg/iron/ironhd.json",
+      "type": "application/json",
+      "title": "LP GRS FeO 0.5° — alternative FeO product from gamma-ray spectroscopy (~15 km resolution)"
+    }
+  ]
+}

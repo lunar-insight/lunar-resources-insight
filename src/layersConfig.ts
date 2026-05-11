@@ -2,6 +2,11 @@ import type { LayersConfig } from './types/layers';
 
 export const layersConfig: LayersConfig = {
   layers: {
+    /*
+      ------------------
+      Geographical layer
+      ------------------
+    */
     geological_global: {
       filename: "geographical/geology_moon_cog.tif",
       category: "geographical",
@@ -34,6 +39,11 @@ export const layersConfig: LayersConfig = {
         description: "Surface slope derived from LOLA data"
       }
     },
+    /*
+      -----------------
+      Chemical elements
+      -----------------
+    */
     hydrogen_lawrence2022: {
       filename: "chemical_elements/hydrogen/hydrogen_abundance_lawrence_COG.tif",
       layerType: "raster",
@@ -195,15 +205,6 @@ export const layersConfig: LayersConfig = {
       displayName: "Magnesium Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/magnesium/magnesium5d.json"
     },
-    feo_lp_grs: {
-      filename: "compounds/feo/ironhd_COG.tif",
-      layerType: "raster",
-      category: "compound",
-      compound: "feo",
-      units: "wt% FeO",
-      displayName: "FeO Abundance · LP GRS",
-      stac: "lunar_prospector/grs/0.5deg/iron/ironhd.json"
-    },
     iron_lp_grs: {
       filename: "chemical_elements/iron/iron5d_COG.tif",
       layerType: "raster",
@@ -231,15 +232,80 @@ export const layersConfig: LayersConfig = {
       displayName: "Aluminium Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/aluminum/aluminum5d.json"
     },
+    /*
+      --------
+      Compound
+      --------
+    */
+    feo_lp_grs: {
+      filename: "compounds/feo/ironhd_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "feo",
+      units: "wt% FeO",
+      displayName: "FeO Abundance · LP GRS",
+      stac: "lunar_prospector/grs/0.5deg/iron/ironhd.json"
+    },
+    feo_clementine_cnn_qiu2025: {
+      filename: "compounds/feo/feo_clementine_cnn_qiu2025_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "feo",
+      units: "wt%",
+      displayName: "FeO Abundance · Clementine CNN (Qiu 2025)",
+      stac: "clementine/qiu2025/feo/feo_clementine_cnn_qiu2025.json"
+    },
+    tio2_clementine_cnn_qiu2025: {
+      filename: "compounds/tio2/tio2_clementine_cnn_qiu2025_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "tio2",
+      units: "wt%",
+      displayName: "TiO₂ Abundance · Clementine CNN (Qiu 2025)",
+      stac: "clementine/qiu2025/tio2/tio2_clementine_cnn_qiu2025.json"
+    },
+    al2o3_clementine_cnn_qiu2025: {
+      filename: "compounds/al2o3/al2o3_clementine_cnn_qiu2025_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "al2o3",
+      units: "wt%",
+      displayName: "Al₂O₃ Abundance · Clementine CNN (Qiu 2025)",
+      stac: "clementine/qiu2025/al2o3/al2o3_clementine_cnn_qiu2025.json"
+    },
+    mgo_clementine_cnn_qiu2025: {
+      filename: "compounds/mgo/mgo_clementine_cnn_qiu2025_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "mgo",
+      units: "wt%",
+      displayName: "MgO Abundance · Clementine CNN (Qiu 2025)",
+      stac: "clementine/qiu2025/mgo/mgo_clementine_cnn_qiu2025.json"
+    },
+    cao_clementine_cnn_qiu2025: {
+      filename: "compounds/cao/cao_clementine_cnn_qiu2025_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "cao",
+      units: "wt%",
+      displayName: "CaO Abundance · Clementine CNN (Qiu 2025)",
+      stac: "clementine/qiu2025/cao/cao_clementine_cnn_qiu2025.json"
+    },
+    /*
+      -------------
+      Derived index
+      -------------
+    */
     mg_number: {
-      filename: "derived/mg_number/mg_number_COG.tif",
+      filename: "derived/mg_number/mg_number_clementine_cnn_qiu2025_COG.tif",
       layerType: "raster",
       category: "derived-index",
-      displayName: "Mg# Magnesium Number",
+      displayName: "Mg# Magnesium Number · Clementine CNN (Qiu 2025)",
       isDerivedIndex: true,
-      units: "Mg# (0 to 100)",
+      units: "Mg# (0 to 1)",
+      stac: "clementine/qiu2025/mg_number/mg_number_clementine_cnn_qiu2025.json",
       metadata: {
-        source: "Clementine UVVIS + CNN model",
+        source: "Clementine UVVIS + 1D CNN (Qiu et al. 2025)",
         resolution: "100m/pixel",
         description: "Magnesium Number derived from CNN-predicted MgO and FeO maps"
       }

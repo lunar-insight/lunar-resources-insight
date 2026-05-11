@@ -1,0 +1,80 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "clementine-al2o3-cnn-qiu2025",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2025-10-14T00:00:00Z",
+    "title": "Al₂O₃ Abundance · Clementine 1D-CNN (Qiu et al., 2025)",
+    "mission": "Clementine",
+    "instruments": ["UVVIS"],
+    "platform": "clementine",
+    "compound": "Al2O3",
+    "units": "wt%",
+    "spatial_resolution_m": 100,
+    "observation_period_start": "1994-02-19",
+    "observation_period_end": "1994-05-03",
+    "doi": "10.1038/s43247-025-02914-w",
+    "authors": "Denggao Qiu, Jianguo Yan, Bin Liu",
+    "publication_date": "2025-10-14",
+    "processing:level": "L4",
+    "processing:lineage": "Clementine UVVIS DIM Mosaic (5 bands: 415, 750, 900, 950, 1000 nm, 100 m/pixel) combined with OMAT as a 6-element input vector. 1D CNN: two Conv1D layers (32 filters, kernel=2, ReLU), MaxPooling1D (pool=2), Dense(64, ReLU), single linear output. L2 regularization (0.001). Adam optimizer (lr=0.01), max 400 epochs, early stopping (patience=30), z-score normalization. Trained on 49 ground-truth points from Apollo, Luna, and Chang'E missions including Chang'E-6. Al₂O₃ cannot be estimated from classical equation models due to spectral complexity; CNN captures the nonlinear Al₂O₃ spectral signature. R²=0.96+ on training set; LOOCV R²=0.947.",
+    "loocv_r2": 0.947,
+    "global_mean_wt_pct": 23.88,
+    "maria_mean_wt_pct": 13.76,
+    "non_maria_mean_wt_pct": 25.84,
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "Al₂O₃ is the primary indicator of anorthositic highland crust — the dominant aluminum and calcium source on the Moon. Highest LOOCV R² of the five oxides (0.947). Not derivable from classical equation models; CNN-only product. Bimodal distribution cleanly separates highlands (mode 27.76 wt%) from maria (mode 11.63 wt%). High Al₂O₃ terrains identify anorthosite-rich regions relevant to aluminum resource assessment.",
+    "lri:quality_note_short": "1D CNN inversion from Clementine UVVIS, calibrated with Chang'E-6 samples. Highest LOOCV R²=0.947 of the five oxides. Global mean 23.88 wt%. Bimodal: highland mode 27.76 wt%, mare mode 11.63 wt%. Not derivable from classical equation models.",
+    "lri:quality_note": "Al₂O₃ abundance derived from 1D CNN inversion of Clementine UVVIS 5-band reflectance (Qiu et al. 2025, Communications Earth & Environment). This is a CNN-only product — Al₂O₃ spectral characteristics are too complex for classical equation-based inversion, which is why no prior Clementine-based Al₂O₃ global map exists at this resolution. LOOCV R²=0.947 is the highest of all five oxides, reflecting strong and consistent spectral signatures. Global mean 23.88 wt%; bimodal distribution with modes at 11.63 wt% (maria) and 27.76 wt% (highlands/non-maria). The bimodal separation cleanly reflects the fundamental maria-highland dichotomy: mare basalts are Al₂O₃-poor (dominated by pyroxene and olivine), while highland anorthosites are Al₂O₃-rich (dominated by plagioclase, ideally ~35 wt%). Non-maria mean 25.84 wt% vs. maria mean 13.76 wt%. The lunar south polar region composition shows Al₂O₃ values consistent with non-mare material. Key resource implication: Al₂O₃-rich terrains identify anorthosite-rich regions, which are potential sources of aluminum metal and oxygen through electrolytic reduction of plagioclase."
+  },
+  "assets": {
+    "data": {
+      "href": "al2o3_clementine_cnn_qiu2025_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Al₂O₃ wt% · Clementine CNN — IAU:30100",
+      "roles": ["data"]
+    },
+    "zenodo_record": {
+      "href": "https://zenodo.org/records/15742878",
+      "type": "text/html",
+      "title": "Zenodo record — download source GeoTIFF",
+      "roles": ["source"]
+    },
+    "processing_script": {
+      "href": "../process_qiu2025.sh",
+      "type": "application/x-sh",
+      "title": "Processing commands used to generate the COG (shared for all Qiu 2025 items)",
+      "roles": ["metadata", "reproducibility"]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./al2o3_clementine_cnn_qiu2025.json" },
+    { "rel": "root",   "href": "../../../catalog.json" },
+    { "rel": "parent", "href": "../collection.json" },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1038/s43247-025-02914-w",
+      "title": "Qiu et al. 2025 — Communications Earth & Environment"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://pdsimage2.wr.usgs.gov/Clementine/PDS4/data/",
+      "type": "text/html",
+      "title": "Clementine UVVIS DIM Mosaic (PDS4)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../../lunar_prospector/grs/5deg/aluminum/aluminum5d.json",
+      "type": "application/json",
+      "title": "LP GRS Al 5° — alternative aluminum product from gamma-ray spectroscopy (~150 km resolution)"
+    }
+  ]
+}

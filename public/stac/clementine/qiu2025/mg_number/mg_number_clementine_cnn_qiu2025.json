@@ -1,0 +1,80 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "clementine-mg-number-cnn-qiu2025",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2025-10-14T00:00:00Z",
+    "title": "Mg# Magnesium Number · Clementine 1D-CNN (Qiu et al., 2025)",
+    "mission": "Clementine",
+    "instruments": ["UVVIS"],
+    "platform": "clementine",
+    "parameter": "mg-number",
+    "units": "ratio (0–1)",
+    "spatial_resolution_m": 100,
+    "observation_period_start": "1994-02-19",
+    "observation_period_end": "1994-05-03",
+    "doi": "10.1038/s43247-025-02914-w",
+    "authors": "Denggao Qiu, Jianguo Yan, Bin Liu",
+    "publication_date": "2025-10-14",
+    "processing:level": "L4",
+    "processing:lineage": "Derived from the CNN MgO and CNN FeO maps from the same publication. Mg# = molar Mg / (Mg + Fe) = (MgO/40.30) / (MgO/40.30 + FeO/71.85). Both input maps are 1D CNN inversions of Clementine UVVIS 5-band reflectance, trained on 49 ground-truth points including Chang'E-6. First global Mg# map with full polar coverage beyond 65° latitude.",
+    "global_mean": 0.609,
+    "global_mode": 0.634,
+    "maria_mean": 0.494,
+    "non_maria_mean": 0.632,
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "Mg# (molar Mg/(Mg+Fe)) is the primary indicator of magma differentiation and crustal/mantle lithology. High Mg# (>0.7) indicates primitive, undifferentiated material — mantle-derived dunites, peridotites, or early-crystallized cumulates. Low Mg# (<0.5) indicates evolved, iron-enriched mare basalts. Non-maria Mg# (mean 0.632) is significantly higher than maria (mean 0.494). This is the first Mg# map with full global polar coverage, enabling south polar compositional characterization. Prior Kaguya MI-based maps were limited to 65°N–65°S.",
+    "lri:quality_note_short": "Mg# (molar Mg/(Mg+Fe)) computed from CNN MgO and FeO maps. Global mean 0.609, mode 0.634. Non-maria mean 0.632 vs. maria mean 0.494. First Mg# map with polar coverage beyond 65°. Inherits uncertainty from both MgO (LOOCV R²=0.755) and FeO (LOOCV R²=0.897) inputs.",
+    "lri:quality_note": "Mg# (magnesium number, molar Mg/(Mg+Fe)) derived from CNN MgO and CNN FeO maps (Qiu et al. 2025, Communications Earth & Environment). Mg# = (MgO/40.30) / (MgO/40.30 + FeO/71.85). Global mean 0.609, unimodal continuous distribution with mode 0.634. Non-maria mean 0.632, significantly higher than maria mean 0.494 — reflecting the iron enrichment of mare basalts relative to highland anorthosites and early crustal cumulates. The bimodal MgO distribution (modes 5.11 and 10.31 wt%) and the unimodal FeO distribution (mode 5.28 wt%) combine as a ratio to produce the unimodal Mg# distribution. This is the first global Mg# map extending beyond 65° latitude; prior state-of-the-art maps from Kaguya Multiband Imager (MI) were limited to 65°N–65°S. The south polar region Mg# analysis identified 42,762 points with FeO >15 wt% and Mg# <0.60 — consistent with mare basalt chemistry — distributed across 96,214 km² (~6.7% of the south polar region), primarily on basin floors, crater walls, and central peaks. Uncertainty is compounded from both input maps: MgO has LOOCV R²=0.755 (the lowest of the five oxides), and FeO has LOOCV R²=0.897. Absolute Mg# values carry combined uncertainty; spatial patterns and relative contrasts are more reliable than point estimates."
+  },
+  "assets": {
+    "data": {
+      "href": "mg_number_clementine_cnn_qiu2025_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Mg# ratio (0–1) · Clementine CNN — IAU:30100",
+      "roles": ["data"]
+    },
+    "zenodo_record": {
+      "href": "https://zenodo.org/records/15743333",
+      "type": "text/html",
+      "title": "Zenodo record — download source GeoTIFF",
+      "roles": ["source"]
+    },
+    "processing_script": {
+      "href": "../process_qiu2025.sh",
+      "type": "application/x-sh",
+      "title": "Processing commands used to generate the COG (shared for all Qiu 2025 items)",
+      "roles": ["metadata", "reproducibility"]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./mg_number_clementine_cnn_qiu2025.json" },
+    { "rel": "root",   "href": "../../../catalog.json" },
+    { "rel": "parent", "href": "../collection.json" },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1038/s43247-025-02914-w",
+      "title": "Qiu et al. 2025 — Communications Earth & Environment"
+    },
+    {
+      "rel": "derived_from",
+      "href": "../mgo/mgo_clementine_cnn_qiu2025.json",
+      "type": "application/json",
+      "title": "CNN MgO map — upstream input to Mg# calculation"
+    },
+    {
+      "rel": "derived_from",
+      "href": "../feo/feo_clementine_cnn_qiu2025.json",
+      "type": "application/json",
+      "title": "CNN FeO map — upstream input to Mg# calculation"
+    }
+  ]
+}

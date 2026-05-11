@@ -1,0 +1,13 @@
+{
+  "type": "Catalog",
+  "id": "clementine",
+  "stac_version": "1.0.0",
+  "title": "Clementine UVVIS",
+  "description": "Global lunar surface chemistry maps derived from Clementine UVVIS spectral data. Includes oxide abundance maps (FeO, TiO2, Al2O3, MgO, CaO) and derived indices (Mg#) produced by 1D CNN inversion models calibrated against Apollo, Luna, and Chang'E mission samples.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    { "rel": "child",  "href": "./qiu2025/collection.json", "title": "Qiu et al. 2025 — CNN oxide maps with Chang'E-6 calibration" }
+  ]
+}

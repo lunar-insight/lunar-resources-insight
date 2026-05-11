@@ -1,0 +1,36 @@
+{
+  "type": "Collection",
+  "id": "clementine-qiu2025",
+  "stac_version": "1.0.0",
+  "title": "Qiu et al. 2025 — Global CNN Oxide Maps (Clementine UVVIS + Chang'E-6)",
+  "description": "Global chemical composition maps of the lunar surface derived from Clementine UVVIS 5-band reflectance data using a 1D convolutional neural network (CNN). Covers FeO, TiO2, Al2O3, MgO, and CaO abundances (wt%) and the Mg# derived index. Calibrated against 49 lunar sample ground-truth points including Chang'E-6 (first farside samples). 100 m/pixel, global coverage including poles. Published in Communications Earth & Environment (2025).",
+  "license": "proprietary",
+  "extent": {
+    "spatial": { "bbox": [[-180, -90, 180, 90]] },
+    "temporal": { "interval": [["1994-02-19T00:00:00Z", "1994-05-03T00:00:00Z"]] }
+  },
+  "providers": [
+    {
+      "name": "Wuhan University, State Key Laboratory of Information Engineering in Surveying, Mapping and Remote Sensing",
+      "roles": ["producer"],
+      "url": "https://www.whu.edu.cn"
+    },
+    {
+      "name": "Zenodo",
+      "roles": ["host"],
+      "url": "https://zenodo.org"
+    }
+  ],
+  "links": [
+    { "rel": "self",   "href": "./collection.json" },
+    { "rel": "root",   "href": "../../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    { "rel": "cite-as", "href": "https://doi.org/10.1038/s43247-025-02914-w", "title": "Qiu et al. 2025 — Communications Earth & Environment" },
+    { "rel": "item", "href": "./feo/feo_clementine_cnn_qiu2025.json",           "title": "FeO Abundance · Clementine CNN (Qiu 2025)" },
+    { "rel": "item", "href": "./tio2/tio2_clementine_cnn_qiu2025.json",         "title": "TiO₂ Abundance · Clementine CNN (Qiu 2025)" },
+    { "rel": "item", "href": "./al2o3/al2o3_clementine_cnn_qiu2025.json",       "title": "Al₂O₃ Abundance · Clementine CNN (Qiu 2025)" },
+    { "rel": "item", "href": "./mgo/mgo_clementine_cnn_qiu2025.json",           "title": "MgO Abundance · Clementine CNN (Qiu 2025)" },
+    { "rel": "item", "href": "./cao/cao_clementine_cnn_qiu2025.json",           "title": "CaO Abundance · Clementine CNN (Qiu 2025)" },
+    { "rel": "item", "href": "./mg_number/mg_number_clementine_cnn_qiu2025.json", "title": "Mg# Magnesium Number · Clementine CNN (Qiu 2025)" }
+  ]
+}
