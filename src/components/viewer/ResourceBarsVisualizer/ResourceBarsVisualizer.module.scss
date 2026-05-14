@@ -132,7 +132,7 @@ $count-rate-color: #fcd34d;
     letter-spacing: 0.09em;
     white-space: nowrap;
 
-    &.wt  { color: $wt-color; }
+    &.wt        { color: $wt-color; }
     &.ppm       { color: $ppm-color; }
     &.countRate { color: $count-rate-color; }
   }

@@ -62,3 +62,55 @@ export const ELEMENT_REFERENCE_RANGES: Record<string, ElementReferenceRange> = {
     ],
   },
 };
+
+export const COMPOUND_REFERENCE_RANGES: Record<string, ElementReferenceRange> = {
+  feo: {
+    min: 0,
+    max: 22.0,
+    units: 'wt%',
+    sources: [
+      'https://www.sciencedirect.com/science/article/pii/S0019103524002185', // Qiu et al. 2025 – FeO from Clementine CNN
+      'https://www.sciencedirect.com/science/article/abs/pii/S0012821X21003344', // LP GRS iron data
+    ],
+  },
+  tio2: {
+    min: 0,
+    max: 15.0,
+    units: 'wt%',
+    sources: [
+      'https://www.sciencedirect.com/science/article/pii/S0019103524002185', // Qiu et al. 2025 – TiO₂ from Clementine CNN
+    ],
+  },
+  al2o3: {
+    min: 0,
+    max: 35.0,
+    units: 'wt%',
+    sources: [
+      'https://www.sciencedirect.com/science/article/pii/S0019103524002185', // Qiu et al. 2025 – Al₂O₃ from Clementine CNN
+    ],
+  },
+  mgo: {
+    min: 0,
+    max: 22.0,
+    units: 'wt%',
+    sources: [
+      'https://www.sciencedirect.com/science/article/pii/S0019103524002185', // Qiu et al. 2025 – MgO from Clementine CNN
+    ],
+  },
+  cao: {
+    min: 0,
+    max: 20.0,
+    units: 'wt%',
+    sources: [
+      'https://www.sciencedirect.com/science/article/pii/S0019103524002185', // Qiu et al. 2025 – CaO from Clementine CNN
+    ],
+  },
+};
+
+export const COMPOUND_SYMBOLS: Record<string, string> = {
+  feo: 'FeO',
+  tio2: 'TiO₂',
+  al2o3: 'Al₂O₃',
+  mgo: 'MgO',
+  cao: 'CaO',
+};

@@ -2,19 +2,19 @@ import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { layersConfig } from 'geoConfigExporter';
 import { elements } from 'constants/periodicTableData';
-import { ELEMENT_REFERENCE_RANGES } from 'constants/elementReferenceRanges';
+import { ELEMENT_REFERENCE_RANGES, COMPOUND_REFERENCE_RANGES, COMPOUND_SYMBOLS } from 'constants/elementReferenceRanges';
 import styles from './ResourceBarsVisualizer.module.scss';
 
 export interface ResourceData {
   layerName: string;
   value: number;
-  geochemicalScore: number;
-  enrichmentScore: number;
+  abundanceScore: number;
   continuousPosition: number;
   color: string;
   symbol: string;
   elementName: string;
   units: string;
+  category: 'chemical' | 'compound';
 }
 
 export interface CountRateData {
@@ -47,7 +47,11 @@ function getElementSymbol(elementName: string): string {
   return element?.symbol || elementName.toUpperCase().substring(0, 2);
 }
 
-export function calculateGeochemicalScore(layerName: string, value: number): number {
+function getCompoundSymbol(compoundName: string): string {
+  return COMPOUND_SYMBOLS[compoundName] ?? compoundName.substring(0, 3).toUpperCase();
+}
+
+export function calculateAbundanceScore(layerName: string, value: number): number {
   const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
     return layerId === layerName || config.element === layerName;
   });
@@ -58,6 +62,14 @@ export function calculateGeochemicalScore(layerName: string, value: number): num
   }
 
   const [, layerConfig] = layerEntry;
+
+  if (layerConfig.category === 'compound' && layerConfig.compound) {
+    const range = COMPOUND_REFERENCE_RANGES[layerConfig.compound];
+    if (!range) return 50;
+    const score = ((value - range.min) / (range.max - range.min)) * 100;
+    return Math.min(100, Math.max(0, score));
+  }
+
   const elementName = layerConfig.element;
 
   if (!elementName) {
@@ -345,7 +357,7 @@ function renderBarsPanel(
     .attr('y', innerHeight + 8 + 12)
     .attr('dy', '0.32em')
     .attr('text-anchor', 'middle')
-    .style('font-size', '12px')
+    .style('font-size', d => d.symbol.length > 4 ? '8px' : d.symbol.length > 3 ? '10px' : '12px')
     .style('font-weight', 'bold')
     .style('fill', '#fff')
     .style('font-family', 'Arial, sans-serif')
@@ -410,7 +422,7 @@ function renderBarsPanel(
     .attr('y', innerHeight + 20)
     .attr('dy', '0.32em')
     .attr('text-anchor', 'middle')
-    .style('font-size', '12px')
+    .style('font-size', d => d.symbol.length > 4 ? '8px' : d.symbol.length > 3 ? '10px' : '12px')
     .style('font-weight', 'bold')
     .style('fill', '#666')
     .style('font-family', 'Arial, sans-serif')
@@ -489,13 +501,16 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   width: propWidth
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const svgWtRef = useRef<SVGSVGElement>(null);
-  const svgPpmRef = useRef<SVGSVGElement>(null);
+  const svgElementWtRef = useRef<SVGSVGElement>(null);
+  const svgElementPpmRef = useRef<SVGSVGElement>(null);
+  const svgCompoundRef = useRef<SVGSVGElement>(null);
   const [width, setWidth] = useState(propWidth);
-  const wtScalesRef = useRef<ScaleRefs | null>(null);
-  const ppmScalesRef = useRef<ScaleRefs | null>(null);
-  const prevNodataWt = useRef<NodataResourceData[]>([]);
-  const prevNodataPpm = useRef<NodataResourceData[]>([]);
+  const elementWtScalesRef = useRef<ScaleRefs | null>(null);
+  const elementPpmScalesRef = useRef<ScaleRefs | null>(null);
+  const compoundScalesRef = useRef<ScaleRefs | null>(null);
+  const prevNodataElementWt = useRef<NodataResourceData[]>([]);
+  const prevNodataElementPpm = useRef<NodataResourceData[]>([]);
+  const prevNodataCompound = useRef<NodataResourceData[]>([]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -518,6 +533,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     d3.scaleSequential(d3.interpolateBlues).domain([1, 0])
   , []);
 
+  const compoundColorScale = useMemo(() =>
+    d3.scaleSequential(d3.interpolateGreens).domain([1, 0])
+  , []);
+
   const resourceData = useMemo(() => {
     const seenSymbols = new Set<string>();
 
@@ -529,21 +548,31 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       const layerConfig = layerEntry?.[1];
       if (layerConfig?.units === 'count_rate') return [];
 
-      const elementName = layerConfig?.element ?? '';
-      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      const isCompound = layerConfig?.category === 'compound';
+      const compoundName = isCompound ? (layerConfig?.compound ?? '') : '';
+      const elementName = isCompound ? '' : (layerConfig?.element ?? '');
+
+      const symbol = isCompound && compoundName
+        ? getCompoundSymbol(compoundName)
+        : elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
 
       if (seenSymbols.has(symbol)) return [];
       seenSymbols.add(symbol);
 
-      const range = ELEMENT_REFERENCE_RANGES[elementName];
-      const units = range?.units ?? 'wt%';
+      let units: string;
+      if (isCompound) {
+        units = 'wt%';
+      } else {
+        const range = ELEMENT_REFERENCE_RANGES[elementName];
+        units = range?.units ?? 'wt%';
+      }
 
-      const geochemicalScore = calculateGeochemicalScore(layerName, value);
-      const enrichmentScore = geochemicalScore;
-      const continuousPosition = enrichmentScore / 100;
+      const abundanceScore = calculateAbundanceScore(layerName, value);
+      const continuousPosition = abundanceScore / 100;
       const color = colorScale(1 - continuousPosition);
+      const category: 'chemical' | 'compound' = isCompound ? 'compound' : 'chemical';
 
-      return [{ layerName, value, geochemicalScore, enrichmentScore, continuousPosition, color, symbol, elementName, units }];
+      return [{ layerName, value, abundanceScore, continuousPosition, color, symbol, elementName, units, category }];
     }) as ResourceData[];
   }, [values, colorScale]);
 
@@ -558,15 +587,16 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     });
   }, [values]);
 
-  const wtResourceData = useMemo(() => resourceData.filter(d => d.units === 'wt%'), [resourceData]);
-  const ppmResourceData = useMemo(() => resourceData.filter(d => d.units === 'ppm'), [resourceData]);
+  const elementWtData = useMemo(() => resourceData.filter(d => d.units === 'wt%' && d.category !== 'compound'), [resourceData]);
+  const elementPpmData = useMemo(() => resourceData.filter(d => d.units === 'ppm'), [resourceData]);
+  const compoundResourceData = useMemo(() => resourceData.filter(d => d.category === 'compound'), [resourceData]);
 
-  const nodataWtLayerData = useMemo((): NodataResourceData[] => {
+  const nodataElementWtData = useMemo((): NodataResourceData[] => {
     const realSymbols = new Set(resourceData.map(d => d.symbol));
     const seenSymbols = new Set<string>();
     return nodataLayerIds.flatMap(layerName => {
       const layerConfig = layersConfig.layers[layerName];
-      if (!layerConfig || layerConfig.units === 'count_rate') return [];
+      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return [];
       const elementName = layerConfig.element ?? '';
       const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
       if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
@@ -578,12 +608,12 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     });
   }, [nodataLayerIds, resourceData]);
 
-  const nodataPpmLayerData = useMemo((): NodataResourceData[] => {
+  const nodataElementPpmData = useMemo((): NodataResourceData[] => {
     const realSymbols = new Set(resourceData.map(d => d.symbol));
     const seenSymbols = new Set<string>();
     return nodataLayerIds.flatMap(layerName => {
       const layerConfig = layersConfig.layers[layerName];
-      if (!layerConfig || layerConfig.units === 'count_rate') return [];
+      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return [];
       const elementName = layerConfig.element ?? '';
       const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
       if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
@@ -592,6 +622,20 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       const units = range?.units ?? 'wt%';
       if (units !== 'ppm') return [];
       return [{ layerName, symbol, elementName, units }];
+    });
+  }, [nodataLayerIds, resourceData]);
+
+  const nodataCompoundLayerData = useMemo((): NodataResourceData[] => {
+    const realSymbols = new Set(resourceData.map(d => d.symbol));
+    const seenSymbols = new Set<string>();
+    return nodataLayerIds.flatMap(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (!layerConfig || layerConfig.category !== 'compound') return [];
+      const compoundName = layerConfig.compound ?? '';
+      const symbol = compoundName ? getCompoundSymbol(compoundName) : layerName.substring(0, 3).toUpperCase();
+      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
+      seenSymbols.add(symbol);
+      return [{ layerName, symbol, elementName: compoundName, units: 'wt%' }];
     });
   }, [nodataLayerIds, resourceData]);
 
@@ -606,37 +650,52 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   }, [nodataLayerIds]);
 
   useEffect(() => {
-    if (!svgWtRef.current || (wtResourceData.length === 0 && nodataWtLayerData.length === 0)) return;
-    if (!wtScalesRef.current || !shallowEqualNodataLayers(prevNodataWt.current, nodataWtLayerData)) {
-      prevNodataWt.current = nodataWtLayerData;
-      wtScalesRef.current = renderBarsPanel(svgWtRef.current, wtResourceData, nodataWtLayerData, d => d.color, '#e0e0e0');
+    if (!svgElementWtRef.current || (elementWtData.length === 0 && nodataElementWtData.length === 0)) return;
+    if (!elementWtScalesRef.current || !shallowEqualNodataLayers(prevNodataElementWt.current, nodataElementWtData)) {
+      prevNodataElementWt.current = nodataElementWtData;
+      elementWtScalesRef.current = renderBarsPanel(svgElementWtRef.current, elementWtData, nodataElementWtData, d => d.color, '#e0e0e0');
     } else {
-      updateBarsOnly(svgWtRef.current, wtResourceData, '#e0e0e0');
+      updateBarsOnly(svgElementWtRef.current, elementWtData, '#e0e0e0');
     }
-  }, [wtResourceData, nodataWtLayerData]);
+  }, [elementWtData, nodataElementWtData]);
 
   useEffect(() => {
-    if (!svgPpmRef.current || (ppmResourceData.length === 0 && nodataPpmLayerData.length === 0)) return;
+    if (!svgElementPpmRef.current || (elementPpmData.length === 0 && nodataElementPpmData.length === 0)) return;
     const getColor = (d: ResourceData) => ppmColorScale(1 - d.continuousPosition);
-    if (!ppmScalesRef.current || !shallowEqualNodataLayers(prevNodataPpm.current, nodataPpmLayerData)) {
-      prevNodataPpm.current = nodataPpmLayerData;
-      ppmScalesRef.current = renderBarsPanel(svgPpmRef.current, ppmResourceData, nodataPpmLayerData, getColor, '#e0e0e0');
+    if (!elementPpmScalesRef.current || !shallowEqualNodataLayers(prevNodataElementPpm.current, nodataElementPpmData)) {
+      prevNodataElementPpm.current = nodataElementPpmData;
+      elementPpmScalesRef.current = renderBarsPanel(svgElementPpmRef.current, elementPpmData, nodataElementPpmData, getColor, '#e0e0e0');
     } else {
-      updateBarsOnly(svgPpmRef.current, ppmResourceData, '#e0e0e0');
+      updateBarsOnly(svgElementPpmRef.current, elementPpmData, '#e0e0e0');
     }
-  }, [ppmResourceData, nodataPpmLayerData, ppmColorScale]);
+  }, [elementPpmData, nodataElementPpmData, ppmColorScale]);
+
+  useEffect(() => {
+    if (!svgCompoundRef.current || (compoundResourceData.length === 0 && nodataCompoundLayerData.length === 0)) return;
+    const getColor = (d: ResourceData) => compoundColorScale(1 - d.continuousPosition);
+    if (!compoundScalesRef.current || !shallowEqualNodataLayers(prevNodataCompound.current, nodataCompoundLayerData)) {
+      prevNodataCompound.current = nodataCompoundLayerData;
+      compoundScalesRef.current = renderBarsPanel(svgCompoundRef.current, compoundResourceData, nodataCompoundLayerData, getColor, '#e0e0e0');
+    } else {
+      updateBarsOnly(svgCompoundRef.current, compoundResourceData, '#e0e0e0');
+    }
+  }, [compoundResourceData, nodataCompoundLayerData, compoundColorScale]);
 
   return (
     <div ref={containerRef} className={styles.resourceBarsVisualizer}>
 
-      <div className={styles.panelHeader}>
-        <span className={`${styles.panelTitle} ${styles.wt}`}>Major Elements</span>
-        <div className={styles.panelRule} />
-        <span className={`${styles.unitBadge} ${styles.wt}`}>wt%</span>
-      </div>
-      {(wtResourceData.length > 0 || nodataWtLayerData.length > 0) && <svg ref={svgWtRef} width={width} height={PANEL_HEIGHT} />}
+      {(elementWtData.length > 0 || nodataElementWtData.length > 0) && (
+        <>
+          <div className={styles.panelHeader}>
+            <span className={`${styles.panelTitle} ${styles.wt}`}>Major Elements</span>
+            <div className={styles.panelRule} />
+            <span className={`${styles.unitBadge} ${styles.wt}`}>wt%</span>
+          </div>
+          <svg ref={svgElementWtRef} width={width} height={PANEL_HEIGHT} />
+        </>
+      )}
 
-      {(ppmResourceData.length > 0 || nodataPpmLayerData.length > 0) && (
+      {(elementPpmData.length > 0 || nodataElementPpmData.length > 0) && (
         <>
           <div className={styles.panelSep} />
           <div className={styles.panelHeader}>
@@ -644,7 +703,22 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
             <div className={styles.panelRule} />
             <span className={`${styles.unitBadge} ${styles.ppm}`}>ppm</span>
           </div>
-          <svg ref={svgPpmRef} width={width} height={PANEL_HEIGHT} />
+          <svg ref={svgElementPpmRef} width={width} height={PANEL_HEIGHT} />
+        </>
+      )}
+
+      {(compoundResourceData.length > 0 || nodataCompoundLayerData.length > 0) && (
+        <>
+          {(elementWtData.length > 0 || nodataElementWtData.length > 0 ||
+            elementPpmData.length > 0 || nodataElementPpmData.length > 0) && (
+            <div className={styles.panelSep} />
+          )}
+          <div className={styles.panelHeader}>
+            <span className={`${styles.panelTitle} ${styles.wt}`}>Compounds</span>
+            <div className={styles.panelRule} />
+            <span className={`${styles.unitBadge} ${styles.wt}`}>wt%</span>
+          </div>
+          <svg ref={svgCompoundRef} width={width} height={PANEL_HEIGHT} />
         </>
       )}
 

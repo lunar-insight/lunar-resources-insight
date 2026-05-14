@@ -24,6 +24,7 @@ const ChemistrySection: React.FC = () => {
   const [isDerivedIndicesModalOpen, setIsDerivedIndicesModalOpen] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
+  const [compoundHoverValues, setCompoundHoverValues] = useState<{[key: string]: number} | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   const boundaryRef = useBoundaryRef();
@@ -38,6 +39,11 @@ const ChemistrySection: React.FC = () => {
 
   const selectedChemicalLayerIds = useMemo(
     () => selectedLayers.filter(id => layersConfig.layers[id]?.category === 'chemical'),
+    [selectedLayers]
+  );
+
+  const selectedCompoundLayerIds = useMemo(
+    () => selectedLayers.filter(id => layersConfig.layers[id]?.category === 'compound'),
     [selectedLayers]
   );
 
@@ -59,25 +65,44 @@ const ChemistrySection: React.FC = () => {
   }, [viewer]);
 
   useEffect(() => {
-    pointValueService.setSelectedLayers(selectedChemicalLayerIds);
-  }, [selectedChemicalLayerIds]);
+    pointValueService.setSelectedLayers([...selectedChemicalLayerIds, ...selectedCompoundLayerIds]);
+  }, [selectedChemicalLayerIds, selectedCompoundLayerIds]);
 
   useEffect(() => {
-    if (showElementScanner) {
-      pointValueService.start();
-      const unsubscribe = pointValueService.onValuesUpdate((data) => {
-        setHoverValues(data.displayValues);
-        setAllHoverValues(data.allValues);
-        setIsPaused(data.isPaused || false);
-      });
-      return unsubscribe;
-    } else {
+    const eitherOpen = showElementScanner || showCompoundScanner;
+    if (!eitherOpen) {
       pointValueService.stop();
       setHoverValues(null);
       setAllHoverValues(null);
+      setCompoundHoverValues(null);
       setIsPaused(false);
+      return;
     }
-  }, [showElementScanner]);
+
+    pointValueService.start();
+    const unsubscribe = pointValueService.onValuesUpdate((data) => {
+      setIsPaused(data.isPaused || false);
+      if (data.isPaused) {
+        setHoverValues(null);
+        setCompoundHoverValues(null);
+        return;
+      }
+      if (showElementScanner) {
+        const elementVals = Object.fromEntries(
+          Object.entries(data.displayValues).filter(([id]) => selectedChemicalLayerIds.includes(id))
+        );
+        setHoverValues(elementVals);
+        setAllHoverValues(data.allValues);
+      }
+      if (showCompoundScanner) {
+        const compoundVals = Object.fromEntries(
+          Object.entries(data.displayValues).filter(([id]) => selectedCompoundLayerIds.includes(id))
+        );
+        setCompoundHoverValues(compoundVals);
+      }
+    });
+    return unsubscribe;
+  }, [showElementScanner, showCompoundScanner, selectedChemicalLayerIds, selectedCompoundLayerIds]);
 
   // Auto close element scanner when all elements are deselected while scanner is open
   useEffect(() => {
@@ -86,6 +111,14 @@ const ChemistrySection: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedElements.size]);
+
+  // Auto close compound scanner when all compounds are deselected while scanner is open
+  useEffect(() => {
+    if (selectedCompoundLayerIds.length === 0 && showCompoundScanner) {
+      toggleCompoundScanner(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCompoundLayerIds.length]);
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -143,6 +176,32 @@ const ChemistrySection: React.FC = () => {
         removeLayer(layerId);
       });
     }
+  };
+
+  const renderCompoundBoxContent = () => {
+    if (isPaused) {
+      return (
+        <div>
+          <p>⏸️ Scan paused</p>
+          <small>Move the mouse on the globe to resume</small>
+        </div>
+      );
+    }
+
+    if (compoundHoverValues === null) {
+      return <p>Hover over the map to scan resources</p>;
+    }
+
+    const presentIds = new Set(Object.keys(compoundHoverValues));
+    const nodataLayerIds = selectedCompoundLayerIds.filter(id => !presentIds.has(id));
+
+    return (
+      <ResourceBarsVisualizer
+        values={compoundHoverValues}
+        nodataLayerIds={nodataLayerIds}
+        width={270}
+      />
+    );
   };
 
   const renderValueBoxContent = () => {
@@ -245,7 +304,11 @@ const ChemistrySection: React.FC = () => {
           boundaryRef={boundaryRef}
           id="compound-scanner-box"
           cascadeIndex={1}
-        />
+        >
+          <div className='map-hover-values-box__content'>
+            {renderCompoundBoxContent()}
+          </div>
+        </DraggableBoxContentContainer>
       </Portal>
 
       <Portal>
