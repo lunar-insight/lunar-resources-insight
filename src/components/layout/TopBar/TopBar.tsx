@@ -2,6 +2,7 @@ import React from 'react';
 import styles from './TopBar.module.scss';
 import TopBarButton from 'components/layout/Button/TopBarButton/TopBarButton';
 import { useSidebarContext } from 'utils/context/SidebarContext';
+import ScannerButton from 'components/layout/Button/ScannerButton/ScannerButton';
 
 export interface TopBarProps {
   children?: React.ReactNode;
@@ -49,6 +50,8 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
           tooltipPlacement='bottom'
           isSelected={false}
         />
+        <div className={styles.separator}></div>
+        <ScannerButton />
         {children}
       </div>
       <div className={styles.centerSection}></div>

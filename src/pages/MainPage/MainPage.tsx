@@ -16,6 +16,7 @@ import { ZIndexProvider } from 'utils/ZIndexProvider';
 import { MouseTrackingProvider } from 'utils/MouseTrackingProvider';
 import BottomBar from 'components/layout/BottomBar/BottomBar';
 import TopBar from 'components/layout/TopBar/TopBar';
+import { ScannerProvider } from 'utils/context/ScannerContext';
 
 const MainPageContent: React.FC = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
@@ -76,7 +77,9 @@ const MainPage = () => {
           <FeaturesProvider>
             <ZIndexProvider>
               <SidebarProvider>
-                <MainPageContent />
+                <ScannerProvider>
+                  <MainPageContent />
+                </ScannerProvider>
               </SidebarProvider>
             </ZIndexProvider>
           </FeaturesProvider>

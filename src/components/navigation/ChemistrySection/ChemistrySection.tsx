@@ -8,8 +8,8 @@ import Compound from '../submenu/Compound/Compound';
 import DerivedIndices from '../submenu/DerivedIndices/DerivedIndices';
 import { useLayerContext } from 'utils/context/LayerContext';
 import { layersConfig } from 'geoConfigExporter';
-import { FeatureCheckbox } from 'components/layout/Checkbox/FeatureCheckbox/FeatureCheckbox';
 import { pointValueService } from 'services/PointValueService';
+import { useScannerContext } from 'utils/context/ScannerContext';
 import { useViewer } from 'utils/context/ViewerContext';
 import { DraggableBoxContentContainer } from 'components/layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
 import { Portal } from 'components/ui/Portal/Portal';
@@ -22,7 +22,6 @@ const ChemistrySection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCompoundModalOpen, setIsCompoundModalOpen] = useState(false);
   const [isDerivedIndicesModalOpen, setIsDerivedIndicesModalOpen] = useState(false);
-  const [showValueBox, setShowValueBox] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -31,6 +30,11 @@ const ChemistrySection: React.FC = () => {
   const { addLayer, removeLayer, selectedLayers } = useLayerContext();
   const { registerModal, unregisterModal } = useZIndex();
   const { viewer } = useViewer();
+  const {
+    showElementScanner, toggleElementScanner,
+    showCompoundScanner, toggleCompoundScanner,
+    showDerivedIndexScanner, toggleDerivedIndexScanner,
+  } = useScannerContext();
 
   const selectedChemicalLayerIds = useMemo(
     () => selectedLayers.filter(id => layersConfig.layers[id]?.category === 'chemical'),
@@ -59,37 +63,29 @@ const ChemistrySection: React.FC = () => {
   }, [selectedChemicalLayerIds]);
 
   useEffect(() => {
-    if (showValueBox) {
+    if (showElementScanner) {
+      pointValueService.start();
       const unsubscribe = pointValueService.onValuesUpdate((data) => {
-        setHoverValues(data.displayValues); // Bar show
-        setAllHoverValues(data.allValues); // Terrain calculation
+        setHoverValues(data.displayValues);
+        setAllHoverValues(data.allValues);
         setIsPaused(data.isPaused || false);
       });
       return unsubscribe;
     } else {
+      pointValueService.stop();
       setHoverValues(null);
       setAllHoverValues(null);
       setIsPaused(false);
     }
-  }, [showValueBox]);
+  }, [showElementScanner]);
 
-  // Auto close value box when no elements are selected
+  // Auto close element scanner when all elements are deselected while scanner is open
   useEffect(() => {
-    if (selectedElements.size === 0 && showValueBox) {
-      handlePointFetchToggle(false);
+    if (selectedElements.size === 0 && showElementScanner) {
+      toggleElementScanner(false);
     }
-  }, [selectedElements.size, showValueBox]);
-
-  const handlePointFetchToggle = (isEnabled: boolean) => {
-    setShowValueBox(isEnabled);
-    if (isEnabled) {
-      pointValueService.start();
-    } else {
-      pointValueService.stop();
-      setHoverValues(null);
-      setIsPaused(false);
-    }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedElements.size]);
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -224,22 +220,13 @@ const ChemistrySection: React.FC = () => {
         </div>
       </div>
 
-      {selectedElements.size > 0 && (
-        <div>
-          <FeatureCheckbox
-            checked={showValueBox}
-            onChange={handlePointFetchToggle}
-          />
-        </div>
-      )}
-
       <Portal>
         <DraggableBoxContentContainer
           className='map-hover-values-box'
           width={400}
           title="Element concentration"
-          isOpen={showValueBox}
-          onClose={() => handlePointFetchToggle(false)}
+          isOpen={showElementScanner}
+          onClose={() => toggleElementScanner(false)}
           boundaryRef={boundaryRef}
           id="element-concentration-box"
         >
@@ -247,6 +234,30 @@ const ChemistrySection: React.FC = () => {
             {renderValueBoxContent()}
           </div>
         </DraggableBoxContentContainer>
+      </Portal>
+
+      <Portal>
+        <DraggableBoxContentContainer
+          width={400}
+          title="Compound Scanner"
+          isOpen={showCompoundScanner}
+          onClose={() => toggleCompoundScanner(false)}
+          boundaryRef={boundaryRef}
+          id="compound-scanner-box"
+          cascadeIndex={1}
+        />
+      </Portal>
+
+      <Portal>
+        <DraggableBoxContentContainer
+          width={400}
+          title="Derived Index Scanner"
+          isOpen={showDerivedIndexScanner}
+          onClose={() => toggleDerivedIndexScanner(false)}
+          boundaryRef={boundaryRef}
+          id="derived-index-scanner-box"
+          cascadeIndex={2}
+        />
       </Portal>
 
       <ModalOverlayContainer

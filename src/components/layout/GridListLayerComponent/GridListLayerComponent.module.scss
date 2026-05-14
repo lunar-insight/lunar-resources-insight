@@ -107,43 +107,21 @@ $heading-item-min-height: 3rem;
   // Chemical elements - Violet
   &[data-category="chemical"] {
     background-color: rgba(147, 51, 234, 0.15);
-    // border: 1px solid rgba(147, 51, 234, 0.6);
-
-    // &::after {
-    //   background: linear-gradient(
-    //     to right,
-    //     rgba(147, 51, 234, 0.7),
-    //     rgba(147, 51, 234, 0.3)
-    //   );
-    // }
   }
 
   // Compounds - Yellow
   &[data-category="compound"] {
     background-color: rgba(234, 179, 8, 0.15);
-    // border: 1px solid rgba(234, 179, 8, 0.6);
-
-    // &::after {
-    //   background: linear-gradient(
-    //     to right,
-    //     rgba(234, 179, 8, 0.7),
-    //     rgba(234, 179, 8, 0.3)
-    //   );
-    // }
   }
 
   // Geographical Layers - Green
   &[data-category="geographical"] {
     background-color: rgba(34, 197, 94, 0.15);
-    // border: 1px solid rgba(34, 197, 94, 0.6);
+  }
 
-    // &::after {
-    //   background: linear-gradient(
-    //     to right,
-    //     rgba(34, 197, 94, 0.7),
-    //     rgba(34, 197, 94, 0.3)
-    //   );
-    // }
+  // Derived Indices - Orange
+  &[data-category="derived-index"] {
+    background-color: rgba(249, 115, 22, 0.15);
   }
 
   // Rocks & Minerals - Blue
@@ -153,15 +131,6 @@ $heading-item-min-height: 3rem;
   
   &[data-category="mineral"] {
     background-color: rgba(59, 130, 246, 0.15);
-    // border: 1px solid rgba(59, 130, 246, 0.6);
-
-    // &::after {
-    //   background: linear-gradient(
-    //     to right,
-    //     rgba(59, 130, 246, 0.7),
-    //     rgba(59, 130, 246, 0.3)
-    //   );
-    // }
   }
 
   // Spacing for category transitions
