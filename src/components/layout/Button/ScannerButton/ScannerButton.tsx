@@ -108,14 +108,16 @@ interface ScannerToggleRowProps {
   label: string;
   isSelected: boolean;
   onChange: (val: boolean) => void;
+  accentColor: string;
 }
 
-const ScannerToggleRow: React.FC<ScannerToggleRowProps> = ({ icon, label, isSelected, onChange }) => (
+const ScannerToggleRow: React.FC<ScannerToggleRowProps> = ({ icon, label, isSelected, onChange, accentColor }) => (
   <ToggleButton
     isSelected={isSelected}
     onChange={onChange}
     className={styles.toggleRow}
     aria-label={label}
+    style={{ '--row-accent-color': accentColor } as React.CSSProperties}
   >
     <span className={`material-symbols-outlined ${styles.rowIcon}`}>{icon}</span>
     <span className={styles.rowLabel}>{label}</span>
@@ -154,18 +156,21 @@ const ScannerButton: React.FC = () => {
             label="Chemical Elements"
             isSelected={showElementScanner}
             onChange={toggleElementScanner}
+            accentColor="rgb(147, 51, 234)"
           />
           <ScannerToggleRow
             icon="join"
             label="Compound"
             isSelected={showCompoundScanner}
             onChange={toggleCompoundScanner}
+            accentColor="rgb(234, 179, 8)"
           />
           <ScannerToggleRow
             icon="calculate"
             label="Derived Index"
             isSelected={showDerivedIndexScanner}
             onChange={toggleDerivedIndexScanner}
+            accentColor="rgb(249, 115, 22)"
           />
         </Dialog>
       </Popover>

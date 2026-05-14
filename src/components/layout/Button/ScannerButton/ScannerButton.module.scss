@@ -69,10 +69,12 @@
 }
 
 .popover {
-  background-color: var(--color-primary);
-  border: 1px solid var(--color-tertiary);
+  background: linear-gradient(135deg, rgba(35, 41, 53, 0.75), rgba(43, 53, 62, 0.75));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(84, 100, 130, 0.45);
   border-radius: 0.5rem;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), inset 0 0 1px rgba(255, 255, 255, 0.04);
   padding: 0.375rem;
   outline: none;
   min-width: 13rem;
@@ -101,21 +103,43 @@
   cursor: pointer;
   background-color: transparent;
   height: 2.25rem;
-  padding: 0 0.5rem;
+  padding: 0 0.5rem 0 0.625rem;
   border-radius: 0.25rem;
   border: 1px solid transparent;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--row-accent-color);
+    opacity: 0.55;
+    border-radius: 0 2px 2px 0;
+  }
 
   &[data-hovered] {
-    background-color: var(--color-quaternary);
+    background-color: color-mix(in srgb, var(--row-accent-color) 10%, transparent);
   }
 
   &[data-pressed] {
-    background-color: var(--color-neutral);
+    background-color: color-mix(in srgb, var(--row-accent-color) 6%, transparent);
   }
 
   &[data-selected] {
-    background-color: var(--color-quaternary);
-    border-color: var(--color-secondary);
+    background-color: color-mix(in srgb, var(--row-accent-color) 14%, transparent);
+    border-color: color-mix(in srgb, var(--row-accent-color) 45%, transparent);
+
+    &[data-hovered] {
+      background-color: color-mix(in srgb, var(--row-accent-color) 20%, transparent);
+    }
+
+    .rowIcon {
+      opacity: 1;
+    }
   }
 }
 
@@ -129,12 +153,13 @@
 
 .rowIcon {
   font-size: 1.1875rem;
-  color: var(--color-tertiary);
+  color: var(--row-accent-color);
+  opacity: 0.7;
 }
 
 .checkmark {
   font-size: 1rem;
-  color: var(--color-secondary);
+  color: var(--row-accent-color);
 }
 
 @keyframes popover-slide {
