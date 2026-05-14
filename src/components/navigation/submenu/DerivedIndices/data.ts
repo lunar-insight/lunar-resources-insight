@@ -44,7 +44,7 @@ export const DERIVED_INDICES: DerivedIndex[] = [
     highLabel: 'Highland',
     info: {
       title: 'Magnesium Number (Mg#)',
-      body: 'Mg# is a petrological index that measures magma evolution. Low values indicate evolved mare basalt, typically richer in FeO and potentially ilmenite. High values indicate primitive, mantle-like highland material. Unlike raw oxide maps that show how much of a compound is present, Mg# answers what type of terrain this is, replacing the need to overlay MgO and FeO maps mentally. High Mg# anomalies inside large impact craters can also flag excavated mantle or lower-crustal material.',
+      body: 'Mg# is a derived petrological index that measures magma evolution. Low values indicate evolved mare basalt, typically richer in FeO and potentially ilmenite. High values indicate primitive, mantle-like highland material. Unlike raw oxide maps that show how much of a compound is present, Mg# answers what type of terrain this is, replacing the need to overlay MgO and FeO maps mentally. High Mg# anomalies inside large impact craters can also flag excavated mantle or lower-crustal material.',
     },
     dataType: 'map',
     layerId: 'mg_number',
