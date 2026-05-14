@@ -24,8 +24,12 @@ export const DERIVED_INDEX_LAYER_MAP: Record<string, { id: string; displayName: 
   'mg-number': { id: 'mg_number', displayName: 'Mg# Magnesium Number' },
 };
 
-export const DERIVED_INDEX_BY_LAYER_ID: Record<string, { lowLabel: string; highLabel: string }> = {
-  mg_number: { lowLabel: 'Highland', highLabel: 'Mare' },
+export const DERIVED_INDEX_BY_LAYER_ID: Record<string, {
+  lowLabel: string;
+  highLabel: string;
+  range: [number, number];
+}> = {
+  mg_number: { lowLabel: 'Mare', highLabel: 'Highland', range: [0, 1] },
 };
 
 export const DERIVED_INDICES: DerivedIndex[] = [
@@ -35,12 +39,12 @@ export const DERIVED_INDICES: DerivedIndex[] = [
     name: 'Magnesium Number',
     formula: 'MgO / (MgO + FeO) × 100',
     inputs: ['mgo', 'feo'],
-    purpose: 'Discriminates highland from mare terrain in a single layer',
-    lowLabel: 'Highland',
-    highLabel: 'Mare',
+    purpose: 'Discriminates mare basalt from highland crust and flags potential mantle exposures.',
+    lowLabel: 'Mare',
+    highLabel: 'Highland',
     info: {
       title: 'Magnesium Number (Mg#)',
-      body: 'Mg# is a petrological index that measures magma evolution. High values indicate primitive, mantle-like highland material. Low values indicate evolved mare basalt, typically richer in FeO and potentially ilmenite. Unlike raw oxide maps that show how much of a compound is present, Mg# answers what type of terrain this is, replacing the need to overlay MgO and FeO maps mentally.',
+      body: 'Mg# is a petrological index that measures magma evolution. Low values indicate evolved mare basalt, typically richer in FeO and potentially ilmenite. High values indicate primitive, mantle-like highland material. Unlike raw oxide maps that show how much of a compound is present, Mg# answers what type of terrain this is, replacing the need to overlay MgO and FeO maps mentally. High Mg# anomalies inside large impact craters can also flag excavated mantle or lower-crustal material.',
     },
     dataType: 'map',
     layerId: 'mg_number',

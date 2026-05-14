@@ -1,0 +1,127 @@
+$track-height: 6px;
+$marker-size: 14px;
+
+.visualizer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 0.25rem 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.rowNodata {
+  opacity: 0.4;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.rowLabel {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #e7e7e7;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.trackWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.lowLabel,
+.highLabel {
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.trackContainer {
+  flex: 1;
+  position: relative;
+  height: $marker-size;
+  display: flex;
+  align-items: center;
+}
+
+// Background image is applied via inline style from the layer's selected colormap
+.track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: $track-height;
+  border-radius: $track-height;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: $marker-size;
+  height: $marker-size;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--color-secondary);
+  box-shadow: 0 0 4px rgba(133, 162, 175, 0.5);
+  pointer-events: none;
+  transition: left 0.08s ease-out;
+}
+
+.value {
+  font-size: 0.65rem;
+  font-family: 'Courier New', monospace;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nodataLabel {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  font-family: 'Courier New', monospace;
+  color: #888;
+  letter-spacing: 0.05em;
+}
+
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  small {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.4);
+  }
+}

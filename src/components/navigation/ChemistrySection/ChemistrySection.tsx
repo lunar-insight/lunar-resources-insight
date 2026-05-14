@@ -15,6 +15,7 @@ import { DraggableBoxContentContainer } from 'components/layout/DraggableBoxCont
 import { Portal } from 'components/ui/Portal/Portal';
 import './MapHoverValuesBox.scss';
 import { ResourceBarsVisualizer } from 'components/viewer/ResourceBarsVisualizer/ResourceBarsVisualizer';
+import { DerivedIndexVisualizer } from 'components/viewer/DerivedIndexVisualizer/DerivedIndexVisualizer';
 import { useBoundaryRef } from 'components/reference/BoundaryRefProvider';
 import { useZIndex } from 'utils/ZIndexProvider';
 
@@ -25,6 +26,7 @@ const ChemistrySection: React.FC = () => {
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
   const [compoundHoverValues, setCompoundHoverValues] = useState<{[key: string]: number} | null>(null);
+  const [derivedIndexHoverValues, setDerivedIndexHoverValues] = useState<{[key: string]: number} | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   const boundaryRef = useBoundaryRef();
@@ -47,6 +49,11 @@ const ChemistrySection: React.FC = () => {
     [selectedLayers]
   );
 
+  const selectedDerivedIndexLayerIds = useMemo(
+    () => selectedLayers.filter(id => layersConfig.layers[id]?.category === 'derived-index'),
+    [selectedLayers]
+  );
+
   const selectedElements = useMemo(() => {
     const atomicNumbers = new Set<number>();
     selectedChemicalLayerIds.forEach(layerId => {
@@ -65,16 +72,21 @@ const ChemistrySection: React.FC = () => {
   }, [viewer]);
 
   useEffect(() => {
-    pointValueService.setSelectedLayers([...selectedChemicalLayerIds, ...selectedCompoundLayerIds]);
-  }, [selectedChemicalLayerIds, selectedCompoundLayerIds]);
+    pointValueService.setSelectedLayers([
+      ...selectedChemicalLayerIds,
+      ...selectedCompoundLayerIds,
+      ...selectedDerivedIndexLayerIds,
+    ]);
+  }, [selectedChemicalLayerIds, selectedCompoundLayerIds, selectedDerivedIndexLayerIds]);
 
   useEffect(() => {
-    const eitherOpen = showElementScanner || showCompoundScanner;
+    const eitherOpen = showElementScanner || showCompoundScanner || showDerivedIndexScanner;
     if (!eitherOpen) {
       pointValueService.stop();
       setHoverValues(null);
       setAllHoverValues(null);
       setCompoundHoverValues(null);
+      setDerivedIndexHoverValues(null);
       setIsPaused(false);
       return;
     }
@@ -85,6 +97,7 @@ const ChemistrySection: React.FC = () => {
       if (data.isPaused) {
         setHoverValues(null);
         setCompoundHoverValues(null);
+        setDerivedIndexHoverValues(null);
         return;
       }
       if (showElementScanner) {
@@ -100,9 +113,15 @@ const ChemistrySection: React.FC = () => {
         );
         setCompoundHoverValues(compoundVals);
       }
+      if (showDerivedIndexScanner) {
+        const derivedIndexVals = Object.fromEntries(
+          Object.entries(data.displayValues).filter(([id]) => selectedDerivedIndexLayerIds.includes(id))
+        );
+        setDerivedIndexHoverValues(derivedIndexVals);
+      }
     });
     return unsubscribe;
-  }, [showElementScanner, showCompoundScanner, selectedChemicalLayerIds, selectedCompoundLayerIds]);
+  }, [showElementScanner, showCompoundScanner, showDerivedIndexScanner, selectedChemicalLayerIds, selectedCompoundLayerIds, selectedDerivedIndexLayerIds]);
 
   // Auto close element scanner when all elements are deselected while scanner is open
   useEffect(() => {
@@ -119,6 +138,14 @@ const ChemistrySection: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompoundLayerIds.length]);
+
+  // Auto close derived index scanner when all derived index layers are deselected while scanner is open
+  useEffect(() => {
+    if (selectedDerivedIndexLayerIds.length === 0 && showDerivedIndexScanner) {
+      toggleDerivedIndexScanner(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDerivedIndexLayerIds.length]);
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -198,6 +225,32 @@ const ChemistrySection: React.FC = () => {
     return (
       <ResourceBarsVisualizer
         values={compoundHoverValues}
+        nodataLayerIds={nodataLayerIds}
+        width={270}
+      />
+    );
+  };
+
+  const renderDerivedIndexBoxContent = () => {
+    if (isPaused) {
+      return (
+        <div>
+          <p>⏸️ Scan paused</p>
+          <small>Move the mouse on the globe to resume</small>
+        </div>
+      );
+    }
+
+    if (derivedIndexHoverValues === null) {
+      return <p>Hover over the map to scan resources</p>;
+    }
+
+    const presentIds = new Set(Object.keys(derivedIndexHoverValues));
+    const nodataLayerIds = selectedDerivedIndexLayerIds.filter(id => !presentIds.has(id));
+
+    return (
+      <DerivedIndexVisualizer
+        values={derivedIndexHoverValues}
         nodataLayerIds={nodataLayerIds}
         width={270}
       />
@@ -320,7 +373,11 @@ const ChemistrySection: React.FC = () => {
           boundaryRef={boundaryRef}
           id="derived-index-scanner-box"
           cascadeIndex={2}
-        />
+        >
+          <div className='map-hover-values-box__content'>
+            {renderDerivedIndexBoxContent()}
+          </div>
+        </DraggableBoxContentContainer>
       </Portal>
 
       <ModalOverlayContainer
