@@ -54,9 +54,11 @@
   }
 }
 
-.icon {
-  font-size: 1.3125rem;
-  color: var(--color-secondary);
+.radarIcon {
+  width: 21px;
+  height: 21px;
+  flex-shrink: 0;
+  overflow: visible;
 }
 
 .label {
