@@ -1,0 +1,50 @@
+networks:
+  frontend:
+    internal: true
+  terrain-net:
+    internal: true
+  proxy-out:
+
+services:
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - .:/app:ro              # source files, read-only
+      - /app/node_modules     # anonymous volume
+    user: "node"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [frontend]
+
+  terrain:
+    image: node:24-alpine
+    working_dir: /app
+    volumes:
+      - ./terrain-server.js:/app/terrain-server.js:ro
+      - ${TERRAIN_PATH}:/terrain:ro
+    environment:
+      - TERRAIN_PORT=${TERRAIN_PORT}
+      - TERRAIN_PATH=/terrain
+      - TERRAIN_HOST=0.0.0.0
+    user: "node"
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    networks: [terrain-net]
+    command: node terrain-server.js
+
+  proxy:
+    image: nginx:alpine
+    volumes:
+      - ./nginx.dev.conf.template:/etc/nginx/templates/default.conf.template:ro
+    environment:
+      - TERRAIN_PORT=${TERRAIN_PORT}
+    ports:
+      - "5173:5173"
+      - "${TERRAIN_PORT}:${TERRAIN_PORT}"
+    networks: [frontend, terrain-net, proxy-out]
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID]
+    security_opt: [no-new-privileges:true]
+    depends_on: [dev, terrain]

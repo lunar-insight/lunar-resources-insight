@@ -13,7 +13,7 @@ This project is a work in progress and not in a ready to use state.
 Lunar Resources Insight use different technologies to work properly:
 
 - [Node.js](https://nodejs.org/) - Javascript runtime environment.
-- [Webpack](https://webpack.js.org/) - Static module bundler for javascript.
+- [Vite](https://vitejs.dev/) - Frontend build tool and dev server.
 - [Planetcantile](https://github.com/AndrewAnnex/planetcantile)
 
 ### Configuration
@@ -70,3 +70,42 @@ gdal_translate -of COG -co "COMPRESS=DEFLATE" -co "PREDICTOR=2" ^
 
 2. Open the project in your code editor and do `npm install`
 3. Start the project with `npm start`
+
+---
+
+## Docker
+
+### Development
+
+Starts the Vite dev server and the terrain server. Source files are mounted from the host.
+
+```sh
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| App | http://localhost:5173 |
+| Terrain | http://localhost:3001 |
+
+To stop: `docker compose down`.
+
+#### Workflow
+
+| Situation | Command | Note |
+|-----------|---------|------|
+| First start or after changing `package.json`, `package-lock.json` / `Dockerfile.dev` | `docker compose up --build` | Rebuilds the image |
+| Restart without dependency changes | `docker compose up` | Reuses cached image and `node_modules` |
+| Code changes | None | Vite picks them up instantly via hot module replacement |
+| Full reset (wipe volumes) | `docker compose down -v` then `--build` | Forces Vite dependency re-bundle on next start |
+
+### Production
+
+Builds the application and serves it with nginx.
+
+```sh
+docker build -t lunar-resources-insight .
+docker run -p 8080:80 lunar-resources-insight
+```
+
+Open `http://localhost:8080`.

@@ -1,0 +1,12 @@
+FROM node:24-alpine
+WORKDIR /app
+RUN chown node:node /app
+
+COPY --chown=node:node package*.json ./
+USER node
+RUN npm ci --ignore-scripts
+RUN npm audit --audit-level=high || true
+
+# Source code mounted at runtime via docker-compose volume
+# User, caps, and network isolation enforced by docker-compose
+CMD ["npx", "vite", "--host", "0.0.0.0", "--no-open"]
