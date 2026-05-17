@@ -1,6 +1,117 @@
 server {
     listen 5173;
 
+    # Planetcantile tile server — sanitize all upstream responses before they reach the client.
+    # Any header the upstream injects (cookies, server info, CORS overrides) is stripped here.
+    # Upstream errors are intercepted and returned as a clean 502 JSON response.
+
+    location /cog/ {
+        proxy_pass         http://planetcantile:8000/cog/;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+
+        proxy_connect_timeout    5s;
+        proxy_read_timeout       30s;
+        proxy_max_temp_file_size 10m;
+
+        proxy_intercept_errors on;
+        error_page 400 401 403 404 500 502 503 504 = @tile_error;
+
+        header_filter_by_lua_block {
+            local keep = {
+                ["content-type"]      = true,
+                ["content-length"]    = true,
+                ["content-encoding"]  = true,
+                ["content-range"]     = true,
+                ["transfer-encoding"] = true,
+                ["accept-ranges"]     = true,
+                ["cache-control"]     = true,
+                ["etag"]              = true,
+                ["last-modified"]     = true,
+                ["expires"]           = true,
+            }
+            for k in pairs(ngx.resp.get_headers()) do
+                if not keep[k:lower()] then
+                    ngx.header[k] = nil
+                end
+            end
+            ngx.header["X-Content-Type-Options"] = "nosniff"
+        }
+    }
+
+    location /stac/ {
+        proxy_pass         http://planetcantile:8000/stac/;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+
+        proxy_connect_timeout    5s;
+        proxy_read_timeout       30s;
+        proxy_max_temp_file_size 1m;
+
+        proxy_intercept_errors on;
+        error_page 400 401 403 404 500 502 503 504 = @tile_error;
+
+        header_filter_by_lua_block {
+            local keep = {
+                ["content-type"]      = true,
+                ["content-length"]    = true,
+                ["content-encoding"]  = true,
+                ["content-range"]     = true,
+                ["transfer-encoding"] = true,
+                ["accept-ranges"]     = true,
+                ["cache-control"]     = true,
+                ["etag"]              = true,
+                ["last-modified"]     = true,
+                ["expires"]           = true,
+            }
+            for k in pairs(ngx.resp.get_headers()) do
+                if not keep[k:lower()] then
+                    ngx.header[k] = nil
+                end
+            end
+            ngx.header["X-Content-Type-Options"] = "nosniff"
+        }
+    }
+
+    location /colorMaps/ {
+        proxy_pass         http://planetcantile:8000/colorMaps/;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+
+        proxy_connect_timeout    5s;
+        proxy_read_timeout       10s;
+        proxy_max_temp_file_size 1m;
+
+        proxy_intercept_errors on;
+        error_page 400 401 403 404 500 502 503 504 = @tile_error;
+
+        header_filter_by_lua_block {
+            local keep = {
+                ["content-type"]      = true,
+                ["content-length"]    = true,
+                ["content-encoding"]  = true,
+                ["content-range"]     = true,
+                ["transfer-encoding"] = true,
+                ["accept-ranges"]     = true,
+                ["cache-control"]     = true,
+                ["etag"]              = true,
+                ["last-modified"]     = true,
+                ["expires"]           = true,
+            }
+            for k in pairs(ngx.resp.get_headers()) do
+                if not keep[k:lower()] then
+                    ngx.header[k] = nil
+                end
+            end
+            ngx.header["X-Content-Type-Options"] = "nosniff"
+        }
+    }
+
+    location @tile_error {
+        default_type application/json;
+        return 502 '{"error":"tile service unavailable"}';
+    }
+
     location / {
         proxy_pass http://dev:5173;
         proxy_http_version 1.1;

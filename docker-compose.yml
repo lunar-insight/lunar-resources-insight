@@ -4,6 +4,9 @@ networks:
   terrain-net:
     internal: true
   proxy-out:
+  planetcantile-net:
+    external: true
+    name: planetcantile_app-net
 
 services:
   dev:
@@ -35,7 +38,9 @@ services:
     command: node terrain-server.js
 
   proxy:
-    image: nginx:alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.proxy
     volumes:
       - ./nginx.dev.conf.template:/etc/nginx/templates/default.conf.template:ro
     environment:
@@ -43,7 +48,7 @@ services:
     ports:
       - "5173:5173"
       - "${TERRAIN_PORT}:${TERRAIN_PORT}"
-    networks: [frontend, terrain-net, proxy-out]
+    networks: [frontend, terrain-net, proxy-out, planetcantile-net]
     cap_drop: [ALL]
     cap_add: [CHOWN, SETUID, SETGID]
     security_opt: [no-new-privileges:true]

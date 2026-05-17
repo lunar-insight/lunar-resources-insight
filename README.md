@@ -18,28 +18,46 @@ Lunar Resources Insight use different technologies to work properly:
 
 ### Configuration
 
-Create a private .env config file in your project at the same level
+Create the env files listed below in the project root. They are not committed. Add them to `.gitignore`.
 
-1. Create an `.env` file in the project directory.
-2. In the `.env` file, add the following environment variable with your local information:
+### ENV Files
 
-Edit the config.js file with your map server configuration with your workspace name and layer name assuming you are using GeoServer.
+Two env files are used, one per environment. Vite loads `.env` always and `.env.production` automatically when running `npm run build`, with `.env.production` taking priority.
 
-### ENV File
+**`.env`** (development only, not committed):
 
 ```
 NODE_ENV=development
 
-REACT_APP_SERVER_URL=http://127.0.0.1:8000
+# Empty string: tile API calls use relative paths (/cog/, /stac/, /colorMaps/)
+# routed through the nginx dev proxy on the same origin, avoiding cross-origin issues.
+VITE_SERVER_URL=
 
-REACT_APP_WORKSPACE_PATH = file://C:/Your/File/Path/To/Folder
+# Container-internal base path for COG (.tif) tile requests sent to planetcantile.
+# Always /data. The actual host directory is set via DATA_PATH in planetcantile's .env file.
+VITE_WORKSPACE_PATH=/data
 
-REACT_APP_TERRAIN_URL=http://localhost:3001
+# Port the terrain server listens on. Must match TERRAIN_PORT below.
+VITE_TERRAIN_URL=http://localhost:3001
 
+# Port used by both the terrain container and the nginx proxy (docker compose).
 TERRAIN_PORT=3001
 
+# Host path to the Cesium terrain tiles directory, mounted read-only into the terrain container.
 TERRAIN_PATH=D:/Terrain/cesium-terrain
 ```
+
+**`.env.production`** (production only, not committed):
+
+```
+NODE_ENV=production
+
+# Empty string: tile API calls use relative paths (/cog/, /stac/, /colorMaps/)
+# so they route through the production nginx on the same origin.
+VITE_SERVER_URL=
+```
+
+> `VITE_SERVER_URL` must not be removed entirely. An empty string is intentional and routes requests through nginx. Removing the variable causes the app to throw on startup.
 
 
 ### Terrain
@@ -101,7 +119,7 @@ To stop: `docker compose down`.
 
 ### Production
 
-Builds the application and serves it with nginx.
+Builds the application and serves it with OpenResty (nginx + Lua). Vite bakes environment variables at build time, so `.env.production` must exist before building.
 
 ```sh
 docker build -t lunar-resources-insight .
@@ -109,3 +127,9 @@ docker run -p 8080:80 lunar-resources-insight
 ```
 
 Open `http://localhost:8080`.
+
+The production image proxies `/cog/`, `/stac/`, and `/colorMaps/` to a `planetcantile` upstream. For this to resolve, the container must be on the same Docker network as a running planetcantile instance:
+
+```sh
+docker run -p 8080:80 --network planetcantile_app-net lunar-resources-insight
+```

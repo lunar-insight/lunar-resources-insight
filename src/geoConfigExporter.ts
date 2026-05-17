@@ -11,7 +11,7 @@ export const tilerEndpoints = {
   colorMap: `${mapServerUrl}/colorMaps/{colormap}`
 };
 
-if (!mapServerUrl) {
+if (mapServerUrl === undefined) {
   throw new Error('VITE_SERVER_URL is not defined in environment variables.');
 }
 

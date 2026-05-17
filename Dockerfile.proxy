@@ -1,0 +1,10 @@
+FROM openresty/openresty:alpine
+
+# gettext provides envsubst for template processing at startup
+RUN apk add --no-cache gettext
+
+COPY proxy-entrypoint.sh /proxy-entrypoint.sh
+RUN chmod +x /proxy-entrypoint.sh
+
+ENTRYPOINT ["/proxy-entrypoint.sh"]
+CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
