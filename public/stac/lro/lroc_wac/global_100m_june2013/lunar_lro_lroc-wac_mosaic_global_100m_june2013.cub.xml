@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!--
+<!DOCTYPE metadata SYSTEM "http://www.fgdc.gov/metadata/fgdc-std-001-1998.dtd"> 
+-->
+<metadata>
+  <idinfo>
+    <citation>
+      <citeinfo>
+        <origin>Arizona State University</origin>
+        <pubdate>20130601</pubdate>
+        <title>LRO WAC Mosaic v3</title>
+        <edition>3</edition>
+        <geoform>raster digital data</geoform>
+        <onlink>http://www.lmmp.nasa.gov</onlink>
+        <lworkcit>
+          <citeinfo>
+            <origin>Arizona State University</origin>
+            <pubdate>20130601</pubdate>
+            <title>Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013.cub</title>
+            <edition>June 2013</edition>
+            <geoform>raster digital data</geoform>
+            <pubinfo>
+              <pubplace>Pasadena, CA</pubplace>
+              <publish>Jet Propulsion Laboratory (JPL)</publish>
+            </pubinfo>
+            <onlink>http://www.lmmp.nasa.gov</onlink>
+          </citeinfo>
+        </lworkcit>
+      </citeinfo>
+    </citation>
+    <descript>
+      <abstract>This is a preliminary global mosaic of the Wide Angle Camera (WAC) of the Lunar Reconnaissance Orbiter Camera (LROC). The WAC global mosaic is comprised of over 15,000 images acquired between November 2009 and February 2011. The WAC maps the whole Moon in one month, however the solar incidence angle at the equator changes about 28 deg from the beginning to the end of the month. This version corrects the polar illumination differences seen in previous mosaics.</abstract>
+      <purpose>The LROC WAC will provide 100 meter per pixel images with Sun angles optimal for morphological mapping (the Sun 15 deg to 35 deg above the horizon), except in polar regions where the Sun is always very low on the horizon. The WAC global map will improve efforts to characterize terrains based on crater counts, especially on the far side of the Moon where existing images from earlier missions have high Sun and poor resolution.</purpose>
+    </descript>
+    <timeperd>
+      <timeinfo>
+        <sngdate>
+          <caldate>2013</caldate>
+        </sngdate>
+      </timeinfo>
+      <current>Publication date</current>
+    </timeperd>
+    <status>
+      <progress>In work</progress>
+      <update>As needed</update>
+    </status>
+    <spdom>
+      <bounding>
+        <westbc>-180</westbc>
+        <eastbc>180</eastbc>
+        <northbc>90</northbc>
+        <southbc>-90</southbc>
+      </bounding>
+    </spdom>
+    <keywords>
+      <theme>
+        <themekt>http://www.lmmp.nasa.gov/redmine/projects/lmmpwiki/wiki/Glossary</themekt>
+        <themekey>Lunar Mapping and Modeling Project (LMMP)</themekey>
+        <themekey>Lunar Reconnaissance Orbiter (LRO)</themekey>
+        <themekey>Lunar Reconnaissance Orbiter Camera (LROC)</themekey>
+        <themekey>Lunar Orbiter Laser Altimeter (LOLA)</themekey>
+        <themekey>LOLA Gridded Data Record (GDR)</themekey>
+      </theme>
+      <place>
+        <placekt>http://www.lmmp.nasa.gov/redmine/projects/lmmpwiki/wiki/Glossary</placekt>
+        <placekey>The Moon</placekey>
+        <placekey>Earth</placekey>
+      </place>
+    </keywords>
+    <accconst>None</accconst>
+    <useconst>None</useconst>
+    <ptcontac>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>Arizona State University</cntorg>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing address</addrtype>
+          <address>1100 S. Cady Mall</address>
+          <city>Tempe</city>
+          <state>AZ</state>
+          <postal>85287-3603</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>480-965-5081</cntvoice>
+      </cntinfo>
+    </ptcontac>
+    <datacred>The LROC Team</datacred>
+    <secinfo>
+      <secsys>None</secsys>
+      <secclass>Unclassified</secclass>
+      <sechandl>None</sechandl>
+    </secinfo>
+    <native>ISIS 3.2.1, GDAL 1.10</native>
+  </idinfo>
+  <dataqual>
+    <logic>The LROC WAC consists of a 1k x 1k CCD frame which is split up into sub-frames for seven different spectral bands. Subframes consists of 14 lines with 704 pxl/line, while subframes form an image strip. Single WAC images within an orbit cover 10 degrees of latitude. From nominal 50 km orbit altitude LROC WAC image have a 75 m/pxl ground scale.</logic>
+    <complete>This is a preliminary product.</complete>
+    <posacc>
+      <horizpa>
+        <horizpar>The absolute horizontal accuracy is dependent on the absolute horizontal accuracy of the LOLA data. The absolute horizontal accuracy of the LOLA data was as much as 300 meters, however, is expected that the absolute horizontal accuracy of the LOLA data will be close to 12 to 50 meters once the crossover analysis is applied.</horizpar>
+        <qhorizpa>
+          <horizpav>300</horizpav>
+          <horizpae>12-300m absolute accuracy, 1-5m relative accuracy</horizpae>
+        </qhorizpa>
+      </horizpa>
+      <vertacc>
+        <vertaccr>The absolute vertical accuracy of the LOLA data is expected to approach 1 meter, but at the time this DEM was created, the vertical accuracy of the LOLA data was approximately 10 meters. The relative precision of the DEM is expected to be 1 meter, but can be as large as 2 meters.</vertaccr>
+        <qvertpa>
+          <vertaccv>10</vertaccv>
+          <vertacce>1-10m absolute accuracy, 1-5m precision. Absolute accuracy is based on LOLA error estimates. Precision is based on SOCET SET precision and RMS error between LOLA profiles and DEM.</vertacce>
+        </qvertpa>
+        <qvertpa>
+          <vertaccv>10</vertaccv>
+          <vertacce>http://directory.eoportal.org/presentations/129/13466.html</vertacce>
+        </qvertpa>
+      </vertacc>
+    </posacc>
+    <lineage>
+      <srcinfo>
+        <srccite>
+          <citeinfo>
+            <origin>Robinson, Mark S. et. al.</origin>
+            <origin>Springer Netherlands, Space Science Reviews Volume 150, Numbers 1-4, 81-124, DOI: 10.1007/s11214-010-9634-2</origin>
+            <pubdate>20100101</pubdate>
+            <title>Lunar Reconnaissance Orbiter Camera (LROC) Instrument Overview</title>
+            <geoform>document</geoform>
+            <onlink>http://dx.doi.org/10.1007/s11214-010-9634-2</onlink>
+          </citeinfo>
+        </srccite>
+        <typesrc>PDS EDR</typesrc>
+        <srctime>
+          <timeinfo>
+            <rngdates>
+              <begdate>2009</begdate>
+              <enddate>2011</enddate>
+            </rngdates>
+          </timeinfo>
+          <srccurr>ground condition</srccurr>
+        </srctime>
+        <srccitea>LROC</srccitea>
+        <srccontr>http://lroc.sese.asu.edu/data/LRO-L-LROC-2-EDR-V1.0/LROLRC_0001/DOCUMENT/LROCSIS.PDF</srccontr>
+      </srcinfo>
+      <!-- the srcinfo element can be repeated Unlimited Times -->
+      <srcinfo>
+        <srccite>
+          <citeinfo>
+            <origin>Smith, David E. et. al.</origin>
+            <origin>Solar System Exploration Division, NASA Goddard Space Flight Center, Greenbelt</origin>
+            <pubdate>20080108</pubdate>
+            <title>The Lunar Orbiter Laser Altimeter Investigation on the Lunar Reconnaissance Orbiter Mission</title>
+            <geoform>document</geoform>
+            <onlink>http://lunar.gsfc.nasa.gov/lola/images/smith_lola_ssr09.pdf</onlink>
+          </citeinfo>
+        </srccite>
+        <typesrc>PDS EDR</typesrc>
+        <srctime>
+          <timeinfo>
+            <rngdates>
+              <begdate>2009</begdate>
+              <enddate>2011</enddate>
+            </rngdates>
+          </timeinfo>
+          <srccurr>ground condition</srccurr>
+        </srctime>
+        <srccitea>LOLA</srccitea>
+        <srccontr>http://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/document/rdrsis.pdf</srccontr>       
+      </srcinfo>
+      <procstep>
+        <procdesc>To even out the incidence angle variations, the equatorial mosaic is comprised of data collected over three periods (1/20/2010 to 1/28/2010, 5/30/2010 to 6/6/2010, 7/24/2010 to 7/31/2010). The South Pole mosaic images were acquired 8/10/10 to 9/19/10 and the north polar images 4/22/10 to 5/19/10. Some gores were filled with data taken at other times. The non-polar images were map projected onto the GLD100 (WAC derived 100 m/pixel DTM), while polar images were map projected on the LOLA shape model (80 deg to 90 deg; N/S) and the GLD100 (60 deg to 80 deg N/S). This version corrects the polar illumination differences seen in previous mosaics.</procdesc>
+        <procdate>20130601</procdate>
+        <proccont>
+          <cntinfo>
+            <cntorgp>
+              <cntorg>Arizona State University</cntorg>
+              <cntper>Mark Robinson</cntper>
+            </cntorgp>
+            <cntaddr>
+              <addrtype>mailing address</addrtype>
+              <address>1100 S. Cady Mall</address>
+              <city>Tempe</city>
+              <state>AZ</state>
+              <postal>85287-3603</postal>
+              <country>USA</country>
+            </cntaddr>
+            <cntvoice>480-965-5081</cntvoice>
+            <cntemail>robinson@ser.asu.edu</cntemail>
+          </cntinfo>
+        </proccont>
+      </procstep>
+    </lineage>
+  </dataqual>
+  <spdoinfo>
+    <direct>Raster</direct>
+    <rastinfo>
+      <rasttype>Pixel</rasttype>
+      <rowcount>48517</rowcount>
+      <colcount>109165</colcount>
+      <vrtcount>1</vrtcount>
+    </rastinfo>
+  </spdoinfo>
+  <spref>
+    <horizsys>
+      <geograph>
+        <latres>0.003298</latres>
+        <longres>0.003298</longres>
+        <geogunit>Decimal degrees</geogunit>
+      </geograph>
+      <geodetic>
+        <ellips>Moon 2000</ellips>
+        <semiaxis>1737400.0</semiaxis>
+        <denflat>1.0e+10</denflat>
+      </geodetic>
+    </horizsys>
+    <vertdef>
+      <altsys>
+        <altdatum>Moon 2000</altdatum>
+        <altres>1</altres>
+        <altunits>Meters</altunits>
+        <altenc>Explicit elevation coordinate included with horizontal coordinates</altenc>
+      </altsys>
+    </vertdef>
+  </spref>
+  <eainfo>
+    <overview>
+      <eaover>Planetary Radius = 1737400m</eaover>
+      <eadetcit>Archinal, B. A., et al., (2011). Report of the IAU Working Group on Cartographic Coordinates and Rotational Elements: 2009, Cel. Mech. and Dyn. Ast., 109, no. 2, 101, DOI 10.1007/s10569-010-9320-4. URL: http://www.springerlink.com/content/g272325h45517581/</eadetcit>
+    </overview>
+  </eainfo>
+  <metainfo>
+    <metd>20110427</metd>
+    <metc>
+      <cntinfo>
+        <cntorgp>
+          <cntorg>United States Geological Survey</cntorg>
+          <cntper>Trent Hare</cntper>
+        </cntorgp>
+        <cntaddr>
+          <addrtype>mailing address</addrtype>
+          <address>2255 North Gemini Drive</address>
+          <city>Flagstaff</city>
+          <state>AZ</state>
+          <postal>86001</postal>
+          <country>USA</country>
+        </cntaddr>
+        <cntvoice>928-556-7100</cntvoice>
+        <cntemail>thare@usgs.gov</cntemail>
+      </cntinfo>
+    </metc>
+    <metstdn>FGDC Content Standards for Digital Geospatial Metadata</metstdn>
+    <metstdv>FGDC-STD-001-1998</metstdv>
+  </metainfo>
+</metadata>

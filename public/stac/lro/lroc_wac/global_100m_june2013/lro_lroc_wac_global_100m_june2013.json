@@ -1,0 +1,134 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "lro-lroc-wac-global-morphology-100m-june2013",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": null,
+    "start_datetime": "2010-01-20T00:00:00Z",
+    "end_datetime": "2010-09-19T00:00:00Z",
+    "title": "LRO LROC WAC Global Morphology Mosaic — 100m (June 2013, v3)",
+    "mission": "LRO",
+    "instruments": ["LROC-WAC"],
+    "platform": "lro",
+    "target": "Moon",
+    "data_set_id": "WAC_morphology_globe_June2013_100m",
+    "version": "3",
+    "version_date": "2013-06",
+    "producer_id": "ASU",
+    "producer_full_name": "Arizona State University",
+    "spatial_resolution_m": 100,
+    "gsd": 100,
+    "raster_samples": 109164,
+    "raster_lines": 54582,
+    "sample_bits": 8,
+    "sample_type": "UnsignedByte",
+    "bands": 1,
+    "spectral_band_nm": 643,
+    "map_projection": "SimpleCylindrical",
+    "map_scale_m_per_px": 100.0,
+    "map_resolution_px_per_deg": 303.2333,
+    "crs": "PROJCRS[\"SimpleCylindrical MOON\"] — Equidistant Cylindrical on D_MOON sphere (1737400 m), units: metres. No EPSG/IAU code assigned.",
+    "coordinate_system": "Planetocentric",
+    "longitude_direction": "PositiveEast",
+    "lunar_radius_m": 1737400.0,
+    "nodata": 0,
+    "processing:level": "L3",
+    "processing:lineage": "More than 15,000 WAC UV-VIS images (643 nm) acquired during dedicated nadir-pointing campaigns designed to achieve a standardised solar incidence angle of ~65 deg at the equator: equatorial coverage January 20-28, May 30-June 6, and July 24-31, 2010; north polar coverage April 22-May 19, 2010; south polar coverage August 10-September 19, 2010. Some gores filled with data acquired at other times. LOLA-derived crossover-corrected ephemeris and improved camera pointing applied to each WAC image before mosaicking. Non-polar images map-projected onto the GLD100 (WAC-derived 100 m/pixel DTM); polar images map-projected onto the LOLA shape model (80-90 deg N/S) and the GLD100 (60-80 deg N/S). Mosaicked and processed using ISIS v3 software. Photometric normalisation applied to minimise inter-campaign brightness discontinuities. Version 3 (June 2013) greatly reduced polar/equatorial seam brightness differences present in earlier versions; residual discontinuities remain due to differing seasonal acquisition geometries.",
+    "lri:data_use": "basemap",
+    "lri:data_use_note": "Primary visual basemap for the 3D Cesium viewer. Grayscale morphology at 100 m/pixel provides global context for overlaid resource and chemistry layers.",
+    "lri:quality_note": "Brightness discontinuities exist between the polar and equatorial mosaic regions due to differing seasonal geometries at the time of acquisition. Not suitable for quantitative photometric analysis across the polar/equatorial boundary."
+  },
+  "assets": {
+    "data": {
+      "href": "lro_lroc_wac_global_100m_june2013_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Global Morphology Mosaic 100m — SimpleCylindrical, D_MOON sphere",
+      "roles": ["data"]
+    },
+    "thumbnail": {
+      "href": "./moon_lro_lroc-wac_mosaic_global_100.jpg",
+      "type": "image/jpeg",
+      "title": "Thumbnail (100px)",
+      "roles": ["thumbnail"]
+    },
+    "overview_512": {
+      "href": "./moon_lro_lroc-wac_mosaic_global_512.jpg",
+      "type": "image/jpeg",
+      "title": "Browse image (512px)",
+      "roles": ["overview"]
+    },
+    "overview_1024": {
+      "href": "./moon_lro_lroc-wac_mosaic_global_1024.jpg",
+      "type": "image/jpeg",
+      "title": "Browse image (1024px)",
+      "roles": ["overview"]
+    },
+    "processing_script": {
+      "href": "./process.sh",
+      "type": "application/x-sh",
+      "title": "COG conversion script",
+      "roles": ["metadata", "reproducibility"]
+    },
+    "source_xml": {
+      "href": "./moon_lro_lroc_wac_global_morphology_mosaic_100m.xml",
+      "type": "application/xml",
+      "title": "USGS product metadata (XML)",
+      "roles": ["metadata"]
+    },
+    "source_pds3_label": {
+      "href": "./lunar_lro_lroc-wac_mosaic_global_100m_june2013_pds3.lbl",
+      "type": "text/plain",
+      "title": "PDS3 label",
+      "roles": ["metadata"]
+    },
+    "source_isis3_label": {
+      "href": "./lunar_lro_lroc-wac_mosaic_global_100m_june2013_isis3.lbl",
+      "type": "text/plain",
+      "title": "ISIS3 label",
+      "roles": ["metadata"]
+    },
+    "source_cub_xml": {
+      "href": "./lunar_lro_lroc-wac_mosaic_global_100m_june2013.cub.xml",
+      "type": "application/xml",
+      "title": "ISIS cube XML label",
+      "roles": ["metadata"]
+    }
+  },
+  "links": [
+    { "rel": "self",       "href": "./lro_lroc_wac_global_100m_june2013.json" },
+    { "rel": "root",       "href": "../../../catalog.json" },
+    { "rel": "parent",     "href": "../collection.json" },
+    { "rel": "collection", "href": "../collection.json" },
+    {
+      "rel": "derived_from",
+      "href": "https://astrogeology.usgs.gov/search/map/moon_lro_lroc_wac_global_morphology_mosaic_100m",
+      "type": "text/html",
+      "title": "USGS Astrogeology — LRO LROC WAC Global Morphology Mosaic"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1007/s11214-010-9634-2",
+      "title": "Robinson et al. 2010 — Lunar Reconnaissance Orbiter Camera (LROC) Instrument Overview"
+    },
+    {
+      "rel": "via",
+      "href": "https://astrogeology.usgs.gov/ckan/dataset/db948a2d-4d6a-4775-a0d3-12613d36f9e7/resource/2e25483b-918e-49cd-91e9-7379a6162048/download/lunar_lro_lroc-wac_mosaic_global_100m_june2013_pds3.lbl",
+      "type": "text/plain",
+      "title": "PDS3 label — upstream USGS source"
+    },
+    {
+      "rel": "via",
+      "href": "https://astrogeology.usgs.gov/ckan/dataset/db948a2d-4d6a-4775-a0d3-12613d36f9e7/resource/259c9184-63d9-424e-b9f9-9348cab7a203/download/lunar_lro_lroc-wac_mosaic_global_100m_june2013.lbl",
+      "type": "text/plain",
+      "title": "ISIS3 label — upstream USGS source"
+    }
+  ]
+}

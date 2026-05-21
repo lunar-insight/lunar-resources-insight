@@ -12,6 +12,7 @@
     { "rel": "child", "href": "./lunar_prospector/ns/catalog.json",  "title": "LP Neutron Spectrometer" },
     { "rel": "child", "href": "./lunar_prospector/wilson2018/catalog.json", "title": "LP Improved Maps - Wilson et al. 2018 (Pixon Reconstruction)" },
     { "rel": "child", "href": "./lunar_prospector/lawrence2022/catalog.json", "title": "LP Global Hydrogen Abundances - Lawrence et al. 2022 (REE-Corrected)" },
-    { "rel": "child", "href": "./clementine/catalog.json", "title": "Clementine UVVIS — CNN oxide maps (Qiu et al. 2025)" }
+    { "rel": "child", "href": "./clementine/catalog.json", "title": "Clementine UVVIS — CNN oxide maps (Qiu et al. 2025)" },
+    { "rel": "child", "href": "./lro/catalog.json", "title": "Lunar Reconnaissance Orbiter (LRO)" }
   ]
 }
