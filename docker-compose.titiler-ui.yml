@@ -1,0 +1,4 @@
+services:
+  proxy:
+    volumes:
+      - ./nginx.titiler-ui.conf:/etc/nginx/conf.d/titiler-ui.conf:ro

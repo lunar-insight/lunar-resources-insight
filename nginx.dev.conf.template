@@ -39,40 +39,6 @@ server {
         }
     }
 
-    location /stac/ {
-        proxy_pass         http://planetcantile:8000/stac/;
-        proxy_http_version 1.1;
-        proxy_set_header   Host $host;
-
-        proxy_connect_timeout    5s;
-        proxy_read_timeout       30s;
-        proxy_max_temp_file_size 1m;
-
-        proxy_intercept_errors on;
-        error_page 400 401 403 404 500 502 503 504 = @tile_error;
-
-        header_filter_by_lua_block {
-            local keep = {
-                ["content-type"]      = true,
-                ["content-length"]    = true,
-                ["content-encoding"]  = true,
-                ["content-range"]     = true,
-                ["transfer-encoding"] = true,
-                ["accept-ranges"]     = true,
-                ["cache-control"]     = true,
-                ["etag"]              = true,
-                ["last-modified"]     = true,
-                ["expires"]           = true,
-            }
-            for k in pairs(ngx.resp.get_headers()) do
-                if not keep[k:lower()] then
-                    ngx.header[k] = nil
-                end
-            end
-            ngx.header["X-Content-Type-Options"] = "nosniff"
-        }
-    }
-
     location /colorMaps/ {
         proxy_pass         http://planetcantile:8000/colorMaps/;
         proxy_http_version 1.1;
@@ -118,7 +84,11 @@ server {
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' ws: http://localhost:${TERRAIN_PORT}; worker-src 'self' blob:; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none';" always;
     }
+
+    # No-op when file is absent; populated by docker-compose.titiler-ui.yml
+    include /etc/nginx/conf.d/titiler-ui*.conf;
 }
 
 server {
