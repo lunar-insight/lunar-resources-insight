@@ -302,7 +302,7 @@ export function buildGradientPreviewUrl(
   width: number,
   height: number = 30
 ): string {
-  return `${tilerEndpoints.colorMap.replace('{colormap}', colormapName)}?format=png&width=${width}&height=${height}`;
+  return `${tilerEndpoints.colorMap.replace('{colormap}', colormapName)}?f=png&width=${width}&height=${height}`;
 }
 
 /**
