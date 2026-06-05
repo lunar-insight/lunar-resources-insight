@@ -4,9 +4,18 @@ export type LayerVariant = {
   stac: string;
 };
 
+export type LayerCategory =
+  | 'basemap'
+  | 'geographical'
+  | 'chemical'
+  | 'compound'
+  | 'derived-index'
+  | 'rock'
+  | 'mineral';
+
 export type LayerConfig = {
   filename: string;
-  category: string;
+  category: LayerCategory;
   displayName?: string;
   element?: string;
   compound?: string;

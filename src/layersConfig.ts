@@ -3,6 +3,22 @@ import type { LayersConfig } from './types/layers';
 export const layersConfig: LayersConfig = {
   layers: {
     /*
+      -------
+      Basemap
+      -------
+    */
+    lroc_wac_basemap: {
+      filename: "basemap/lro_lroc_wac_global_100m_june2013_COG.tif",
+      category: "basemap",
+      displayName: "LRO LROC WAC Global Mosaic (100m, June 2013)",
+      stac: "lro/lroc_wac/global_100m_june2013/lro_lroc_wac_global_100m_june2013.json",
+      metadata: {
+        source: "LRO LROC / ASU",
+        resolution: "100m/pixel",
+        description: "8-bit grayscale global lunar morphology mosaic, WAC 643 nm"
+      }
+    },
+    /*
       ------------------
       Geographical layer
       ------------------

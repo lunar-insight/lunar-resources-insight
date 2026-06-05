@@ -7,6 +7,7 @@ import { pointValueService } from 'services/PointValueService';
 import BottomRightControls from '../BottomRightControls/BottomRightControls';
 import TopRightControls from '../TopRightControls/TopRightControls';
 import { TerrainService } from 'services/TerrainService';
+import { layersConfig, buildCogTileUrl } from 'geoConfigExporter';
 
 // Skybox images
 import positiveX from 'assets/images/skybox/px.jpg';
@@ -98,20 +99,17 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         }
       });
 
-      // Primary imagery layer creation
+      // Primary imagery layer, local TiTiler COG basemap
+      const basemapConfig = layersConfig.layers.lroc_wac_basemap;
       const baseLayer = new Cesium.ImageryLayer(
-        new Cesium.WebMapServiceImageryProvider({
-          // Dev only:
-          url: 'https://planetarymaps.usgs.gov/cgi-bin/mapserv?map=/maps/earth/moon_simp_cyl.map&service=WMS',
-          layers: 'LROC_WAC',
-          parameters: {
-            transparent: false,
-            format: 'image/png'
-          },
-          tileWidth: 512,
-          tileHeight: 512,
+        new Cesium.UrlTemplateImageryProvider({
+          url: buildCogTileUrl(basemapConfig.filename, {
+            rescale: [0, 255],
+          }),
+          tilingScheme: new Cesium.GeographicTilingScheme(),
+          minimumLevel: 0,
+          maximumLevel: 20,
         }),
-        // { show: true }
       );
 
       // Add the primary layer to the viewer
