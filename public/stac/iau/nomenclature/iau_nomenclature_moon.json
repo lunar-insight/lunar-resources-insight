@@ -1,0 +1,125 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "id": "iau-nomenclature-moon-centre-pts",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2026-06-06T00:00:00Z",
+    "title": "IAU Planetary Nomenclature: Moon (centre points)",
+    "target": "Moon",
+    "data_type": "Vector: Point",
+    "feature_count": 9085,
+    "coordinate_system": "Planetographic",
+    "longitude_direction": "PositiveEast",
+    "longitude_domain": "0 to 360",
+    "geodetic_datum": "Moon 2000 IAU IAG",
+    "lunar_radius_m": 1737400.0,
+    "producer_id": "IAU/USGS",
+    "producer_full_name": "International Astronomical Union (IAU) & U.S. Geological Survey, Astrogeology Science Center",
+    "source_database": "Gazetteer of Planetary Nomenclature",
+    "source_update_frequency": "Weekly",
+    "license": "Public domain",
+    "lri:downloaded_at": "2026-06-06T00:00:00Z",
+    "lri:download_note": "Downloaded from USGS Astrogeology Planetary Nomenclature as Shapefile. Re-download to check for new approved names; source is updated weekly.",
+    "lri:data_use": "vector-overlay",
+    "lri:data_use_note": "Feature name labels overlaid on the Cesium 3D viewer. Labels filtered by camera altitude to avoid clutter. Key attributes for display: name (with diacritics), clean_name (without diacritics), type (feature descriptor, e.g. Crater/Mare/Mons), diameter (km), center_lon, center_lat.",
+    "attributes": {
+      "name":       "Name as approved by the IAU, including diacritical marks",
+      "clean_name": "Name without diacritical marks (for display systems that cannot render them)",
+      "type":       "IAU descriptor term (e.g. Crater, Mare, Mons, Vallis, Rima, Rupes, Dorsum, Lacus, Sinus, Planitia, Planum, Terra, Patera, Promontorium, Catena, Fossa, Regio, Oceanus, Palus, Satellite Feature, Landing site name)",
+      "diameter":   "Approximate diameter or longest dimension in kilometres",
+      "center_lon": "Longitude of feature centre (degrees, PositiveEast, 0 to 360)",
+      "center_lat": "Planetocentric latitude of feature centre (positive = north)",
+      "min_lon":    "Approximate westernmost extent (PositiveEast, 0 to 360)",
+      "max_lon":    "Approximate easternmost extent (PositiveEast, 0 to 360)",
+      "min_lat":    "Approximate southernmost planetocentric latitude extent",
+      "max_lat":    "Approximate northernmost planetocentric latitude extent",
+      "approvaldt": "IAU approval date: full date (YYYY-MM-DD) from mid-September 2006 onwards; year only before that",
+      "approval":   "IAU approval status as full text (e.g. 'Adopted by IAU', 'Dropped', 'Never approved')",
+      "origin":     "Short explanation of the name's origin",
+      "code":       "Country or ethnic group code for name origin",
+      "ethnicity":  "Country or ethnic group of name origin",
+      "continent":  "Continent or large geographic division of name origin",
+      "quad_name":  "Planetary quadrant name containing the feature centre",
+      "quad_code":  "Planetary quadrant code containing the feature centre",
+      "link":       "Direct URL to the feature's entry in the Gazetteer of Planetary Nomenclature"
+    }
+  },
+  "assets": {
+    "shapefile_shp": {
+      "href": "./MOON_nomenclature_center_pts.shp",
+      "type": "application/x-esri-shapefile",
+      "title": "Shapefile: geometry (SHP)",
+      "roles": ["data"]
+    },
+    "shapefile_dbf": {
+      "href": "./MOON_nomenclature_center_pts.dbf",
+      "type": "application/x-dbf",
+      "title": "Shapefile: attribute table (DBF)",
+      "roles": ["data"]
+    },
+    "shapefile_prj": {
+      "href": "./MOON_nomenclature_center_pts.prj",
+      "type": "text/plain",
+      "title": "Shapefile: projection definition (PRJ)",
+      "roles": ["metadata"]
+    },
+    "shapefile_shx": {
+      "href": "./MOON_nomenclature_center_pts.shx",
+      "type": "application/octet-stream",
+      "title": "Shapefile: shape index (SHX)",
+      "roles": ["data"]
+    },
+    "shapefile_cpg": {
+      "href": "./MOON_nomenclature_center_pts.cpg",
+      "type": "text/plain",
+      "title": "Shapefile: code page (CPG)",
+      "roles": ["metadata"]
+    },
+    "source_xml": {
+      "href": "./metadata_nomenclature_points_MOON.xml",
+      "type": "application/xml",
+      "title": "USGS FGDC metadata (XML)",
+      "roles": ["metadata"]
+    },
+    "geojson": {
+      "href": "./iau_nomenclature_moon.geojson",
+      "type": "application/geo+json",
+      "title": "GeoJSON: all 9085 features (all Adopted by IAU), lon normalised -180 to 180, CRS IAU:30100",
+      "roles": ["data"]
+    },
+    "processing_script": {
+      "href": "./process_nomenclature.sh",
+      "type": "application/x-sh",
+      "title": "Conversion script (Shapefile to GeoJSON via GDAL)",
+      "roles": ["metadata", "reproducibility"]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./iau_nomenclature_moon.json" },
+    { "rel": "root",   "href": "../../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    {
+      "rel": "derived_from",
+      "href": "https://planetarynames.wr.usgs.gov/",
+      "type": "text/html",
+      "title": "IAU Gazetteer of Planetary Nomenclature"
+    },
+    {
+      "rel": "via",
+      "href": "https://astrocloud.wr.usgs.gov/dataset/data/nomenclature/MOON/WFS?request=getCapabilities",
+      "type": "application/xml",
+      "title": "USGS Astrogeology WFS: Lunar Nomenclature"
+    },
+    {
+      "rel": "describedby",
+      "href": "https://planetarynames.wr.usgs.gov/DescriptorTerms",
+      "type": "text/html",
+      "title": "IAU descriptor terms reference"
+    }
+  ]
+}

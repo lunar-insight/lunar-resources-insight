@@ -55,6 +55,17 @@ export const layersConfig: LayersConfig = {
         description: "Surface slope derived from LOLA data"
       }
     },
+    iau_nomenclature: {
+      filename: "stac/iau/nomenclature/iau_nomenclature_moon.geojson",
+      layerType: "vector",
+      category: "geographical",
+      displayName: "IAU Feature Names",
+      stac: "iau/nomenclature/iau_nomenclature_moon.json",
+      metadata: {
+        source: "IAU / USGS Planetary Nomenclature",
+        description: "Named features on the Moon per IAU approved nomenclature"
+      }
+    },
     /*
       -----------------
       Chemical elements

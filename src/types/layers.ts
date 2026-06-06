@@ -23,7 +23,7 @@ export type LayerConfig = {
   available?: boolean;
   isDerivedIndex?: boolean;
   stac?: string;
-  layerType?: 'raster' | 'point';
+  layerType?: 'raster' | 'point' | 'vector';
   variants?: LayerVariant[];
   metadata?: {
     source?: string;

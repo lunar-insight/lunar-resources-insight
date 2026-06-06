@@ -133,7 +133,7 @@ const GeographicalLayersSection: React.FC = () => {
 
   // Get all geographical layers from config
   const geographicalLayers: GeographicalLayer[] = Object.entries(layersConfig.layers)
-    .filter(([_, config]) => config.category === 'geographical')
+    .filter(([_, config]) => config.category === 'geographical' && config.layerType !== 'vector')
     .map(([layerId, config]) => ({
       id: layerId,
       displayName: config.displayName || layerId,

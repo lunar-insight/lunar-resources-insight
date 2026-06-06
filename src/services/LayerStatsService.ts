@@ -64,12 +64,12 @@ class LayerStatsService {
         loaded: false
       });
 
-      // Only fetch statistics for available layers
-      if (config.available !== false) {
+      // Only fetch statistics for available raster/point layers
+      if (config.available !== false && config.layerType !== 'vector') {
         const fetchPromise = this.fetchAndStoreStats(layerId, config.filename);
         fetchPromises.push(fetchPromise);
       } else {
-        console.log(`Skipping statistics fetch for unavailable layer: ${layerId}`);
+        console.log(`Skipping statistics fetch for layer: ${layerId}`);
       }
     });
 
