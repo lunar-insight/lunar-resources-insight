@@ -56,7 +56,7 @@ export const layersConfig: LayersConfig = {
       }
     },
     iau_nomenclature: {
-      filename: "stac/iau/nomenclature/iau_nomenclature_moon.geojson",
+      filename: "stac/iau/nomenclature/iau_nomenclature_compact.json",
       layerType: "vector",
       category: "geographical",
       displayName: "IAU Feature Names",
