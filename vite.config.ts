@@ -81,6 +81,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: '127.0.0.1',
     open: true,
+    watch: {
+      usePolling: true,
+    },
   },
   test: {
     environment: 'jsdom',
