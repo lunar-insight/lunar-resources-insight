@@ -22,13 +22,57 @@ const TIERS = [
   { minDiameter: 0,   maxLabels: 2000 },  // < 300 km: all features
 ];
 
-function getTier(cameraHeight: number): number {
-  if (cameraHeight > 2000000) return 0;
-  if (cameraHeight > 800000)  return 1;
-  if (cameraHeight > 300000)  return 2;
+// currentTier adds a ~15% hysteresis band on zoom-out so labels linger past
+// the nominal boundary instead of vanishing the instant it is crossed.
+function getTier(cameraHeight: number, currentTier: number = -1): number {
+  if (cameraHeight > (currentTier > 0 ? 2_300_000 : 2_000_000)) return 0;
+  if (cameraHeight > (currentTier > 1 ?   920_000 :   800_000)) return 1;
+  if (cameraHeight > (currentTier > 2 ?   345_000 :   300_000)) return 2;
   return 3;
 }
 
+
+// Water-like IAU descriptors are shown in italic by cartographic convention
+const WATER_LIKE_PREFIX = /^(Mare|Lacus|Sinus|Palus|Oceanus|Fretum)\s/;
+
+function getLabelStyle(diameter: number, name: string): {
+  font: string;
+  scale: number;
+  outlineWidth: number;
+  translucencyByDistance: Cesium.NearFarScalar;
+} {
+  // Render at 32px then scale down: produces a crisper canvas texture than
+  // native small-px rendering (Cesium label quality workaround, issue #8474)
+  const italic = WATER_LIKE_PREFIX.test(name) ? 'italic ' : '';
+  if (diameter >= 300) return {
+    font: `${italic}bold 32px sans-serif`,
+    scale: 0.47,        // ~15px visual
+    outlineWidth: 4,
+    // Fades in from default zoom (8 000 km) to fully opaque at 2 000 km entry boundary
+    translucencyByDistance: new Cesium.NearFarScalar(2_000_000, 1.0, 8_000_000, 0.0),
+  };
+  if (diameter >= 100) return {
+    font: `${italic}bold 32px sans-serif`,
+    scale: 0.41,        // ~13px visual
+    outlineWidth: 4,
+    // ~30% opacity at 2 000 km entry; fully opaque at 800 km; fades out past hysteresis exit
+    translucencyByDistance: new Cesium.NearFarScalar(800_000, 1.0, 2_500_000, 0.0),
+  };
+  if (diameter >= 30) return {
+    font: `${italic}32px sans-serif`,
+    scale: 0.34,        // ~11px visual
+    outlineWidth: 3,
+    // ~23% opacity at 800 km entry; fully opaque at 300 km; fades out past hysteresis exit
+    translucencyByDistance: new Cesium.NearFarScalar(300_000, 1.0, 950_000, 0.0),
+  };
+  return {
+    font: `${italic}32px sans-serif`,
+    scale: 0.31,        // ~10px visual
+    outlineWidth: 3,
+    // ~26% opacity at 300 km entry; fully opaque at 100 km; fades out past hysteresis exit
+    translucencyByDistance: new Cesium.NearFarScalar(100_000, 1.0, 370_000, 0.0),
+  };
+}
 
 const REBUILD_DEBOUNCE_MS = 180;
 const CHUNK_SIZE = 30;
@@ -85,17 +129,20 @@ async function updateLabelsAsync(
     if (shownLabels.has(idx)) continue;
     if (cancelToken.cancelled) return;
     const f = features[idx];
+    const { font, scale, outlineWidth, translucencyByDistance } = getLabelStyle(f.diameter, f.name);
     const label = collection.add({
       text: f.name,
       position: f.position,
-      font: '11px sans-serif',
+      font,
+      scale,
       fillColor: Cesium.Color.WHITE,
       outlineColor: Cesium.Color.BLACK,
-      outlineWidth: 2,
+      outlineWidth,
       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       disableDepthTestDistance: 500000,
+      translucencyByDistance,
     });
     shownLabels.set(idx, label);
     addCount++;
@@ -151,7 +198,8 @@ const ViewerOptionsSection: React.FC = () => {
 
       rebuildTimerRef.current = setTimeout(() => {
         rebuildTimerRef.current = null;
-        const latestTier = getTier(viewer.camera.positionCartographic.height);
+        const prevTier = currentTierRef.current;
+        const latestTier = getTier(viewer.camera.positionCartographic.height, prevTier);
         currentTierRef.current = latestTier;
         const token = { cancelled: false };
         cancelTokenRef.current = token;
@@ -191,13 +239,14 @@ const ViewerOptionsSection: React.FC = () => {
         labelCollectionRef.current = collection;
 
         const startLabels = () => {
-          currentTierRef.current = getTier(viewer.camera.positionCartographic.height);
+          currentTierRef.current = getTier(viewer.camera.positionCartographic.height, currentTierRef.current);
           scheduleRebuild(collection, features);
-          viewer.camera.changed.addEventListener(() => {
+          const onCameraUpdate = () => {
             if (!collection.show) return;
-            currentTierRef.current = getTier(viewer.camera.positionCartographic.height);
             scheduleRebuild(collection, features);
-          });
+          };
+          viewer.camera.changed.addEventListener(onCameraUpdate);
+          viewer.camera.moveEnd.addEventListener(onCameraUpdate);
         };
 
         if (viewer.scene.globe.tilesLoaded) {
