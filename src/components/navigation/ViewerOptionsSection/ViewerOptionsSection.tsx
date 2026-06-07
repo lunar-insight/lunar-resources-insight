@@ -22,12 +22,12 @@ const TIERS = [
   { minDiameter: 0,   maxLabels: 2000 },  // < 300 km: all features
 ];
 
-// currentTier adds a ~15% hysteresis band on zoom-out so labels linger past
-// the nominal boundary instead of vanishing the instant it is crossed.
-function getTier(cameraHeight: number, currentTier: number = -1): number {
-  if (cameraHeight > (currentTier > 0 ? 2_300_000 : 2_000_000)) return 0;
-  if (cameraHeight > (currentTier > 1 ?   920_000 :   800_000)) return 1;
-  if (cameraHeight > (currentTier > 2 ?   345_000 :   300_000)) return 2;
+// Each threshold matches the NearFarScalar `far` distance for the labels that tier
+// adds, so labels enter and exit the collection at alpha 0.
+function getTier(cameraHeight: number): number {
+  if (cameraHeight > 2_500_000) return 0;
+  if (cameraHeight > 950_000)   return 1;
+  if (cameraHeight > 370_000)   return 2;
   return 3;
 }
 
@@ -48,28 +48,24 @@ function getLabelStyle(diameter: number, name: string): {
     font: `${italic}bold 32px sans-serif`,
     scale: 0.47,        // ~15px visual
     outlineWidth: 4,
-    // Fades in from default zoom (8 000 km) to fully opaque at 2 000 km entry boundary
-    translucencyByDistance: new Cesium.NearFarScalar(2_000_000, 1.0, 8_000_000, 0.0),
+    translucencyByDistance: new Cesium.NearFarScalar(2_250_000, 1.0, 6_500_000, 0.0),
   };
   if (diameter >= 100) return {
     font: `${italic}bold 32px sans-serif`,
     scale: 0.41,        // ~13px visual
     outlineWidth: 4,
-    // ~30% opacity at 2 000 km entry; fully opaque at 800 km; fades out past hysteresis exit
     translucencyByDistance: new Cesium.NearFarScalar(800_000, 1.0, 2_500_000, 0.0),
   };
   if (diameter >= 30) return {
     font: `${italic}32px sans-serif`,
-    scale: 0.34,        // ~11px visual
+    scale: 0.35,        // ~11px visual
     outlineWidth: 3,
-    // ~23% opacity at 800 km entry; fully opaque at 300 km; fades out past hysteresis exit
     translucencyByDistance: new Cesium.NearFarScalar(300_000, 1.0, 950_000, 0.0),
   };
   return {
     font: `${italic}32px sans-serif`,
-    scale: 0.31,        // ~10px visual
+    scale: 0.32,        // ~10px visual
     outlineWidth: 3,
-    // ~26% opacity at 300 km entry; fully opaque at 100 km; fades out past hysteresis exit
     translucencyByDistance: new Cesium.NearFarScalar(100_000, 1.0, 370_000, 0.0),
   };
 }
@@ -198,8 +194,7 @@ const ViewerOptionsSection: React.FC = () => {
 
       rebuildTimerRef.current = setTimeout(() => {
         rebuildTimerRef.current = null;
-        const prevTier = currentTierRef.current;
-        const latestTier = getTier(viewer.camera.positionCartographic.height, prevTier);
+        const latestTier = getTier(viewer.camera.positionCartographic.height);
         currentTierRef.current = latestTier;
         const token = { cancelled: false };
         cancelTokenRef.current = token;
@@ -239,7 +234,7 @@ const ViewerOptionsSection: React.FC = () => {
         labelCollectionRef.current = collection;
 
         const startLabels = () => {
-          currentTierRef.current = getTier(viewer.camera.positionCartographic.height, currentTierRef.current);
+          currentTierRef.current = getTier(viewer.camera.positionCartographic.height);
           scheduleRebuild(collection, features);
           const onCameraUpdate = () => {
             if (!collection.show) return;
