@@ -11,6 +11,10 @@ interface NomenclatureFeature {
   lat: number;
   diameter: number;
   position: Cesium.Cartesian3;
+  font: string;
+  scale: number;
+  outlineWidth: number;
+  translucencyByDistance: Cesium.NearFarScalar;
 }
 
 // Camera height thresholds (meters) and the label set shown at each tier.
@@ -35,6 +39,12 @@ function getTier(cameraHeight: number): number {
 // Water-like IAU descriptors are shown in italic by cartographic convention
 const WATER_LIKE_PREFIX = /^(Mare|Lacus|Sinus|Palus|Oceanus|Fretum)\s/;
 
+// Shared NearFarScalar constants, one per diameter tier, allocated once at module load
+const NFS_TIER0 = new Cesium.NearFarScalar(2_250_000, 1.0, 4_750_000, 0.0);
+const NFS_TIER1 = new Cesium.NearFarScalar(  800_000, 1.0, 2_500_000, 0.0);
+const NFS_TIER2 = new Cesium.NearFarScalar(  300_000, 1.0,   950_000, 0.0);
+const NFS_TIER3 = new Cesium.NearFarScalar(  100_000, 1.0,   370_000, 0.0);
+
 function getLabelStyle(diameter: number, name: string): {
   font: string;
   scale: number;
@@ -48,25 +58,25 @@ function getLabelStyle(diameter: number, name: string): {
     font: `${italic}bold 32px sans-serif`,
     scale: 0.47,        // ~15px visual
     outlineWidth: 4,
-    translucencyByDistance: new Cesium.NearFarScalar(2_250_000, 1.0, 6_500_000, 0.0),
+    translucencyByDistance: NFS_TIER0,
   };
   if (diameter >= 100) return {
     font: `${italic}bold 32px sans-serif`,
     scale: 0.41,        // ~13px visual
     outlineWidth: 4,
-    translucencyByDistance: new Cesium.NearFarScalar(800_000, 1.0, 2_500_000, 0.0),
+    translucencyByDistance: NFS_TIER1,
   };
   if (diameter >= 30) return {
     font: `${italic}32px sans-serif`,
     scale: 0.35,        // ~11px visual
     outlineWidth: 3,
-    translucencyByDistance: new Cesium.NearFarScalar(300_000, 1.0, 950_000, 0.0),
+    translucencyByDistance: NFS_TIER2,
   };
   return {
     font: `${italic}32px sans-serif`,
     scale: 0.32,        // ~10px visual
     outlineWidth: 3,
-    translucencyByDistance: new Cesium.NearFarScalar(100_000, 1.0, 370_000, 0.0),
+    translucencyByDistance: NFS_TIER3,
   };
 }
 
@@ -125,20 +135,19 @@ async function updateLabelsAsync(
     if (shownLabels.has(idx)) continue;
     if (cancelToken.cancelled) return;
     const f = features[idx];
-    const { font, scale, outlineWidth, translucencyByDistance } = getLabelStyle(f.diameter, f.name);
     const label = collection.add({
       text: f.name,
       position: f.position,
-      font,
-      scale,
+      font: f.font,
+      scale: f.scale,
       fillColor: Cesium.Color.WHITE,
       outlineColor: Cesium.Color.BLACK,
-      outlineWidth,
+      outlineWidth: f.outlineWidth,
       style: Cesium.LabelStyle.FILL_AND_OUTLINE,
       verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
       heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
       disableDepthTestDistance: 500000,
-      translucencyByDistance,
+      translucencyByDistance: f.translucencyByDistance,
     });
     shownLabels.set(idx, label);
     addCount++;
@@ -159,6 +168,7 @@ const ViewerOptionsSection: React.FC = () => {
   const rebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const cancelTokenRef = useRef<{ cancelled: boolean }>({ cancelled: false });
   const shownLabelsRef = useRef<Map<number, Cesium.Label>>(new Map());
+  const moonRadiusSqRef = useRef<number>(0);
 
   // Apply constraint setting to camera
   useEffect(() => {
@@ -198,12 +208,10 @@ const ViewerOptionsSection: React.FC = () => {
         currentTierRef.current = latestTier;
         const token = { cancelled: false };
         cancelTokenRef.current = token;
-        const ellipsoid = viewer.scene.globe.ellipsoid;
         const camPos = viewer.camera.position.clone();
         const cullingVolume = (viewer.camera.frustum as Cesium.PerspectiveFrustum)
           .computeCullingVolume(camPos, viewer.camera.direction, viewer.camera.up);
-        const moonRadiusSq = ellipsoid.maximumRadius * ellipsoid.maximumRadius;
-        updateLabelsAsync(collection, features, latestTier, token, cullingVolume, camPos, moonRadiusSq, shownLabelsRef.current);
+        updateLabelsAsync(collection, features, latestTier, token, cullingVolume, camPos, moonRadiusSqRef.current, shownLabelsRef.current);
       }, REBUILD_DEBOUNCE_MS);
     };
 
@@ -222,9 +230,11 @@ const ViewerOptionsSection: React.FC = () => {
       .then(res => res.json())
       .then((rows: [string, number, number, number][]) => {
         const ellipsoid = viewer.scene.globe.ellipsoid;
+        moonRadiusSqRef.current = ellipsoid.maximumRadius * ellipsoid.maximumRadius;
         const features: NomenclatureFeature[] = rows.map(([name, lon, lat, diameter]) => ({
           name, lon, lat, diameter,
           position: Cesium.Cartesian3.fromDegrees(lon, lat, 0, ellipsoid),
+          ...getLabelStyle(diameter, name),
         }));
 
         featuresRef.current = features;
