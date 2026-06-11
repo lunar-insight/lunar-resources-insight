@@ -4,8 +4,8 @@
 FROM node:24-alpine AS builder
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci --ignore-scripts
+COPY package*.json .npmrc ./
+RUN npm ci
 
 COPY . .
 RUN --network=none npm run build
