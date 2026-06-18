@@ -9,4 +9,4 @@ RUN npm audit --audit-level=high || true
 
 # Source code mounted at runtime via docker-compose volume
 # User, caps, and network isolation enforced by docker-compose
-CMD ["npx", "vite", "--host", "0.0.0.0", "--no-open"]
+CMD ["./node_modules/.bin/vite", "--host", "0.0.0.0", "--no-open"]

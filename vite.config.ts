@@ -31,6 +31,8 @@ export default defineConfig(({ mode }) => ({
             if (err || !stat.isFile()) return next()
             const ext = path.extname(filePath).toLowerCase()
             res.setHeader('Content-Type', mimeTypes[ext] ?? 'application/octet-stream')
+            res.setHeader('Cache-Control', 'public, max-age=86400')
+            res.setHeader('Content-Length', stat.size)
             fs.createReadStream(filePath).pipe(res)
           })
         })
@@ -67,6 +69,10 @@ export default defineConfig(({ mode }) => ({
       'geoConfigExporter': path.resolve(__dirname, 'src/geoConfigExporter.ts'),
       'constants':         path.resolve(__dirname, 'src/constants'),
     },
+  },
+  optimizeDeps: {
+    noDiscovery: true,
+    include: ['cesium', 'react', 'react-dom', 'd3'],
   },
   build: {
     sourcemap: true,
