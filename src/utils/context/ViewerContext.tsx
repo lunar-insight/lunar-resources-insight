@@ -10,9 +10,10 @@ const ViewerContext = createContext<ViewerContextType | undefined>(undefined);
 
 export const ViewerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [viewer, setViewer] = React.useState<Cesium.Viewer | null>(null);
+  const value = React.useMemo(() => ({ viewer, setViewer }), [viewer]);
 
   return (
-    <ViewerContext.Provider value={{ viewer, setViewer }}>
+    <ViewerContext.Provider value={value}>
       {children}
     </ViewerContext.Provider>
   );

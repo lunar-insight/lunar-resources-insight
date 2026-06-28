@@ -17,6 +17,7 @@ import negativeY from 'assets/images/skybox/ny.jpg';
 import positiveZ from 'assets/images/skybox/pz.jpg';
 import negativeZ from 'assets/images/skybox/nz.jpg';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
+import useLoadingScreen from 'hooks/useLoadingScreen';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 
 interface CesiumComponentProps {
@@ -36,6 +37,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const activeDrawingToolRef = useRef<string | null>(null);
 
   useMouseTrackingControl(isCameraMoving, 'cesium-camera');
+  useLoadingScreen(localViewer);
 
   // For Cesium initialisation
   useEffect(() => {
@@ -200,7 +202,6 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
 
       // Cleanup function
       return () => {
-
         if (resumeTimeoutRef.current) {
           clearTimeout(resumeTimeoutRef.current);
         }

@@ -71,8 +71,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    noDiscovery: true,
-    include: ['cesium', 'react', 'react-dom', 'd3'],
+    include: ['cesium', 'react', 'react-dom', 'react-dom/client', 'd3'],
   },
   build: {
     sourcemap: true,
