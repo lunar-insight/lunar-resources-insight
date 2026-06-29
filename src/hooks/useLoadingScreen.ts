@@ -73,32 +73,63 @@ const useLoadingScreen = (viewer: Cesium.Viewer | null): void => {
       }
     };
 
-    // Stop the inline Phase 1 animation and pick up from its current position.
-    const stopInlinePhase1 = (window as any).__loadingPhase1Stop as (() => number) | undefined;
-    const startPct = stopInlinePhase1 ? stopInlinePhase1() : 0;
-    setLoadingProgress(startPct);
-    setLoadingLabel(startPct);
+    // The inline Phase 1 RAF is still running when the hook fires, its exponential
+    // decay has no stop condition and naturally fills the gap between hook mount and
+    // the first tile event. We leave it running and take over lazily: the first tile
+    // event (or the safety timeout) calls takeOverFromPhase1(), which stops the
+    // inline RAF, reads the bar's exact current position, and hands control to the
+    // lerp loop below. Until then the lerp loop idles and the inline script owns
+    // the bar.
+    let phase1Handed = false;
+    let startPct     = 0;
+    let targetPct    = 0;
+    let displayPct   = 0;
 
-    const hookStart  = performance.now();
-    let targetPct    = startPct;
-    let displayPct   = startPct;
-    let maxTiles     = 0;
+    const takeOverFromPhase1 = () => {
+      if (phase1Handed) return;
+      phase1Handed = true;
+      const fn = (window as any).__loadingPhase1Stop as (() => number) | undefined;
+      startPct   = fn ? fn() : 0;
+      displayPct = startPct;
+      targetPct  = startPct;
+    };
+
+    let maxTiles        = 0;
     let loadingComplete = false;
 
     const safetyTimeout = setTimeout(() => {
+      takeOverFromPhase1();
       loadingComplete = true;
       targetPct = 100;
       document.fonts.load('400 24px "Material Symbols Outlined"').then(() => enterApp());
     }, 30000);
 
-    // Tile events map 0 → 100% directly. The synthetic floor in the lerp loop
-    // keeps the bar moving while waiting for the first tile event.
     const removeTileListener = viewer.scene.globe.tileLoadProgressEvent.addEventListener(
       (remaining: number) => {
         if (loadingComplete) return;
         if (remaining > maxTiles) maxTiles = remaining;
+
+        // Warm-cache edge case: only event is remaining=0 before any non-zero event.
+        if (maxTiles === 0 && remaining === 0) {
+          takeOverFromPhase1();
+          loadingComplete = true;
+          targetPct = 100;
+          removeTileListener();
+          clearTimeout(safetyTimeout);
+          document.fonts.load('400 24px "Material Symbols Outlined"').then(() => setTimeout(enterApp, 300));
+          return;
+        }
         if (maxTiles === 0) return;
-        const tilePct = (1 - remaining / maxTiles) * 100;
+
+        const tileProgress = 1 - remaining / maxTiles;
+
+        // Delay the handoff until the first tile has actually completed
+        // (remaining < maxTiles). While the queue is still filling, the inline
+        // Phase 1 animation keeps the bar moving.
+        if (!phase1Handed && tileProgress > 0) takeOverFromPhase1();
+        if (!phase1Handed) return;
+
+        const tilePct = startPct + tileProgress * (100 - startPct);
         targetPct = Math.max(targetPct, tilePct);
         setLoadingLabel(targetPct);
         if (remaining === 0) {
@@ -111,20 +142,14 @@ const useLoadingScreen = (viewer: Cesium.Viewer | null): void => {
       }
     );
 
-    // Lerp loop: runs at 30 fps.
-    // Synthetic floor creeps at 1 %/s from startPct, capped at 80%, so the bar
-    // always moves even before the first tile event. Tile progress takes over
-    // naturally once it overtakes the floor.
+    // Lerp loop: idles until the inline Phase 1 has been handed off, then drives
+    // displayPct toward targetPct at 30 fps.
     let lastFrameTime = 0;
     const canvasLoop = (now: number) => {
       canvasRaf = requestAnimationFrame(canvasLoop);
+      if (!phase1Handed) return;
       if (now - lastFrameTime < 33) return;
       lastFrameTime = now;
-
-      if (!loadingComplete) {
-        const syntheticFloor = Math.min(80, startPct + (now - hookStart) * 0.001);
-        targetPct = Math.max(targetPct, syntheticFloor);
-      }
       if (displayPct < targetPct) {
         displayPct = Math.min(targetPct, displayPct + Math.min(Math.max((targetPct - displayPct) * 0.08, 0.5), 1.5));
         setLoadingProgress(displayPct);

@@ -143,19 +143,24 @@
         var msf = new FontFace(
           'Material Symbols Outlined',
           "url('/symbols/MaterialSymbolsOutlined-Regular.ttf')",
-          { style: 'normal', weight: '100 700', display: 'block' }
+          { style: 'normal', weight: '400', display: 'block' }
         );
         document.fonts.add(msf);
         msf.load();
       }
 
-      // ── Phase 1: progress bar 0 → 28% while React + Cesium load ───────────
+      // ── Phase 1: progress bar animation while React + Cesium load ───────────
       var bar = document.getElementById('progress-bar');
       var pctEl = document.getElementById('loading-pct');
       if (bar) {
-        var start = performance.now(), tau = 5000, ceil = 28, raf;
+        var start = performance.now(), raf;
+        // Burst (fast initial rise) + linear (constant 2 %/s thereafter).
+        // Rate never drops below 2 %/s so the bar always visibly moves regardless
+        // of how long Cesium takes to start firing tile events.
+        var BURST_CEIL = 20, BURST_TAU = 1500, LINEAR = 0.002, CAP = 85;
         function tick(now) {
-          var p = ceil * (1 - Math.exp(-(now - start) / tau));
+          var e = now - start;
+          var p = Math.min(CAP, BURST_CEIL * (1 - Math.exp(-e / BURST_TAU)) + e * LINEAR);
           bar.style.width = p.toFixed(2) + '%';
           if (pctEl) pctEl.textContent = Math.round(p) + '%';
           raf = requestAnimationFrame(tick);
