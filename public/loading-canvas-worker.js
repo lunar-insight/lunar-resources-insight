@@ -18,7 +18,7 @@ function proj(la, lo) {
 }
 
 function buildTiles() {
-  var sz = 4, gap = 0.84;
+  var sz = 7, gap = 0.84;
   var deep = [40, 108, 214], light = [128, 198, 255];
   function lerp(a, b, t) { return a + (b - a) * t; }
   var tiles = [], la, lo, c, raw, mx, my, r;
@@ -145,7 +145,8 @@ function drawFrame(now) {
       if (op < 0.012) continue;
       var col = tl.col;
       var R = (col[0] + (210 - col[0]) * fl) | 0, G = (col[1] + (236 - col[1]) * fl) | 0, B = (col[2] + (255 - col[2]) * fl) | 0;
-      ctx.fillStyle = 'rgba(' + R + ',' + G + ',' + B + ',' + op.toFixed(3) + ')';
+      ctx.fillStyle = 'rgb(' + R + ',' + G + ',' + B + ')';
+      ctx.globalAlpha = op;
       var cr = tl.corners;
       ctx.beginPath();
       ctx.moveTo(offX + cr[0].x * sc, offY + cr[0].y * sc);
@@ -167,8 +168,12 @@ var W = 0, H = 0, dpr = 1;
 var timerId    = 0;
 
 function loop() {
-  drawFrame(performance.now());
-  timerId = setTimeout(loop, 16);
+  var t0 = performance.now();
+  drawFrame(t0);
+  var elapsed = performance.now() - t0;
+  // If drawing took longer than the 33ms budget, wait at least that long again
+  // before the next frame so the worker never queues faster than it can render.
+  timerId = setTimeout(loop, Math.max(33, elapsed));
 }
 
 self.onmessage = function(e) {
