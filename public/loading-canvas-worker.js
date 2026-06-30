@@ -168,7 +168,7 @@ var timerId    = 0;
 
 function loop() {
   drawFrame(performance.now());
-  timerId = setTimeout(loop, tiles.length ? 33 : 50);
+  timerId = setTimeout(loop, 16);
 }
 
 self.onmessage = function(e) {
