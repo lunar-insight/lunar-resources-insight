@@ -32,6 +32,7 @@ interface LayerContextType {
   updateRampValues: (layer: string, min: number, max: number) => Promise<void>;
   updateLayerOpacity: (layer: string, opacity: number) => void;
   updateLayerRangeFilter: (layer: string, enabled: boolean) => void;
+  updateLayerGradientLock: (layer: string, locked: boolean) => void;
   getLayerStyle: (layer: string) => StyleConfig | undefined;
   activeVariants: Map<string, number>;
   swappingLayers: Set<string>;
@@ -49,6 +50,7 @@ class CesiumLayerManager {
   private layerStats: Map<string, { min: number; max: number }>;
   private tileCache = new Map<string, string>();
   private rangeFilterEnabled: Map<string, boolean>;
+  private gradientLocked: Map<string, boolean>;
   private hasDisableRequests: (() => boolean) | null = null;
   private activeFilenames: Map<string, string>
 
@@ -60,6 +62,7 @@ class CesiumLayerManager {
     this.layerStyleConfig = new Map();
     this.layerStats = new Map();
     this.rangeFilterEnabled = new Map();
+    this.gradientLocked = new Map();
     this.hasDisableRequests = hasDisableRequestsFn || null;
     this.activeFilenames = new Map();
   }
@@ -168,9 +171,14 @@ class CesiumLayerManager {
 
       // Build full style option in one pass
       // (versus plain layer creation with updateLayerStyle)
+      const gradientLocked = this.gradientLocked.get(layerId) || false;
+      const rescaleStats = this.layerStats.get(layerId);
+      const rescaleMin = gradientLocked && rescaleStats ? rescaleStats.min : min;
+      const rescaleMax = gradientLocked && rescaleStats ? rescaleStats.max : max;
+
       const options: any = {
         colormap: currentStyle?.type === 'gray' ? undefined : currentStyle?.type,
-        rescale: [min, max],
+        rescale: [rescaleMin, rescaleMax],
       };
 
       if (rangeFilterEnabled) {
@@ -300,10 +308,14 @@ class CesiumLayerManager {
       const bounds = existingLayer.imageryProvider.rectangle;
 
       const rangeFilterEnabled = this.rangeFilterEnabled.get(layerId) || false;
+      const gradientLocked = this.gradientLocked.get(layerId) || false;
+      const rescaleStats = this.layerStats.get(layerId);
+      const rescaleMin = gradientLocked && rescaleStats ? rescaleStats.min : (styleConfig.min ?? 0);
+      const rescaleMax = gradientLocked && rescaleStats ? rescaleStats.max : (styleConfig.max ?? 100);
 
       const options: any = {
         colormap: styleConfig.type === 'gray' ? undefined : styleConfig.type,
-        rescale: [styleConfig.min, styleConfig.max]
+        rescale: [rescaleMin, rescaleMax]
       };
 
       if (rangeFilterEnabled) {
@@ -373,6 +385,15 @@ class CesiumLayerManager {
   
   updateLayerRangeFilter(layerId: string, enabled: boolean) {
     this.rangeFilterEnabled.set(layerId, enabled)
+
+    const currentStyle = this.layerStyleConfig.get(layerId);
+    if (currentStyle) {
+      this.updateLayerStyle(layerId, currentStyle);
+    }
+  }
+
+  updateLayerGradientLock(layerId: string, locked: boolean) {
+    this.gradientLocked.set(layerId, locked);
 
     const currentStyle = this.layerStyleConfig.get(layerId);
     if (currentStyle) {
@@ -548,6 +569,14 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, []);
 
+  const updateLayerGradientLock = useCallback((layer: string, locked: boolean) => {
+    try {
+      cesiumManagerRef.current?.updateLayerGradientLock(layer, locked);
+    } catch (error) {
+      console.error(`Error updating gradient lock for layer ${layer}:`, error);
+    }
+  }, []);
+
   const getLayerStyle = useCallback((layer: string) => {
     return cesiumManagerRef.current?.getLayerStyleConfig(layer);
   }, []);
@@ -614,6 +643,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     updateRampValues,
     updateLayerOpacity,
     updateLayerRangeFilter,
+    updateLayerGradientLock,
     getLayerStyle,
     activeVariants,
     swappingLayers,
@@ -632,6 +662,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     updateRampValues,
     updateLayerOpacity,
     updateLayerRangeFilter,
+    updateLayerGradientLock,
     getLayerStyle,
     activeVariants,
     swappingLayers,

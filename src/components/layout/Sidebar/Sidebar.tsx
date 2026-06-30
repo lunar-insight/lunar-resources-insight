@@ -8,6 +8,7 @@ import LayerGradientSelect from 'components/ui/LayerGradientSelect/LayerGradient
 import { ColorRampSlider } from '../Slider/ColorRampSlider/ColorRampSlider';
 import OpacitySlider from '../Slider/OpacitySlider/OpacitySlider';
 import { RangeFilterCheckbox } from '../Checkbox/RangeFilterCheckbox/RangeFilterCheckbox';
+import { GradientLockCheckbox } from '../Checkbox/GradientLockCheckbox/GradientLockCheckbox';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import CloseButton from '../Button/CloseButton/CloseButton';
@@ -223,6 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
                         <div>Layer statistics not loaded, remove and re-add the element map...</div>
                       )}
                       <RangeFilterCheckbox layerId={layerId} />
+                      <GradientLockCheckbox layerId={layerId} />
                     </div>
 
                     <OpacitySlider
