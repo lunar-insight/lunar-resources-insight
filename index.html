@@ -90,7 +90,7 @@
     }
     @keyframes bar-shimmer {
       from { transform: translateX(-100%); }
-      to   { transform: translateX(200%); }
+      to   { transform: translateX(100%); }
     }
     #progress-bar {
       position: relative;
@@ -104,9 +104,8 @@
     #progress-bar::after {
       content: '';
       position: absolute; inset: 0;
-      background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,.5) 50%, transparent 100%);
-      width: 54px;
-      animation: bar-shimmer 1s linear infinite;
+      background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.5) 50%, transparent 70%);
+      animation: bar-shimmer 1.2s linear infinite;
       will-change: transform;
     }
   </style>
