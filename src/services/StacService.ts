@@ -1,4 +1,4 @@
-const STAC_BASE_PATH = '/stac';
+export const STAC_BASE_PATH = '/stac';
 
 export interface StacItemProperties {
   title?: string;

@@ -1,0 +1,68 @@
+.layersCatalog {
+  width: 100%;
+  margin: 1.5rem;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.headerCell {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-neutralVariant);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid rgba(var(--color-selection-default-rgb), 0.3);
+}
+
+.row {
+  &:hover {
+    background-color: rgba(var(--color-selection-hover-rgb), 0.08);
+  }
+
+  &:not(:last-child) .cell {
+    border-bottom: 1px solid rgba(var(--color-selection-default-rgb), 0.15);
+  }
+}
+
+.cell {
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  color: var(--color-secondary);
+  white-space: nowrap;
+}
+
+.category {
+  text-transform: capitalize;
+  color: var(--color-neutralVariant);
+}
+
+.available {
+  color: var(--color-selection-selected, #4caf50);
+}
+
+.unavailable {
+  color: var(--color-selection-unavailable);
+  opacity: 0.6;
+}
+
+.stacLink {
+  color: var(--color-secondary);
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--color-selection-hover, var(--color-secondary));
+  }
+}
+
+.variantBadge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-neutralVariant);
+  opacity: 0.7;
+}
