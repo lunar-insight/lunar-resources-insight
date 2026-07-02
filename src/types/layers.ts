@@ -25,11 +25,6 @@ export type LayerConfig = {
   stac?: string;
   layerType?: 'raster' | 'point' | 'vector';
   variants?: LayerVariant[];
-  metadata?: {
-    source?: string;
-    resolution?: string;
-    description?: string;
-  };
 };
 
 export type LayersConfig = {

@@ -5,6 +5,8 @@ import { useLayerContext } from 'utils/context/LayerContext';
 import { layersConfig } from 'geoConfigExporter';
 import { buildLayerPreviewUrl } from 'geoConfigExporter';
 import { layerPreviewCache } from 'services/LayerPreviewCache';
+import { getStacSourceLabel, getStacResolutionLabel } from 'services/StacService';
+import { useStacItem } from 'hooks/useStacItem';
 
 interface GeographicalLayer {
   id: string;
@@ -12,11 +14,7 @@ interface GeographicalLayer {
   filename: string;
   previewUrl: string;
   available: boolean;
-  metadata?: {
-    source?: string;
-    resolution?: string;
-    [key: string]: any;
-  };
+  stac?: string;
 }
 
 interface LayerButtonProps {
@@ -31,6 +29,10 @@ const LayerButton: React.FC<LayerButtonProps> = ({ layer, isSelected, onToggle, 
   const [cachedImageUrl, setCachedImageUrl] = useState<string | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const stacItem = useStacItem(layer.stac);
+  const source = stacItem ? getStacSourceLabel(stacItem.properties) : undefined;
+  const resolution = stacItem ? getStacResolutionLabel(stacItem.properties) : undefined;
 
   useEffect(() => {
     // Skip loading preview images for disabled layers
@@ -99,16 +101,16 @@ const LayerButton: React.FC<LayerButtonProps> = ({ layer, isSelected, onToggle, 
           <h4 className={styles.layerTitle}>
             {layer.displayName}
           </h4>
-          {layer.metadata && (
+          {(source || resolution) && (
             <div className={styles.layerMetadata}>
-              {layer.metadata.source && (
+              {source && (
                 <span className={styles.metadataItem}>
-                  {layer.metadata.source}
+                  {source}
                 </span>
               )}
-              {layer.metadata.resolution && (
+              {resolution && (
                 <span className={styles.metadataItem}>
-                  {layer.metadata.resolution}
+                  {resolution}
                 </span>
               )}
             </div>
@@ -140,7 +142,7 @@ const GeographicalLayersSection: React.FC = () => {
       filename: config.filename,
       // Limit preview to ±60° latitude to avoid equirectangular distortion (3:1 aspect ratio)
       previewUrl: buildLayerPreviewUrl(config.filename, 256, 85, [-180, -60, 180, 60]),
-      metadata: config.metadata,
+      stac: config.stac,
       available: config.available !== false
     }));
 

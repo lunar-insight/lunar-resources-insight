@@ -11,12 +11,7 @@ export const layersConfig: LayersConfig = {
       filename: "basemap/lro_lroc_wac_global_100m_june2013_COG.tif",
       category: "basemap",
       displayName: "LRO LROC WAC Global Mosaic (100m, June 2013)",
-      stac: "lro/lroc_wac/global_100m_june2013/lro_lroc_wac_global_100m_june2013.json",
-      metadata: {
-        source: "LRO LROC / ASU",
-        resolution: "100m/pixel",
-        description: "8-bit grayscale global lunar morphology mosaic, WAC 643 nm"
-      }
+      stac: "lro/lroc_wac/global_100m_june2013/lro_lroc_wac_global_100m_june2013.json"
     },
     /*
       ------------------
@@ -26,45 +21,26 @@ export const layersConfig: LayersConfig = {
     geological_global: {
       filename: "geographical/geology_moon_cog.tif",
       category: "geographical",
-      displayName: "Global Geological Map",
-      metadata: {
-        source: "USGS",
-        resolution: "1:5M",
-        description: "Unified Geologic Map of the Moon"
-      }
+      displayName: "Global Geological Map"
     },
     terrain_elevation: {
       filename: "geographical/lunar_terrain_elevation_COG.tif",
       category: "geographical",
       displayName: "Terrain Elevation",
-      available: false,
-      metadata: {
-        source: "LOLA",
-        resolution: "118m/pixel",
-        description: "Lunar Orbiter Laser Altimeter elevation data"
-      }
+      available: false
     },
     slope_map: {
       filename: "geographical/lunar_slope_map_COG.tif",
       category: "geographical",
       displayName: "Slope Map",
-      available: false,
-      metadata: {
-        source: "LOLA",
-        resolution: "118m/pixel",
-        description: "Surface slope derived from LOLA data"
-      }
+      available: false
     },
     iau_nomenclature: {
       filename: "stac/iau/nomenclature/iau_nomenclature_compact.json",
       layerType: "vector",
       category: "geographical",
       displayName: "IAU Feature Names",
-      stac: "iau/nomenclature/iau_nomenclature_moon.json",
-      metadata: {
-        source: "IAU / USGS Planetary Nomenclature",
-        description: "Named features on the Moon per IAU approved nomenclature"
-      }
+      stac: "iau/nomenclature/iau_nomenclature_moon.json"
     },
     /*
       -----------------
@@ -330,12 +306,7 @@ export const layersConfig: LayersConfig = {
       displayName: "Mg# Magnesium Number · Clementine CNN (Qiu 2025)",
       isDerivedIndex: true,
       units: "Mg# (0 to 1)",
-      stac: "clementine/qiu2025/mg_number/mg_number_clementine_cnn_qiu2025.json",
-      metadata: {
-        source: "Clementine UVVIS + 1D CNN (Qiu et al. 2025)",
-        resolution: "100m/pixel",
-        description: "Magnesium Number derived from CNN-predicted MgO and FeO maps"
-      }
+      stac: "clementine/qiu2025/mg_number/mg_number_clementine_cnn_qiu2025.json"
     }
   }
 } satisfies LayersConfig;
