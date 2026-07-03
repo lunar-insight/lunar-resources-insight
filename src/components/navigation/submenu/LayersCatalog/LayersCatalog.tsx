@@ -9,18 +9,17 @@ interface CatalogRow {
   title: string;
   category: string;
   available: boolean;
-  stac: string;
+  stac?: string;
   variantCount: number;
 }
 
 const catalogRows: CatalogRow[] = Object.entries(layersConfig.layers)
-  .filter(([, config]) => !!config.stac)
   .map(([id, config]) => ({
     id,
     title: config.displayName || id,
     category: config.category,
     available: config.available !== false,
-    stac: config.stac as string,
+    stac: config.stac,
     variantCount: config.variants?.length ?? 0
   }));
 
@@ -31,9 +30,11 @@ const LayersCatalog: React.FC = () => {
     let cancelled = false;
 
     Promise.all(
-      catalogRows.map((row) =>
-        stacService.fetchStacItem(row.stac).then((item) => [row.stac, item] as const)
-      )
+      catalogRows
+        .filter((row): row is CatalogRow & { stac: string } => !!row.stac)
+        .map((row) =>
+          stacService.fetchStacItem(row.stac).then((item) => [row.stac, item] as const)
+        )
     ).then((entries) => {
       if (!cancelled) {
         setStacItems(new Map(entries));
@@ -58,7 +59,7 @@ const LayersCatalog: React.FC = () => {
         </TableHeader>
         <TableBody items={catalogRows} dependencies={[stacItems]}>
           {(row) => {
-            const stacItem = stacItems.get(row.stac);
+            const stacItem = row.stac ? stacItems.get(row.stac) : undefined;
             const source = stacItem ? getStacSourceLabel(stacItem.properties) : undefined;
             const resolution = stacItem ? getStacResolutionLabel(stacItem.properties) : undefined;
 
@@ -66,24 +67,30 @@ const LayersCatalog: React.FC = () => {
               <Row id={row.id} textValue={row.title} className={styles.row}>
                 <Cell className={styles.cell}>{row.title}</Cell>
                 <Cell className={`${styles.cell} ${styles.category}`}>{row.category}</Cell>
-                <Cell className={styles.cell}>{source || '–'}</Cell>
-                <Cell className={styles.cell}>{resolution || '–'}</Cell>
+                <Cell className={styles.cell}>{source || '-'}</Cell>
+                <Cell className={styles.cell}>{resolution || '-'}</Cell>
                 <Cell className={styles.cell}>
                   <span className={`material-symbols-outlined ${row.available ? styles.available : styles.unavailable}`}>
                     {row.available ? 'check_circle' : 'cancel'}
                   </span>
                 </Cell>
                 <Cell className={styles.cell}>
-                  <a
-                    href={`${STAC_BASE_PATH}/${row.stac}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.stacLink}
-                  >
-                    View
-                  </a>
-                  {row.variantCount > 0 && (
-                    <span className={styles.variantBadge}>+{row.variantCount} more</span>
+                  {row.stac ? (
+                    <>
+                      <a
+                        href={`${STAC_BASE_PATH}/${row.stac}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.stacLink}
+                      >
+                        View
+                      </a>
+                      {row.variantCount > 0 && (
+                        <span className={styles.variantBadge}>+{row.variantCount} more</span>
+                      )}
+                    </>
+                  ) : (
+                    '-'
                   )}
                 </Cell>
               </Row>

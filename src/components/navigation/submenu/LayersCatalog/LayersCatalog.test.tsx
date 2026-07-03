@@ -68,18 +68,25 @@ afterEach(() => {
 
 // ─── Static columns ────────────────────────────────────────────────────────
 
-it('excludes layers without a stac path from the table', () => {
+it('includes layers without a stac path, showing - for Source, Resolution, and STAC', async () => {
   render(<LayersCatalog />)
-  expect(screen.queryByText('Layer Without STAC')).not.toBeInTheDocument()
+
+  // Sync point: wait for a sibling row's fetch to resolve first.
+  await waitFor(() => {
+    expect(screen.getByText('Test Mission · Test Instrument')).toBeInTheDocument()
+  })
+
+  const row = screen.getByRole('row', { name: 'Layer Without STAC' })
+  expect(within(row).getAllByText('-')).toHaveLength(3)
 })
 
 // ─── STAC-derived columns ────────────────────────────────────────────────────
 
 describe('Source and Resolution columns', () => {
-  it('show – before the STAC fetch resolves', () => {
+  it('show - before the STAC fetch resolves', () => {
     render(<LayersCatalog />)
     const row = screen.getByRole('row', { name: 'Layer With Data' })
-    expect(within(row).getAllByText('–')).toHaveLength(2)
+    expect(within(row).getAllByText('-')).toHaveLength(2)
   })
 
   it('populate once the STAC fetch resolves', async () => {
@@ -92,7 +99,7 @@ describe('Source and Resolution columns', () => {
     })
   })
 
-  it('stay at – when the STAC fetch fails', async () => {
+  it('stay at - when the STAC fetch fails', async () => {
     render(<LayersCatalog />)
 
     // Sync point: wait for a sibling row's fetch to resolve so the failing
@@ -102,10 +109,10 @@ describe('Source and Resolution columns', () => {
     })
 
     const row = screen.getByRole('row', { name: 'Layer Fetch Fails' })
-    expect(within(row).getAllByText('–')).toHaveLength(2)
+    expect(within(row).getAllByText('-')).toHaveLength(2)
   })
 
-  it('stay at – when the STAC item has no matching properties', async () => {
+  it('stay at - when the STAC item has no matching properties', async () => {
     render(<LayersCatalog />)
 
     await waitFor(() => {
@@ -113,6 +120,6 @@ describe('Source and Resolution columns', () => {
     })
 
     const row = screen.getByRole('row', { name: 'Layer No Metadata' })
-    expect(within(row).getAllByText('–')).toHaveLength(2)
+    expect(within(row).getAllByText('-')).toHaveLength(2)
   })
 })

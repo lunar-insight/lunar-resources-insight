@@ -43,11 +43,11 @@
 }
 
 .available {
-  color: var(--color-selection-selected, #4caf50);
+  color: var(--color-green);
 }
 
 .unavailable {
-  color: var(--color-selection-unavailable);
+  color: var(--color-red);
   opacity: 0.6;
 }
 
