@@ -30,7 +30,7 @@ class StacService {
 
   private async load(stacPath: string): Promise<StacItem | null> {
     try {
-      const response = await fetch(`${STAC_BASE_PATH}/${stacPath}`);
+      const response = await fetch(`${STAC_BASE_PATH}/${stacPath}`, { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(`Failed to fetch STAC item: ${response.statusText}`);
       }
