@@ -56,7 +56,7 @@ const LayersCatalog: React.FC = () => {
           <Column className={styles.headerCell}>Available</Column>
           <Column className={styles.headerCell}>STAC</Column>
         </TableHeader>
-        <TableBody items={catalogRows}>
+        <TableBody items={catalogRows} dependencies={[stacItems]}>
           {(row) => {
             const stacItem = stacItems.get(row.stac);
             const source = stacItem ? getStacSourceLabel(stacItem.properties) : undefined;
