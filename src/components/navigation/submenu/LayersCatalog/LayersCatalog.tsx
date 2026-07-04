@@ -29,6 +29,18 @@ const catalogRows: CatalogRow[] = Object.entries(layersConfig.layers)
     variantCount: config.variants?.length ?? 0
   }));
 
+const categoryOrder = new Map<string, number>();
+catalogRows.forEach((row) => {
+  if (!categoryOrder.has(row.category)) {
+    categoryOrder.set(row.category, categoryOrder.size);
+  }
+});
+
+catalogRows.sort((a, b) => {
+  const categoryDiff = categoryOrder.get(a.category)! - categoryOrder.get(b.category)!;
+  return categoryDiff !== 0 ? categoryDiff : a.title.localeCompare(b.title);
+});
+
 const categories: string[] = Array.from(new Set(catalogRows.map((row) => row.category))).sort();
 
 const formatCategoryLabel = (category: string): string =>
