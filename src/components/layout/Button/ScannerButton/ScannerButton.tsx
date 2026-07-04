@@ -156,21 +156,21 @@ const ScannerButton: React.FC = () => {
             label="Chemical Elements"
             isSelected={showElementScanner}
             onChange={toggleElementScanner}
-            accentColor="rgb(147, 51, 234)"
+            accentColor="rgb(var(--color-category-chemical-rgb))"
           />
           <ScannerToggleRow
             icon="join"
             label="Compound"
             isSelected={showCompoundScanner}
             onChange={toggleCompoundScanner}
-            accentColor="rgb(234, 179, 8)"
+            accentColor="rgb(var(--color-category-compound-rgb))"
           />
           <ScannerToggleRow
             icon="calculate"
             label="Derived Index"
             isSelected={showDerivedIndexScanner}
             onChange={toggleDerivedIndexScanner}
-            accentColor="rgb(249, 115, 22)"
+            accentColor="rgb(var(--color-category-derived-index-rgb))"
           />
         </Dialog>
       </Popover>

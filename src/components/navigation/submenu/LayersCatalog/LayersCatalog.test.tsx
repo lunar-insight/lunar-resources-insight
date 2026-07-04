@@ -1,4 +1,5 @@
 import { render, screen, within, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import LayersCatalog from './LayersCatalog'
 
 vi.mock('geoConfigExporter', () => ({
@@ -121,5 +122,50 @@ describe('Source and Resolution columns', () => {
 
     const row = screen.getByRole('row', { name: 'Layer No Metadata' })
     expect(within(row).getAllByText('-')).toHaveLength(2)
+  })
+})
+
+// ─── Category tag ────────────────────────────────────────────────────────
+
+it('renders the category as a tag with a matching data-category attribute', () => {
+  render(<LayersCatalog />)
+
+  const row = screen.getByRole('row', { name: 'Layer With Data' })
+  const tag = within(row).getByText('Chemical')
+  expect(tag).toHaveAttribute('data-category', 'chemical')
+})
+
+// ─── Filtering ────────────────────────────────────────────────────────────
+
+describe('filtering', () => {
+  it('filters rows by title via the search field', async () => {
+    const user = userEvent.setup()
+    render(<LayersCatalog />)
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search layers by title' }), 'Without STAC')
+
+    expect(screen.getByRole('row', { name: 'Layer Without STAC' })).toBeInTheDocument()
+    expect(screen.queryByRole('row', { name: 'Layer With Data' })).not.toBeInTheDocument()
+  })
+
+  it('shows an empty state when no row matches the search text', async () => {
+    const user = userEvent.setup()
+    render(<LayersCatalog />)
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search layers by title' }), 'no such layer')
+
+    expect(screen.getByText('No layers match the current filters.')).toBeInTheDocument()
+  })
+
+  it('hides rows for a category when its filter chip is deselected', async () => {
+    const user = userEvent.setup()
+    render(<LayersCatalog />)
+
+    await user.click(screen.getByRole('button', { name: 'Chemical' }))
+
+    expect(screen.queryByRole('row', { name: 'Layer With Data' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('row', { name: 'Layer Fetch Fails' })).not.toBeInTheDocument()
+    expect(screen.getByRole('row', { name: 'Layer No Metadata' })).toBeInTheDocument()
+    expect(screen.getByRole('row', { name: 'Layer Without STAC' })).toBeInTheDocument()
   })
 })

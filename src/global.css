@@ -55,6 +55,15 @@
   --color-badge-global: rgba(34, 185, 67, 0.55); /* Green for map+ground data */
   --color-badge-map: rgba(59, 130, 246, 0.55); /* Blue for map-only data */
   --color-badge-local: rgba(240, 159, 17, 0.55); /* Orange for ground-only data */
+
+  /* Layer Category Colors. Used in GridListLayerComponent (accent stripe/background) and LayersCatalog (category tag/filter chips) */
+  --color-category-basemap-rgb: 128, 128, 128; /* Gray */
+  --color-category-geographical-rgb: 34, 197, 94; /* Green */
+  --color-category-chemical-rgb: 147, 51, 234; /* Violet */
+  --color-category-compound-rgb: 234, 179, 8; /* Yellow */
+  --color-category-derived-index-rgb: 249, 115, 22; /* Orange */
+  --color-category-rock-rgb: 59, 212, 246; /* Cyan */
+  --color-category-mineral-rgb: 59, 130, 246; /* Blue */
 }
 
 /*
