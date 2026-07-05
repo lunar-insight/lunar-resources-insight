@@ -1,16 +1,18 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
-import { ComboBox, ComboBoxStateContext, Input, ListBox, ListBoxItem, Popover, Button } from 'react-aria-components';
+import { ComboBox, ComboBoxStateContext, Input, ListBox, ListBoxItem, Popover, Button, TooltipTrigger, Focusable } from 'react-aria-components';
 import { useFilter } from 'react-aria';
 import { useViewer } from 'utils/context/ViewerContext';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useNomenclatureFeatures } from 'hooks/useNomenclatureFeatures';
 import { parseCoordinateInput } from 'utils/coordinateParser';
 import { createPointFeature } from 'services/drawing/PointDrawingService';
-import { SearchResultMarkerService } from 'services/SearchResultMarkerService';
+import { formatDegrees, formatCoordinateFeatureName } from 'utils/featurePointNaming';
 import { Feature } from 'components/navigation/FeaturesSection/types';
 import ViewerIconButton from 'components/layout/Button/ViewerIconButton/ViewerIconButton';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import SearchResultCallout from './SearchResultCallout';
+import SearchResultMarker from './SearchResultMarker';
 import styles from './NomenclatureSearch.module.scss';
 
 type SearchItem =
@@ -73,16 +75,6 @@ const NomenclatureSearch: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
   const [activeMarker, setActiveMarker] = useState<SavablePoint | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const markerServiceRef = useRef<SearchResultMarkerService>(new SearchResultMarkerService());
-
-  useEffect(() => {
-    markerServiceRef.current.setViewer(viewer);
-  }, [viewer]);
-
-  useEffect(() => {
-    const markerService = markerServiceRef.current;
-    return () => markerService.destroy();
-  }, []);
 
   // Search results already saved as a feature point are tracked by a stable
   // source key (distinct from the coordinate/feature's own precision-sensitive
@@ -107,7 +99,7 @@ const NomenclatureSearch: React.FC = () => {
         lat: coordinate.lat,
         lon: coordinate.lon,
         altitude: coordinate.altitude,
-        label: `Fly to Lat ${coordinate.lat.toFixed(4)}°, Lon ${coordinate.lon.toFixed(4)}°${altitudeLabel}`,
+        label: `Fly to Lat ${formatDegrees(coordinate.lat)}°, Lon ${formatDegrees(coordinate.lon)}°${altitudeLabel}`,
       });
     }
 
@@ -163,9 +155,7 @@ const NomenclatureSearch: React.FC = () => {
   const toSavablePoint = (item: SearchItem): SavablePoint => ({
     lon: item.lon,
     lat: item.lat,
-    name: item.kind === 'coordinate'
-      ? `Lat ${item.lat.toFixed(4)}°, Lon ${item.lon.toFixed(4)}°`
-      : item.label,
+    name: item.kind === 'coordinate' ? formatCoordinateFeatureName(item.lon, item.lat) : item.label,
     sourceId: getSourceId(item),
   });
 
@@ -187,7 +177,6 @@ const NomenclatureSearch: React.FC = () => {
       : Math.max(item.diameter * 1000 * FEATURE_ALTITUDE_PADDING, MIN_FEATURE_ALTITUDE);
     flyTo(Cesium.Cartesian3.fromDegrees(item.lon, item.lat, altitude));
 
-    markerServiceRef.current.show(item.lon, item.lat);
     setActiveMarker(toSavablePoint(item));
 
     collapse();
@@ -198,19 +187,23 @@ const NomenclatureSearch: React.FC = () => {
     saveAsFeaturePoint(toSavablePoint(item));
   };
 
-  // Save + immediately open Insights
+  // Save silently from the callout.
+  const handleSaveFromCallout = () => {
+    if (!activeMarker) return;
+    saveAsFeaturePoint(activeMarker);
+  };
+
   const handleAnalyze = () => {
     if (!activeMarker) return;
-    const feature = saveAsFeaturePoint(activeMarker);
+    const existing = features.find((feature) => feature.metadata.sourceId === activeMarker.sourceId);
+    const feature = existing ?? saveAsFeaturePoint(activeMarker);
     if (feature) {
       toggleFeatureInsights(feature.id);
     }
-    markerServiceRef.current.clear();
     setActiveMarker(null);
   };
 
   const handleDismissMarker = () => {
-    markerServiceRef.current.clear();
     setActiveMarker(null);
   };
 
@@ -258,29 +251,36 @@ const NomenclatureSearch: React.FC = () => {
                     <span aria-hidden="true" className={`material-symbols-outlined ${styles.itemIcon}`}>near_me</span>
                   )}
                   <span className={styles.itemLabel}>{item.label}</span>
-                  <button
-                    type="button"
-                    aria-label={alreadySaved ? 'Already saved as feature point' : 'Save as feature point'}
-                    className={styles.saveButton}
-                    disabled={alreadySaved}
-                    data-saved={alreadySaved || undefined}
-                    // The Option commits its selection (flying the camera there) on
-                    // pointerup, not on click, so every stage of the press has to be
-                    // stopped here, not just the click, to keep this a separate action.
-                    onPointerDownCapture={stopEventPropagation}
-                    onMouseDownCapture={stopEventPropagation}
-                    onPointerUpCapture={stopEventPropagation}
-                    onMouseUpCapture={stopEventPropagation}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      event.preventDefault();
-                      if (!alreadySaved) handleDropdownSave(item);
-                    }}
-                  >
-                    <span className="material-symbols-outlined" aria-hidden="true">
-                      {alreadySaved ? 'bookmark' : 'bookmark_add'}
-                    </span>
-                  </button>
+                  <TooltipTrigger>
+                    <Focusable>
+                      <button
+                        type="button"
+                        aria-label={alreadySaved ? 'Already saved as feature point' : 'Save as feature point'}
+                        className={styles.saveButton}
+                        disabled={alreadySaved}
+                        data-saved={alreadySaved || undefined}
+                        // The Option commits its selection (flying the camera there) on
+                        // pointerup, not on click, so every stage of the press has to be
+                        // stopped here, not just the click, to keep this a separate action.
+                        onPointerDownCapture={stopEventPropagation}
+                        onMouseDownCapture={stopEventPropagation}
+                        onPointerUpCapture={stopEventPropagation}
+                        onMouseUpCapture={stopEventPropagation}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          event.preventDefault();
+                          if (!alreadySaved) handleDropdownSave(item);
+                        }}
+                      >
+                        <span className="material-symbols-outlined" aria-hidden="true">
+                          {alreadySaved ? 'bookmark' : 'bookmark_add'}
+                        </span>
+                      </button>
+                    </Focusable>
+                    <ButtonTooltip placement="top">
+                      {alreadySaved ? 'Already saved as feature point' : 'Save as feature point'}
+                    </ButtonTooltip>
+                  </TooltipTrigger>
                 </ListBoxItem>
               );
             }}
@@ -297,14 +297,19 @@ const NomenclatureSearch: React.FC = () => {
     <>
       {searchBox}
       {activeMarker && viewer && (
-        <SearchResultCallout
-          viewer={viewer}
-          label={activeMarker.name}
-          alreadySaved={savedSourceIds.has(activeMarker.sourceId)}
-          getScreenPosition={() => markerServiceRef.current.getScreenPosition()}
-          onAnalyze={handleAnalyze}
-          onDismiss={handleDismissMarker}
-        />
+        <>
+          <SearchResultMarker viewer={viewer} lon={activeMarker.lon} lat={activeMarker.lat} />
+          <SearchResultCallout
+            viewer={viewer}
+            lon={activeMarker.lon}
+            lat={activeMarker.lat}
+            label={activeMarker.name}
+            alreadySaved={savedSourceIds.has(activeMarker.sourceId)}
+            onSave={handleSaveFromCallout}
+            onAnalyze={handleAnalyze}
+            onDismiss={handleDismissMarker}
+          />
+        </>
       )}
     </>
   );

@@ -3,6 +3,7 @@ import * as Cesium from 'cesium';
 import { Feature } from 'components/navigation/FeaturesSection/types';
 import { useViewer } from './ViewerContext';
 import { hexaToCesiumColor } from 'utils/colorUtils';
+import { formatCoordinateFeatureName, COORDINATE_FEATURE_NAME_PATTERN } from 'utils/featurePointNaming';
 
 interface FeaturesContextType {
   features: Feature[];
@@ -86,9 +87,23 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const updateFeaturePosition = useCallback((id: string, newPosition: Cesium.Cartographic) => {
     setFeatures(prev =>
-      prev.map(f =>
-        f.id === id ? { ...f, metadata: { ...f.metadata, position: newPosition } } : f
-      )
+      prev.map(f => {
+        if (f.id !== id) return f;
+
+        // Dragging a point away from where it was saved severs its link to the
+        // search result it came from, it's no longer "at" that coordinate,
+        // so that search result should be save-able again.
+        const wasCoordinateOrigin = f.metadata.sourceId?.startsWith('coordinate-') ?? false;
+
+        // Keep the name in sync with the new position, but only if it's still
+        // the auto-generated "Lat X°, Lon Y°" form, a manually renamed point
+        // (or one saved from a named nomenclature feature) is left alone.
+        const name = wasCoordinateOrigin && COORDINATE_FEATURE_NAME_PATTERN.test(f.name)
+          ? formatCoordinateFeatureName(Cesium.Math.toDegrees(newPosition.longitude), Cesium.Math.toDegrees(newPosition.latitude))
+          : f.name;
+
+        return { ...f, name, metadata: { ...f.metadata, position: newPosition, sourceId: undefined } };
+      })
     );
   }, []);
 

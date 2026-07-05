@@ -184,10 +184,18 @@
   color: rgba(var(--color-tertiary-rgb), 0.7);
 }
 
-.searchResultCallout {
+.searchResultCalloutAnchor {
   position: absolute;
+  top: 0;
+  left: 0;
   z-index: 110;
-  transform: translate(-50%, calc(-100% - 14px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.searchResultCallout {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -202,6 +210,12 @@
   white-space: nowrap;
 }
 
+.searchResultCalloutLeader {
+  width: 2px;
+  height: 56px;
+  background: linear-gradient(to bottom, rgba(var(--color-tertiary-rgb), 0.6), rgba(var(--color-tertiary-rgb), 0.1));
+}
+
 .searchResultCalloutLabel {
   font-size: 0.8rem;
   color: var(--color-tertiary);
@@ -211,6 +225,20 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.searchResultCalloutSave {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid rgba(var(--color-tertiary-rgb), 0.4);
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--color-tertiary);
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &[data-hovered] {
+    background: rgba(var(--color-quaternary-rgb), 0.5);
+  }
 }
 
 .searchResultCalloutAnalyze {
@@ -259,5 +287,51 @@
 
   &[data-hovered] {
     background: rgba(var(--color-quaternary-rgb), 0.5);
+  }
+}
+
+.searchResultMarker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 105;
+  // Position is set inline per-frame in JS (see searchResultCalloutAnchor).
+  pointer-events: none;
+}
+
+.searchResultMarkerPin {
+  position: relative;
+  display: block;
+  // Matches the 32x42 viewBox aspect ratio exactly, so the SVG fills this
+  // box with no extra padding (for anchored ground point).
+  width: 28px;
+  height: 36.75px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.searchResultMarkerPulse {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: rgba(255, 176, 32, 0.55);
+  animation: searchResultMarkerPulse 1.6s ease-out infinite;
+}
+
+@keyframes searchResultMarkerPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
   }
 }

@@ -77,7 +77,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       globe.baseColor = Cesium.Color.GRAY;
 
       // Terrain
-      globe.depthTestAgainstTerrain = false;
+      globe.depthTestAgainstTerrain = true;
       globe.showWaterEffect = false;
 
       // Remove the default double click of Cesium that can conflict with custom selection tools

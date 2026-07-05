@@ -6,11 +6,21 @@ const entitiesAddMock = vi.fn((options: Cesium.Entity.ConstructorOptions) => new
 const entitiesRemoveMock = vi.fn()
 const cartesianToCanvasCoordinatesMock = vi.fn(() => new Cesium.Cartesian2(100, 100))
 
+const MOON_RADIUS = Cesium.Ellipsoid.MOON.maximumRadius
+
 const viewerMock = {
   camera: {
     flyTo: flyToMock,
     positionCartographic: { height: 123456 },
+    // Far overhead of (0, 0), well within view of every coordinate used in
+    // these tests, so the EllipsoidalOccluder visibility check in
+    // useTrackedScreenPosition doesn't hide the marker/callout.
+    positionWC: Cesium.Cartesian3.fromDegrees(0, 0, MOON_RADIUS * 10),
   },
+  // Left undefined: sampleTerrainMostDetailed rejects/throws synchronously on
+  // an invalid provider, which useTrackedScreenPosition catches and falls
+  // back to the ellipsoid-surface position, fine for these tests.
+  terrainProvider: undefined as unknown as Cesium.TerrainProvider,
   entities: {
     add: entitiesAddMock,
     remove: entitiesRemoveMock,
@@ -18,6 +28,7 @@ const viewerMock = {
   scene: {
     globe: { ellipsoid: Cesium.Ellipsoid.MOON },
     cartesianToCanvasCoordinates: cartesianToCanvasCoordinatesMock,
+    requestRender: vi.fn(),
     postRender: {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
@@ -133,7 +144,17 @@ describe('coordinate search', () => {
 
     await user.type(screen.getByRole('combobox'), '12.34, 56.78')
 
-    expect(screen.getByRole('option', { name: 'Fly to Lat 12.3400°, Lon 56.7800°' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Fly to Lat 12.34°, Lon 56.78°' })).toBeInTheDocument()
+  })
+
+  it('drops trailing zeros but keeps up to 6 decimal places', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+
+    await user.type(screen.getByRole('combobox'), '12.3456789, 56.1')
+
+    expect(screen.getByRole('option', { name: 'Fly to Lat 12.345679°, Lon 56.1°' })).toBeInTheDocument()
   })
 
   it('includes the altitude in the option label when provided as a third value', async () => {
@@ -143,7 +164,7 @@ describe('coordinate search', () => {
 
     await user.type(screen.getByRole('combobox'), '12.34, 56.78, 50000')
 
-    expect(screen.getByRole('option', { name: 'Fly to Lat 12.3400°, Lon 56.7800°, Alt 50000m' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'Fly to Lat 12.34°, Lon 56.78°, Alt 50000m' })).toBeInTheDocument()
   })
 
   it('does not offer a coordinate match for plain feature-name text', async () => {
@@ -222,7 +243,7 @@ describe('Enter key without navigating the menu', () => {
 })
 
 describe('temporary search marker', () => {
-  it('shows an on-map callout with Analyze and dismiss actions after selecting a result', async () => {
+  it('shows an on-map callout with Save, Analyze and dismiss actions after selecting a result', async () => {
     const user = userEvent.setup()
     render(<NomenclatureSearch />)
     await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
@@ -231,6 +252,7 @@ describe('temporary search marker', () => {
     await user.click(screen.getByRole('option', { name: 'Tycho' }))
 
     expect(screen.getByText('Tycho')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Analyze' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Dismiss marker' })).toBeInTheDocument()
   })
@@ -241,7 +263,6 @@ describe('temporary search marker', () => {
     await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
     await user.type(screen.getByRole('combobox'), 'Tycho')
     await user.click(screen.getByRole('option', { name: 'Tycho' }))
-    entitiesAddMock.mockClear() // clear the temp-pin creation, isolate feature creation below
 
     await user.click(screen.getByRole('button', { name: 'Analyze' }))
 
@@ -250,18 +271,48 @@ describe('temporary search marker', () => {
     expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()
   })
 
+  it('creates a feature point without opening insights when Save is pressed', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+    await user.type(screen.getByRole('combobox'), 'Tycho')
+    await user.click(screen.getByRole('option', { name: 'Tycho' }))
+
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(entitiesAddMock).toHaveBeenCalledTimes(1)
+    expect(toggleFeatureInsightsMock).not.toHaveBeenCalled()
+    // The callout stays open, reflecting the saved state.
+    expect(screen.getByText('Saved')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Analyze' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument()
+  })
+
+  it('keeps Analyze available after saving, opening insights on the existing feature without duplicating it', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+    await user.type(screen.getByRole('combobox'), 'Tycho')
+    await user.click(screen.getByRole('option', { name: 'Tycho' }))
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    entitiesAddMock.mockClear()
+
+    await user.click(screen.getByRole('button', { name: 'Analyze' }))
+
+    expect(entitiesAddMock).not.toHaveBeenCalled() // no duplicate feature created
+    expect(toggleFeatureInsightsMock).toHaveBeenCalledTimes(1)
+  })
+
   it('dismisses the marker without saving when the dismiss button is pressed', async () => {
     const user = userEvent.setup()
     render(<NomenclatureSearch />)
     await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
     await user.type(screen.getByRole('combobox'), 'Tycho')
     await user.click(screen.getByRole('option', { name: 'Tycho' }))
-    entitiesAddMock.mockClear() // clear the temp-pin creation
 
     await user.click(screen.getByRole('button', { name: 'Dismiss marker' }))
 
     expect(entitiesAddMock).not.toHaveBeenCalled() // no feature created
-    expect(entitiesRemoveMock).toHaveBeenCalledTimes(1) // temp pin removed
     expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()
   })
 
@@ -290,7 +341,7 @@ describe('saving a feature point from the dropdown', () => {
     expect(entitiesAddMock).toHaveBeenCalledTimes(1)
     expect(flyToMock).not.toHaveBeenCalled()
     expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()
-    // Popover should stay open - saving isn't a selection/commit action.
+    // Popover should stay open.
     expect(screen.getByRole('option', { name: 'Tycho' })).toBeInTheDocument()
   })
 
