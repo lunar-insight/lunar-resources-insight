@@ -142,9 +142,122 @@
   color: var(--color-tertiary);
 }
 
+.itemLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saveButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--color-tertiary);
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(var(--color-quaternary-rgb), 0.5);
+  }
+
+  &:disabled {
+    cursor: default;
+    color: var(--color-secondary);
+  }
+}
+
 .emptyState {
   display: block;
   padding: 0.5rem 0.6rem;
   font-size: 0.8rem;
   color: rgba(var(--color-tertiary-rgb), 0.7);
+}
+
+.searchResultCallout {
+  position: absolute;
+  z-index: 110;
+  transform: translate(-50%, calc(-100% - 14px));
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(var(--color-primary-rgb), 0.8);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.searchResultCalloutLabel {
+  font-size: 0.8rem;
+  color: var(--color-tertiary);
+}
+
+.searchResultCalloutActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.searchResultCalloutAnalyze {
+  padding: 0.25rem 0.6rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: var(--color-secondary);
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &[data-hovered] {
+    filter: brightness(1.1);
+  }
+}
+
+.searchResultCalloutSaved {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--color-tertiary);
+
+  .material-symbols-outlined {
+    font-size: 16px;
+    color: var(--color-secondary);
+  }
+}
+
+.searchResultCalloutDismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--color-tertiary);
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  &[data-hovered] {
+    background: rgba(var(--color-quaternary-rgb), 0.5);
+  }
 }

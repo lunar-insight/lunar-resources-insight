@@ -1,8 +1,27 @@
+import { useState } from 'react'
+import * as Cesium from 'cesium'
+
 const flyToMock = vi.fn()
+const entitiesAddMock = vi.fn((options: Cesium.Entity.ConstructorOptions) => new Cesium.Entity(options))
+const entitiesRemoveMock = vi.fn()
+const cartesianToCanvasCoordinatesMock = vi.fn(() => new Cesium.Cartesian2(100, 100))
+
 const viewerMock = {
   camera: {
     flyTo: flyToMock,
     positionCartographic: { height: 123456 },
+  },
+  entities: {
+    add: entitiesAddMock,
+    remove: entitiesRemoveMock,
+  },
+  scene: {
+    globe: { ellipsoid: Cesium.Ellipsoid.MOON },
+    cartesianToCanvasCoordinates: cartesianToCanvasCoordinatesMock,
+    postRender: {
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    },
   },
 }
 
@@ -20,15 +39,37 @@ vi.mock('hooks/useNomenclatureFeatures', () => ({
   }),
 }))
 
-import { render, screen } from '@testing-library/react'
+const toggleFeatureInsightsMock = vi.fn()
+
+// A minimal stand-in for FeaturesContext backed by real useState, so that
+// addFeature calls actually cause NomenclatureSearch to re-render with the
+// updated features list (needed to test the "already saved" row state).
+vi.mock('utils/context/FeaturesContext', () => ({
+  useFeaturesContext: () => {
+    const [features, setFeatures] = useState<Array<{ id: string; metadata: { sourceId?: string } }>>([])
+    return {
+      features,
+      addFeature: (feature: { id: string; metadata: { sourceId?: string } }) =>
+        setFeatures((prev) => [...prev, feature]),
+      toggleFeatureInsights: toggleFeatureInsightsMock,
+      showFeatures: true,
+      showLabels: true,
+    }
+  },
+}))
+
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import * as Cesium from 'cesium'
 import NomenclatureSearch from './NomenclatureSearch'
 
 const SEARCH_LABEL = /search for a lunar feature or coordinate/i
 
 beforeEach(() => {
   flyToMock.mockClear()
+  entitiesAddMock.mockClear()
+  entitiesRemoveMock.mockClear()
+  toggleFeatureInsightsMock.mockClear()
+  cartesianToCanvasCoordinatesMock.mockClear()
 })
 
 it('renders collapsed as an icon button by default', () => {
@@ -177,5 +218,94 @@ describe('Enter key without navigating the menu', () => {
     const expected = Cesium.Cartesian3.fromDegrees(-20.08, 9.62, copernicusAltitude)
 
     expect(Cesium.Cartesian3.equalsEpsilon(destination, expected, Cesium.Math.EPSILON7)).toBe(true)
+  })
+})
+
+describe('temporary search marker', () => {
+  it('shows an on-map callout with Analyze and dismiss actions after selecting a result', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+    await user.type(screen.getByRole('combobox'), 'Tycho')
+
+    await user.click(screen.getByRole('option', { name: 'Tycho' }))
+
+    expect(screen.getByText('Tycho')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Analyze' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Dismiss marker' })).toBeInTheDocument()
+  })
+
+  it('creates a feature point and opens its insights when Analyze is pressed', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+    await user.type(screen.getByRole('combobox'), 'Tycho')
+    await user.click(screen.getByRole('option', { name: 'Tycho' }))
+    entitiesAddMock.mockClear() // clear the temp-pin creation, isolate feature creation below
+
+    await user.click(screen.getByRole('button', { name: 'Analyze' }))
+
+    expect(entitiesAddMock).toHaveBeenCalledTimes(1)
+    expect(toggleFeatureInsightsMock).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()
+  })
+
+  it('dismisses the marker without saving when the dismiss button is pressed', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+    await user.type(screen.getByRole('combobox'), 'Tycho')
+    await user.click(screen.getByRole('option', { name: 'Tycho' }))
+    entitiesAddMock.mockClear() // clear the temp-pin creation
+
+    await user.click(screen.getByRole('button', { name: 'Dismiss marker' }))
+
+    expect(entitiesAddMock).not.toHaveBeenCalled() // no feature created
+    expect(entitiesRemoveMock).toHaveBeenCalledTimes(1) // temp pin removed
+    expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()
+  })
+
+  it('does not clear the marker when the search box is closed', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+    await user.type(screen.getByRole('combobox'), 'Tycho')
+    await user.click(screen.getByRole('option', { name: 'Tycho' }))
+
+    expect(screen.getByRole('button', { name: 'Analyze' })).toBeInTheDocument()
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+  })
+})
+
+describe('saving a feature point from the dropdown', () => {
+  it('saves silently, without moving the camera or opening the callout', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+    await user.type(screen.getByRole('combobox'), 'Tycho')
+
+    const option = screen.getByRole('option', { name: 'Tycho' })
+    await user.click(within(option).getByRole('button', { name: 'Save as feature point' }))
+
+    expect(entitiesAddMock).toHaveBeenCalledTimes(1)
+    expect(flyToMock).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()
+    // Popover should stay open - saving isn't a selection/commit action.
+    expect(screen.getByRole('option', { name: 'Tycho' })).toBeInTheDocument()
+  })
+
+  it('marks the result as already saved and disables the save button', async () => {
+    const user = userEvent.setup()
+    render(<NomenclatureSearch />)
+    await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
+    await user.type(screen.getByRole('combobox'), 'Tycho')
+
+    const option = screen.getByRole('option', { name: 'Tycho' })
+    await user.click(within(option).getByRole('button', { name: 'Save as feature point' }))
+
+    const savedButton = within(screen.getByRole('option', { name: 'Tycho' })).getByRole('button', {
+      name: 'Already saved as feature point',
+    })
+    expect(savedButton).toBeDisabled()
   })
 })

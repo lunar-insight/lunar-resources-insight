@@ -1,11 +1,16 @@
-import React, { useContext, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
 import { ComboBox, ComboBoxStateContext, Input, ListBox, ListBoxItem, Popover, Button } from 'react-aria-components';
 import { useFilter } from 'react-aria';
 import { useViewer } from 'utils/context/ViewerContext';
+import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useNomenclatureFeatures } from 'hooks/useNomenclatureFeatures';
 import { parseCoordinateInput } from 'utils/coordinateParser';
+import { createPointFeature } from 'services/drawing/PointDrawingService';
+import { SearchResultMarkerService } from 'services/SearchResultMarkerService';
+import { Feature } from 'components/navigation/FeaturesSection/types';
 import ViewerIconButton from 'components/layout/Button/ViewerIconButton/ViewerIconButton';
+import SearchResultCallout from './SearchResultCallout';
 import styles from './NomenclatureSearch.module.scss';
 
 type SearchItem =
@@ -44,13 +49,48 @@ const SearchInput: React.FC<SearchInputProps> = ({ inputRef, items, onCommit, on
   return <Input ref={inputRef} placeholder="Feature name or lat, lon[, altitude]" onKeyDown={handleKeyDown} />;
 };
 
+interface SavablePoint {
+  lon: number;
+  lat: number;
+  name: string;
+  sourceId: string;
+}
+
+// Stops the option row underneath from treating this press as its own
+// selection (which flies the camera there), the row commits on pointerup,
+// not click, so every stage of the press sequence needs this.
+const stopEventPropagation = (event: React.SyntheticEvent) => {
+  event.preventDefault();
+  event.stopPropagation();
+};
+
 const NomenclatureSearch: React.FC = () => {
   const { viewer } = useViewer();
-  const { features } = useNomenclatureFeatures();
+  const { features: nomenclatureFeatures } = useNomenclatureFeatures();
+  const { features, addFeature, toggleFeatureInsights, showFeatures, showLabels } = useFeaturesContext();
   const { contains } = useFilter({ sensitivity: 'base' });
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [activeMarker, setActiveMarker] = useState<SavablePoint | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const markerServiceRef = useRef<SearchResultMarkerService>(new SearchResultMarkerService());
+
+  useEffect(() => {
+    markerServiceRef.current.setViewer(viewer);
+  }, [viewer]);
+
+  useEffect(() => {
+    const markerService = markerServiceRef.current;
+    return () => markerService.destroy();
+  }, []);
+
+  // Search results already saved as a feature point are tracked by a stable
+  // source key (distinct from the coordinate/feature's own precision-sensitive
+  // values) so re-searching the same result doesn't create a duplicate.
+  const savedSourceIds = useMemo(
+    () => new Set(features.map((feature) => feature.metadata.sourceId).filter((id): id is string => !!id)),
+    [features]
+  );
 
   const items = useMemo<SearchItem[]>(() => {
     const trimmed = inputValue.trim();
@@ -71,7 +111,7 @@ const NomenclatureSearch: React.FC = () => {
       });
     }
 
-    for (const feature of features) {
+    for (const feature of nomenclatureFeatures) {
       if (results.length >= MAX_FEATURE_RESULTS) break;
       if (contains(feature.name, trimmed)) {
         results.push({
@@ -86,7 +126,7 @@ const NomenclatureSearch: React.FC = () => {
     }
 
     return results;
-  }, [inputValue, features, contains]);
+  }, [inputValue, nomenclatureFeatures, contains]);
 
   const collapse = () => {
     setIsExpanded(false);
@@ -112,36 +152,78 @@ const NomenclatureSearch: React.FC = () => {
     });
   };
 
+  // Stable identity for "has this exact result already been saved as a feature
+  // point" checks, distinct from SearchItem.id, which is always the literal
+  // 'coordinate' for typed coordinates and thus not unique per lat/lon.
+  const getSourceId = (item: SearchItem): string =>
+    item.kind === 'coordinate'
+      ? `coordinate-${item.lat.toFixed(6)}-${item.lon.toFixed(6)}`
+      : item.id;
+
+  const toSavablePoint = (item: SearchItem): SavablePoint => ({
+    lon: item.lon,
+    lat: item.lat,
+    name: item.kind === 'coordinate'
+      ? `Lat ${item.lat.toFixed(4)}°, Lon ${item.lon.toFixed(4)}°`
+      : item.label,
+    sourceId: getSourceId(item),
+  });
+
+  const saveAsFeaturePoint = (point: SavablePoint): Feature | null => {
+    if (!viewer || savedSourceIds.has(point.sourceId)) return null;
+    const cartesian = Cesium.Cartesian3.fromDegrees(point.lon, point.lat, 0);
+    const feature = createPointFeature(viewer, cartesian, point.name, showFeatures, showLabels, point.sourceId);
+    addFeature(feature);
+    return feature;
+  };
+
   const handleSelection = (key: React.Key | null) => {
     if (!viewer || key === null) return;
     const item = items.find((candidate) => candidate.id === key);
     if (!item) return;
 
-    if (item.kind === 'coordinate') {
-      const altitude = item.altitude ?? viewer.camera.positionCartographic.height;
-      flyTo(Cesium.Cartesian3.fromDegrees(item.lon, item.lat, altitude));
-    } else {
-      const altitude = Math.max(item.diameter * 1000 * FEATURE_ALTITUDE_PADDING, MIN_FEATURE_ALTITUDE);
-      flyTo(Cesium.Cartesian3.fromDegrees(item.lon, item.lat, altitude));
-    }
+    const altitude = item.kind === 'coordinate'
+      ? item.altitude ?? viewer.camera.positionCartographic.height
+      : Math.max(item.diameter * 1000 * FEATURE_ALTITUDE_PADDING, MIN_FEATURE_ALTITUDE);
+    flyTo(Cesium.Cartesian3.fromDegrees(item.lon, item.lat, altitude));
+
+    markerServiceRef.current.show(item.lon, item.lat);
+    setActiveMarker(toSavablePoint(item));
 
     collapse();
   };
 
-  if (!isExpanded) {
-    return (
-      <ViewerIconButton
-        icon="search"
-        ariaLabel="Search for a lunar feature or coordinate"
-        tooltipText="Search feature or coordinate"
-        tooltipPlacement="right"
-        className={styles.collapsedButton}
-        onPress={expand}
-      />
-    );
-  }
+  // Save silently from the dropdown for bookmarking several candidates in a row without interruption.
+  const handleDropdownSave = (item: SearchItem) => {
+    saveAsFeaturePoint(toSavablePoint(item));
+  };
 
-  return (
+  // Save + immediately open Insights
+  const handleAnalyze = () => {
+    if (!activeMarker) return;
+    const feature = saveAsFeaturePoint(activeMarker);
+    if (feature) {
+      toggleFeatureInsights(feature.id);
+    }
+    markerServiceRef.current.clear();
+    setActiveMarker(null);
+  };
+
+  const handleDismissMarker = () => {
+    markerServiceRef.current.clear();
+    setActiveMarker(null);
+  };
+
+  const searchBox = !isExpanded ? (
+    <ViewerIconButton
+      icon="search"
+      ariaLabel="Search for a lunar feature or coordinate"
+      tooltipText="Search feature or coordinate"
+      tooltipPlacement="right"
+      className={styles.collapsedButton}
+      onPress={expand}
+    />
+  ) : (
     <div className={styles.expandedContainer}>
       <ComboBox
         aria-label="Search for a lunar feature or coordinate"
@@ -163,18 +245,45 @@ const NomenclatureSearch: React.FC = () => {
               </span>
             )}
           >
-            {(item: SearchItem) => (
-              <ListBoxItem
-                id={item.id}
-                textValue={item.label}
-                className={`${styles.listBoxItem} ${item.kind === 'coordinate' ? styles.coordinateItem : ''}`}
-              >
-                {item.kind === 'coordinate' && (
-                  <span aria-hidden="true" className={`material-symbols-outlined ${styles.itemIcon}`}>near_me</span>
-                )}
-                {item.label}
-              </ListBoxItem>
-            )}
+            {(item: SearchItem) => {
+              const alreadySaved = savedSourceIds.has(getSourceId(item));
+
+              return (
+                <ListBoxItem
+                  id={item.id}
+                  textValue={item.label}
+                  className={`${styles.listBoxItem} ${item.kind === 'coordinate' ? styles.coordinateItem : ''}`}
+                >
+                  {item.kind === 'coordinate' && (
+                    <span aria-hidden="true" className={`material-symbols-outlined ${styles.itemIcon}`}>near_me</span>
+                  )}
+                  <span className={styles.itemLabel}>{item.label}</span>
+                  <button
+                    type="button"
+                    aria-label={alreadySaved ? 'Already saved as feature point' : 'Save as feature point'}
+                    className={styles.saveButton}
+                    disabled={alreadySaved}
+                    data-saved={alreadySaved || undefined}
+                    // The Option commits its selection (flying the camera there) on
+                    // pointerup, not on click, so every stage of the press has to be
+                    // stopped here, not just the click, to keep this a separate action.
+                    onPointerDownCapture={stopEventPropagation}
+                    onMouseDownCapture={stopEventPropagation}
+                    onPointerUpCapture={stopEventPropagation}
+                    onMouseUpCapture={stopEventPropagation}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      event.preventDefault();
+                      if (!alreadySaved) handleDropdownSave(item);
+                    }}
+                  >
+                    <span className="material-symbols-outlined" aria-hidden="true">
+                      {alreadySaved ? 'bookmark' : 'bookmark_add'}
+                    </span>
+                  </button>
+                </ListBoxItem>
+              );
+            }}
           </ListBox>
         </Popover>
       </ComboBox>
@@ -182,6 +291,22 @@ const NomenclatureSearch: React.FC = () => {
         <span className="material-symbols-outlined">close</span>
       </Button>
     </div>
+  );
+
+  return (
+    <>
+      {searchBox}
+      {activeMarker && viewer && (
+        <SearchResultCallout
+          viewer={viewer}
+          label={activeMarker.name}
+          alreadySaved={savedSourceIds.has(activeMarker.sourceId)}
+          getScreenPosition={() => markerServiceRef.current.getScreenPosition()}
+          onAnalyze={handleAnalyze}
+          onDismiss={handleDismissMarker}
+        />
+      )}
+    </>
   );
 };
 

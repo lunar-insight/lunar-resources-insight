@@ -16,6 +16,8 @@ export interface Feature {
     diameterEndpoints?: Cesium.Cartographic[];
     circumferencePoints?: Cesium.Cartographic[];
     createdAt: Date;
+    /** Identifies the search result this feature was created from, if any (used to detect "already saved" results). */
+    sourceId?: string;
   };
   insightsOpen: boolean;
   visible: boolean;
