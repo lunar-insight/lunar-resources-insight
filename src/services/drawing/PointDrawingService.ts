@@ -54,6 +54,7 @@ export function createPointFeature(
       position: cartographic,
       createdAt: new Date(),
       sourceId,
+      autoNamedFromCoordinate: sourceId?.startsWith('coordinate-') ?? false,
     },
     insightsOpen: false,
     visible: true,

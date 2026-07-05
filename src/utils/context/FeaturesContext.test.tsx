@@ -29,7 +29,7 @@ describe('updateFeaturePosition', () => {
 
     act(() => result.current.addFeature(makeFeature({
       name: formatCoordinateFeatureName(-11.36, -43.31),
-      metadata: { createdAt: new Date(), sourceId: 'coordinate--43.310000--11.360000' },
+      metadata: { createdAt: new Date(), sourceId: 'coordinate--43.310000--11.360000', autoNamedFromCoordinate: true },
     })))
 
     const newPosition = Cesium.Cartographic.fromDegrees(12.5, 34.25)
@@ -43,7 +43,7 @@ describe('updateFeaturePosition', () => {
 
     act(() => result.current.addFeature(makeFeature({
       name: formatCoordinateFeatureName(-11.36, -43.31),
-      metadata: { createdAt: new Date(), sourceId: 'coordinate--43.310000--11.360000' },
+      metadata: { createdAt: new Date(), sourceId: 'coordinate--43.310000--11.360000', autoNamedFromCoordinate: true },
     })))
 
     act(() => result.current.updateFeaturePosition('feature-1', Cesium.Cartographic.fromDegrees(12.5, 34.25)))
@@ -69,12 +69,27 @@ describe('updateFeaturePosition', () => {
 
     act(() => result.current.addFeature(makeFeature({
       name: formatCoordinateFeatureName(-11.36, -43.31),
-      metadata: { createdAt: new Date(), sourceId: 'coordinate--43.310000--11.360000' },
+      metadata: { createdAt: new Date(), sourceId: 'coordinate--43.310000--11.360000', autoNamedFromCoordinate: true },
     })))
     act(() => result.current.renameFeature('feature-1', 'Landing Site A'))
 
     act(() => result.current.updateFeaturePosition('feature-1', Cesium.Cartographic.fromDegrees(12.5, 34.25)))
 
     expect(result.current.features[0].name).toBe('Landing Site A')
+  })
+
+  it('keeps renaming on the second and later drags, not just the first', () => {
+    const { result } = renderHook(() => useFeaturesContext(), { wrapper })
+
+    act(() => result.current.addFeature(makeFeature({
+      name: formatCoordinateFeatureName(-11.36, -43.31),
+      metadata: { createdAt: new Date(), sourceId: 'coordinate--43.310000--11.360000', autoNamedFromCoordinate: true },
+    })))
+
+    act(() => result.current.updateFeaturePosition('feature-1', Cesium.Cartographic.fromDegrees(12.5, 34.25)))
+    expect(result.current.features[0].name).toBe(formatCoordinateFeatureName(12.5, 34.25))
+
+    act(() => result.current.updateFeaturePosition('feature-1', Cesium.Cartographic.fromDegrees(20, -5)))
+    expect(result.current.features[0].name).toBe(formatCoordinateFeatureName(20, -5))
   })
 })

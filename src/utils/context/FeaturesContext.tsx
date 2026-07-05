@@ -93,12 +93,8 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
         // Dragging a point away from where it was saved severs its link to the
         // search result it came from, it's no longer "at" that coordinate,
         // so that search result should be save-able again.
-        const wasCoordinateOrigin = f.metadata.sourceId?.startsWith('coordinate-') ?? false;
 
-        // Keep the name in sync with the new position, but only if it's still
-        // the auto-generated "Lat X°, Lon Y°" form, a manually renamed point
-        // (or one saved from a named nomenclature feature) is left alone.
-        const name = wasCoordinateOrigin && COORDINATE_FEATURE_NAME_PATTERN.test(f.name)
+        const name = f.metadata.autoNamedFromCoordinate && COORDINATE_FEATURE_NAME_PATTERN.test(f.name)
           ? formatCoordinateFeatureName(Cesium.Math.toDegrees(newPosition.longitude), Cesium.Math.toDegrees(newPosition.latitude))
           : f.name;
 

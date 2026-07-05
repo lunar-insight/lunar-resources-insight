@@ -34,11 +34,7 @@ export const useTrackedScreenPosition = (
     // itself is independent of the camera entirely).
     Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [Cesium.Cartographic.fromDegrees(lon, lat)])
       .then(([sampled]) => {
-        if (cancelled) return;
-        if (sampled.height === undefined) {
-          console.warn('[NomenclatureSearch] Terrain sample returned no height for', lon, lat);
-          return;
-        }
+        if (cancelled || sampled.height === undefined) return;
         groundPositionRef.current = Cesium.Cartesian3.fromRadians(
           sampled.longitude,
           sampled.latitude,
@@ -46,9 +42,8 @@ export const useTrackedScreenPosition = (
         );
         update();
       })
-      .catch((error) => {
-        // Ellipsoid-surface fallback already in groundPositionRef
-        console.warn('[NomenclatureSearch] Failed to sample terrain height for', lon, lat, error);
+      .catch(() => {
+        // Ellipsoid-surface fallback already in groundPositionRef.
       });
 
     update();

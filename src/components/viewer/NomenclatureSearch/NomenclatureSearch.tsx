@@ -118,7 +118,7 @@ const NomenclatureSearch: React.FC = () => {
     }
 
     return results;
-  }, [inputValue, nomenclatureFeatures, contains]);
+  }, [inputValue, nomenclatureFeatures, contains, savedSourceIds]);
 
   const collapse = () => {
     setIsExpanded(false);
