@@ -15,10 +15,8 @@ export class FeatureDrawingService {
   private currentTool: string | null = null;
   private onPointCreatedCallback: ((feature: Feature) => void) | null = null;
   private onDrawingCancelledCallback: (() => void) | null = null;
-  private onFeatureUpdatedCallback: ((id: string, newPosition: Cesium.Cartographic) => void) | null = null;
   private onPolygonUpdatedCallback: ((id: string, positions: Cesium.Cartographic[]) => void) | null = null;
   private onCircleUpdatedCallback: ((id: string, center: Cesium.Cartographic) => void) | null = null;
-  private draggedEntity: Cesium.Entity | null = null;
   private draggedShapeEntity: Cesium.Entity | null = null;
   private draggedShapeType: 'polygon' | 'circle' | null = null;
   private dragStartPosition: Cesium.Cartesian3 | null = null;
@@ -29,6 +27,12 @@ export class FeatureDrawingService {
   private dragPolyline: Cesium.Polyline | null = null;
   private showFeatures: boolean = true;
   private showLabels: boolean = true;
+  // Throttles the hover-cursor pick below, since scene.pick() triggers a
+  // hidden render pass. Running it on every raw mouse-move event forces
+  // Cesium to keep re-resolving clamp-to-ground entity heights on complex
+  // terrain, which shows up as flicker on stationary points near the cursor.
+  private lastHoverPickTime = 0;
+  private static readonly HOVER_PICK_THROTTLE_MS = 100;
 
   // Drawing services
   private pointDrawingService: PointDrawingService;
@@ -66,7 +70,6 @@ export class FeatureDrawingService {
   setCallbacks(
     onPointCreated: (feature: Feature) => void,
     onDrawingCancelled: () => void,
-    onFeatureUpdated?: (id: string, newPosition: Cesium.Cartographic) => void,
     onLineUpdated?: (id: string, positions: Cesium.Cartographic[]) => void,
     onPolygonUpdated?: (id: string, positions: Cesium.Cartographic[]) => void,
     onCircleUpdated?: (id: string, center: Cesium.Cartographic) => void
@@ -81,9 +84,6 @@ export class FeatureDrawingService {
     this.circleDrawingService.setCallback(onPointCreated);
     this.circleDrawingService.setDrawingFinishedCallback(() => this.stopDrawing());
 
-    if (onFeatureUpdated) {
-      this.onFeatureUpdatedCallback = onFeatureUpdated;
-    }
     if (onLineUpdated) {
       this.lineVertexEditingService.setCallback(onLineUpdated);
     }
@@ -319,16 +319,6 @@ export class FeatureDrawingService {
 
       if (entity.properties?.hasProperty('_isScanIndicator')) return;
 
-      // Check if entity is a point feature with a position
-      if (entity.point && entity.position &&
-          !entity.properties?.hasProperty('_isVertexMarker') &&
-          !entity.properties?.hasProperty('_isHoverPreview')) {
-        this.draggedEntity = entity;
-        this.viewer.scene.screenSpaceCameraController.enableRotate = false;
-        this.viewer.scene.screenSpaceCameraController.enableInputs = false;
-        return;
-      }
-
       // Check for polygon entity
       if (entity.polygon && entity.polygon.hierarchy) {
         const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
@@ -401,15 +391,6 @@ export class FeatureDrawingService {
     // Delegate to vertex editing service for vertex dragging
     const handledByVertexEditing = this.lineVertexEditingService.handleMouseMove(position);
     if (handledByVertexEditing) {
-      return;
-    }
-
-    // Handle point feature dragging
-    if (this.draggedEntity) {
-      const cartesian = this.pickGlobePosition(position);
-      if (cartesian) {
-        this.draggedEntity.position = new Cesium.ConstantPositionProperty(cartesian);
-      }
       return;
     }
 
@@ -486,31 +467,26 @@ export class FeatureDrawingService {
       return;
     }
 
-    // Show grabbing cursor while dragging point features
-    if (this.draggedEntity) {
-      this.viewer.canvas.style.cursor = 'grabbing';
-      return;
-    }
-
     // Show grabbing cursor while dragging shapes
     if (this.draggedShapeEntity) {
       this.viewer.canvas.style.cursor = 'grabbing';
       return;
     }
 
+    // Cursor freshness doesn't need per-frame precision: leaving it at
+    // whatever it last resolved to for a moment is imperceptible, but skips
+    // the pick's hidden render pass on most mouse-move events.
+    const now = Date.now();
+    if (now - this.lastHoverPickTime < FeatureDrawingService.HOVER_PICK_THROTTLE_MS) {
+      return;
+    }
+    this.lastHoverPickTime = now;
+
     const pickedObject = this.viewer.scene.pick(position);
     if (Cesium.defined(pickedObject) && pickedObject.id instanceof Cesium.Entity) {
       const entity = pickedObject.id as Cesium.Entity;
 
       if (!entity.properties?.hasProperty('_isScanIndicator')) {
-        // Check if it's a draggable point feature
-        if (entity.point && entity.position &&
-            !entity.properties?.hasProperty('_isVertexMarker') &&
-            !entity.properties?.hasProperty('_isHoverPreview')) {
-          this.viewer.canvas.style.cursor = 'grab';
-          return;
-        }
-
         // Check for polygon hover
         if (entity.polygon && entity.polygon.hierarchy) {
           this.viewer.canvas.style.cursor = 'grab';
@@ -535,26 +511,6 @@ export class FeatureDrawingService {
     // Delegate to vertex editing service for vertex drag finish
     const handledByVertexEditing = this.lineVertexEditingService.handleLeftUp(position);
     if (handledByVertexEditing) {
-      return;
-    }
-
-    // Handle point feature dragging finish
-    if (this.draggedEntity) {
-      const finalPosition = this.draggedEntity.position?.getValue(Cesium.JulianDate.now());
-
-      if (finalPosition) {
-        const ellipsoid = this.viewer.scene.globe.ellipsoid;
-        const cartographic = ellipsoid.cartesianToCartographic(finalPosition);
-
-        // Notify context of update
-        if (this.onFeatureUpdatedCallback && this.draggedEntity.id) {
-          this.onFeatureUpdatedCallback(this.draggedEntity.id, cartographic);
-        }
-      }
-
-      this.draggedEntity = null;
-      this.viewer.scene.screenSpaceCameraController.enableRotate = true;
-      this.viewer.scene.screenSpaceCameraController.enableInputs = true;
       return;
     }
 
@@ -684,6 +640,5 @@ export class FeatureDrawingService {
 
     this.onPointCreatedCallback = null;
     this.onDrawingCancelledCallback = null;
-    this.onFeatureUpdatedCallback = null;
   }
 }

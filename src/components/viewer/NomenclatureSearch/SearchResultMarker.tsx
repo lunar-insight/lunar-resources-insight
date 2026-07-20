@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import * as Cesium from 'cesium';
-import { useTrackedScreenPosition } from './useTrackedScreenPosition';
+import { useTrackedScreenPosition } from 'hooks/useTrackedScreenPosition';
 import styles from './NomenclatureSearch.module.scss';
 
 interface SearchResultMarkerProps {
