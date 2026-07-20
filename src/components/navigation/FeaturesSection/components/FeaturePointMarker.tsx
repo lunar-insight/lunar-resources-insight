@@ -2,6 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
 import { useTrackedScreenPosition } from 'hooks/useTrackedScreenPosition';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
+import { DrawingUtils } from 'services/drawing/DrawingUtils';
 import { Feature } from '../types';
 import styles from './FeaturePointMarker.module.scss';
 
@@ -26,7 +27,7 @@ const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature
   // Disabled while dragging: the hook's own per-frame position update would
   // otherwise conflict with the drag handler's live transform update on
   // every rendered frame.
-  useTrackedScreenPosition(viewer, lon, lat, elementRef, 'translate(-50%, -50%)', !isDragging);
+  useTrackedScreenPosition(viewer, lon, lat, elementRef, 'translate(-50%, -50%)', !isDragging, position?.height);
 
   const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
     // Don't steal the point out from under an in-progress drawing operation.
@@ -75,7 +76,7 @@ const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature
       }
     };
 
-    const handlePointerUp = () => {
+    const handlePointerUp = (upEvent: PointerEvent) => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
       viewer.scene.screenSpaceCameraController.enableInputs = true;
@@ -85,21 +86,17 @@ const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature
 
       if (!lastWorldPosition) return;
 
-      const ellipsoid = viewer.scene.globe.ellipsoid;
-      const approxCartographic = ellipsoid.cartesianToCartographic(lastWorldPosition);
-      updateFeaturePosition(feature.id, approxCartographic);
+      // The plane used for live drag feedback is only tangent to the globe
+      // at the drag's start position, so on sloped terrain it drifts from
+      // the real surface in both height and lon/lat as the drag moves. Use
+      // the same terrain-aware picker as click-to-place for the final
+      // position at drop time.
+      const rect = viewer.canvas.getBoundingClientRect();
+      const dropScreenPosition = new Cesium.Cartesian2(upEvent.clientX - rect.left, upEvent.clientY - rect.top);
+      const dropCartesian = DrawingUtils.pickGlobePosition(viewer, dropScreenPosition) ?? lastWorldPosition;
 
-      // The plane-intersected drop position is only approximate; refine it
-      // with the real terrain height once resolved, since accurate height
-      // matters for camera framing when later jumping to this feature.
-      Cesium.sampleTerrainMostDetailed(viewer.terrainProvider, [Cesium.Cartographic.clone(approxCartographic)])
-        .then(([sampled]) => {
-          if (sampled.height === undefined) return;
-          updateFeaturePosition(feature.id, new Cesium.Cartographic(sampled.longitude, sampled.latitude, sampled.height));
-        })
-        .catch(() => {
-          // Approximate position from the drop is retained as the fallback.
-        });
+      const ellipsoid = viewer.scene.globe.ellipsoid;
+      updateFeaturePosition(feature.id, ellipsoid.cartesianToCartographic(dropCartesian));
     };
 
     window.addEventListener('pointermove', handlePointerMove);

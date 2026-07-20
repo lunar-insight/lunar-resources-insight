@@ -15,14 +15,19 @@ export const useTrackedScreenPosition = (
   // Lets a consumer that's driving its own live updates (e.g. an active drag)
   // fully pause this hook, rather than have both write to element.style on
   // every rendered frame and fight each other.
-  enabled: boolean = true
+  enabled: boolean = true,
+  // Initial height to render at before the terrain sample below resolves.
+  // Defaults to 0 (ellipsoid surface). Callers with a known accurate height
+  // (e.g. a terrain-picked drop position) should pass it to avoid a visible
+  // jump to sea level while the async correction is pending.
+  initialHeight: number = 0
 ): void => {
-  const groundPositionRef = useRef<Cesium.Cartesian3>(Cesium.Cartesian3.fromDegrees(lon, lat, 0));
+  const groundPositionRef = useRef<Cesium.Cartesian3>(Cesium.Cartesian3.fromDegrees(lon, lat, initialHeight));
 
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
-    groundPositionRef.current = Cesium.Cartesian3.fromDegrees(lon, lat, 0);
+    groundPositionRef.current = Cesium.Cartesian3.fromDegrees(lon, lat, initialHeight);
 
     const update = () => {
       const element = elementRef.current;
@@ -62,5 +67,5 @@ export const useTrackedScreenPosition = (
       cancelled = true;
       viewer.scene.postRender.removeEventListener(update);
     };
-  }, [viewer, lon, lat, elementRef, anchorTransform, enabled]);
+  }, [viewer, lon, lat, elementRef, anchorTransform, enabled, initialHeight]);
 };

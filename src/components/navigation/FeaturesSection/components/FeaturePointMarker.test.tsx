@@ -25,9 +25,13 @@ const makeViewer = () => ({
     postRender: { addEventListener: vi.fn(), removeEventListener: vi.fn() },
     screenSpaceCameraController: { enableInputs: true },
     requestRenderMode: true,
+    // No terrain-picked result by default; individual tests override this
+    // to supply the drop-time terrain pick.
+    pickPosition: vi.fn(() => undefined),
   },
   camera: {
     getPickRay: vi.fn(() => new Cesium.Ray(Cesium.Cartesian3.ZERO, Cesium.Cartesian3.UNIT_X)),
+    pickEllipsoid: vi.fn(() => undefined),
   },
   canvas: { getBoundingClientRect: () => CANVAS_RECT },
   terrainProvider: undefined as unknown as Cesium.TerrainProvider,
@@ -91,10 +95,16 @@ it('renders nothing when the feature has no position', () => {
 })
 
 describe('dragging', () => {
-  it('updates the feature position on drop, using the plane-intersected world position', () => {
+  it('follows the drag plane approximation live, but resolves the drop with terrain-accurate picking', () => {
     const viewer = makeViewer()
-    const droppedWorldPosition = Cesium.Cartesian3.fromDegrees(15, 25, 0)
-    const rayPlaneSpy = vi.spyOn(Cesium.IntersectionTests, 'rayPlane').mockReturnValue(droppedWorldPosition)
+    const dragPlanePosition = Cesium.Cartesian3.fromDegrees(15, 25, 0)
+    const rayPlaneSpy = vi.spyOn(Cesium.IntersectionTests, 'rayPlane').mockReturnValue(dragPlanePosition)
+
+    // The plane approximation used for live feedback is only tangent at the
+    // drag's start position. On sloped terrain, the accurate pick at drop
+    // time can differ from it in both lon/lat and height.
+    const terrainPickedPosition = Cesium.Cartesian3.fromDegrees(15.2, 25.3, 50)
+    viewer.scene.pickPosition = vi.fn(() => terrainPickedPosition)
 
     const { container } = render(<FeaturePointMarker viewer={viewer} feature={makeFeature()} />)
     const marker = container.firstChild as HTMLElement
@@ -109,19 +119,45 @@ describe('dragging', () => {
 
     fireEvent(window, new PointerEvent('pointermove', { clientX: 60, clientY: 60 }))
 
-    // The marker should visually follow the drag live, not just jump on drop.
-    const expectedScreen = viewer.scene.cartesianToCanvasCoordinates(droppedWorldPosition)
+    // The marker follows the drag live via the plane approximation, not
+    // just on drop.
+    const expectedScreen = viewer.scene.cartesianToCanvasCoordinates(dragPlanePosition)
     expect(marker.style.transform).toBe(`translate(${expectedScreen.x}px, ${expectedScreen.y}px) translate(-50%, -50%)`)
 
     fireEvent(window, new PointerEvent('pointerup', { clientX: 60, clientY: 60 }))
 
     expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
     expect(viewer.scene.requestRenderMode).toBe(true)
+    expect(viewer.scene.pickPosition).toHaveBeenCalled()
     expect(updateFeaturePositionMock).toHaveBeenCalledTimes(1)
 
+    // The stored position comes from the terrain pick, not the drag plane.
     const [id, cartographic] = updateFeaturePositionMock.mock.calls[0]
     expect(id).toBe('point-1')
-    const expected = Cesium.Ellipsoid.MOON.cartesianToCartographic(droppedWorldPosition)
+    const expected = Cesium.Ellipsoid.MOON.cartesianToCartographic(terrainPickedPosition)
+    expect(cartographic.longitude).toBeCloseTo(expected.longitude)
+    expect(cartographic.latitude).toBeCloseTo(expected.latitude)
+    expect(cartographic.height).toBeCloseTo(expected.height)
+
+    rayPlaneSpy.mockRestore()
+  })
+
+  it('falls back to the drag plane position if terrain picking fails at drop time', () => {
+    const viewer = makeViewer()
+    const dragPlanePosition = Cesium.Cartesian3.fromDegrees(15, 25, 0)
+    const rayPlaneSpy = vi.spyOn(Cesium.IntersectionTests, 'rayPlane').mockReturnValue(dragPlanePosition)
+    // scene.pickPosition and camera.pickEllipsoid both default to undefined.
+
+    const { container } = render(<FeaturePointMarker viewer={viewer} feature={makeFeature()} />)
+    const marker = container.firstChild as HTMLElement
+
+    fireEvent.pointerDown(marker, { clientX: 50, clientY: 50 })
+    fireEvent(window, new PointerEvent('pointermove', { clientX: 60, clientY: 60 }))
+    fireEvent(window, new PointerEvent('pointerup', { clientX: 60, clientY: 60 }))
+
+    expect(updateFeaturePositionMock).toHaveBeenCalledTimes(1)
+    const [, cartographic] = updateFeaturePositionMock.mock.calls[0]
+    const expected = Cesium.Ellipsoid.MOON.cartesianToCartographic(dragPlanePosition)
     expect(cartographic.longitude).toBeCloseTo(expected.longitude)
     expect(cartographic.latitude).toBeCloseTo(expected.latitude)
 
