@@ -4,6 +4,7 @@ import styles from './MainPage.module.scss';
 import CesiumComponent from 'components/viewer/CesiumComponent/CesiumComponent';
 import CompassWidget from 'components/viewer/CompassWidget/CompassWidget';
 import NomenclatureSearch from 'components/viewer/NomenclatureSearch/NomenclatureSearch';
+import FeaturePointsOverlay from 'components/navigation/FeaturesSection/components/FeaturePointsOverlay';
 import { BoundaryRefProvider } from 'components/reference/BoundaryRefProvider';
 import { DialogProvider, DialogRenderer } from 'utils/DialogWindowManagement';
 import { SidebarProvider, useSidebarContext } from 'utils/context/SidebarContext';
@@ -42,6 +43,7 @@ const MainPageContent: React.FC = () => {
               <CesiumComponent className={styles.cesiumComponent} />
               <CompassWidget />
               <NomenclatureSearch />
+              <FeaturePointsOverlay />
             </div>
           </div>
           <DialogRenderer />
