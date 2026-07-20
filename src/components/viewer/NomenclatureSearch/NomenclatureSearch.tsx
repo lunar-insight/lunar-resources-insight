@@ -69,7 +69,7 @@ const stopEventPropagation = (event: React.SyntheticEvent) => {
 const NomenclatureSearch: React.FC = () => {
   const { viewer } = useViewer();
   const { features: nomenclatureFeatures } = useNomenclatureFeatures();
-  const { features, addFeature, toggleFeatureInsights, showFeatures, showLabels } = useFeaturesContext();
+  const { features, addFeature, toggleFeatureInsights } = useFeaturesContext();
   const { contains } = useFilter({ sensitivity: 'base' });
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -162,7 +162,7 @@ const NomenclatureSearch: React.FC = () => {
   const saveAsFeaturePoint = (point: SavablePoint): Feature | null => {
     if (!viewer || savedSourceIds.has(point.sourceId)) return null;
     const cartesian = Cesium.Cartesian3.fromDegrees(point.lon, point.lat, 0);
-    const feature = createPointFeature(viewer, cartesian, point.name, showFeatures, showLabels, point.sourceId);
+    const feature = createPointFeature(viewer, cartesian, point.name, point.sourceId);
     addFeature(feature);
     return feature;
   };

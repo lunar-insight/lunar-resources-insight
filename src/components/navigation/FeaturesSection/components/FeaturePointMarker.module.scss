@@ -1,0 +1,41 @@
+.featurePointMarker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  // Prevents the browser's own touch scroll/zoom gestures from fighting with
+  // pointer-based dragging.
+  touch-action: none;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #FFFFFF;
+  box-sizing: border-box;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.6));
+}
+
+.label {
+  position: absolute;
+  bottom: calc(100% + 3px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  font-family: sans-serif;
+  color: #FFFFFF;
+  text-shadow:
+    -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+  white-space: nowrap;
+  pointer-events: none;
+}
