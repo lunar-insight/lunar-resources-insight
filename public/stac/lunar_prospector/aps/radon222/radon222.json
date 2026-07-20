@@ -1,0 +1,120 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "lp-radon222-aps",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -180,
+          -90
+        ],
+        [
+          180,
+          -90
+        ],
+        [
+          180,
+          90
+        ],
+        [
+          -180,
+          90
+        ],
+        [
+          -180,
+          -90
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -180,
+    -90,
+    180,
+    90
+  ],
+  "properties": {
+    "datetime": "2002-01-03T00:00:00Z",
+    "title": "LP APS Radon-222 Relative Count Rate",
+    "lri:data_use_note": "²²²Rn relative count rate from the LP Alpha Particle Spectrometer (Lawson et al. 2002). Reflects radon outgassing from recent or ongoing volcanic activity. This is an APS measurement — distinct from GRS-derived thorium count rates, which use a different instrument and physical process.",
+    "mission": "Lunar Prospector",
+    "instruments": [
+      "Alpha Particle Spectrometer"
+    ],
+    "platform": "lunar-prospector",
+    "element": "Rn-222",
+    "units": "counts/s",
+    "scale_factor": 0.001,
+    "pixel_count": 336,
+    "grid_note": "336 equal-area pixels, ~300 km (longitude) × ~450 km (latitude) at equator. Within the 720×360 binary container, each cell value is repeated across all 0.5° pixels covering that cell.",
+    "observation_period_start": "1998-01-16",
+    "observation_period_end": "1999-07-31",
+    "processing:lineage": "Raw INT16 binary (radon222.dat) scaled ÷1000 via gdal_calc.py to obtain ²²²Rn counts/s as Float32. Binary values are 1000× the ASCII count rate values. Data acquired during high- and low-altitude mission phases (Lawson et al. 2002). Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.8.4"
+    },
+    "processing:level": "L3"
+  },
+  "assets": {
+    "data": {
+      "href": "radon222_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "²²²Rn counts/s COG - IAU:30100",
+      "roles": [
+        "data"
+      ]
+    },
+    "vrt": {
+      "href": "radon222.vrt",
+      "type": "application/xml",
+      "title": "GDAL VRT - raw binary geometry description",
+      "roles": [
+        "metadata",
+        "source"
+      ]
+    },
+    "processing_script": {
+      "href": "radon222.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
+    },
+    "source_data": {
+      "href": "radon222.dat",
+      "type": "application/octet-stream",
+      "title": "Original PDS binary - INT16 MSB, scale ×1000",
+      "roles": [
+        "data",
+        "source"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./radon222.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
+      "type": "text/html",
+      "title": "PDS source - radon222.dat, version Jan. 3, 2002"
+    }
+  ]
+}

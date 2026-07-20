@@ -1,0 +1,48 @@
+.viewerIconButton {
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  padding: 0;
+  line-height: 1;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(var(--color-primary-rgb), 0.55);
+  border-radius: 0.25rem;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
+
+  &[data-hovered] {
+    background: rgba(var(--color-quaternary-rgb), 0.65);
+  }
+
+  &[data-pressed] {
+    background: rgba(var(--color-neutral-rgb), 0.70);
+  }
+
+  &:focus {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  .icon {
+    color: var(--color-tertiary);
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .label {
+    color: var(--color-tertiary);
+    font-size: 24px;
+    font-weight: bold;
+    line-height: 1;
+  }
+}

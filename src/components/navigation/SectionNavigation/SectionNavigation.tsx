@@ -1,8 +1,12 @@
 import React, { useState, Fragment } from 'react';
 import { Button } from 'react-aria-components';
 import styles from './SectionNavigation.module.scss';
-import ChemicalElementsSection from '../ChemicalElementSection/ChemicalElementsSection';
-import { useDialogContext } from '../../../utils/DialogWindowManagement';
+import ChemistrySection from '../ChemistrySection/ChemistrySection';
+import GeographicalLayersSection from '../GeographicalLayersSection/GeographicalLayersSection';
+import MineralsSection from '../MineralsSection/MineralsSection';
+import ViewerOptionsSection from '../ViewerOptionsSection/ViewerOptionsSection';
+import FeaturesSection from '../FeaturesSection/FeaturesSection';
+import { useDialogContext } from 'utils/DialogWindowManagement';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 import logo from 'assets/images/logo/lunar-resources-insight-logo-100x100.jpg'
@@ -32,33 +36,40 @@ const dialogsData: Icon[] = [
     dialogContent: 'Layer Management content goes here.',
     type: 'dock'
   },
-  { 
-    id: 'home-dialog', 
-    name: 'home', 
-    label: 'Home', 
-    dialogTitle: 'Home Dialog', 
-    dialogContent: 'Home dialog content goes here.' 
+  {
+    id: 'home-dialog',
+    name: 'home',
+    label: 'Home',
+    dialogTitle: 'Home Dialog',
+    dialogContent: 'Home dialog content goes here.'
   },
-  { 
-    id: 'geospatial-layer-dialog', 
-    name: 'map', 
+  {
+    id: 'geospatial-layer-dialog',
+    name: 'map',
     label: 'Base Maps',
-    dialogTitle: 'Base Maps', 
-    dialogContent: 'Base Maps dialog content goes here.'
-  },
-  { 
-    id: 'mineral-layer-dialog', 
-    name: 'landslide', 
-    label: 'Minerals',
-    dialogTitle: 'Minerals Dialog', 
-    dialogContent: 'Minerals dialog content goes here.'
+    dialogTitle: 'Base Maps',
+    dialogContent: <GeographicalLayersSection />
   },
   { 
     id: 'element-layer-dialog', 
     name: 'lab_research', 
     label: 'Chemistry',
     dialogTitle: 'Chemistry', 
-    dialogContent: <ChemicalElementsSection />
+    dialogContent: <ChemistrySection />
+  },
+  {
+    id: 'mineral-layer-dialog',
+    name: 'landslide',
+    label: 'Geology',
+    dialogTitle: 'Geology',
+    dialogContent: <MineralsSection />
+  },
+  {
+    id: 'features-dialog',
+    name: 'shapes',
+    label: 'Features',
+    dialogTitle: 'Features',
+    dialogContent: <FeaturesSection />
   },
   /*
   { 
@@ -86,12 +97,12 @@ const dialogsData: Icon[] = [
     dialogContent: 'Plugins dialog content goes here.'
   },
   */
-  { 
-    id: 'viewer-option-dialog', 
-    name: 'tune', 
+  {
+    id: 'viewer-option-dialog',
+    name: 'tune',
     label: 'Viewer',
-    dialogTitle: 'Viewer Option', 
-    dialogContent: 'Viewer Option dialog content goes here.'
+    dialogTitle: 'Viewer Options',
+    dialogContent: <ViewerOptionsSection />
   },
   { 
     id: 'application-setting-dialog', 

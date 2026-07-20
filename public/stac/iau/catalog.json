@@ -1,0 +1,13 @@
+{
+  "type": "Catalog",
+  "id": "iau",
+  "stac_version": "1.0.0",
+  "title": "IAU Planetary Nomenclature",
+  "description": "Approved feature names on the surface of the Moon as maintained by the International Astronomical Union (IAU) Working Group for Planetary System Nomenclature (WGPSN) and distributed by the USGS Astrogeology Science Center via the Gazetteer of Planetary Nomenclature. The database is updated weekly as new names are approved.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    { "rel": "item",   "href": "./nomenclature/iau_nomenclature_moon.json", "title": "IAU Planetary Nomenclature: Moon (centre points, Shapefile)" }
+  ]
+}

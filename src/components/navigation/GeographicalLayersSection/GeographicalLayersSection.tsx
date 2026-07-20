@@ -1,0 +1,204 @@
+import React, { useState, useEffect, useRef } from 'react';
+import styles from './GeographicalLayersSection.module.scss';
+import { Button, GridList, GridListItem } from 'react-aria-components';
+import { useLayerContext } from 'utils/context/LayerContext';
+import { layersConfig } from 'geoConfigExporter';
+import { buildLayerPreviewUrl } from 'geoConfigExporter';
+import { layerPreviewCache } from 'services/LayerPreviewCache';
+import { getStacSourceLabel, getStacResolutionLabel } from 'services/StacService';
+import { useStacItem } from 'hooks/useStacItem';
+
+interface GeographicalLayer {
+  id: string;
+  displayName: string;
+  filename: string;
+  previewUrl: string;
+  available: boolean;
+  stac?: string;
+}
+
+interface LayerButtonProps {
+  layer: GeographicalLayer;
+  isSelected: boolean;
+  onToggle: () => void;
+  isDisabled?: boolean;
+}
+
+const LayerButton: React.FC<LayerButtonProps> = ({ layer, isSelected, onToggle, isDisabled = false }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [cachedImageUrl, setCachedImageUrl] = useState<string | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const stacItem = useStacItem(layer.stac);
+  const source = stacItem ? getStacSourceLabel(stacItem.properties) : undefined;
+  const resolution = stacItem ? getStacResolutionLabel(stacItem.properties) : undefined;
+
+  useEffect(() => {
+    // Skip loading preview images for disabled layers
+    if (isDisabled) {
+      return;
+    }
+
+    // Intersection Observer for lazy loading
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !imageLoaded) {
+            loadImage();
+          }
+        });
+      },
+      {
+        rootMargin: '50px', // Start loading 50px before entering viewport
+        threshold: 0.01
+      }
+    );
+
+    if (buttonRef.current) {
+      observerRef.current.observe(buttonRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+      // Cleanup object URL
+      if (cachedImageUrl) {
+        URL.revokeObjectURL(cachedImageUrl);
+      }
+    };
+  }, []);
+
+  const loadImage = async () => {
+    try {
+      const url = await layerPreviewCache.fetchAndCache(layer.previewUrl);
+      if (url) {
+        setCachedImageUrl(url);
+        setImageLoaded(true);
+      }
+    } catch (error) {
+      console.error('Failed to load preview image:', error);
+      // Fallback to direct URL
+      setCachedImageUrl(layer.previewUrl);
+      setImageLoaded(true);
+    }
+  };
+
+  return (
+    <Button
+      ref={buttonRef}
+      className={`${styles.layerButton} ${isSelected ? styles.selected : ''} ${isDisabled ? styles.disabled : ''}`}
+      onPress={isDisabled ? undefined : onToggle}
+      data-loaded={imageLoaded}
+      isDisabled={isDisabled}
+      style={{
+        '--layer-bg-image': cachedImageUrl ? `url(${cachedImageUrl})` : 'none'
+      } as React.CSSProperties}
+    >
+      <div className={styles.layerOverlay}>
+        <div className={styles.layerInfo}>
+          <h4 className={styles.layerTitle}>
+            {layer.displayName}
+          </h4>
+          {(source || resolution) && (
+            <div className={styles.layerMetadata}>
+              {source && (
+                <span className={styles.metadataItem}>
+                  {source}
+                </span>
+              )}
+              {resolution && (
+                <span className={styles.metadataItem}>
+                  {resolution}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className={styles.layerCheckbox}>
+          <input
+            type="checkbox"
+            checked={isSelected}
+            readOnly
+            aria-label={`Toggle ${layer.displayName}`}
+          />
+        </div>
+      </div>
+    </Button>
+  );
+};
+
+const GeographicalLayersSection: React.FC = () => {
+  const { addLayer, removeLayer, selectedLayers } = useLayerContext();
+
+  // Get all geographical layers from config
+  const geographicalLayers: GeographicalLayer[] = Object.entries(layersConfig.layers)
+    .filter(([_, config]) => config.category === 'geographical' && config.layerType !== 'vector')
+    .map(([layerId, config]) => ({
+      id: layerId,
+      displayName: config.displayName || layerId,
+      filename: config.filename,
+      // Limit preview to ±60° latitude to avoid equirectangular distortion (3:1 aspect ratio)
+      previewUrl: buildLayerPreviewUrl(config.filename, 256, 85, [-180, -60, 180, 60]),
+      stac: config.stac,
+      available: config.available !== false
+    }));
+
+  const handleLayerToggle = (layerId: string) => {
+    const isSelected = selectedLayers.includes(layerId);
+
+    if (isSelected) {
+      removeLayer(layerId);
+    } else {
+      addLayer(layerId);
+    }
+  };
+
+  const isLayerSelected = (layerId: string) => selectedLayers.includes(layerId);
+
+  return (
+    <div className={styles.section}>
+      <div className={styles.info}>
+        <p className={styles.description}>
+          Select geographical layers to display.
+        </p>
+      </div>
+
+      <div className={styles.layersListContainer}>
+        {geographicalLayers.length === 0 ? (
+          <div className={styles.empty}>
+            No geographical layers available.
+          </div>
+        ) : (
+          <GridList
+            aria-label="Geographical Layers"
+            className={styles.layersList}
+            selectionMode="none"
+          >
+            {geographicalLayers.map((layer) => {
+              const isDisabled = !layer.available;
+              return (
+                <GridListItem
+                  key={layer.id}
+                  textValue={layer.displayName}
+                  className={styles.layerItem}
+                >
+                  <LayerButton
+                    layer={layer}
+                    isSelected={isLayerSelected(layer.id)}
+                    onToggle={() => handleLayerToggle(layer.id)}
+                    isDisabled={isDisabled}
+                  />
+                </GridListItem>
+              );
+            })}
+          </GridList>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default GeographicalLayersSection;

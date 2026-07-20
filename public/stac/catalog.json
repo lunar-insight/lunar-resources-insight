@@ -1,0 +1,19 @@
+{
+  "type": "Catalog",
+  "id": "lunar-resources-insight",
+  "stac_version": "1.0.0",
+  "title": "Lunar Resources Insight - STAC Catalog",
+  "description": "Root catalog for Lunar Prospector reduced spectrometer data products. Contains elemental abundance maps derived from the Gamma Ray Spectrometer (GRS), Alpha Particle Spectrometer (APS), and Neutron Spectrometer (NS). Source: PDS Geosciences Node.",
+  "links": [
+    { "rel": "self", "href": "./catalog.json" },
+    { "rel": "root", "href": "./catalog.json" },
+    { "rel": "child", "href": "./lunar_prospector/grs/catalog.json", "title": "LP Gamma Ray Spectrometer" },
+    { "rel": "child", "href": "./lunar_prospector/aps/catalog.json", "title": "LP Alpha Particle Spectrometer" },
+    { "rel": "child", "href": "./lunar_prospector/ns/catalog.json",  "title": "LP Neutron Spectrometer" },
+    { "rel": "child", "href": "./lunar_prospector/wilson2018/catalog.json", "title": "LP Improved Maps - Wilson et al. 2018 (Pixon Reconstruction)" },
+    { "rel": "child", "href": "./lunar_prospector/lawrence2022/catalog.json", "title": "LP Global Hydrogen Abundances - Lawrence et al. 2022 (REE-Corrected)" },
+    { "rel": "child", "href": "./clementine/catalog.json", "title": "Clementine UVVIS — CNN oxide maps (Qiu et al. 2025)" },
+    { "rel": "child", "href": "./lro/catalog.json", "title": "Lunar Reconnaissance Orbiter (LRO)" },
+    { "rel": "child", "href": "./iau/catalog.json", "title": "IAU Planetary Nomenclature" }
+  ]
+}

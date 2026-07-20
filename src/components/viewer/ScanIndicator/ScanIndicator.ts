@@ -51,24 +51,11 @@ export class ScanIndicator {
     if (cartesian) {
       this.currentWorldPosition = cartesian;
       this.show();
-      this.updateEntityPositions();
       return true;
     } else {
       this.hide();
       return false;
     }
-  }
-
-  private updateEntityPositions() {
-    if (!this.currentWorldPosition) return;
-
-    if (this.scanIndicator) {
-      this.scanIndicator.position = new Cesium.ConstantPositionProperty(this.currentWorldPosition);
-    }
-
-    this.ringEntities.forEach(entity => {
-      entity.position = new Cesium.ConstantPositionProperty(this.currentWorldPosition!);
-    });
   }
 
   private getCameraHeight(): number {
@@ -163,7 +150,8 @@ export class ScanIndicator {
 
     // Central pulsing ellipse
     this.scanIndicator = this.viewer.entities.add({
-      position: new Cesium.ConstantPositionProperty(this.currentWorldPosition),
+      position: new Cesium.CallbackPositionProperty(() => this.currentWorldPosition ?? Cesium.Cartesian3.ZERO, false),
+      properties: { _isScanIndicator: true },
       ellipse: {
         // CallbackProperty enables real-time animation by recalculating values each frame
         semiMinorAxis: new Cesium.CallbackProperty(() => {
@@ -216,7 +204,8 @@ export class ScanIndicator {
 
     ringConfigs.forEach((config, index) => {
       const ringEllipse = this.viewer!.entities.add({
-        position: new Cesium.ConstantPositionProperty(this.currentWorldPosition!),
+        position: new Cesium.CallbackPositionProperty(() => this.currentWorldPosition ?? Cesium.Cartesian3.ZERO, false),
+        properties: { _isScanIndicator: true },
         ellipse: {
           semiMinorAxis: new Cesium.CallbackProperty(() => {
             const elapsed = (Date.now() - this.pulseStartTime - config.delay) % config.duration;

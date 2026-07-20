@@ -1,0 +1,65 @@
+Object = IsisCube
+  Object = Core
+    StartByte = 874304
+    Format    = BandSequential
+
+    Group = Dimensions
+      Samples = 109164
+      Lines   = 54582
+      Bands   = 1
+    End_Group
+
+    Group = Pixels
+      Type       = UnsignedByte
+      ByteOrder  = Lsb
+      Base       = -0.00395256916996050006
+      Multiplier = 1.00395256916999998
+    End_Group
+    ^Core     = Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013.tif
+  End_Object
+
+  Group = Archive
+    DataSetId               = WAC_morphology_globe_June2013_100m
+    ProducerInstitutionName = "Arizona State University"
+    ProducerId              = ASU
+    ProducerFullName        = "Arizona State University"
+    ProductId               = n/a
+    ProductVersionId        = n/a
+    InstrumentHostName      = LRO
+    InstrumentName          = LROC-WAC
+    InstrumentId            = n/a
+    TargetName              = Moon
+    MissionPhaseName        = n/a
+  End_Group
+
+  Group = Mapping
+    ProjectionName     = SimpleCylindrical
+    CenterLongitude    = 0.0
+    TargetName         = MOON
+    EquatorialRadius   = 1737400.0 <meters>
+    PolarRadius        = 1737400.0 <meters>
+    LatitudeType       = Planetocentric
+    LongitudeDirection = PositiveEast
+    LongitudeDomain    = 180
+    MinimumLatitude    = -90.0
+    MaximumLatitude    = 90.0
+    MinimumLongitude   = -180.0
+    MaximumLongitude   = 180.0
+    UpperLeftCornerX   = -5458203.07634699997 <meters>
+    UpperLeftCornerY   = 2729101.53817299986 <meters>
+    PixelResolution    = 100.0 <meters/pixel>
+    Scale              = 303.233299999999986 <pixel/degree>
+  End_Group
+End_Object
+
+Object = Label
+  Bytes = 1830             
+End_Object
+
+Object = History
+  Name      = IsisCube
+  StartByte = 1
+  Bytes     = 1594
+  ^History  = Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013.History.IsisCube
+End_Object
+End

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+  <title>Lunar Resources Insight</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #05070d; min-height: 100vh; font-family: Arial, sans-serif; }
+    #loading-overlay {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      font-family: Arial, sans-serif;
+      will-change: opacity;
+      background-color: #05070d;
+      background-image:
+        radial-gradient(circle 1px at 4% 7%, rgba(255,255,255,.65) 0%,transparent 100%),
+        radial-gradient(circle 1px at 11% 33%, rgba(255,255,255,.45) 0%,transparent 100%),
+        radial-gradient(circle 2px at 16% 55%, rgba(255,255,255,.55) 0%,transparent 100%),
+        radial-gradient(circle 1px at 23% 18%, rgba(255,255,255,.40) 0%,transparent 100%),
+        radial-gradient(circle 1px at 29% 82%, rgba(255,255,255,.50) 0%,transparent 100%),
+        radial-gradient(circle 1px at 35% 43%, rgba(255,255,255,.35) 0%,transparent 100%),
+        radial-gradient(circle 2px at 3% 72%, rgba(255,255,255,.60) 0%,transparent 100%),
+        radial-gradient(circle 1px at 8% 91%, rgba(255,255,255,.45) 0%,transparent 100%),
+        radial-gradient(circle 1px at 42% 12%, rgba(255,255,255,.70) 0%,transparent 100%),
+        radial-gradient(circle 1px at 47% 67%, rgba(255,255,255,.40) 0%,transparent 100%),
+        radial-gradient(circle 1px at 19% 38%, rgba(255,255,255,.55) 0%,transparent 100%),
+        radial-gradient(circle 2px at 6% 48%, rgba(255,255,255,.50) 0%,transparent 100%),
+        radial-gradient(circle 1px at 32% 96%, rgba(255,255,255,.65) 0%,transparent 100%),
+        radial-gradient(circle 1px at 55% 24%, rgba(255,255,255,.45) 0%,transparent 100%),
+        radial-gradient(circle 1px at 14% 77%, rgba(255,255,255,.55) 0%,transparent 100%),
+        radial-gradient(circle 2px at 26% 6%, rgba(255,255,255,.70) 0%,transparent 100%),
+        radial-gradient(circle 1px at 38% 59%, rgba(255,255,255,.35) 0%,transparent 100%),
+        radial-gradient(circle 1px at 52% 88%, rgba(255,255,255,.50) 0%,transparent 100%),
+        radial-gradient(circle 1px at 2% 62%, rgba(255,255,255,.60) 0%,transparent 100%),
+        radial-gradient(circle 1px at 45% 41%, rgba(255,255,255,.45) 0%,transparent 100%),
+        radial-gradient(circle 2px at 22% 84%, rgba(255,255,255,.65) 0%,transparent 100%),
+        radial-gradient(circle 1px at 9% 15%, rgba(255,255,255,.50) 0%,transparent 100%),
+        radial-gradient(circle 1px at 40% 31%, rgba(255,255,255,.40) 0%,transparent 100%),
+        radial-gradient(circle 1px at 57% 53%, rgba(255,255,255,.55) 0%,transparent 100%),
+        radial-gradient(circle 1px at 33% 73%, rgba(255,255,255,.35) 0%,transparent 100%),
+        radial-gradient(circle 2px at 17% 4%, rgba(255,255,255,.75) 0%,transparent 100%),
+        radial-gradient(circle 1px at 50% 77%, rgba(255,255,255,.45) 0%,transparent 100%),
+        radial-gradient(circle 1px at 27% 50%, rgba(255,255,255,.55) 0%,transparent 100%),
+        radial-gradient(circle 1px at 61% 13%, rgba(255,255,255,.60) 0%,transparent 100%),
+        radial-gradient(circle 1px at 48% 95%, rgba(255,255,255,.40) 0%,transparent 100%),
+        radial-gradient(circle 1px at 7% 27%, rgba(255,255,255,.55) 0%,transparent 100%),
+        radial-gradient(circle 2px at 37% 86%, rgba(255,255,255,.65) 0%,transparent 100%),
+        radial-gradient(circle 1px at 53% 44%, rgba(255,255,255,.45) 0%,transparent 100%),
+        radial-gradient(circle 1px at 20% 68%, rgba(255,255,255,.50) 0%,transparent 100%),
+        radial-gradient(circle 1px at 44% 3%, rgba(255,255,255,.70) 0%,transparent 100%),
+        radial-gradient(circle 1px at 59% 72%, rgba(255,255,255,.35) 0%,transparent 100%),
+        radial-gradient(circle 2px at 13% 90%, rgba(255,255,255,.60) 0%,transparent 100%),
+        radial-gradient(circle 1px at 30% 25%, rgba(255,255,255,.45) 0%,transparent 100%),
+        radial-gradient(circle 1px at 64% 36%, rgba(255,255,255,.55) 0%,transparent 100%),
+        radial-gradient(circle 1px at 1% 45%, rgba(255,255,255,.40) 0%,transparent 100%);
+      z-index: 9999;
+      transition: opacity 0.6s ease;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    #loading-stage { position: absolute; inset: 0; }
+    #loading-globe { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #loading-canvas { position: absolute; inset: 0; width: 100%; height: 100%; will-change: transform; }
+    #loading-ui {
+      position: absolute; inset: 0;
+      padding: 56px 64px;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    #loading-header { display: flex; align-items: center; gap: 10px; }
+    #loading-header img { width: 32px; height: 32px; }
+    #loading-header span { color: #e9eee9; font-size: 15px; font-weight: 600; letter-spacing: 0.04em; }
+    #loading-bottom { display: flex; flex-direction: column; gap: 6px; max-width: 480px; }
+    #loading-headline { color: #e9eee9; font-size: 52px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.2; }
+    #loading-subtitle { color: rgba(233,238,233,.55); font-size: 18px; letter-spacing: 0.06em; margin-bottom: 12px; }
+    #loading-progress-area { display: flex; flex-direction: column; gap: 6px; }
+    #loading-progress-labels { display: flex; justify-content: space-between; align-items: center; }
+    #loading-status { color: rgba(233,238,233,.7); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; }
+    #loading-pct { color: rgba(61,169,252,.9); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
+    #loading-bar-track { height: 4px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
+    #loading-flash {
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 62% 50%, rgba(255,247,214,.95), rgba(255,209,92,.45) 38%, transparent 70%);
+      opacity: 0; pointer-events: none;
+    }
+    @font-face {
+      font-family: 'Material Symbols Outlined';
+      font-style: normal;
+      font-weight: 100 700;
+      src: url('/symbols/MaterialSymbolsOutlined-Regular.ttf') format('truetype');
+      font-display: block;
+    }
+    @keyframes bar-shimmer {
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(100%); }
+    }
+    #progress-bar {
+      position: relative;
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #3da9fc, #7cc8ff);
+      border-radius: 2px;
+      overflow: hidden;
+      transition: width 0.35s linear;
+      will-change: width;
+    }
+    #progress-bar::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,.5) 50%, transparent 70%);
+      animation: bar-shimmer 1.2s linear infinite;
+      will-change: transform;
+    }
+  </style>
+</head>
+<body>
+  <noscript>
+    <div style="position:fixed;bottom:12px;left:12px;font:13px/1.4 Arial,sans-serif;color:#999;background:rgba(255,255,255,0.9);padding:6px 12px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,0.08);z-index:10000;">
+      This page requires JavaScript to display.
+    </div>
+  </noscript>
+  <div id="app"></div>
+  <script type="module" src="/src/index.tsx"></script>
+  <div id="loading-overlay">
+    <div id="loading-flash"></div>
+    <div id="loading-stage">
+      <svg id="loading-globe" viewBox="0 0 1280 800" preserveAspectRatio="xMaxYMid slice" xmlns="http://www.w3.org/2000/svg"></svg>
+      <canvas id="loading-canvas"></canvas>
+    </div>
+    <div id="loading-ui">
+      <div id="loading-header">
+        <img src="/images/lunar-resources-insight-logo-background-56x56.png" alt="">
+        <span>Lunar Resources Insight</span>
+      </div>
+      <div id="loading-bottom">
+        <div id="loading-headline">Lunar resources, made readable</div>
+        <div id="loading-subtitle">Explore, chart, and analyze lunar resources</div>
+        <div id="loading-progress-area">
+          <div id="loading-progress-labels">
+            <span id="loading-status">Initializing</span>
+            <span id="loading-pct">0%</span>
+          </div>
+          <div id="loading-bar-track">
+            <div id="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      // ── Material Symbols font preload ──────────────────────────────────────
+      if ('FontFace' in window) {
+        var msf = new FontFace(
+          'Material Symbols Outlined',
+          "url('/symbols/MaterialSymbolsOutlined-Regular.ttf')",
+          { style: 'normal', weight: '400', display: 'block' }
+        );
+        document.fonts.add(msf);
+        msf.load();
+      }
+
+      // ── Phase 1: progress bar animation while React + Cesium load ───────────
+      var bar = document.getElementById('progress-bar');
+      var pctEl = document.getElementById('loading-pct');
+      if (bar) {
+        var start = performance.now(), raf;
+        // Burst (fast initial rise) + linear (constant 2 %/s thereafter).
+        // Rate never drops below 2 %/s so the bar always visibly moves regardless
+        // of how long Cesium takes to start firing tile events.
+        var BURST_CEIL = 20, BURST_TAU = 1500, LINEAR = 0.002, CAP = 85;
+        function tick(now) {
+          var e = now - start;
+          var p = Math.min(CAP, BURST_CEIL * (1 - Math.exp(-e / BURST_TAU)) + e * LINEAR);
+          bar.style.width = p.toFixed(2) + '%';
+          if (pctEl) pctEl.textContent = Math.round(p) + '%';
+          raf = requestAnimationFrame(tick);
+        }
+        raf = requestAnimationFrame(tick);
+        window.__loadingPhase1Stop = function () {
+          cancelAnimationFrame(raf);
+          return parseFloat(bar.style.width) || 0;
+        };
+      }
+
+      // ── Globe and canvas animation ─────
+      var SVG_NS = 'http://www.w3.org/2000/svg';
+      var cx = 1320, cy = 400, Rg = 520;
+      var lat0 = 20 * Math.PI / 180, d = Math.PI / 180;
+      function proj(la, lo) {
+        var lat = la * d, lon = lo * d, cosLat = Math.cos(lat);
+        var z = Math.sin(lat0) * Math.sin(lat) + Math.cos(lat0) * cosLat * Math.cos(lon);
+        return {
+          x: cx + Rg * cosLat * Math.sin(lon),
+          y: cy - Rg * (Math.cos(lat0) * Math.sin(lat) - Math.sin(lat0) * cosLat * Math.cos(lon)),
+          z: z,
+        };
+      }
+
+      function buildMoon(svg) {
+        var defs = document.createElementNS(SVG_NS, 'defs');
+        var grad = document.createElementNS(SVG_NS, 'radialGradient');
+        grad.id = 'gmoon';
+        grad.setAttribute('cx', '34%'); grad.setAttribute('cy', '30%'); grad.setAttribute('r', '85%');
+        [['0%', '#171b26'], ['55%', '#0b0e16'], ['100%', '#05070d']].forEach(function(s) {
+          var stop = document.createElementNS(SVG_NS, 'stop');
+          stop.setAttribute('offset', s[0]); stop.setAttribute('stop-color', s[1]);
+          grad.appendChild(stop);
+        });
+        defs.appendChild(grad);
+        svg.appendChild(defs);
+
+        var disc = document.createElementNS(SVG_NS, 'circle');
+        disc.setAttribute('cx', cx); disc.setAttribute('cy', cy); disc.setAttribute('r', Rg);
+        disc.setAttribute('fill', 'url(#gmoon)');
+        svg.appendChild(disc);
+
+        function addLine(pts) {
+          if (pts.length < 2) return;
+          var poly = document.createElementNS(SVG_NS, 'polyline');
+          poly.setAttribute('points', pts.map(function(p) { return p.x.toFixed(1) + ',' + p.y.toFixed(1); }).join(' '));
+          poly.setAttribute('stroke', 'rgba(125,155,205,.16)');
+          poly.setAttribute('stroke-width', '1');
+          poly.setAttribute('fill', 'none');
+          svg.appendChild(poly);
+        }
+
+        var lo, la, seg, p;
+        for (lo = -160; lo <= 160; lo += 20) {
+          seg = [];
+          for (la = -90; la <= 90; la += 4) {
+            p = proj(la, lo); if (p.z >= 0) seg.push(p); else { addLine(seg); seg = []; }
+          }
+          addLine(seg);
+        }
+        for (la = -60; la <= 60; la += 20) {
+          seg = [];
+          for (lo = -180; lo <= 180; lo += 4) {
+            p = proj(la, lo); if (p.z >= 0) seg.push(p); else { addLine(seg); seg = []; }
+          }
+          addLine(seg);
+        }
+
+        var limb = document.createElementNS(SVG_NS, 'circle');
+        limb.setAttribute('cx', cx); limb.setAttribute('cy', cy); limb.setAttribute('r', Rg);
+        limb.setAttribute('fill', 'none');
+        limb.setAttribute('stroke', 'rgba(61,169,252,.30)');
+        limb.setAttribute('stroke-width', '1.5');
+        svg.appendChild(limb);
+      }
+
+      var canvasEl = document.getElementById('loading-canvas');
+      var svgEl    = document.getElementById('loading-globe');
+
+      try { if (svgEl) buildMoon(svgEl); } catch (e) {}
+
+      // ── Canvas worker ──────────────────────────────────────────────────────
+      var worker = null;
+      if (canvasEl && typeof OffscreenCanvas !== 'undefined' && canvasEl.transferControlToOffscreen) {
+        try {
+          var w   = canvasEl.clientWidth;
+          var h   = canvasEl.clientHeight;
+          var dpr = Math.min(2, window.devicePixelRatio || 1);
+          var offscreen = canvasEl.transferControlToOffscreen();
+          worker = new Worker('/loading-canvas-worker.js');
+          worker.postMessage({ type: 'init', canvas: offscreen, w: w, h: h, dpr: dpr }, [offscreen]);
+          window.addEventListener('resize', function() {
+            if (worker) worker.postMessage({
+              type: 'resize',
+              w:   canvasEl.clientWidth,
+              h:   canvasEl.clientHeight,
+              dpr: Math.min(2, window.devicePixelRatio || 1),
+            });
+          });
+        } catch (e) {
+          worker = null;
+        }
+      }
+
+      window.__loadingGlobeBuilt    = true;
+      window.__loadingSetFloodStart = function() {
+        if (worker) worker.postMessage({ type: 'flood' });
+      };
+      window.__loadingCancelCanvas  = function() {
+        if (worker) { worker.postMessage({ type: 'cancel' }); worker = null; }
+      };
+    })();
+  </script>
+</body>
+</html>

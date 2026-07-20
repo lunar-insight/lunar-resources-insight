@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import './CloseButton.scss';
-import { ButtonTooltip } from '../../Tooltip/ButtonTooltip';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 
 interface CloseButtonProps {
   onPress: () => void;
@@ -25,7 +25,7 @@ const CloseButton: React.FC<CloseButtonProps> = ({
           close
         </span>
       </Button>
-      <ButtonTooltip placement='left'>
+      <ButtonTooltip placement='right'>
         Close
       </ButtonTooltip>
     </TooltipTrigger>

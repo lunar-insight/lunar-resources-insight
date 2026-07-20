@@ -1,0 +1,38 @@
+.infoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  height: 1.25rem;
+  width: 1.25rem;
+
+  background-color: transparent;
+  border: none;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+
+  &[data-hovered] {
+    opacity: 1;
+  }
+
+  &[data-pressed] {
+    opacity: 1;
+
+    .icon {
+      color: var(--color-tertiary);
+    }
+  }
+
+  &[data-open] {
+    opacity: 1;
+  }
+}
+
+.icon {
+  font-size: 1.125rem;
+  color: var(--color-neutralVariant);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

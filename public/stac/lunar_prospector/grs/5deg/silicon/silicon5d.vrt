@@ -1,0 +1,11 @@
+<VRTDataset rasterXSize="720" rasterYSize="360">
+  <SRS dataAxisToSRSAxisMapping="2,1">IAU:30100</SRS>
+  <GeoTransform>-180.0, 0.5, 0.0, 90.0, 0.0, -0.5</GeoTransform>
+  <VRTRasterBand dataType="Int16" band="1" subClass="VRTRawRasterBand">
+    <SourceFilename relativeToVRT="1">silicon5d.dat</SourceFilename>
+    <ImageOffset>516960</ImageOffset>
+    <PixelOffset>2</PixelOffset>
+    <LineOffset>-1440</LineOffset>
+    <ByteOrder>MSB</ByteOrder>
+  </VRTRasterBand>
+</VRTDataset>

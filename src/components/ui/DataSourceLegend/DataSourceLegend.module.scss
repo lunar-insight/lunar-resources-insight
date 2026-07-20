@@ -1,0 +1,42 @@
+// Badge uses global CSS variables defined in global.css
+.legend {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 0.875rem;
+  color: var(--color-neutralVariant);
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badgeMini {
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.badgeMiniMapGround {
+  background-color: var(--color-badge-global);
+  color: white;
+}
+
+.badgeMiniMap {
+  background-color: var(--color-badge-map);
+  color: white;
+}
+
+.badgeMiniGround {
+  background-color: var(--color-badge-local);
+  color: rgba(0, 0, 0, 0.9);
+}

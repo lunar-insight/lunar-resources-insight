@@ -28,13 +28,15 @@ export class PointValueService {
   private currentMousePosition: Cesium.Cartesian2 | null = null;
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
   private isMouseTrackingEnabled: boolean = true;
+  private isLeftButtonDown: boolean = false;
   private lastFetchTime: number = 0;
   private fetchThrottleMs: number = 100; // in ms, between requests. Can be 16, 33, 50-100
   private pendingFetch: NodeJS.Timeout | null = null;
   private isCurrentlyFetching: boolean = false;
   private scanIndicator: ScanIndicator = new ScanIndicator();
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
-  private layerBounds: Map<string, Cesium.Rectangle> = new Map(); // Store bounds for each layer
+  private layerBounds: Map<string, Cesium.Rectangle> = new Map();
+  private activeFilenames: Map<string, string> = new Map();
 
   constructor() {}
 
@@ -136,8 +138,17 @@ export class PointValueService {
 
     this.mouseMoveHandler = new Cesium.ScreenSpaceEventHandler(this.viewer.canvas);
 
+    this.mouseMoveHandler.setInputAction(() => {
+      this.isLeftButtonDown = true;
+      this.scanIndicator.hide();
+    }, Cesium.ScreenSpaceEventType.LEFT_DOWN);
+
+    this.mouseMoveHandler.setInputAction(() => {
+      this.isLeftButtonDown = false;
+    }, Cesium.ScreenSpaceEventType.LEFT_UP);
+
     this.mouseMoveHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
-      if (this.isMouseTrackingEnabled && this.isActive) {
+      if (this.isMouseTrackingEnabled && this.isActive && !this.isLeftButtonDown) {
         this.currentMousePosition = event.endPosition;
         this.scanIndicator.updatePosition(event.endPosition);
 
@@ -363,7 +374,8 @@ export class PointValueService {
       throw new Error(`Layer config not found for ${layerId}`);
     }
 
-    const url = getPointValueUrl(layerConfig.filename, lon, lat, { 
+    const filename = this.activeFilenames.get(layerId) ?? layerConfig.filename;
+    const url = getPointValueUrl(filename, lon, lat, {
       bidx: [1],
       coord_crs: 'IAU:30100'
     });
@@ -380,14 +392,22 @@ export class PointValueService {
 
       return {
         layerId,
-        filename: layerConfig.filename,
+        filename,
         lon,
         lat,
-        value: typeof value === 'number' ? value :  null
+        value: typeof value === 'number' ? value : null
       };
     } catch (error) {
       throw new Error(`Failed to fetch point value: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  updateActiveFilename(layerId: string, filename: string) {
+    this.activeFilenames.set(layerId, filename);
+  }
+
+  clearActiveFilename(layerId: string) {
+    this.activeFilenames.delete(layerId);
   }
 
   // Clean up
@@ -396,6 +416,7 @@ export class PointValueService {
     this.callbacks = [];
     this.scanIndicator.destroy();
     this.layerBounds.clear();
+    this.activeFilenames.clear();
 
     if (this.pendingFetch) {
       clearTimeout(this.pendingFetch);

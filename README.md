@@ -6,87 +6,130 @@ Lunar Resources Insight is a easy-to use web application dedicated to lunar reso
 
 ## Important information
 
-```diff
-@@ New version development ongoing in other branch @@
-```
+This project is a work in progress and not in a ready to use state.
 
 ## Technology
 
 Lunar Resources Insight use different technologies to work properly:
 
 - [Node.js](https://nodejs.org/) - Javascript runtime environment.
-- [Webpack](https://webpack.js.org/) - Static module bundler for javascript.
-- [GeoServer](https://geoserver.org/) - Geographical data backend.
-
-## Get Started
-
+- [Vite](https://vitejs.dev/) - Frontend build tool and dev server.
+- [Planetcantile](https://github.com/AndrewAnnex/planetcantile)
 
 ### Configuration
 
-Create a private .env config file in your project at the same level
+Create the env files listed below in the project root. They are not committed. Add them to `.gitignore`.
 
-1. Create an `.env` file in the project directory.
-2. In the `.env` file, add the following environment variable with your local information:
+### ENV Files
+
+Two env files are used, one per environment. Vite loads `.env` always and `.env.production` automatically when running `npm run build`, with `.env.production` taking priority.
+
+**`.env`** (development only, not committed):
+
 ```
-# The map server url, where the geographical data are located, can be localhost, an ip or a specific adress (without the slash / at the end)
-MAP_SERVER_URL=http://example.com/geoserver
+NODE_ENV=development
+
+# Empty string: tile API calls use relative paths (/cog/, /stac/, /colorMaps/)
+# routed through the nginx dev proxy on the same origin, avoiding cross-origin issues.
+VITE_SERVER_URL=
+
+# Container-internal base path for COG (.tif) tile requests sent to planetcantile.
+# Always /data. The actual host directory is set via DATA_PATH in planetcantile's .env file.
+VITE_WORKSPACE_PATH=/data
+
+# Port the terrain server listens on. Must match TERRAIN_PORT below.
+VITE_TERRAIN_URL=http://localhost:3001
+
+# Port used by both the terrain container and the nginx proxy (docker compose).
+TERRAIN_PORT=3001
+
+# Host path to the Cesium terrain tiles directory, mounted read-only into the terrain container.
+TERRAIN_PATH=D:/Terrain/cesium-terrain
 ```
 
-Edit the config.js file with your map server configuration with your workspace name and layer name assuming you are using GeoServer.
+**`.env.production`** (production only, not committed):
 
-### Installation
-
-1. Install [Node.js](https://nodejs.org/) on your computer.
-2. Install [GeoServer](https://geoserver.org/) on your computer, assuming via [docker](https://github.com/geoserver/docker) in this case.
-If you are using docker, mount an external directory by following the geoserver github docker initialization, in your geoserver local folder the data should be placed in data/{{custom_workspace_name}}/ with the port configured like this: ``-p 8090:8080``, this way it will be accessible with the url ``localhost:8090/geoserver``
-
-Example commands:
-
-To pull the official image:
 ```
-docker pull docker.osgeo.org/geoserver:{{VERSION}}
+NODE_ENV=production
+
+# Empty string: tile API calls use relative paths (/cog/, /stac/, /colorMaps/)
+# so they route through the production nginx on the same origin.
+VITE_SERVER_URL=
 ```
 
-To pull the image locally:
-```
-docker run -it -p {{LOCAL_PORT}}:8080 --env INSTALL_EXTENSIONS=true --env STABLE_EXTENSIONS="vectortiles,geopkg-output,gdal,jp2k,iau"  --env CORS_ENABLED=true --mount src="C:/Your/Local/Geoserver/Directory",target=/opt/geoserver_data/,type=bind docker.osgeo.org/geoserver:{{VERSION}}
-```
+> `VITE_SERVER_URL` must not be removed entirely. An empty string is intentional and routes requests through nginx. Removing the variable causes the app to throw on startup.
 
-When geoserver is running, you need to create a workspace, eg. ``lunar-resources``, the different service on the workspace need to be activated (WMS, WCS, WMTS and WFS). On the **Stores** category, connect to a layer and publish it. The layer will appear in the **Layers** category. For the layer publication, the default names in the config.js of the Lunar Resources Insight project can be used.
 
-If the downloaded dataset has a style with it, you can add it in the **Styles** category in GeoServer.
+### Terrain
 
-The **Layers** page in GeoServer should look like this:
+The layer.json file should have EPSG:4326 due to CesiumTerrainProvider that does not support the code IAU:30100. The two projection are geographically compatible (lat/lon -90 to 90 and -180 to 180)
 
-| Title                                 | Name                            | Store                       |
-|---------------------------------------|---------------------------------|-----------------------------|
-| Global20ppd_SRV_LPGRS_geotiffCa_tiles | lunar-resources:calcium         | Calcium                     |
-| GeoContacts                           | lunar-resources:geo_contacts    | unified_geologic_v2         |
-| GeoUnits                              | lunar-resources:geo_units       | unified_geologic_v2         |
-| Global20ppd_SRV_LPGRS_geotiffFe_tiles | lunar-resources:iron            | Iron                        |
-| Global20ppd_SRV_LPGRS_geotiffMg_tiles | lunar-resources:magnesium       | Magnesium                   |
-| MOON_nomenclature_center_pts          | lunar-resources:nomenclature    | IAU Nomenclature            |
-| Global20ppd_LPGRS_geotiffTi_tiles     | lunar-resources:titanium        | Titanium                    |
-| WAC_GLOBAL_100M                       | lunar-resources:wac_global_100m | wac_global_morphologic_100m |
+Command used: 
 
-The *Name* category is related to the Lunar Resources Insight ``config.js`` file. The *Title* and *Store* can be any names.
-
-### Style
-
-Styles are in SLD format that can be incorporated into GeoServer via Data > Styles option.
-
-- The chemical element styling is done automatically via the interface, but they also need a default styling file (eg. gray) to be present in the "GetCapabilities", as default.
-- For the *Nomenclature* and the *Geologic* data, the style should be configured as default by using the provided styles from the required test data link.
-- About the 'WAC Global 100m' file, you need to generate a default 'raster' style, by creating a new one directly on GeoServer in the Style category.
+``gdalwarp -t_srs "+proj=longlat +a=1737400 +b=1737400 +no_defs" -r bilinear input.tif output.tif``
 
 ### Data
 
-Download and add the required test data to your geoserver local directory. The test data is composed of WGS84 processed and optimised from the following original:
+Test data:
 - [Global20ppd Titanium, Calcium, Magnesium and Iron](https://zenodo.org/records/5762834)
 
-Starting the 2.24.0 version of GeoServer, planetary CRS support was added. The data can be now in lunar coordinate system with the [GeoServer IAU planetary CRS extension](https://docs.geoserver.org/stable/en/user/extensions/iau/index.html). The data will be changed in the future to reflect this changes (Globally to IAU2015:30100 projection and related code), the Cesium globe ellipsoid will be modified to take into account the lunar ellipsoid. You will need to [download](https://sourceforge.net/projects/geoserver/files/GeoServer/) and install the extension in GeoServer.
+Converted via:
+
+```
+gdal_translate -a_srs IAU_2015:30100 input.tif output.tif
+
+gdal_translate -of COG -co "COMPRESS=DEFLATE" -co "PREDICTOR=2" ^
+-co "BLOCKSIZE=256" ^
+-co "OVERVIEW_RESAMPLING=AVERAGE" ^
+-co "OVERVIEWS=AUTO" geology_moon.tif geology_moon_cog.tif
+```
 
 ### Launch
 
 2. Open the project in your code editor and do `npm install`
 3. Start the project with `npm start`
+
+---
+
+## Docker
+
+### Development
+
+Starts the Vite dev server and the terrain server. Source files are mounted from the host.
+
+```sh
+docker compose up --build
+```
+
+| Service | URL |
+|---------|-----|
+| App | http://localhost:5173 |
+| Terrain | http://localhost:3001 |
+
+To stop: `docker compose down`.
+
+#### Workflow
+
+| Situation | Command | Note |
+|-----------|---------|------|
+| First start or after changing `package.json`, `package-lock.json` / `Dockerfile.dev` | `docker compose up --build` | Rebuilds the image |
+| Restart without dependency changes | `docker compose up` | Reuses cached image and `node_modules` |
+| Code changes | None | Vite picks them up instantly via hot module replacement |
+| Full reset (wipe volumes) | `docker compose down -v` then `--build` | Forces Vite dependency re-bundle on next start |
+
+### Production
+
+Builds the application and serves it with OpenResty (nginx + Lua). Vite bakes environment variables at build time, so `.env.production` must exist before building.
+
+```sh
+docker build -t lunar-resources-insight .
+docker run -p 8080:80 lunar-resources-insight
+```
+
+Open `http://localhost:8080`.
+
+The production image proxies `/cog/`, `/stac/`, and `/colorMaps/` to a `planetcantile` upstream. For this to resolve, the container must be on the same Docker network as a running planetcantile instance:
+
+```sh
+docker run -p 8080:80 --network planetcantile_app-net lunar-resources-insight
+```

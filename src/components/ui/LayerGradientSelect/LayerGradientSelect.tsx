@@ -2,9 +2,9 @@ import './LayerGradientSelect.scss'
 import React, { useState, useEffect, useRef } from 'react'
 import { Select, Button, Label, ListBox, ListBoxItem, Popover, SelectValue, ListBoxSection, Header } from "react-aria-components";
 import { useLayerContext } from 'utils/context/LayerContext';
-import { layerStatsService } from '../../../services/LayerStatsService';
-import { getFormattedColormaps } from '../../../geoConfigExporter';
-import { colormapService } from '../../../services/ColormapService';
+import { layerStatsService } from 'services/LayerStatsService';
+import { getFormattedColormaps } from 'geoConfigExporter';
+import { colormapService } from 'services/ColormapService';
 
 interface Gradient {
   category: string;

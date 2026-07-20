@@ -1,0 +1,80 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "clementine-cao-cnn-qiu2025",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2025-10-14T00:00:00Z",
+    "title": "CaO Abundance · Clementine 1D-CNN (Qiu et al., 2025)",
+    "mission": "Clementine",
+    "instruments": ["UVVIS"],
+    "platform": "clementine",
+    "compound": "CaO",
+    "units": "wt%",
+    "spatial_resolution_m": 100,
+    "observation_period_start": "1994-02-19",
+    "observation_period_end": "1994-05-03",
+    "doi": "10.1038/s43247-025-02914-w",
+    "authors": "Denggao Qiu, Jianguo Yan, Bin Liu",
+    "publication_date": "2025-10-14",
+    "processing:level": "L4",
+    "processing:lineage": "Clementine UVVIS DIM Mosaic (5 bands: 415, 750, 900, 950, 1000 nm, 100 m/pixel) combined with OMAT as a 6-element input vector. 1D CNN: two Conv1D layers (32 filters, kernel=2, ReLU), MaxPooling1D (pool=2), Dense(64, ReLU), single linear output. L2 regularization (0.001). Adam optimizer (lr=0.01), max 400 epochs, early stopping (patience=30), z-score normalization. Trained on 49 ground-truth points from Apollo, Luna, and Chang'E missions including Chang'E-6. CaO cannot be estimated from classical equation models. R²=0.96+ on training set; LOOCV R²=0.918.",
+    "loocv_r2": 0.918,
+    "global_mean_wt_pct": 14.93,
+    "maria_mean_wt_pct": 11.28,
+    "non_maria_mean_wt_pct": 15.64,
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "CaO is a key component of both anorthosite (plagioclase, CaAl₂Si₂O₈) and pyroxene. High CaO in the highlands indicates calcium-rich plagioclase; in mare basalts it reflects clinopyroxene content. Complementary to Al₂O₃ for distinguishing anorthositic vs. pyroxene-dominated terrains. Calcium is a potential construction material resource (cement analog). LOOCV R²=0.918, the second-highest of the five oxides.",
+    "lri:quality_note_short": "1D CNN inversion from Clementine UVVIS, calibrated with Chang'E-6 samples. LOOCV R²=0.918. Global mean 14.93 wt%. Bimodal: highland mode 16.38 wt%, mare mode 10.63 wt%. Not derivable from classical equation models.",
+    "lri:quality_note": "CaO abundance derived from 1D CNN inversion of Clementine UVVIS 5-band reflectance (Qiu et al. 2025, Communications Earth & Environment). CNN-only product — not derivable from classical equation models due to complex spectral characteristics. LOOCV R²=0.918, second-highest of the five oxides. Global mean 14.93 wt%; bimodal distribution with modes at 10.63 wt% (maria) and 16.38 wt% (highlands/non-maria). Maria mean 11.28 wt%; non-maria mean 15.64 wt%. CaO co-varies with Al₂O₃ in the highlands (both enriched in plagioclase), and inversely in maria (clinopyroxene is Ca-rich but Al-poor). This map is therefore most informative when interpreted together with Al₂O₃ and FeO. The lunar south polar region CaO is consistent with non-mare composition. Key resource consideration: calcium-rich terrains (high CaO + high Al₂O₃) are dominated by anorthosite, relevant to both aluminum/calcium extraction and as a potential building material analog."
+  },
+  "assets": {
+    "data": {
+      "href": "cao_clementine_cnn_qiu2025_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "CaO wt% · Clementine CNN — IAU:30100",
+      "roles": ["data"]
+    },
+    "zenodo_record": {
+      "href": "https://zenodo.org/records/15746439",
+      "type": "text/html",
+      "title": "Zenodo record — download source GeoTIFF",
+      "roles": ["source"]
+    },
+    "processing_script": {
+      "href": "../process_qiu2025.sh",
+      "type": "application/x-sh",
+      "title": "Processing commands used to generate the COG (shared for all Qiu 2025 items)",
+      "roles": ["metadata", "reproducibility"]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./cao_clementine_cnn_qiu2025.json" },
+    { "rel": "root",   "href": "../../../catalog.json" },
+    { "rel": "parent", "href": "../collection.json" },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1038/s43247-025-02914-w",
+      "title": "Qiu et al. 2025 — Communications Earth & Environment"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://pdsimage2.wr.usgs.gov/Clementine/PDS4/data/",
+      "type": "text/html",
+      "title": "Clementine UVVIS DIM Mosaic (PDS4)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../../lunar_prospector/grs/5deg/calcium/calcium5d.json",
+      "type": "application/json",
+      "title": "LP GRS Ca 5° — alternative calcium product from gamma-ray spectroscopy (~150 km resolution)"
+    }
+  ]
+}

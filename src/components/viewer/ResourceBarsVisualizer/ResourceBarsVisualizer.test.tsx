@@ -1,264 +1,253 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import { ResourceBarsVisualizer } from './ResourceBarsVisualizer';
-import { LunarTerrainClassifier } from '../../../utils/LunarTerrainClassifier';
-
-// Mock dependencies
-jest.mock('../../../geoConfigExporter', () => ({
+vi.mock('geoConfigExporter', () => ({
   layersConfig: {
     layers: {
-      calcium_primary: {
-        filename: 'test_ca.tif',
-        category: 'chemical',
-        element: 'calcium',
-        displayName: 'Calcium (Primary)'
-      },
-      iron_primary: {
-        filename: 'test_fe.tif',
-        category: 'chemical',
-        element: 'iron',
-        displayName: 'Iron (Primary)'
-      },
-      titanium_primary: {
-        filename: 'test_ti.tif',
-        category: 'chemical',
-        element: 'titanium',
-        displayName: 'Titanium (Primary)'
-      },
-      magnesium_primary: {
-        filename: 'test_mg.tif',
-        category: 'chemical',
-        element: 'magnesium',
-        displayName: 'Magnesium (Primary)'
-      }
-    }
-  }
-}));
-
-jest.mock('../../navigation/submenu/PeriodicTable/PeriodicTable', () => ({
-  elements: [
-    { name: 'Calcium', symbol: 'Ca', atomicNumber: 20 },
-    { name: 'Iron', symbol: 'Fe', atomicNumber: 26 },
-    { name: 'Titanium', symbol: 'Ti', atomicNumber: 22 },
-    { name: 'Magnesium', symbol: 'Mg', atomicNumber: 12 }
-  ]
-}));
-
-jest.mock('../../../utils/LunarTerrainClassifier', () => ({
-  LunarTerrainClassifier: {
-    extractElements: jest.fn(),
-    classifyTerrain: jest.fn()
-  }
-}));
-
-// Mock ResizeObserver
-const mockDisconnect = jest.fn();
-const mockObserve = jest.fn();
-const mockResizeObserver = jest.fn(() => ({
-  observe: mockObserve,
-  disconnect: mockDisconnect,
-  unobserve: jest.fn()
-}));
-
-// Mock D3
-const mockColorScale = jest.fn((value: number) => `rgb(${Math.floor(value * 255)}, 100, 150)`);
-const mockD3Selection = {
-  selectAll: jest.fn().mockReturnThis(),
-  remove: jest.fn().mockReturnThis(),
-  append: jest.fn().mockReturnThis(),
-  attr: jest.fn().mockReturnThis(),
-  style: jest.fn().mockReturnThis(),
-  text: jest.fn().mockReturnThis(),
-  call: jest.fn().mockReturnThis(),
-  data: jest.fn().mockReturnThis(),
-  enter: jest.fn().mockReturnThis(),
-  exit: jest.fn().mockReturnThis()
-};
-
-jest.mock('d3', () => ({
-  select: jest.fn(() => mockD3Selection),
-  scaleSequential: jest.fn(() => {
-    const scale = Object.assign(mockColorScale, {
-      domain: jest.fn().mockReturnThis(),
-      range: jest.fn().mockReturnThis()
-    });
-    return scale;
-  }),
-  interpolateRdYlBu: jest.fn(t => `rgb(${Math.floor(t * 255)}, 100, 150)`),
-  scaleLinear: jest.fn(() => ({
-    domain: jest.fn().mockReturnThis(),
-    range: jest.fn().mockReturnThis()
-  })),
-  scaleBand: jest.fn(() => ({
-    domain: jest.fn().mockReturnThis(),
-    range: jest.fn().mockReturnThis(),
-    padding: jest.fn().mockReturnThis(),
-    bandwidth: jest.fn(() => 50)
-  })),
-  axisLeft: jest.fn(() => ({
-    tickValues: jest.fn().mockReturnThis(),
-    tickFormat: jest.fn().mockReturnThis()
-  }))
-}));
-
-// @ts-ignore
-global.ResizeObserver = mockResizeObserver;
-
-// Mock console.warn
-const mockConsoleWarn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-describe('ResourceBarsVisualizer', () => {
-  const defaultProps = {
-    values: {
-      calcium_primary: 8.5,
-      iron_primary: 12.3,
-      titanium_primary: 3.2,
-      magnesium_primary: 7.8
+      calcium_primary:       { category: 'chemical', element: 'calcium',   units: 'wt%'        },
+      iron_primary:          { category: 'chemical', element: 'iron',      units: 'wt%'        },
+      magnesium_primary:     { category: 'chemical', element: 'magnesium', units: 'wt%'        },
+      titanium_primary:      { category: 'chemical', element: 'titanium',  units: 'wt%'        },
+      hydrogen_lawrence2022: { category: 'chemical', element: 'hydrogen',  units: 'ppm'        },
+      thorium_grs:           { category: 'chemical', element: 'thorium',   units: 'ppm'        },
+      neutron_primary:       { category: 'chemical', element: 'neutron',   units: 'count_rate', displayName: 'Neutron flux' },
+      feo_primary:           { category: 'compound', compound: 'feo',      units: 'wt%'        },
+      tio2_primary:          { category: 'compound', compound: 'tio2',     units: 'wt%'        },
     },
-    width: 400,
-    height: 300
-  };
+  },
+}))
 
-  const mockTerrainClassification = {
-    type: 'highlands' as const,
-    confidence: 'high' as const,
-    description: 'Typical anorthosite highlands',
-    ratio: 1.8
-  };
+import { render, screen } from '@testing-library/react'
+import { calculateAbundanceScore, ResourceBarsVisualizer } from './ResourceBarsVisualizer'
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockConsoleWarn.mockClear();
-    (LunarTerrainClassifier.extractElements as jest.Mock).mockReturnValue({
-      calcium: 8.5,
-      iron: 12.3,
-      titanium: 3.2
-    });
-    (LunarTerrainClassifier.classifyTerrain as jest.Mock).mockReturnValue(mockTerrainClassification);
-  });
+// Reference ranges (from elementReferenceRanges.ts):
+//   calcium:   0 – 14.3 wt%   iron:      0 – 15.2 wt%
+//   magnesium: 0 – 13.0 wt%   titanium:  0 – 6.0  wt%
+//   hydrogen:  0 – 150  ppm   thorium:   0 – 14.0 ppm
+//   feo:       0 – 22.0 wt%   tio2:      0 – 15.0 wt%
 
-  afterAll(() => {
-    mockConsoleWarn.mockRestore();
-  });
+beforeAll(() => {
+  vi.stubGlobal('ResizeObserver', class {
+    observe = vi.fn()
+    unobserve = vi.fn()
+    disconnect = vi.fn()
+  })
+})
 
-  describe('Component Rendering', () => {
-    it('renders without crashing', () => {
-      render(<ResourceBarsVisualizer {...defaultProps} />);
-      expect(document.querySelector('.resource-bars-visualizer')).toBeInTheDocument();
-    });
+// ─── Pure function ────────────────────────────────────────────────────────────
 
-    it('renders with custom dimensions', () => {
-      render(<ResourceBarsVisualizer {...defaultProps} width={500} height={400} />);
-      const svg = document.querySelector('svg');
-      expect(svg).toBeInTheDocument();
-      expect(svg).toHaveAttribute('width', '500');
-      expect(svg).toHaveAttribute('height', '400');
-    });
+describe('calculateAbundanceScore', () => {
 
-    it('renders without explicit dimensions', () => {
-      const { values } = defaultProps;
-      render(<ResourceBarsVisualizer values={values} />);
-      expect(document.querySelector('.resource-bars-visualizer')).toBeInTheDocument();
-    });
-  });
+  describe('wt% elements — calcium', () => {
+    it('returns 0 at min value', () => {
+      expect(calculateAbundanceScore('calcium_primary', 0)).toBe(0)
+    })
 
-  describe('Data Processing', () => {
-    it('handles valid elemental data', () => {
-      render(<ResourceBarsVisualizer {...defaultProps} />);
-      expect(document.querySelector('.resource-bars-visualizer')).toBeInTheDocument();
-      expect(mockColorScale).toHaveBeenCalled();
-    });
+    it('returns 50 at midpoint', () => {
+      expect(calculateAbundanceScore('calcium_primary', 7.15)).toBeCloseTo(50)
+    })
 
-    it('handles empty values object', () => {
-      render(<ResourceBarsVisualizer values={{}} />);
-      expect(document.querySelector('.resource-bars-visualizer')).toBeInTheDocument();
-    });
+    it('returns 100 at max value', () => {
+      expect(calculateAbundanceScore('calcium_primary', 14.3)).toBe(100)
+    })
 
-    it('handles unknown elements gracefully', () => {
-      const unknownElementValues = {
-        unknown_element: 5.0
-      };
-      
-      render(<ResourceBarsVisualizer values={unknownElementValues} />);
-      expect(document.querySelector('.resource-bars-visualizer')).toBeInTheDocument();
-      expect(mockConsoleWarn).toHaveBeenCalledWith(
-        expect.stringContaining('Layer configuration not found for: unknown_element')
-      );
-    });
+    it('clamps to 100 above max', () => {
+      expect(calculateAbundanceScore('calcium_primary', 20)).toBe(100)
+    })
 
-    it('handles extreme values correctly', () => {
-      const extremeValues = {
-        calcium_primary: 100, // Way above max
-        iron_primary: -10,    // Below min
-        titanium_primary: 3.2,
-        magnesium_primary: 7.8
-      };
-      
-      render(<ResourceBarsVisualizer values={extremeValues} />);
-      expect(document.querySelector('.resource-bars-visualizer')).toBeInTheDocument();
-    });
-  });
+    it('clamps to 0 below min', () => {
+      expect(calculateAbundanceScore('calcium_primary', -5)).toBe(0)
+    })
+  })
 
-  describe('Terrain Classification Integration', () => {
-    it('displays terrain context when classification available', () => {
-      render(<ResourceBarsVisualizer {...defaultProps} />);
-      
-      // Just check that terrain context div exists
-      expect(document.querySelector('.terrain-context')).toBeInTheDocument();
-      expect(LunarTerrainClassifier.extractElements).toHaveBeenCalledWith(defaultProps.values);
-    });
+  describe('wt% elements — iron', () => {
+    it('returns 50 at midpoint', () => {
+      expect(calculateAbundanceScore('iron_primary', 7.6)).toBeCloseTo(50)
+    })
 
-    it('handles missing terrain classification', () => {
-      (LunarTerrainClassifier.extractElements as jest.Mock).mockReturnValue(null);
-      
-      render(<ResourceBarsVisualizer {...defaultProps} />);
-      
-      expect(document.querySelector('.terrain-context')).not.toBeInTheDocument();
-    });
+    it('returns 100 at max value', () => {
+      expect(calculateAbundanceScore('iron_primary', 15.2)).toBe(100)
+    })
+  })
 
-    it('uses allValues for terrain classification when provided', () => {
-      const allValues = {
-        ...defaultProps.values,
-        additional_element: 5.0
-      };
-      
-      render(<ResourceBarsVisualizer {...defaultProps} allValues={allValues} />);
-      
-      expect(LunarTerrainClassifier.extractElements).toHaveBeenCalledWith(allValues);
-    });
-  });
+  describe('ppm elements — hydrogen', () => {
+    it('returns 0 at min value', () => {
+      expect(calculateAbundanceScore('hydrogen_lawrence2022', 0)).toBe(0)
+    })
 
-  describe('Responsive Behavior', () => {
-    it('sets up ResizeObserver on mount', () => {
-      render(<ResourceBarsVisualizer {...defaultProps} />);
-      expect(mockResizeObserver).toHaveBeenCalled();
-      expect(mockObserve).toHaveBeenCalled();
-    });
+    it('returns 50 at midpoint', () => {
+      expect(calculateAbundanceScore('hydrogen_lawrence2022', 75)).toBeCloseTo(50)
+    })
 
-    it('cleans up ResizeObserver on unmount', () => {
-      const { unmount } = render(<ResourceBarsVisualizer {...defaultProps} />);
-      unmount();
-      expect(mockDisconnect).toHaveBeenCalled();
-    });
-  });
+    it('returns 100 at ceiling', () => {
+      expect(calculateAbundanceScore('hydrogen_lawrence2022', 150)).toBe(100)
+    })
 
-  describe('D3 Visualization', () => {
-    it('initializes D3 visualization correctly', async () => {
-      render(<ResourceBarsVisualizer {...defaultProps} />);
-      
-      await waitFor(() => {
-        expect(mockD3Selection.selectAll).toHaveBeenCalled();
-        expect(mockColorScale).toHaveBeenCalled();
-      });
-    });
+    it('clamps to 100 above ceiling', () => {
+      expect(calculateAbundanceScore('hydrogen_lawrence2022', 200)).toBe(100)
+    })
+  })
 
-    it('handles visualization re-renders', () => {
-      const { rerender } = render(<ResourceBarsVisualizer {...defaultProps} />);
-      
-      const newValues = { ...defaultProps.values, calcium_primary: 10.0 };
-      rerender(<ResourceBarsVisualizer {...defaultProps} values={newValues} />);
-      
-      expect(mockD3Selection.remove).toHaveBeenCalled();
-    });
-  });
-});
+  describe('ppm elements — thorium', () => {
+    it('returns 50 at midpoint', () => {
+      expect(calculateAbundanceScore('thorium_grs', 7)).toBeCloseTo(50)
+    })
+
+    it('returns 100 at max value', () => {
+      expect(calculateAbundanceScore('thorium_grs', 14)).toBe(100)
+    })
+  })
+
+  describe('fallback behavior', () => {
+    it('returns 50 for an unknown layer', () => {
+      expect(calculateAbundanceScore('unknown_layer', 5)).toBe(50)
+    })
+
+    it('returns 50 for a layer with no element field', () => {
+      expect(calculateAbundanceScore('calcium_primary', 0)).not.toBeUndefined()
+    })
+  })
+
+  describe('compound — feo', () => {
+    it('returns 0 at min value', () => {
+      expect(calculateAbundanceScore('feo_primary', 0)).toBe(0)
+    })
+
+    it('returns 50 at midpoint', () => {
+      expect(calculateAbundanceScore('feo_primary', 11)).toBeCloseTo(50)
+    })
+
+    it('returns 100 at max value', () => {
+      expect(calculateAbundanceScore('feo_primary', 22)).toBe(100)
+    })
+
+    it('clamps to 100 above max', () => {
+      expect(calculateAbundanceScore('feo_primary', 30)).toBe(100)
+    })
+  })
+
+  describe('compound — tio2', () => {
+    it('returns 50 at midpoint', () => {
+      expect(calculateAbundanceScore('tio2_primary', 7.5)).toBeCloseTo(50)
+    })
+
+    it('returns 100 at max value', () => {
+      expect(calculateAbundanceScore('tio2_primary', 15)).toBe(100)
+    })
+  })
+
+})
+
+// ─── Component rendering ──────────────────────────────────────────────────────
+
+describe('ResourceBarsVisualizer — nodata state', () => {
+
+  describe('SVG panel visibility', () => {
+    it('renders no SVG panels when values and nodataLayerIds are both empty', () => {
+      const { container } = render(<ResourceBarsVisualizer values={{}} nodataLayerIds={[]} />)
+      expect(container.querySelector('svg')).not.toBeInTheDocument()
+    })
+
+    it('renders the wt% SVG when a wt% nodata layer is provided', () => {
+      const { container } = render(
+        <ResourceBarsVisualizer values={{}} nodataLayerIds={['calcium_primary']} />
+      )
+      expect(container.querySelector('svg')).toBeInTheDocument()
+    })
+
+    it('renders the ppm section when a ppm nodata layer is provided', () => {
+      render(<ResourceBarsVisualizer values={{}} nodataLayerIds={['hydrogen_lawrence2022']} />)
+      expect(screen.getByText('Trace Elements')).toBeInTheDocument()
+    })
+
+    it('does not render the ppm section when only wt% nodata layers are provided', () => {
+      render(<ResourceBarsVisualizer values={{}} nodataLayerIds={['calcium_primary']} />)
+      expect(screen.queryByText('Trace Elements')).not.toBeInTheDocument()
+    })
+
+    it('renders both wt% and ppm SVGs when nodata layers of each type are provided', () => {
+      const { container } = render(
+        <ResourceBarsVisualizer
+          values={{}}
+          nodataLayerIds={['calcium_primary', 'hydrogen_lawrence2022']}
+        />
+      )
+      expect(container.querySelectorAll('svg')).toHaveLength(2)
+    })
+  })
+
+  describe('count rate rows', () => {
+    it('shows an em dash for a nodata count_rate layer', () => {
+      render(<ResourceBarsVisualizer values={{}} nodataLayerIds={['neutron_primary']} />)
+      expect(screen.getByText('Spatial Signal')).toBeInTheDocument()
+      expect(screen.getByText('—')).toBeInTheDocument()
+    })
+
+    it('shows the numeric value and no em dash when a count_rate layer has data', () => {
+      render(
+        <ResourceBarsVisualizer values={{ neutron_primary: 1.2345 }} nodataLayerIds={[]} />
+      )
+      expect(screen.getByText('1.2345')).toBeInTheDocument()
+      expect(screen.queryByText('—')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('mixed state (partial data)', () => {
+    it('renders the wt% SVG when some layers have values and others are nodata', () => {
+      const { container } = render(
+        <ResourceBarsVisualizer
+          values={{ calcium_primary: 7.15 }}
+          nodataLayerIds={['iron_primary']}
+        />
+      )
+      expect(container.querySelector('svg')).toBeInTheDocument()
+    })
+
+    it('does not render a nodata bar for a layer that already has a real value', () => {
+      const { container } = render(
+        <ResourceBarsVisualizer
+          values={{ calcium_primary: 7.15 }}
+          nodataLayerIds={['calcium_primary', 'iron_primary']}
+        />
+      )
+      expect(container.querySelector('svg')).toBeInTheDocument()
+    })
+  })
+
+})
+
+// ─── Compound panel ───────────────────────────────────────────────────────────
+
+describe('ResourceBarsVisualizer — compound panel', () => {
+
+  describe('panel visibility', () => {
+    it('renders the Compounds panel when compound values are provided', () => {
+      render(<ResourceBarsVisualizer values={{ feo_primary: 11 }} nodataLayerIds={[]} />)
+      expect(screen.getByText('Compounds')).toBeInTheDocument()
+    })
+
+    it('renders the Compounds panel when a compound nodata layer is provided', () => {
+      render(<ResourceBarsVisualizer values={{}} nodataLayerIds={['feo_primary']} />)
+      expect(screen.getByText('Compounds')).toBeInTheDocument()
+    })
+
+    it('does not render Major Elements when only compound values are provided', () => {
+      render(<ResourceBarsVisualizer values={{ feo_primary: 11 }} nodataLayerIds={[]} />)
+      expect(screen.queryByText('Major Elements')).not.toBeInTheDocument()
+    })
+
+    it('does not render Compounds panel when only element values are provided', () => {
+      render(<ResourceBarsVisualizer values={{ calcium_primary: 7 }} nodataLayerIds={[]} />)
+      expect(screen.queryByText('Compounds')).not.toBeInTheDocument()
+    })
+
+    it('renders both panels when element and compound values are provided together', () => {
+      render(
+        <ResourceBarsVisualizer
+          values={{ calcium_primary: 7, feo_primary: 11 }}
+          nodataLayerIds={[]}
+        />
+      )
+      expect(screen.getByText('Major Elements')).toBeInTheDocument()
+      expect(screen.getByText('Compounds')).toBeInTheDocument()
+    })
+  })
+
+})

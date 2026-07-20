@@ -1,0 +1,163 @@
+@use './colors' as *;
+
+// Container for all mineral categories
+.mineralGridContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+// Category section with title and separator
+.categorySection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.categoryTitleContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.categoryTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-tertiary);
+  text-align: left;
+  margin: 0;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.categoryInfoButton {
+  margin-top: -2px;
+}
+
+// Mineral grid layout
+.mineralGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  outline: none;
+}
+
+// Mineral item base styling
+.mineralItem {
+  border: 2px solid $color-border-default;
+  background-color: $color-background-default;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+  min-height: 90px;
+  outline: none;
+
+  &[data-selected] {
+    border-color: $color-border-selected;
+    background-color: $color-background-selected;
+  }
+
+  &.highlighted {
+    border-color: $color-border-highlighted;
+    background-color: $color-background-highlighted;
+    box-shadow: 0 0 16px rgba(251, 146, 60, 0.5);
+  }
+
+  // Combined state (selected AND highlighted)
+  &[data-selected].highlighted {
+    border-color: $color-border-combined;
+    background-color: $color-background-combined;
+    box-shadow: 0 0 16px rgba(147, 51, 234, 0.6);
+  }
+
+  &[data-hovered] {
+    box-shadow: 0 0 20px rgba(var(--color-selection-hover-rgb), 0.6);
+    transform: translateY(-2px);
+  }
+
+  // Focus visible (keyboard navigation)
+  &[data-focus-visible] {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
+
+  &[data-pressed] {
+    transform: scale(0.98);
+  }
+
+  // Disabled state
+  &[data-disabled] {
+    border-color: var(--color-selection-unavailable);
+    background-color: rgba(var(--color-selection-unavailable-bg-rgb), 0.5);
+    cursor: default;
+    opacity: 0.6;
+
+    .mineralName,
+    .mineralFormula,
+    .mineralCategory,
+    .mineralGrouping {
+      opacity: 0.25;
+    }
+
+    // Disable hover
+    &[data-hovered] {
+      box-shadow: none;
+      transform: none;
+    }
+
+    &[data-focus-visible] {
+      outline: none;
+    }
+
+    &[data-pressed] {
+      transform: none;
+    }
+  }
+}
+
+// Mineral item content layout
+.mineralItemContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 0.5rem;
+  position: relative;
+  min-height: 90px;
+  gap: 0.2rem;
+}
+
+.mineralName {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-neutralVariant);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.mineralFormula {
+  font-size: 0.85rem;
+  color: rgba(156, 163, 175, 1);
+  text-align: center;
+  line-height: 1.1;
+}
+
+// Category label for moon-discovered minerals
+.mineralCategory {
+  font-size: 0.7rem;
+  color: rgba(156, 163, 175, 0.7);
+  text-align: center;
+  font-style: italic;
+  margin-top: 0.1rem;
+}
+
+.mineralGrouping {
+  font-size: 0.7rem;
+  color: rgba(156, 163, 175, 0.7);
+  text-align: center;
+  font-style: italic;
+  margin-top: 0.1rem;
+}

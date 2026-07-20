@@ -1,0 +1,102 @@
+@use './colors' as *;
+
+// Rock grid layout - single row with 8 columns
+.rockGrid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+  outline: none;
+}
+
+// Rock item base styling
+.rockItem {
+  border: 2px solid $color-border-default;
+  background-color: $color-background-default;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-out;
+  cursor: pointer;
+  min-height: 105px;
+  outline: none;
+
+  // Selected state
+  &[data-selected] {
+    border-color: $color-border-selected;
+    background-color: $color-background-selected;
+  }
+
+  // Highlighted state (when mineral is hovered)
+  &.highlighted {
+    border-color: $color-border-highlighted;
+    background-color: $color-background-highlighted;
+    box-shadow: 0 0 16px rgba(251, 146, 60, 0.5);
+  }
+
+  // Combined state (selected AND highlighted)
+  &[data-selected].highlighted {
+    border-color: $color-border-combined;
+    background-color: $color-background-combined;
+    box-shadow: 0 0 16px rgba(147, 51, 234, 0.6);
+  }
+
+  // Hover state - more visible
+  &[data-hovered] {
+    box-shadow: 0 0 20px rgba(var(--color-selection-hover-rgb), 0.6);
+    transform: translateY(-2px);
+  }
+
+  // Focus visible (keyboard navigation)
+  &[data-focus-visible] {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
+
+  // Pressed state
+  &[data-pressed] {
+    transform: scale(0.98);
+  }
+}
+
+// Rock item content layout
+.rockItemContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  position: relative;
+  min-height: 105px;
+  gap: 0.25rem;
+}
+
+// Rock icon
+.rockIcon {
+  font-size: 1.75rem;
+  margin-bottom: 0.15rem;
+}
+
+// Rock name
+.rockName {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-neutralVariant);
+  text-align: center;
+  line-height: 1.2;
+  margin-top: 0.25rem;
+}
+
+// Rock location
+.rockType {
+  font-size: 0.8rem;
+  color: rgba(156, 163, 175, 0.8);
+  text-align: center;
+  line-height: 1.1;
+}
+
+// Info button for individual rocks
+.rockInfoButton {
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  z-index: 10;
+}

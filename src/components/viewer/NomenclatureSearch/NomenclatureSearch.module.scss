@@ -1,0 +1,337 @@
+@keyframes searchButtonIn {
+  from {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes searchBoxIn {
+  from {
+    opacity: 0;
+    transform: scaleX(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+.collapsedButton {
+  position: absolute;
+  top: 3.25rem;
+  left: 0.75rem;
+  z-index: 100;
+  animation: searchButtonIn 0.15s ease-out;
+}
+
+.expandedContainer {
+  position: absolute;
+  top: 3.25rem;
+  left: 0.75rem;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  transform-origin: left center;
+  animation: searchBoxIn 0.18s ease-out;
+}
+
+.comboBox {
+  display: flex;
+
+  input {
+    width: 16rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.25rem;
+    border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(var(--color-primary-rgb), 0.55);
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+    color: var(--color-tertiary);
+    font-size: 0.9rem;
+
+    &::placeholder {
+      color: rgba(var(--color-tertiary-rgb), 0.6);
+    }
+
+    &:focus {
+      outline: 2px solid var(--color-secondary);
+      outline-offset: 1px;
+    }
+  }
+}
+
+.closeButton {
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(var(--color-primary-rgb), 0.55);
+  border-radius: 0.25rem;
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
+  color: var(--color-tertiary);
+
+  &[data-hovered] {
+    background: rgba(var(--color-quaternary-rgb), 0.65);
+  }
+
+  &[data-pressed] {
+    background: rgba(var(--color-neutral-rgb), 0.70);
+  }
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+}
+
+.popover {
+  min-width: 16rem;
+  max-height: 20rem;
+  overflow-y: auto;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
+  background: var(--color-primary);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.listBox {
+  display: flex;
+  flex-direction: column;
+  padding: 0.25rem;
+}
+
+.listBoxItem {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--color-tertiary);
+  cursor: pointer;
+
+  &[data-focused],
+  &[data-hovered] {
+    background: rgba(var(--color-quaternary-rgb), 0.4);
+  }
+
+  &[data-selected] {
+    background: rgba(var(--color-selection-selected-rgb), 0.4);
+  }
+}
+
+.coordinateItem {
+  font-style: italic;
+}
+
+.itemIcon {
+  font-size: 18px;
+  color: var(--color-tertiary);
+}
+
+.itemLabel {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saveButton {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--color-tertiary);
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(var(--color-quaternary-rgb), 0.5);
+  }
+
+  &:disabled {
+    cursor: default;
+    color: var(--color-secondary);
+  }
+}
+
+.emptyState {
+  display: block;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.8rem;
+  color: rgba(var(--color-tertiary-rgb), 0.7);
+}
+
+.searchResultCalloutAnchor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.searchResultCallout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(var(--color-primary-rgb), 0.8);
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.4);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.searchResultCalloutLeader {
+  width: 2px;
+  height: 56px;
+  background: linear-gradient(to bottom, rgba(var(--color-tertiary-rgb), 0.6), rgba(var(--color-tertiary-rgb), 0.1));
+}
+
+.searchResultCalloutLabel {
+  font-size: 0.8rem;
+  color: var(--color-tertiary);
+}
+
+.searchResultCalloutActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.searchResultCalloutSave {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid rgba(var(--color-tertiary-rgb), 0.4);
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--color-tertiary);
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &[data-hovered] {
+    background: rgba(var(--color-quaternary-rgb), 0.5);
+  }
+}
+
+.searchResultCalloutAnalyze {
+  padding: 0.25rem 0.6rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: var(--color-secondary);
+  color: var(--color-primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &[data-hovered] {
+    filter: brightness(1.1);
+  }
+}
+
+.searchResultCalloutSaved {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--color-tertiary);
+
+  .material-symbols-outlined {
+    font-size: 16px;
+    color: var(--color-secondary);
+  }
+}
+
+.searchResultCalloutDismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--color-tertiary);
+  cursor: pointer;
+
+  .material-symbols-outlined {
+    font-size: 16px;
+  }
+
+  &[data-hovered] {
+    background: rgba(var(--color-quaternary-rgb), 0.5);
+  }
+}
+
+.searchResultMarker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 105;
+  // Position is set inline per-frame in JS (see searchResultCalloutAnchor).
+  pointer-events: none;
+}
+
+.searchResultMarkerPin {
+  position: relative;
+  display: block;
+  // Matches the 32x42 viewBox aspect ratio exactly, so the SVG fills this
+  // box with no extra padding (for anchored ground point).
+  width: 28px;
+  height: 36.75px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+
+.searchResultMarkerPulse {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 50%;
+  background: rgba(255, 176, 32, 0.55);
+  animation: searchResultMarkerPulse 1.6s ease-out infinite;
+}
+
+@keyframes searchResultMarkerPulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}

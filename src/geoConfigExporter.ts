@@ -1,5 +1,5 @@
-export const mapServerUrl = process.env.REACT_APP_SERVER_URL;
-export const workspacePath = process.env.REACT_APP_WORKSPACE_PATH;
+export const mapServerUrl = import.meta.env.VITE_SERVER_URL;
+export const workspacePath = import.meta.env.VITE_WORKSPACE_PATH;
 
 export const tilerEndpoints = {
   tiles: `${mapServerUrl}/cog/tiles/MoonGeographicSphere/{z}/{x}/{y}`,
@@ -11,32 +11,15 @@ export const tilerEndpoints = {
   colorMap: `${mapServerUrl}/colorMaps/{colormap}`
 };
 
-if (!mapServerUrl) {
-  throw new Error('REACT_APP_SERVER_URL is not defined in environment variables.');
+if (mapServerUrl === undefined) {
+  throw new Error('VITE_SERVER_URL is not defined in environment variables.');
 }
 
 if (!workspacePath) {
-  throw new Error('REACT_APP_WORKSPACE_PATH is not defined in environment variables.');
+  throw new Error('VITE_WORKSPACE_PATH is not defined in environment variables.');
 }
 
-export type LayerConfig = {
-  filename: string;
-  category: string;
-  element?: string;
-  displayName?: string;
-  metadata?: {
-    source?: string;
-    resolution?: string;
-    [key: string]: any;
-  };
-  [key: string]: any;
-};
-
-export type LayersConfig = {
-  layers: {
-    [layerId: string]: LayerConfig;
-  }
-}
+export type { LayerVariant, LayerConfig, LayersConfig } from './types/layers';
 
 export interface CogBandStatistics {
   min: number;
@@ -75,8 +58,14 @@ export interface CogStatistics {
   histogram?: [number[], number[]];
 }
 
-import layersConfigJson from './layersConfig.json';
-export const layersConfig: LayersConfig = layersConfigJson;
+import { layersConfig } from './layersConfig';
+export { layersConfig };
+
+export function getLayersByCompound(compoundId: string): string[] {
+  return Object.entries(layersConfig.layers)
+    .filter(([, config]) => config.compound === compoundId)
+    .map(([id]) => id);
+}
 
 export function buildCogTileUrl(filename: string, options: {
   colormap?: string;
@@ -91,10 +80,6 @@ export function buildCogTileUrl(filename: string, options: {
   const encodedFileUrl = safeEncodeURI(fileUrl);
   
   let url = `${tilerEndpoints.tiles}?url=${encodedFileUrl}`;
-
-  if (options.colormap) {
-    url += `&colormap=${encodeURIComponent(options.colormap)}`;
-  }
 
   if (options.colormap) {
     url += `&colormap_name=${options.colormap}`;
@@ -313,11 +298,37 @@ export async function fetchColormapData(colormapName: string): Promise<Record<st
  * @returns Preview image URL
  */
 export function buildGradientPreviewUrl(
-  colormapName: string, 
-  width: number, 
+  colormapName: string,
+  width: number,
   height: number = 30
 ): string {
-  return `${tilerEndpoints.colorMap.replace('{colormap}', colormapName)}?format=png&width=${width}&height=${height}`;
+  return `${tilerEndpoints.colorMap.replace('{colormap}', colormapName)}?f=png&width=${width}&height=${height}`;
+}
+
+/**
+ * Builds the URL to obtain a preview image of a layer
+ * @param filename Layer filename
+ * @param width Image width in pixels (optional, default: 512)
+ * @param height Image height in pixels (optional, default: 256)
+ * @param bbox Bounding box to crop the preview [minLon, minLat, maxLon, maxLat] (optional)
+ * @returns Preview image URL from TiTiler
+ */
+export function buildLayerPreviewUrl(
+  filename: string,
+  width: number = 512,
+  height: number = 256,
+  bbox?: [number, number, number, number]
+): string {
+  const fileUrl = `${workspacePath}/${filename}`;
+  const encodedFileUrl = safeEncodeURI(fileUrl);
+  let url = `${tilerEndpoints.preview}?url=${encodedFileUrl}&max_size=${width}&height=${height}&format=png`;
+
+  // Add bounding box if provided to limit latitude/longitude range
+  if (bbox && bbox.length === 4) {
+    url += `&bbox=${bbox.join(',')}`;
+  }
+
+  return url;
 }
 
 function safeEncodeURI(uri: string): string {

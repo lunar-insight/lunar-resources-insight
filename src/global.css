@@ -2,8 +2,9 @@
   --color-primary: #232935; /* dark color 35 41 53*/
   --color-secondary: #85a2af; /* light color */
   --color-tertiary: #97a5ab; /* light color */
-  --color-quartenary: #324049; /* dark color 50 64 73*/
-  --color-red: #ff5449; /* red for error or cancel */
+  --color-quaternary: #324049; /* dark color 50 64 73*/
+  --color-red: #ff5449;/* red for error or cancel */
+  --color-redVariant: #e05353; /* Less flashy but still red */
   --color-green: #2eaf2e; /* green for validation */
   --color-dark-intermediary: #2d3a42; /* 45 58 66 dark color, used for sidebar for "is-active + pressed" state */
   --color-neutral: #2b353e; /* dark color 43 53 62 */
@@ -16,13 +17,53 @@
   --color-primary-rgb: 35, 41, 53;
   --color-secondary-rgb: 133, 162, 175;
   --color-tertiary-rgb: 151, 165, 171;
-  --color-quartenary-rgb: 50, 64, 73;
+  --color-quaternary-rgb: 50, 64, 73;
   --color-red-rgb: 255, 84, 73;
+  --color-redVariant-rgb: 224, 83, 83;
   --color-green-rgb: 46, 175, 46;
   --color-dark-intermediary-rgb: 45, 58, 66;
   --color-neutral-rgb: 43, 53, 62;
   --color-neutralVariant-rgb: 182, 187, 193;
   --color-light-button-pressed-rgb: 156, 167, 171;
+
+  /* Selection State Colors - Used across selection menus (Periodic Table, Compounds, Minerals, Rocks) */
+  --color-selection-default: #808080; /* Gray for default/selectable state */
+  --color-selection-default-rgb: 128, 128, 128;
+
+  --color-selection-selected: #3b82f6; /* Blue for selected state */
+  --color-selection-selected-rgb: 59, 130, 246;
+
+  --color-selection-hover: #808080; /* Gray for hover highlights */
+  --color-selection-hover-rgb: 128, 128, 128;
+
+  --color-selection-unavailable: #1a1a1a; /* Dark gray for unavailable/disabled state */
+  --color-selection-unavailable-rgb: 26, 26, 26;
+
+  --color-selection-unavailable-bg: #191d25; /* Background for unavailable items */
+  --color-selection-unavailable-bg-rgb: 25, 29, 37;
+
+  /* Chemical Layer Variant Pill Colors - Violet theme, used in VariantSelector */
+  --chemical-border: rgba(147, 51, 234, 0.3);
+  --chemical-active-bg: rgba(147, 51, 234, 0.50);
+  --chemical-active-border: rgba(147, 51, 234, 0.85);
+
+  /* Muted accent colors, soft, non-flashy tones suitable for subtle UI indicators */
+  --color-muted-green: rgba(66, 191, 66, 0.5);
+  --color-muted-red: rgba(224, 83, 83, 0.5);
+
+  /* Data Source Badge Colors. Used in DataSourceBadge and DataSourceLegend components */
+  --color-badge-global: rgba(34, 185, 67, 0.55); /* Green for map+ground data */
+  --color-badge-map: rgba(59, 130, 246, 0.55); /* Blue for map-only data */
+  --color-badge-local: rgba(240, 159, 17, 0.55); /* Orange for ground-only data */
+
+  /* Layer Category Colors. Used in GridListLayerComponent (accent stripe/background) and LayersCatalog (category tag/filter chips) */
+  --color-category-basemap-rgb: 128, 128, 128; /* Gray */
+  --color-category-geographical-rgb: 34, 197, 94; /* Green */
+  --color-category-chemical-rgb: 147, 51, 234; /* Violet */
+  --color-category-compound-rgb: 234, 179, 8; /* Yellow */
+  --color-category-derived-index-rgb: 249, 115, 22; /* Orange */
+  --color-category-rock-rgb: 59, 212, 246; /* Cyan */
+  --color-category-mineral-rgb: 59, 130, 246; /* Blue */
 }
 
 /*
@@ -33,8 +74,51 @@
 */
 
 @font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/symbols/MaterialSymbolsOutlined-Regular.ttf') format('truetype');
+  font-display: block;
+}
+
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  -webkit-font-smoothing: antialiased;
+}
+
+@font-face {
   font-family: 'Roboto';
-  src: url('./fonts//Roboto/Roboto-Regular.ttf') format('truetype');
+  src: url('/fonts/Roboto/static/Roboto-Regular.ttf') format('truetype');
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto/static/Roboto-Medium.ttf') format('truetype');
+  font-weight: 500;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto/static/Roboto-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto/static/Roboto-Bold.ttf') format('truetype');
+  font-weight: 700;
 }
 
 body {
@@ -46,11 +130,11 @@ body {
   height: 100%;
   overflow: hidden;
 
-  scrollbar-color: var(--color-quartenary) var(--color-primary);
+  scrollbar-color: var(--color-quaternary) var(--color-primary);
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--color-quartenary);
+  background-color: var(--color-quaternary);
 }
 
 ::-webkit-scrollbar-thumb {

@@ -1,0 +1,21 @@
+{
+  "type": "Catalog",
+  "id": "lp-wilson2018",
+  "stac_version": "1.0.0",
+  "title": "Lunar Prospector - Pixon Reconstructed Maps (Wilson et al., 2018)",
+  "description": "Improved-resolution maps of Lunar Prospector Neutron Spectrometer (NS) and Gamma Ray Spectrometer (GRS) data produced via global application of pixon image reconstruction techniques (Wilson et al., 2018, JGR Planets, doi:10.1029/2018JE005589). Datasets cover epithermal neutrons (primary H/water-ice proxy), the Sn-covered sensor blended thermal+epithermal signal, and Th-line GRS count rates. All maps form a 1024×512 equal-angle rectangular grid covering the full lunar surface. Source data: LP-NS and LP-GRS PDS archives. Authors: J. T. Wilson, D. J. Lawrence, P. N. Peplowski, J. T. S. Cahill, V. R. Eke, R. J. Massey, L. F. A. Teodoro.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../../catalog.json" },
+    { "rel": "parent", "href": "../../catalog.json" },
+    { "rel": "item",   "href": "./epithermal/epithermal_wilson.json",             "title": "Pixon epithermal neutron (H/water-ice proxy)" },
+    { "rel": "item",   "href": "./sn_thermal_epithermal/sn_thermal_epithermal_wilson.json", "title": "Pixon Sn-covered sensor (thermal + epithermal neutrons)" },
+    { "rel": "item",   "href": "./thorium_grs/thorium_grs_wilson.json",           "title": "Pixon Th-line GRS count rate (KREEP tracer)" },
+    {
+      "rel": "via",
+      "href": "https://doi.org/10.1029/2018JE005589",
+      "type": "text/html",
+      "title": "Wilson et al. 2018 - JGR Planets source paper"
+    }
+  ]
+}

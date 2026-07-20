@@ -1,0 +1,20 @@
+// ============================================
+// Shared Color Variables
+// Used across MineralsSection, MineralGrid, and RockGrid
+// ============================================
+
+// Default state colors - using global CSS variables
+$color-border-default: rgba(var(--color-selection-default-rgb), 0.5);
+$color-background-default: rgba(45, 55, 65, 0.3);
+
+// Selected state colors - using global CSS variables
+$color-border-selected: rgba(var(--color-selection-selected-rgb), 0.6);
+$color-background-selected: rgba(var(--color-selection-selected-rgb), 0.15);
+
+// Highlighted state colors
+$color-border-highlighted: rgba(251, 146, 60, 0.7);
+$color-background-highlighted: rgba(251, 146, 60, 0.2);
+
+// Combined state colors (selected + highlighted)
+$color-border-combined: rgba(147, 51, 234, 0.7);
+$color-background-combined: rgba(147, 51, 234, 0.2);

@@ -1,0 +1,75 @@
+.selectionFrame {
+  padding: 1rem;
+  border: 1px solid var(--color-quaternary);
+  border-radius: 0.25rem;
+  background-color: rgba(35, 41, 53, 0.3);
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+}
+
+.placeholder {
+  color: var(--color-tertiary);
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  flex: 1;
+}
+
+.featuresList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  outline: none;
+}
+
+.featureItem {
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-quaternary);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  cursor: default;
+  outline: none;
+
+  &[data-focus-visible] {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+
+  &[data-hovered] {
+    background-color: rgba(50, 64, 73, 0.5);
+  }
+}
+
+.featureItemHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 1.75rem;
+}
+
+.featureName {
+  flex: 1;
+  min-width: 10rem;
+  max-width: 10rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.featureActions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}

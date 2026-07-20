@@ -3,11 +3,11 @@ import { Label, Slider, SliderOutput, SliderThumb, SliderTrack } from 'react-ari
 import './OpacitySlider.scss';
 import type { SliderProps } from 'react-aria-components';
 
-interface OpacitySliderProps<T> extends SliderProps<T> {
+interface OpacitySliderProps extends SliderProps<number> {
   label?: string;
 }
 
-function OpacitySlider<T extends number>({ label = 'Opacity', ...props }: OpacitySliderProps<T>) {
+function OpacitySlider({ label = 'Opacity', ...props }: OpacitySliderProps) {
   return (
     <Slider defaultValue={100} {...props}>
       <Label>

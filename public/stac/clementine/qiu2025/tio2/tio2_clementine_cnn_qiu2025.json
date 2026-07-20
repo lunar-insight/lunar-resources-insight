@@ -1,0 +1,80 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "clementine-tio2-cnn-qiu2025",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2025-10-14T00:00:00Z",
+    "title": "TiO₂ Abundance · Clementine 1D-CNN (Qiu et al., 2025)",
+    "mission": "Clementine",
+    "instruments": ["UVVIS"],
+    "platform": "clementine",
+    "compound": "TiO2",
+    "units": "wt%",
+    "spatial_resolution_m": 100,
+    "observation_period_start": "1994-02-19",
+    "observation_period_end": "1994-05-03",
+    "doi": "10.1038/s43247-025-02914-w",
+    "authors": "Denggao Qiu, Jianguo Yan, Bin Liu",
+    "publication_date": "2025-10-14",
+    "processing:level": "L4",
+    "processing:lineage": "Clementine UVVIS DIM Mosaic (5 bands: 415, 750, 900, 950, 1000 nm, 100 m/pixel) combined with OMAT as a 6-element input vector. 1D CNN: two Conv1D layers (32 filters, kernel=2, ReLU), MaxPooling1D (pool=2), Dense(64, ReLU), single linear output. L2 regularization (0.001) on all layers. Adam optimizer (lr=0.01), max 400 epochs, early stopping (patience=30), z-score normalization. Trained on 49 ground-truth points from Apollo, Luna, and Chang'E missions including Chang'E-6. Chang'E-6 samples (TiO₂: 2.7 wt%) corrected a systematic overestimation of TiO₂ in lunar maria by the equation model. R²=0.96+ on training set; LOOCV R²=0.831.",
+    "loocv_r2": 0.831,
+    "global_mean_wt_pct": 0.99,
+    "maria_mean_wt_pct": 2.66,
+    "non_maria_mean_wt_pct": 0.67,
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "High-resolution TiO₂ abundance at 100 m/pixel — key proxy for ilmenite (FeTiO₃) concentration. Combined with FeO, identifies ilmenite-rich zones for oxygen and titanium extraction. CNN model corrects prior overestimation of high-TiO₂ basalts: the classical equation placed high-TiO₂ material (>9 wt%) widely across Oceanus Procellarum and Mare Tranquillitatis; the CNN constrains it to the northern and SW parts of Mare Tranquillitatis, consistent with LP GRS (which detected no pixels above 9 wt% globally except 1-2 in Mare Tranquillitatis at 7.9-8.0 wt%).",
+    "lri:quality_note_short": "1D CNN inversion from Clementine UVVIS, calibrated with Chang'E-6 samples. LOOCV R²=0.831. Global mean 0.99 wt%; maria 2.66 wt%. CNN corrects prior overestimation of high-TiO₂ basalts; high-TiO₂ material correctly concentrated in northern/SW Mare Tranquillitatis, consistent with LP GRS.",
+    "lri:quality_note": "TiO₂ abundance derived from 1D CNN inversion of Clementine UVVIS 5-band reflectance (Qiu et al. 2025, Communications Earth & Environment). The addition of Chang'E-6 samples (TiO₂: 2.7 wt%, a low-Ti farside mare) had the largest calibration impact of any sample on the TiO₂ model — the sample deviated ~3.0 wt% from the previously fitted line, greater than the RMSE of 1.24 wt%, correcting a systematic overestimation of TiO₂ in maria. LOOCV R²=0.831. Global mean 0.99 wt%, unimodal continuous distribution, mode 0.42 wt%. CNN TiO₂ is ~0.21 wt% lower globally and ~1.04 wt% lower in maria compared to the companion equation model. The key improvement is spatial: the equation model placed high-TiO₂ basalts (>9 wt%) widely across Oceanus Procellarum and Mare Tranquillitatis; the CNN concentrates them in the northern and SW parts of Mare Tranquillitatis — consistent with LP GRS (no signals >9 wt% globally, 7.9-8.0 wt% in 1-2 pixels of Mare Tranquillitatis) and Apollo 11/17 sample TiO₂ measurements. Oceanus Procellarum TiO₂ is revised to ~4 wt% (down from >9 wt% in the equation model). Key limitation: LOOCV R² of 0.831 is the second-lowest among the five oxides; TiO₂ inversion from optical data is inherently more uncertain than FeO. Additional farside mare samples are needed to fully constrain the nearside-farside TiO₂ dichotomy."
+  },
+  "assets": {
+    "data": {
+      "href": "tio2_clementine_cnn_qiu2025_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "TiO₂ wt% · Clementine CNN — IAU:30100",
+      "roles": ["data"]
+    },
+    "zenodo_record": {
+      "href": "https://zenodo.org/records/15742802",
+      "type": "text/html",
+      "title": "Zenodo record — download source GeoTIFF",
+      "roles": ["source"]
+    },
+    "processing_script": {
+      "href": "../process_qiu2025.sh",
+      "type": "application/x-sh",
+      "title": "Processing commands used to generate the COG (shared for all Qiu 2025 items)",
+      "roles": ["metadata", "reproducibility"]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./tio2_clementine_cnn_qiu2025.json" },
+    { "rel": "root",   "href": "../../../catalog.json" },
+    { "rel": "parent", "href": "../collection.json" },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1038/s43247-025-02914-w",
+      "title": "Qiu et al. 2025 — Communications Earth & Environment"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://pdsimage2.wr.usgs.gov/Clementine/PDS4/data/",
+      "type": "text/html",
+      "title": "Clementine UVVIS DIM Mosaic (PDS4)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../../lunar_prospector/grs/2deg/titanium/titanium2d.json",
+      "type": "application/json",
+      "title": "LP GRS Ti 2° — alternative titanium product from gamma-ray spectroscopy (~60 km resolution)"
+    }
+  ]
+}

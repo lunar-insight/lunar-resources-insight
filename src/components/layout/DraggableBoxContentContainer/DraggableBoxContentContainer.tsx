@@ -1,12 +1,10 @@
-import './DraggableBoxContentContainer.scss';
+import styles from './DraggableBoxContentContainer.module.scss';
 import React, { useRef, useState, useEffect } from 'react';
-import { useDialog } from '@react-aria/dialog';
-import { useMove, usePress } from '@react-aria/interactions';
-import { mergeProps } from '@react-aria/utils';
+import { useDialog, useMove, usePress, mergeProps } from 'react-aria';
 import CloseButton from '../Button/CloseButton/CloseButton';
-import { pointValueService } from '../../../services/PointValueService';
-import { useZIndex } from '../../../utils/ZIndexProvider';
+import { useZIndex } from 'utils/ZIndexProvider';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
+import { useInitialPosition } from 'hooks/useInitialPosition';
 
 export interface DraggableBoxContentContainerProps {
   className?: string;
@@ -19,6 +17,7 @@ export interface DraggableBoxContentContainerProps {
   onClose: () => void;
   boundaryRef: React.RefObject<HTMLDivElement>;
   id?: string;
+  cascadeIndex?: number;
 }
 
 interface ViewerContainerSize {
@@ -41,19 +40,43 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   onClose,
   boundaryRef,
   id = 'draggable-box-' + Math.random().toString(36).substring(2, 11),
+  cascadeIndex = 0,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
   const { bringToFront, getZIndex } = useZIndex();
   const [viewerContainerSize, setViewerContainerSize] = useState<ViewerContainerSize>({
-    x: 0, y: 0, width: 0, height: 0, left: 0, top: 0 
+    x: 0, y: 0, width: 0, height: 0, left: 0, top: 0
   });
   const [translation, setTranslation] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isPositionReady, setIsPositionReady] = useState(false);
+  const [hasBeenPositioned, setHasBeenPositioned] = useState(false);
 
   useMouseTrackingControl(isDragging || isHovered, `draggable-box-${id}`);
+
+  // Calculate initial centered position with cascade
+  const initialPosition = useInitialPosition({
+    dialogRef,
+    boundaryRef,
+    isOpen,
+    cascadeIndex,
+    hasBeenPositioned
+  });
+
+  // Apply initial position when calculated
+  useEffect(() => {
+    if (initialPosition && !hasBeenPositioned) {
+      setTranslation(initialPosition);
+      setIsPositionReady(true);
+      setHasBeenPositioned(true);
+    } else if (hasBeenPositioned) {
+      // If already positioned, mark as ready immediately
+      setIsPositionReady(true);
+    }
+  }, [initialPosition, hasBeenPositioned]);
 
   const updateSizes = () => {
     if (boundaryRef.current && dialogRef.current) {
@@ -130,6 +153,10 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       });
     },
     onMoveEnd: () => {
+      // Mark as positioned after user drag
+      if (!hasBeenPositioned) {
+        setHasBeenPositioned(true);
+      }
       setTimeout(() => {
         setIsDragging(false);
       }, 100);
@@ -172,54 +199,60 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   useEffect(() => {
     if (isOpen) {
       setIsVisible(true);
-
-      const timer = setTimeout(() => {
-        dialogRef.current?.classList.add('draggable-box-content-container__visible');
-        // Foreground when opening
-        bringToFront(id, 'box-container');
-      }, 50);
-
-      return () => clearTimeout(timer);
+      // Foreground when opening
+      bringToFront(id, 'box-container');
+      // Restore position ready state if already positioned
+      if (hasBeenPositioned) {
+        setIsPositionReady(true);
+      }
     } else {
-      dialogRef.current?.classList.remove('draggable-box-content-container__visible');
+      dialogRef.current?.classList.remove(styles.visible);
 
       const timer = setTimeout(() => {
         setIsVisible(false);
         setIsHovered(false);
         setIsDragging(false);
+        setIsPositionReady(false);
       }, 200);
 
       return () => clearTimeout(timer);
     }
-  }, [isOpen, id, bringToFront]);
+  }, [isOpen, id, bringToFront, hasBeenPositioned]);
+
+  // Add visible class when position becomes ready
+  useEffect(() => {
+    if (isVisible && isPositionReady) {
+      dialogRef.current?.classList.add(styles.visible);
+    }
+  }, [isVisible, isPositionReady]);
 
   return (
-    <div 
-      {...dialogProps} 
+    <div
+      {...dialogProps}
       {...pressProps}
-      ref={dialogRef} 
-      className={`draggable-box-content-container ${className} ${!isVisible ? 'draggable-box-content-container__hidden' : ''}`}
+      ref={dialogRef}
+      className={`${styles.draggableBoxContentContainer} ${className} ${!isVisible ? styles.hidden : ''}`}
       style={isVisible ? containerStyle : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {title && (
-        <div 
+        <div
           {...titleBarProps}
-          className="draggable-box-content-container__move-area"
+          className={styles.moveArea}
         >
-          <h3 {...titleProps} className="draggable-box-content-container__move-area__title">
+          <h3 {...titleProps} className={styles.title}>
             {title}
           </h3>
           <CloseButton
             onPress={onClose}
-            className="draggable-box-content-container__move-area__close-button"
+            className={styles.closeButton}
             light
           />
         </div>
       )}
-      
-      <div className="draggable-box-content-container__content-area">
+
+      <div className={styles.contentArea}>
         {children}
       </div>
     </div>

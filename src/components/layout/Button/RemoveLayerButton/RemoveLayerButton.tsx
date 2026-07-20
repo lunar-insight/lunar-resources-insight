@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import './RemoveLayerButton.scss';
-import { ButtonTooltip } from '../../Tooltip/ButtonTooltip';
+import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 
 interface RemoveLayerButtonProps {
   onPress: () => void;
@@ -20,7 +20,7 @@ const RemoveLayerButton: React.FC<RemoveLayerButtonProps> = ({ onPress, classNam
           remove
         </span>
       </Button>
-      <ButtonTooltip placement='left'>
+      <ButtonTooltip placement='right'>
         Remove layer
       </ButtonTooltip>
     </TooltipTrigger>

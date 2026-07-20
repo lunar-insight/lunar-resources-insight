@@ -1,0 +1,160 @@
+.layersCatalog {
+  width: 100%;
+  margin: 1.5rem;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.headerCell {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-neutralVariant);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 1px solid rgba(var(--color-selection-default-rgb), 0.3);
+}
+
+.row {
+  &:hover {
+    background-color: rgba(var(--color-selection-hover-rgb), 0.08);
+  }
+
+  &:not(:last-child) .cell {
+    border-bottom: 1px solid rgba(var(--color-selection-default-rgb), 0.15);
+  }
+}
+
+.cell {
+  padding: 0.65rem 1rem;
+  font-size: 0.9rem;
+  color: var(--color-secondary);
+  white-space: nowrap;
+}
+
+// Category tag/chip colors, shared with GridListLayerComponent via CSS custom properties (global.css)
+@mixin category-colors {
+  &[data-category="basemap"] { --category-color-rgb: var(--color-category-basemap-rgb); }
+  &[data-category="geographical"] { --category-color-rgb: var(--color-category-geographical-rgb); }
+  &[data-category="chemical"] { --category-color-rgb: var(--color-category-chemical-rgb); }
+  &[data-category="compound"] { --category-color-rgb: var(--color-category-compound-rgb); }
+  &[data-category="derived-index"] { --category-color-rgb: var(--color-category-derived-index-rgb); }
+  &[data-category="rock"] { --category-color-rgb: var(--color-category-rock-rgb); }
+  &[data-category="mineral"] { --category-color-rgb: var(--color-category-mineral-rgb); }
+}
+
+.categoryTag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  border: 1px solid rgba(var(--category-color-rgb), 0.5);
+  background-color: rgba(var(--category-color-rgb), 0.15);
+  color: rgb(var(--category-color-rgb));
+  white-space: nowrap;
+
+  @include category-colors;
+}
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.searchField {
+  display: flex;
+
+  input {
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.3rem;
+    border: 1px solid rgba(var(--color-selection-default-rgb), 0.4);
+    background-color: var(--color-neutral);
+    color: var(--color-secondary);
+    font-size: 0.9rem;
+    min-width: 14rem;
+
+    &:focus {
+      outline: 2px solid var(--color-selection-selected);
+      outline-offset: 1px;
+    }
+  }
+}
+
+.categoryFilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.categoryChip {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+  cursor: pointer;
+  border: 1px solid rgba(var(--category-color-rgb), 0.5);
+  background-color: transparent;
+  color: rgba(var(--category-color-rgb), 0.85);
+  white-space: nowrap;
+
+  @include category-colors;
+
+  &[data-hovered] {
+    background-color: rgba(var(--category-color-rgb), 0.1);
+  }
+
+  &[data-selected] {
+    background-color: rgba(var(--category-color-rgb), 0.3);
+    color: rgb(var(--category-color-rgb));
+  }
+
+  &[data-focus-visible] {
+    outline: 2px solid var(--color-selection-selected);
+    outline-offset: 1px;
+  }
+}
+
+.emptyState {
+  display: block;
+  padding: 1.5rem 1rem;
+  color: var(--color-neutralVariant);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.available {
+  color: var(--color-green);
+}
+
+.unavailable {
+  color: var(--color-red);
+  opacity: 0.6;
+}
+
+.stacLink {
+  color: var(--color-secondary);
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--color-selection-hover, var(--color-secondary));
+  }
+}
+
+.variantBadge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--color-neutralVariant);
+  opacity: 0.7;
+}

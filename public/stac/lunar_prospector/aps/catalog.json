@@ -1,0 +1,15 @@
+{
+  "type": "Catalog",
+  "id": "lp-aps",
+  "stac_version": "1.0.0",
+  "title": "Lunar Prospector Alpha Particle Spectrometer Data",
+  "description": "Relative count rate maps for Radon-222 and Polonium-210 derived from the Lunar Prospector Alpha Particle Spectrometer (January 1998 - July 1999). Data acquired during high- and low-altitude mission phases. Mapped onto 336 equal-area pixels (~300 km × 450 km at equator). Source: PDS Geosciences Node, January 2002.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../../catalog.json" },
+    { "rel": "parent", "href": "../../catalog.json" },
+    { "rel": "item",  "href": "./radon222/radon222.json",     "title": "Radon-222 count rate" },
+    { "rel": "item",  "href": "./polonium210/polonium210.json", "title": "Polonium-210 count rate" },
+    { "rel": "via",   "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html", "title": "PDS source page" }
+  ]
+}

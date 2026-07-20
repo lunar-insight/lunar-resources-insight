@@ -23,11 +23,7 @@ export const Portal: React.FC<PortalProps> = ({
 
     setContainer(element);
 
-    return () => {
-      if (element && element.parentNode) {
-        element.parentNode.removeChild(element);
-      }
-    };
+    // Don't remove the container on cleanup - other Portals might still be using it
   }, [containerId]);
 
   if (!container) return null;

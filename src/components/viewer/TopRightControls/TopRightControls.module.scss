@@ -1,0 +1,17 @@
+.topRightControls {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.25rem;
+  z-index: 100;
+}
+
+.separator {
+  width: 1px;
+  height: 1.25rem;
+  background-color: var(--color-secondary);
+  opacity: 0.5;
+}

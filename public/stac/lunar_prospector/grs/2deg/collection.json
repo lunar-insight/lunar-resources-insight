@@ -1,0 +1,44 @@
+{
+  "type": "Collection",
+  "id": "lp-grs-2deg",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "title": "LP GRS/NS 2° Elemental Abundance Special Products (60 km grid)",
+  "description": "Elemental abundance maps (Sm, Gd, Ti, K, H, Th) at 2° bin size (~60 km), derived from LP gamma ray and neutron spectrometer data acquired during both high- and low-altitude mission phases (January 1998 - July 1999). Sm in ug/g (GRS+NS); Gd in ug/g (derived from Sm × 1.17, Korotev 2000); Ti in wt% (GRS); K in ppm (GRS); H in ppm (NS, low-altitude only); Th in ug/g (GRS, separate high- and low-altitude versions). Note: hydrogen abundances are not necessarily reliable in regions of high thorium and rare-earth element abundances (Maurice et al. 2001a).",
+  "license": "proprietary",
+  "extent": {
+    "spatial": {
+      "bbox": [ [-180, -90, 180, 90] ]
+    },
+    "temporal": {
+      "interval": [ ["1998-01-16T00:00:00Z", "1999-07-31T00:00:00Z"] ]
+    }
+  },
+  "links": [
+    { "rel": "self",   "href": "./collection.json" },
+    { "rel": "root",   "href": "../../../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    { "rel": "item",   "href": "./samarium/samarium2d.json" },
+    { "rel": "item",   "href": "./gadolinium/gadolinium2d.json" },
+    { "rel": "item",   "href": "./titanium/titanium2d.json" },
+    { "rel": "item",   "href": "./potassium/potassium2d.json" },
+    { "rel": "item",   "href": "./hydrogen/hydrogenlow2d.json" },
+    { "rel": "item",   "href": "./thoriumhigh/thoriumhigh2d.json" },
+    { "rel": "item",   "href": "./thoriumlow/thoriumlow2d.json" },
+    { "rel": "via",    "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html", "title": "PDS source page" }
+  ],
+  "providers": [
+    {
+      "name": "Los Alamos National Laboratory",
+      "roles": ["producer"],
+      "url": "https://www.lanl.gov"
+    },
+    {
+      "name": "PDS Geosciences Node, Washington University",
+      "roles": ["host"],
+      "url": "https://pds-geosciences.wustl.edu"
+    }
+  ]
+}

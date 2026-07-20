@@ -1,0 +1,18 @@
+.section {
+  padding: 0;
+  color: var(--color-neutralVariant);
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  color: var(--color-tertiary);
+}
+
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}

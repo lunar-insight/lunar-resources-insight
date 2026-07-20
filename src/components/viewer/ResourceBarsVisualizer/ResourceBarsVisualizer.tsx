@@ -1,72 +1,60 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
-import { layersConfig } from '../../../geoConfigExporter';
-import { LunarTerrainClassifier, TerrainClassification } from '../../../utils/LunarTerrainClassifier';
-import { elements } from '../../navigation/submenu/PeriodicTable/PeriodicTable';
-import './ResourceBarsVisualizer.scss';
+import { layersConfig } from 'geoConfigExporter';
+import { elements } from 'constants/periodicTableData';
+import { ELEMENT_REFERENCE_RANGES, COMPOUND_REFERENCE_RANGES, COMPOUND_SYMBOLS } from 'constants/elementReferenceRanges';
+import styles from './ResourceBarsVisualizer.module.scss';
 
 export interface ResourceData {
   layerName: string;
   value: number;
-  geochemicalScore: number; // Score based on lunar elemental ranges (0-100)
-  enrichmentScore: number; // Terrain-adjusted score (0-100)
-  continuousPosition: number; // 0-1, based on enrichmentScore
+  abundanceScore: number;
+  continuousPosition: number;
   color: string;
   symbol: string;
+  elementName: string;
+  units: string;
+  category: 'chemical' | 'compound';
+}
+
+export interface CountRateData {
+  layerName: string;
+  value: number;
+  symbol: string;
+  displayName: string;
+}
+
+export interface NodataResourceData {
+  layerName: string;
+  symbol: string;
+  elementName: string;
+  units: string;
 }
 
 interface ResourceBarsVisalizerProps {
-  values: { [key: string]: number }; // For display
-  allValues?: { [key: string]: number }; // For calculation
+  values: { [key: string]: number };
+  allValues?: { [key: string]: number };
+  nodataLayerIds?: string[];
   width?: number;
   height?: number;
 }
 
-// Data for Ca, Fe, Ti, Mg from gamma spectrometry, magnetometry and isotope analysis
-const LUNAR_ELEMENTAL_RANGES: Record<string, { min: number; max: number }> = {
+const PANEL_HEIGHT = 220;
+const MAX_HATCH_OPACITY = 0.35;
 
-  /**
-   * (Ca) Source:
-   * https://www.sciencedirect.com/science/article/abs/pii/S0012821X21003344
-   * https://www.lpi.usra.edu/publications/books/lunar_sourcebook/pdf/Chapter08.pdf
-   */
-  'calcium': { min: 0, max: 14.3 },
-
-  /**
-   * (Fe) Source:
-   * https://ntrs.nasa.gov/api/citations/19740018168/downloads/19740018168.pdf
-   * https://ntrs.nasa.gov/api/citations/19740018189/downloads/19740018189.pdf?attachment=true
-   */
-  'iron': { min: 0, max: 15.2 },
-
-  /**
-   * (Ti) Source:
-   * https://ntrs.nasa.gov/citations/19800026504
-   */
-  'titanium': { min: 0, max: 6.0 },
-
-  /**
-   * (Mg) Source:
-   * https://ui.adsabs.harvard.edu/abs/2013GeCoA.120....1S
-   * https://pmc.ncbi.nlm.nih.gov/articles/PMC8974359/
-   */
-  'magnesium': { min: 0, max: 13.0 }
-};
-
-/* PeriodicTable element mapping with layersConfig */
 function getElementSymbol(elementName: string): string {
   const element = elements.find(el => el.name.toLowerCase() === elementName.toLowerCase());
   return element?.symbol || elementName.toUpperCase().substring(0, 2);
 }
 
-/**
- * Calculate geochemical score based on lunar elemental literature ranges
- */
-function calculateGeochemicalScore(layerName: string, value: number): number {
+function getCompoundSymbol(compoundName: string): string {
+  return COMPOUND_SYMBOLS[compoundName] ?? compoundName.substring(0, 3).toUpperCase();
+}
 
+export function calculateAbundanceScore(layerName: string, value: number): number {
   const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
     return layerId === layerName || config.element === layerName;
-  })
+  });
 
   if (!layerEntry) {
     console.warn(`Layer configuration not found for: ${layerName}`);
@@ -74,293 +62,694 @@ function calculateGeochemicalScore(layerName: string, value: number): number {
   }
 
   const [, layerConfig] = layerEntry;
-  const elementName = layerConfig.element; // ← Cette ligne manquait !
+
+  if (layerConfig.category === 'compound' && layerConfig.compound) {
+    const range = COMPOUND_REFERENCE_RANGES[layerConfig.compound];
+    if (!range) return 50;
+    const score = ((value - range.min) / (range.max - range.min)) * 100;
+    return Math.min(100, Math.max(0, score));
+  }
+
+  const elementName = layerConfig.element;
 
   if (!elementName) {
     console.warn(`No element defined for layer: ${layerName}`);
     return 50;
   }
 
-  const range = LUNAR_ELEMENTAL_RANGES[elementName];
+  const range = ELEMENT_REFERENCE_RANGES[elementName];
 
   if (!range) {
-    console.warn(`No elemental range defined for element: ${elementName}. Supported elements: ${Object.keys(LUNAR_ELEMENTAL_RANGES).join(', ')}`);
+    console.warn(`No elemental range defined for element: ${elementName}. Supported elements: ${Object.keys(ELEMENT_REFERENCE_RANGES).join(', ')}`);
     return 50;
   }
 
-  // Calculate score based on position within literature range
   const score = ((value - range.min) / (range.max - range.min)) * 100;
-  const clampedScore = Math.min(100, Math.max(0, score));
+  return Math.min(100, Math.max(0, score));
+}
 
-  return clampedScore;
+interface ScaleRefs {
+  yScale: d3.ScaleLinear<number, number>;
+  xScale: d3.ScaleBand<string>;
+  innerHeight: number;
+}
 
+function shallowEqualNodataLayers(a: NodataResourceData[], b: NodataResourceData[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((item, i) => item.layerName === b[i].layerName);
+}
+
+function updateBarsOnly(
+  svgEl: SVGSVGElement,
+  data: ResourceData[],
+  valueTextFill: string
+): void {
+  const svg = d3.select(svgEl);
+
+  const groups = svg.selectAll<SVGGElement, ResourceData>('.resource-group')
+    .data(data, d => d.layerName);
+
+  groups.select<SVGTextElement>('.data-value')
+    .style('fill', valueTextFill)
+    .text(d => d.value.toFixed(2));
+
+  groups.each(function(d) {
+    const groupId = d.layerName.replace(/[^a-zA-Z0-9]/g, '-');
+    d3.select(svgEl)
+      .selectAll(`#hatch-grad-${groupId} stop`)
+      .filter((_, i) => i === 1)
+      .attr('stop-opacity', d.continuousPosition * MAX_HATCH_OPACITY);
+  });
+}
+
+function renderBarsPanel(
+  svgEl: SVGSVGElement,
+  data: ResourceData[],
+  nodataData: NodataResourceData[],
+  getColor: (d: ResourceData) => string,
+  valueTextFill: string
+): ScaleRefs {
+  const svg = d3.select(svgEl);
+  svg.selectAll('*').remove();
+
+  const defs = svg.append('defs');
+  defs.append('pattern')
+    .attr('id', 'resource-hatch-white')
+    .attr('patternUnits', 'userSpaceOnUse')
+    .attr('width', 4)
+    .attr('height', 4)
+    .append('line')
+    .attr('x1', 0).attr('y1', 0)
+    .attr('x2', 4).attr('y2', 4)
+    .attr('stroke', 'white')
+    .attr('stroke-width', 0.75);
+
+  const actualWidth = svgEl.clientWidth;
+  const actualHeight = svgEl.clientHeight;
+
+  const margin = { top: 30, right: 0, bottom: 55, left: 0 };
+  const axisWidth = 50;
+  const innerWidth = actualWidth - margin.left - margin.right;
+  const innerHeight = actualHeight - margin.top - margin.bottom;
+
+  const g = svg
+    .append('g')
+    .attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const yScale = d3.scaleLinear().domain([0, 1]).range([innerHeight, 0]);
+
+  const yAxis = d3.axisLeft(yScale)
+    .tickValues([0, 0.25, 0.5, 0.75, 1])
+    .tickFormat((d) => {
+      const labels: Record<number, string> = {
+        0: 'LOW',
+        0.25: '0.25%',
+        0.5: 'MED',
+        0.75: '0.75%',
+        1: 'HIGH'
+      };
+      return labels[d as number] || '';
+    });
+
+  g.append('g')
+    .attr('class', 'y-axis')
+    .attr('transform', `translate(${axisWidth}, 0)`)
+    .call(yAxis)
+    .selectAll('text')
+    .style('fill', '#e0e0e0')
+    .style('font-size', '11px')
+    .style('font-weight', 'bold');
+
+  g.selectAll('.y-axis line').style('stroke', '#e0e0e0');
+
+  g.selectAll('.threshold-line')
+    .data([0.25, 0.5, 0.75])
+    .enter()
+    .append('line')
+    .attr('class', 'threshold-line')
+    .attr('x1', axisWidth)
+    .attr('x2', innerWidth)
+    .attr('y1', d => yScale(d))
+    .attr('y2', d => yScale(d))
+    .style('stroke', '#fff')
+    .style('stroke-dasharray', '3,3')
+    .style('opacity', 0.4);
+
+  g.selectAll('.reference-bar')
+    .data([{ position: 0 }, { position: 1 }])
+    .enter()
+    .append('line')
+    .attr('class', 'reference-bar')
+    .attr('x1', axisWidth)
+    .attr('x2', innerWidth)
+    .attr('y1', d => yScale(d.position))
+    .attr('y2', d => yScale(d.position))
+    .style('stroke', '#ffffff')
+    .style('opacity', 0.4);
+
+  const allLayerNames = [
+    ...data.map(d => d.layerName),
+    ...nodataData.map(d => d.layerName),
+  ];
+
+  const xScale = d3.scaleBand()
+    .domain(allLayerNames)
+    .range([axisWidth, innerWidth])
+    .padding(0.3);
+
+  const effectiveBandwidth = Math.min(
+    xScale.bandwidth(),
+    (innerWidth - axisWidth) * (1 - xScale.padding()) / 4
+  );
+  const xOffset = (xScale.bandwidth() - effectiveBandwidth) / 2;
+
+  const resourceGroups = g.selectAll('.resource-group')
+    .data(data)
+    .enter()
+    .append('g')
+    .attr('class', 'resource-group')
+    .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`);
+
+  const HATCH_BOTTOM_Y = innerHeight + 56;
+
+  resourceGroups.each(function(d) {
+    const groupId = d.layerName.replace(/[^a-zA-Z0-9]/g, '-');
+    const gradId  = `hatch-grad-${groupId}`;
+    const maskId  = `hatch-mask-${groupId}`;
+
+    const grad = defs.append('linearGradient')
+      .attr('id', gradId)
+      .attr('gradientUnits', 'userSpaceOnUse')
+      .attr('x1', 0).attr('y1', 0)
+      .attr('x2', 0).attr('y2', HATCH_BOTTOM_Y);
+
+    grad.append('stop')
+      .attr('offset', '0%')
+      .attr('stop-color', 'white')
+      .attr('stop-opacity', 0);
+
+    grad.append('stop')
+      .attr('offset', `${((innerHeight / HATCH_BOTTOM_Y) * 100).toFixed(1)}%`)
+      .attr('stop-color', 'white')
+      .attr('stop-opacity', d.continuousPosition * MAX_HATCH_OPACITY);
+
+    grad.append('stop')
+      .attr('offset', '100%')
+      .attr('stop-color', 'white')
+      .attr('stop-opacity', 0);
+
+    const mask = defs.append('mask').attr('id', maskId);
+    mask.append('rect')
+      .attr('x', xOffset)
+      .attr('y', 0)
+      .attr('width', effectiveBandwidth)
+      .attr('height', HATCH_BOTTOM_Y)
+      .attr('fill', `url(#${gradId})`);
+
+    d3.select(this)
+      .insert('rect', ':first-child')
+      .attr('class', 'resource-hatch-bg')
+      .attr('x', xOffset)
+      .attr('y', 0)
+      .attr('width', effectiveBandwidth)
+      .attr('height', HATCH_BOTTOM_Y)
+      .attr('fill', 'url(#resource-hatch-white)')
+      .attr('mask', `url(#${maskId})`);
+  });
+
+  const NOISE_COUNT = 5;
+  const noiseBarW = (effectiveBandwidth / NOISE_COUNT) * 0.65;
+  const noiseStep = effectiveBandwidth / NOISE_COUNT;
+
+  const noiseGroups = resourceGroups.append('g')
+    .attr('class', 'resource-noise-group');
+
+  noiseGroups.each(function(d) {
+    const noiseGroup = d3.select(this);
+    for (let i = 0; i < NOISE_COUNT; i++) {
+      noiseGroup.append('rect')
+        .attr('class', 'noise-bar')
+        .attr('x', xOffset + i * noiseStep + (noiseStep - noiseBarW) / 2)
+        .attr('width', noiseBarW)
+        .attr('fill', getColor(d))
+        .attr('opacity', 0.75)
+        .attr('y', yScale(0))
+        .attr('height', 0);
+    }
+  });
+
+  noiseGroups.each(function() {
+    const groupEl = this;
+    const resourceGroupEl = groupEl.parentElement!;
+
+    d3.select(groupEl).selectAll<SVGRectElement, unknown>('.noise-bar').each(function() {
+      const barEl = this;
+      const bar = d3.select(this);
+
+      function animateNoise() {
+        if (!barEl.isConnected) return;
+        const datum = d3.select<SVGGElement, ResourceData>(resourceGroupEl as unknown as SVGGElement).datum();
+        const maxH = Math.max(
+          yScale(0) - yScale(datum.continuousPosition),
+          innerHeight * 0.08
+        );
+        const jitter = 0.15;
+        const h = maxH * (1 - jitter + Math.random() * jitter);
+        bar.transition()
+          .duration(150 + Math.random() * 200)
+          .ease(d3.easeSinInOut)
+          .attr('fill', getColor(datum))
+          .attr('y', yScale(0) - h)
+          .attr('height', h)
+          .on('end', animateNoise);
+      }
+      animateNoise();
+    });
+  });
+
+  g.selectAll('.element-separator')
+    .data(data.slice(0, -1))
+    .enter()
+    .append('line')
+    .attr('class', 'element-separator')
+    .attr('x1', d => (xScale(d.layerName) || 0) + xScale.bandwidth() + xScale.padding() * xScale.bandwidth() / 2)
+    .attr('x2', d => (xScale(d.layerName) || 0) + xScale.bandwidth() + xScale.padding() * xScale.bandwidth() / 2)
+    .attr('y1', innerHeight + 5)
+    .attr('y2', innerHeight + 45)
+    .style('stroke', '#fff')
+    .style('stroke-width', 1)
+    .style('opacity', 0.3);
+
+  resourceGroups.append('rect')
+    .attr('class', 'element-symbol-square')
+    .attr('x', xOffset + effectiveBandwidth / 2 - 12)
+    .attr('y', innerHeight + 8)
+    .attr('width', 24)
+    .attr('height', 24)
+    .attr('fill', 'none')
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 1.5)
+    .attr('rx', 2);
+
+  resourceGroups.append('text')
+    .attr('class', 'element-symbol')
+    .attr('x', xOffset + effectiveBandwidth / 2)
+    .attr('y', innerHeight + 8 + 12)
+    .attr('dy', '0.32em')
+    .attr('text-anchor', 'middle')
+    .style('font-size', d => d.symbol.length > 4 ? '8px' : d.symbol.length > 3 ? '10px' : '12px')
+    .style('font-weight', 'bold')
+    .style('fill', '#fff')
+    .style('font-family', 'Arial, sans-serif')
+    .text(d => d.symbol);
+
+  resourceGroups.append('text')
+    .attr('class', 'resource-value data-value')
+    .attr('x', xOffset + effectiveBandwidth / 2)
+    .attr('y', innerHeight + 45)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('fill', valueTextFill)
+    .style('font-family', 'Courier New, monospace')
+    .text(d => d.value.toFixed(2));
+
+  const nodataGroups = g.selectAll<SVGGElement, NodataResourceData>('.nodata-group')
+    .data(nodataData)
+    .enter()
+    .append('g')
+    .attr('class', 'nodata-group')
+    .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`)
+    .style('opacity', 0.2);
+
+  nodataGroups.append('rect')
+    .attr('class', 'nodata-bar')
+    .attr('x', xOffset)
+    .attr('y', 0)
+    .attr('width', effectiveBandwidth)
+    .attr('height', innerHeight)
+    .attr('fill', 'none')
+    .attr('stroke', '#666')
+    .attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '5,3');
+
+  nodataGroups.append('text')
+    .attr('class', 'nodata-label')
+    .attr('x', xOffset + effectiveBandwidth / 2)
+    .attr('y', innerHeight / 2)
+    .attr('text-anchor', 'middle')
+    .attr('dominant-baseline', 'middle')
+    .style('font-size', '11px')
+    .style('font-weight', 'bold')
+    .style('fill', '#bbb')
+    .style('font-family', 'Courier New, monospace')
+    .style('letter-spacing', '0.08em')
+    .text('N/A');
+
+  nodataGroups.append('rect')
+    .attr('class', 'element-symbol-square')
+    .attr('x', xOffset + effectiveBandwidth / 2 - 12)
+    .attr('y', innerHeight + 8)
+    .attr('width', 24)
+    .attr('height', 24)
+    .attr('fill', 'none')
+    .attr('stroke', '#666')
+    .attr('stroke-width', 1.5)
+    .attr('rx', 2);
+
+  nodataGroups.append('text')
+    .attr('class', 'element-symbol')
+    .attr('x', xOffset + effectiveBandwidth / 2)
+    .attr('y', innerHeight + 20)
+    .attr('dy', '0.32em')
+    .attr('text-anchor', 'middle')
+    .style('font-size', d => d.symbol.length > 4 ? '8px' : d.symbol.length > 3 ? '10px' : '12px')
+    .style('font-weight', 'bold')
+    .style('fill', '#666')
+    .style('font-family', 'Arial, sans-serif')
+    .text(d => d.symbol);
+
+  nodataGroups.append('text')
+    .attr('class', 'resource-value')
+    .attr('x', xOffset + effectiveBandwidth / 2)
+    .attr('y', innerHeight + 45)
+    .attr('text-anchor', 'middle')
+    .style('font-size', '12px')
+    .style('fill', '#555')
+    .style('font-family', 'Courier New, monospace')
+    .text('—');
+
+  const rollDur = 40;
+  const rollPts = 30;
+  const rollBaseY = innerHeight * 0.96;
+  const rollAmp = innerHeight * 0.038;
+  const rollLineGen = d3.line<{ x: number; y: number }>()
+    .x(d => d.x)
+    .y(d => d.y)
+    .curve(d3.curveBasis);
+  const genRollPts = () =>
+    Array.from({ length: rollPts }, (_, i) => ({
+      x: xOffset + (i / (rollPts - 1)) * effectiveBandwidth,
+      y: rollBaseY + (Math.random() - 0.5) * rollAmp * 2,
+    }));
+
+  nodataGroups.each(function() {
+    const rollGroup = this;
+    const rollPath = d3.select(rollGroup)
+      .append('path')
+      .attr('fill', 'none')
+      .attr('stroke', '#aaa')
+      .attr('stroke-width', 1)
+      .attr('stroke-linecap', 'round')
+      .style('opacity', 0.75)
+      .attr('d', rollLineGen(genRollPts()) ?? '');
+
+    function rollMorph() {
+      if (!rollGroup.isConnected) return;
+      rollPath
+        .transition()
+        .duration(rollDur + Math.random() * rollDur * 0.25)
+        .ease(d3.easeSinInOut)
+        .attr('d', rollLineGen(genRollPts()) ?? '')
+        .on('end', rollMorph);
+    }
+    rollMorph();
+  });
+
+  nodataGroups.each(function() {
+    const node = this;
+    function pulse() {
+      d3.select(node)
+        .transition()
+        .duration(1200)
+        .ease(d3.easeSinInOut)
+        .style('opacity', 0.8)
+        .transition()
+        .duration(1200)
+        .ease(d3.easeSinInOut)
+        .style('opacity', 0.2)
+        .on('end', pulse);
+    }
+    pulse();
+  });
+
+  return { yScale, xScale, innerHeight };
 }
 
 export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   values,
-  allValues,
-  width: propWidth,
-  height: propHeight
+  nodataLayerIds = [],
+  width: propWidth
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
-  const [dimensions, setDimensions] = useState({
-    width: propWidth,
-    height: propHeight
-  })
+  const svgElementWtRef = useRef<SVGSVGElement>(null);
+  const svgElementPpmRef = useRef<SVGSVGElement>(null);
+  const svgCompoundRef = useRef<SVGSVGElement>(null);
+  const [width, setWidth] = useState(propWidth);
+  const elementWtScalesRef = useRef<ScaleRefs | null>(null);
+  const elementPpmScalesRef = useRef<ScaleRefs | null>(null);
+  const compoundScalesRef = useRef<ScaleRefs | null>(null);
+  const prevNodataElementWt = useRef<NodataResourceData[]>([]);
+  const prevNodataElementPpm = useRef<NodataResourceData[]>([]);
+  const prevNodataCompound = useRef<NodataResourceData[]>([]);
 
-  // Measure container and respond to size changes
   useEffect(() => {
     if (!containerRef.current) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        setDimensions({
-          width: propWidth || width,
-          height: propHeight || height
-        });
+        setWidth(propWidth || entry.contentRect.width);
       }
     });
 
     resizeObserver.observe(containerRef.current);
+    return () => resizeObserver.disconnect();
+  }, [propWidth]);
 
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [propWidth, propHeight]);
+  const colorScale = useMemo(() =>
+    d3.scaleSequential(d3.interpolateGreens).domain([1, 0])
+  , []);
 
-  const { width, height } = dimensions;
+  const ppmColorScale = useMemo(() =>
+    d3.scaleSequential(d3.interpolateBlues).domain([1, 0])
+  , []);
 
-  // Color scale (gradient from scarce to abundant)
-  const colorScale = useMemo(() => {
-    return d3.scaleSequential(d3.interpolateGreens)
-      .domain([1, 0]); // 0 = enrichment score 0%, 1 = enrichment score 100%
-  }, []);
+  const compoundColorScale = useMemo(() =>
+    d3.scaleSequential(d3.interpolateGreens).domain([1, 0])
+  , []);
 
-  // Lunar terrain classification based on Ca/(Fe + 2*Ti) ratio
-  const terrainClassification = useMemo((): TerrainClassification | null => {
-    const valuesForCalculation = allValues || values;
-    const elements = LunarTerrainClassifier.extractElements(valuesForCalculation);
-    if (elements) {
-      return LunarTerrainClassifier.classifyTerrain(elements.calcium, elements.iron, elements.titanium);
-    }
-    return null;
-  }, [allValues, values]);
-
-  // Convert elemental values to geochemical scores
   const resourceData = useMemo(() => {
-    const data = Object.entries(values).map(([layerName, value]) => {
-      // Calculate base geochemical score using literature elemental ranges
-      const geochemicalScore = calculateGeochemicalScore(layerName, value);
+    const seenSymbols = new Set<string>();
 
-      // Apply terrain context adjustment
-      const enrichmentScore = geochemicalScore;
-
-      const continuousPosition = enrichmentScore / 100;
-      const color = colorScale(1 - continuousPosition);
-
-      // Get element symbol from layersConfig
+    return Object.entries(values).flatMap(([layerName, value]) => {
       const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
         return layerId === layerName || config.element === layerName;
       });
 
-      const elementName = layerEntry?.[1]?.element;
-      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      const layerConfig = layerEntry?.[1];
+      if (layerConfig?.units === 'count_rate') return [];
 
-      return {
-        layerName,
-        value,
-        geochemicalScore,
-        enrichmentScore,
-        continuousPosition,
-        color,
-        symbol,
-      };
-    }).filter(Boolean) as ResourceData[];
+      const isCompound = layerConfig?.category === 'compound';
+      const compoundName = isCompound ? (layerConfig?.compound ?? '') : '';
+      const elementName = isCompound ? '' : (layerConfig?.element ?? '');
 
-    return data;
+      const symbol = isCompound && compoundName
+        ? getCompoundSymbol(compoundName)
+        : elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+
+      if (seenSymbols.has(symbol)) return [];
+      seenSymbols.add(symbol);
+
+      let units: string;
+      if (isCompound) {
+        units = 'wt%';
+      } else {
+        const range = ELEMENT_REFERENCE_RANGES[elementName];
+        units = range?.units ?? 'wt%';
+      }
+
+      const abundanceScore = calculateAbundanceScore(layerName, value);
+      const continuousPosition = abundanceScore / 100;
+      const color = colorScale(1 - continuousPosition);
+      const category: 'chemical' | 'compound' = isCompound ? 'compound' : 'chemical';
+
+      return [{ layerName, value, abundanceScore, continuousPosition, color, symbol, elementName, units, category }];
+    }) as ResourceData[];
   }, [values, colorScale]);
 
+  const countRateData = useMemo((): CountRateData[] => {
+    return Object.entries(values).flatMap(([layerName, value]) => {
+      const layerEntry = Object.entries(layersConfig.layers).find(([layerId]) => layerId === layerName);
+      const layerConfig = layerEntry?.[1];
+      if (layerConfig?.units !== 'count_rate') return [];
+      const elementName = layerConfig.element ?? '';
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      return [{ layerName, value, symbol, displayName: layerConfig.displayName ?? layerName }];
+    });
+  }, [values]);
+
+  const elementWtData = useMemo(() => resourceData.filter(d => d.units === 'wt%' && d.category !== 'compound'), [resourceData]);
+  const elementPpmData = useMemo(() => resourceData.filter(d => d.units === 'ppm'), [resourceData]);
+  const compoundResourceData = useMemo(() => resourceData.filter(d => d.category === 'compound'), [resourceData]);
+
+  const nodataElementWtData = useMemo((): NodataResourceData[] => {
+    const realSymbols = new Set(resourceData.map(d => d.symbol));
+    const seenSymbols = new Set<string>();
+    return nodataLayerIds.flatMap(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return [];
+      const elementName = layerConfig.element ?? '';
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
+      seenSymbols.add(symbol);
+      const range = ELEMENT_REFERENCE_RANGES[elementName];
+      const units = range?.units ?? 'wt%';
+      if (units !== 'wt%') return [];
+      return [{ layerName, symbol, elementName, units }];
+    });
+  }, [nodataLayerIds, resourceData]);
+
+  const nodataElementPpmData = useMemo((): NodataResourceData[] => {
+    const realSymbols = new Set(resourceData.map(d => d.symbol));
+    const seenSymbols = new Set<string>();
+    return nodataLayerIds.flatMap(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return [];
+      const elementName = layerConfig.element ?? '';
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
+      seenSymbols.add(symbol);
+      const range = ELEMENT_REFERENCE_RANGES[elementName];
+      const units = range?.units ?? 'wt%';
+      if (units !== 'ppm') return [];
+      return [{ layerName, symbol, elementName, units }];
+    });
+  }, [nodataLayerIds, resourceData]);
+
+  const nodataCompoundLayerData = useMemo((): NodataResourceData[] => {
+    const realSymbols = new Set(resourceData.map(d => d.symbol));
+    const seenSymbols = new Set<string>();
+    return nodataLayerIds.flatMap(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (!layerConfig || layerConfig.category !== 'compound') return [];
+      const compoundName = layerConfig.compound ?? '';
+      const symbol = compoundName ? getCompoundSymbol(compoundName) : layerName.substring(0, 3).toUpperCase();
+      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
+      seenSymbols.add(symbol);
+      return [{ layerName, symbol, elementName: compoundName, units: 'wt%' }];
+    });
+  }, [nodataLayerIds, resourceData]);
+
+  const nodataCountRateData = useMemo((): NodataResourceData[] => {
+    return nodataLayerIds.flatMap(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (layerConfig?.units !== 'count_rate') return [];
+      const elementName = layerConfig.element ?? '';
+      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      return [{ layerName, symbol, elementName, units: 'count_rate' }];
+    });
+  }, [nodataLayerIds]);
+
   useEffect(() => {
-    if (!svgRef.current || resourceData.length === 0) {
-      return;
+    if (!svgElementWtRef.current || (elementWtData.length === 0 && nodataElementWtData.length === 0)) return;
+    if (!elementWtScalesRef.current || !shallowEqualNodataLayers(prevNodataElementWt.current, nodataElementWtData)) {
+      prevNodataElementWt.current = nodataElementWtData;
+      elementWtScalesRef.current = renderBarsPanel(svgElementWtRef.current, elementWtData, nodataElementWtData, d => d.color, '#e0e0e0');
+    } else {
+      updateBarsOnly(svgElementWtRef.current, elementWtData, '#e0e0e0');
     }
+  }, [elementWtData, nodataElementWtData]);
 
-    const svg = d3.select(svgRef.current);
-    svg.selectAll('*').remove();
+  useEffect(() => {
+    if (!svgElementPpmRef.current || (elementPpmData.length === 0 && nodataElementPpmData.length === 0)) return;
+    const getColor = (d: ResourceData) => ppmColorScale(1 - d.continuousPosition);
+    if (!elementPpmScalesRef.current || !shallowEqualNodataLayers(prevNodataElementPpm.current, nodataElementPpmData)) {
+      prevNodataElementPpm.current = nodataElementPpmData;
+      elementPpmScalesRef.current = renderBarsPanel(svgElementPpmRef.current, elementPpmData, nodataElementPpmData, getColor, '#e0e0e0');
+    } else {
+      updateBarsOnly(svgElementPpmRef.current, elementPpmData, '#e0e0e0');
+    }
+  }, [elementPpmData, nodataElementPpmData, ppmColorScale]);
 
-    const svgElement = svgRef.current;
-    const actualWidth = svgElement.clientWidth;
-    const actualHeight = svgElement.clientHeight;
-
-    const margin = { 
-      top: 30, 
-      right: 0,
-      bottom: 55, 
-      left: 0
-    };
-
-    const axisWidth = 50; 
-    const innerWidth = actualWidth - margin.left - margin.right;
-    const innerHeight = actualHeight - margin.top - margin.bottom;
-
-    const g = svg
-      .append('g')
-      .attr('transform', `translate(${margin.left},${margin.top})`);
-
-    const yScale = d3.scaleLinear()
-      .domain([0, 1])
-      .range([innerHeight, 0]);
-
-    const yAxis = d3.axisLeft(yScale)
-      .tickValues([0, 0.25, 0.5, 0.75, 1])
-      .tickFormat((d) => {
-        const labels = {
-          0: 'LOW',
-          0.25: '0.25%',
-          0.5: 'MED',
-          0.75: '0.75%',
-          1: 'HIGH'
-        };
-        return labels[d as number] || '';
-      });
-    
-    g.append('g')
-      .attr('class', 'y-axis')
-      .attr('transform', `translate(${axisWidth}, 0)`)
-      .call(yAxis)
-      .selectAll('text')
-      .style('fill', '#ccc')
-      .style('font-size', '11px')
-      .style('font-weight', 'bold');
-    
-    g.selectAll('.y-axis line')
-      .style('stroke', '#ccc');
-    
-    // Threshold lines
-    g.selectAll('.threshold-line')
-      .data([0.25, 0.5, 0.75])
-      .enter()
-      .append('line')
-      .attr('class', 'threshold-line')
-      .attr('x1', axisWidth)
-      .attr('x2', innerWidth)
-      .attr('y1', d => yScale(d))
-      .attr('y2', d => yScale(d))
-      .style('stroke', '#fff')
-      .style('stroke-dasharray', '3,3')
-      .style('opacity', 0.4);
-    
-    const referenceData = [
-      { position: 0, label: '0%' },
-      { position: 1, label: '100%' }
-    ];
-
-    g.selectAll('.reference-bar')
-      .data(referenceData)
-      .enter()
-      .append('line')
-      .attr('class', 'reference-bar')
-      .attr('x1', axisWidth)
-      .attr('x2', innerWidth)
-      .attr('y1', d => yScale(d.position))
-      .attr('y2', d => yScale(d.position))
-      .style('stroke', ' #ffffff')
-      .style('opacity', 0.4)
-
-    // Scale for bars
-    const xScale = d3.scaleBand()
-      .domain(resourceData.map(d => d.layerName))
-      .range([axisWidth, innerWidth])
-      .padding(0.3)
-    
-    // Groups for each resources
-    const resourceGroups = g.selectAll('.resource-group')
-      .data(resourceData)
-      .enter()
-      .append('g')
-      .attr('class', 'resource-group')
-      .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`);
-    
-    // Main bars
-    resourceGroups.append('rect')
-      .attr('class', 'resource-bar')
-      .attr('x', 0)
-      .attr('y', d => yScale(d.continuousPosition))
-      .attr('width', xScale.bandwidth())
-      .attr('height', d => yScale(0) - yScale(d.continuousPosition))
-      .attr('fill', d => d.color)
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 1)
-      .attr('opacity', 0.9);
-    
-    // Vertical separator between elements symbol and value
-    g.selectAll('.element-separator')
-      .data(resourceData.slice(0, -1)) // no separator for the last element
-      .enter()
-      .append('line')
-      .attr('class', 'element-separator')
-      .attr('x1', d => (xScale(d.layerName) || 0) + xScale.bandwidth() + xScale.padding() * xScale.bandwidth() / 2)
-      .attr('x2', d => (xScale(d.layerName) || 0) + xScale.bandwidth() + xScale.padding() * xScale.bandwidth() / 2)
-      .attr('y1', innerHeight + 5)
-      .attr('y2', innerHeight + 45)
-      .style('stroke', '#fff')
-      .style('stroke-width', 1)
-      .style('opacity', 0.3);
-    
-    // Square for chemical elements
-    resourceGroups.append('rect')
-      .attr('class', 'element-symbol-square')
-      .attr('x', xScale.bandwidth() / 2 - 12) // Centered square of 24x24
-      .attr('y', innerHeight + 8)
-      .attr('width', 24)
-      .attr('height', 24)
-      .attr('fill', 'none')
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 1.5)
-      .attr('rx', 2); // Rounded border
-    
-    // Chemical element inside the square
-    resourceGroups.append('text')
-      .attr('class', 'element-symbol')
-      .attr('x', xScale.bandwidth() / 2)
-      .attr('y', innerHeight + 8 + 12) // Verticaly centered inside the square
-      .attr('dy', '0.32em')
-      .attr('text-anchor', 'middle')
-      .style('font-size', '12px')
-      .style('font-weight', 'bold')
-      .style('fill', '#fff')
-      .style('font-family', 'Arial, sans-serif')
-      .text(d => d.symbol);
-    
-    // Raw elemental values
-    resourceGroups.append('text')
-      .attr('class', 'resource-value')
-      .attr('x', xScale.bandwidth() / 2)
-      .attr('y', innerHeight + 45)
-      .attr('text-anchor', 'middle')
-      .style('font-size', '12px')
-      .style('fill', '#dcdcdc')
-      .style('font-family', 'Courier New, monospace')
-      .text(d => `${d.value.toFixed(2)} wt%`);
-    
-  }, [resourceData, colorScale, terrainClassification]);
+  useEffect(() => {
+    if (!svgCompoundRef.current || (compoundResourceData.length === 0 && nodataCompoundLayerData.length === 0)) return;
+    const getColor = (d: ResourceData) => compoundColorScale(1 - d.continuousPosition);
+    if (!compoundScalesRef.current || !shallowEqualNodataLayers(prevNodataCompound.current, nodataCompoundLayerData)) {
+      prevNodataCompound.current = nodataCompoundLayerData;
+      compoundScalesRef.current = renderBarsPanel(svgCompoundRef.current, compoundResourceData, nodataCompoundLayerData, getColor, '#e0e0e0');
+    } else {
+      updateBarsOnly(svgCompoundRef.current, compoundResourceData, '#e0e0e0');
+    }
+  }, [compoundResourceData, nodataCompoundLayerData, compoundColorScale]);
 
   return (
-    <div 
-      ref={containerRef}
-      className='resource-bars-visualizer'
-    >
-      <svg ref={svgRef} width={width} height={height} />
-      {/* Terrain context information */}
-      {terrainClassification && (
-        <div className='terrain-context'>
-          <small>
-            <strong>{terrainClassification.type.charAt(0).toUpperCase() + terrainClassification.type.slice(1)}</strong> terrain
-          </small>
-        </div>
+    <div ref={containerRef} className={styles.resourceBarsVisualizer}>
+
+      {(elementWtData.length > 0 || nodataElementWtData.length > 0) && (
+        <>
+          <div className={styles.panelHeader}>
+            <span className={`${styles.panelTitle} ${styles.wt}`}>Major Elements</span>
+            <div className={styles.panelRule} />
+            <span className={`${styles.unitBadge} ${styles.wt}`}>wt%</span>
+          </div>
+          <svg ref={svgElementWtRef} width={width} height={PANEL_HEIGHT} />
+        </>
       )}
+
+      {(elementPpmData.length > 0 || nodataElementPpmData.length > 0) && (
+        <>
+          <div className={styles.panelSep} />
+          <div className={styles.panelHeader}>
+            <span className={`${styles.panelTitle} ${styles.ppm}`}>Trace Elements</span>
+            <div className={styles.panelRule} />
+            <span className={`${styles.unitBadge} ${styles.ppm}`}>ppm</span>
+          </div>
+          <svg ref={svgElementPpmRef} width={width} height={PANEL_HEIGHT} />
+        </>
+      )}
+
+      {(compoundResourceData.length > 0 || nodataCompoundLayerData.length > 0) && (
+        <>
+          {(elementWtData.length > 0 || nodataElementWtData.length > 0 ||
+            elementPpmData.length > 0 || nodataElementPpmData.length > 0) && (
+            <div className={styles.panelSep} />
+          )}
+          <div className={styles.panelHeader}>
+            <span className={`${styles.panelTitle} ${styles.wt}`}>Compounds</span>
+            <div className={styles.panelRule} />
+            <span className={`${styles.unitBadge} ${styles.wt}`}>wt%</span>
+          </div>
+          <svg ref={svgCompoundRef} width={width} height={PANEL_HEIGHT} />
+        </>
+      )}
+
+      {(countRateData.length > 0 || nodataCountRateData.length > 0) && (
+        <>
+          <div className={styles.panelSep} />
+          <div className={styles.panelHeader}>
+            <span className={`${styles.panelTitle} ${styles.countRate}`}>Spatial Signal</span>
+            <div className={styles.panelRule} />
+            <span className={`${styles.unitBadge} ${styles.countRate}`}>count rate</span>
+          </div>
+          <div className={styles.countRateRows}>
+            {countRateData.map(d => (
+              <div key={d.layerName} className={styles.countRateRow}>
+                <span className={styles.countRateSymbol}>{d.symbol}</span>
+                <span className={styles.countRateLabel}>{d.displayName}</span>
+                <span className={styles.countRateValue}>{d.value.toFixed(4)}</span>
+              </div>
+            ))}
+            {nodataCountRateData.map(d => (
+              <div key={d.layerName} className={`${styles.countRateRow} ${styles.countRateRowNodata}`}>
+                <span className={`${styles.countRateSymbol} ${styles.nodataMuted}`}>{d.symbol}</span>
+                <span className={styles.countRateLabel}>{d.elementName}</span>
+                <span className={`${styles.countRateValue} ${styles.nodataMuted}`}>—</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* terrainClassification display disabled */}
     </div>
   );
 };

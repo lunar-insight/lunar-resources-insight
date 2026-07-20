@@ -1,0 +1,121 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "lp-silicon-5deg",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -180,
+          -90
+        ],
+        [
+          180,
+          -90
+        ],
+        [
+          180,
+          90
+        ],
+        [
+          -180,
+          90
+        ],
+        [
+          -180,
+          -90
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -180,
+    -90,
+    180,
+    90
+  ],
+  "properties": {
+    "datetime": "2002-06-15T00:00:00Z",
+    "title": "LP GRS Silicon 5° Elemental Abundance",
+    "lri:data_use_note": "Silicon elemental abundance (wt%) from LP GRS at 5° resolution (~150 km). Ubiquitous in lunar regolith (~20 wt%); useful as a context layer for bulk regolith composition.",
+    "mission": "Lunar Prospector",
+    "instruments": [
+      "Gamma Ray Spectrometer"
+    ],
+    "platform": "lunar-prospector",
+    "element": "Si",
+    "units": "wt%",
+    "scale_factor": 0.1,
+    "grid_size_deg": 5.0,
+    "grid_size_km": 150,
+    "observation_period_start": "1998-01-16",
+    "observation_period_end": "1999-07-31",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
+    "processing:lineage": "Raw INT16 binary (silicon5d.dat) scaled ÷10 via gdal_calc.py to obtain Si wt% as Float32. Written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.8.4"
+    },
+    "processing:level": "L3"
+  },
+  "assets": {
+    "data": {
+      "href": "silicon5d_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Si wt% COG - IAU:30100",
+      "roles": [
+        "data"
+      ]
+    },
+    "vrt": {
+      "href": "silicon5d.vrt",
+      "type": "application/xml",
+      "title": "GDAL VRT - raw binary geometry description",
+      "roles": [
+        "metadata",
+        "source"
+      ]
+    },
+    "processing_script": {
+      "href": "silicon5d.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
+    },
+    "source_data": {
+      "href": "silicon5d.dat",
+      "type": "application/octet-stream",
+      "title": "Original PDS binary - INT16 MSB, scale ×10",
+      "roles": [
+        "data",
+        "source"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./silicon5d.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html",
+      "type": "text/html",
+      "title": "PDS source - silicon5d.dat, version June 15 2002"
+    }
+  ]
+}

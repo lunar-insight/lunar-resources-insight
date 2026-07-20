@@ -1,0 +1,15 @@
+{
+  "type": "Catalog",
+  "id": "lp-ns",
+  "stac_version": "1.0.0",
+  "title": "Lunar Prospector Neutron Spectrometer Data",
+  "description": "Thermal and epithermal neutron counting rate maps derived from the Lunar Prospector Neutron Spectrometer (January 1998 - July 1999). Both products are sensitive to hydrogen (water ice) presence; epithermal suppression is a direct hydrogen proxy, thermal suppression is sensitive to hydrogen and other neutron absorbers (Fe, Ti, Gd, Sm). Map bin size 60 km × 60 km. Special products prepared by the LP Spectrometer Team, LANL. Source: PDS Geosciences Node, November 2000.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../../catalog.json" },
+    { "rel": "parent", "href": "../../catalog.json" },
+    { "rel": "item",  "href": "./thermal/thermal.json",     "title": "Thermal neutron counting rate" },
+    { "rel": "item",  "href": "./epithermal/epithermal.json", "title": "Epithermal neutron counting rate" },
+    { "rel": "via",   "href": "https://pds-geosciences.wustl.edu/missions/lunarp/reduced_special.html", "title": "PDS source page" }
+  ]
+}

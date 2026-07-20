@@ -1,17 +1,24 @@
 import React, { useRef, useEffect } from 'react';
-import SectionNavigation, { dialogs } from '../../components/navigation/SectionNavigation/SectionNavigation';
+import SectionNavigation, { dialogs } from 'components/navigation/SectionNavigation/SectionNavigation';
 import styles from './MainPage.module.scss';
-import CesiumComponent from '../../components/viewer/CesiumComponent/CesiumComponent';
-import { BoundaryRefProvider } from '../../components/reference/BoundaryRefProvider';
-import { DialogProvider, DialogRenderer } from '../../utils/DialogWindowManagement';
-import { SidebarProvider, useSidebarContext } from '../../utils/context/SidebarContext';
-import Sidebar from '../../components/layout/Sidebar/Sidebar';
-import { LayerProvider } from '../../utils/context/LayerContext';
+import CesiumComponent from 'components/viewer/CesiumComponent/CesiumComponent';
+import CompassWidget from 'components/viewer/CompassWidget/CompassWidget';
+import NomenclatureSearch from 'components/viewer/NomenclatureSearch/NomenclatureSearch';
+import FeaturePointsOverlay from 'components/navigation/FeaturesSection/components/FeaturePointsOverlay';
+import { BoundaryRefProvider } from 'components/reference/BoundaryRefProvider';
+import { DialogProvider, DialogRenderer } from 'utils/DialogWindowManagement';
+import { SidebarProvider, useSidebarContext } from 'utils/context/SidebarContext';
+import Sidebar from 'components/layout/Sidebar/Sidebar';
+import { LayerProvider } from 'utils/context/LayerContext';
 import { ViewerProvider } from 'utils/context/ViewerContext';
-import { initializeLayerStats } from '../../services/LayerStatsService';
-import { initializeColormapService } from '../../services/ColormapService';
+import { FeaturesProvider } from 'utils/context/FeaturesContext';
+import { initializeLayerStats } from 'services/LayerStatsService';
+import { initializeColormapService } from 'services/ColormapService';
 import { ZIndexProvider } from 'utils/ZIndexProvider';
 import { MouseTrackingProvider } from 'utils/MouseTrackingProvider';
+import BottomBar from 'components/layout/BottomBar/BottomBar';
+import TopBar from 'components/layout/TopBar/TopBar';
+import { ScannerProvider } from 'utils/context/ScannerContext';
 
 const MainPageContent: React.FC = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
@@ -34,9 +41,14 @@ const MainPageContent: React.FC = () => {
               }}
             >
               <CesiumComponent className={styles.cesiumComponent} />
+              <CompassWidget />
+              <NomenclatureSearch />
+              <FeaturePointsOverlay />
             </div>
           </div>
           <DialogRenderer />
+          <TopBar />
+          <BottomBar />
         </div>
       </DialogProvider>
     </BoundaryRefProvider>
@@ -66,11 +78,15 @@ const MainPage = () => {
     <ViewerProvider>
       <MouseTrackingProvider>
         <LayerProvider>
-          <ZIndexProvider>
-            <SidebarProvider>
-              <MainPageContent />
-            </SidebarProvider>
-          </ZIndexProvider>  
+          <FeaturesProvider>
+            <ZIndexProvider>
+              <SidebarProvider>
+                <ScannerProvider>
+                  <MainPageContent />
+                </ScannerProvider>
+              </SidebarProvider>
+            </ZIndexProvider>
+          </FeaturesProvider>
         </LayerProvider>
       </MouseTrackingProvider>
     </ViewerProvider>
