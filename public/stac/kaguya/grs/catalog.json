@@ -1,0 +1,13 @@
+{
+  "type": "Catalog",
+  "id": "kaguya-grs",
+  "stac_version": "1.0.0",
+  "title": "Kaguya (SELENE) Gamma Ray Spectrometer Data",
+  "description": "Elemental abundance maps derived from the Kaguya (SELENE) Gamma Ray Spectrometer (December 2007 - June 2009). Products prepared by JAXA / ISAS. Source: JAXA DARTS PDS3 archive.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    { "rel": "child", "href": "./nuclide_map/collection.json", "title": "Nuclide Map (Higher Level elemental/oxide abundance)" }
+  ]
+}

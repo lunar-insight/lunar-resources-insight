@@ -1,0 +1,101 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "kaguya-grs-thorium-nmap",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [-180, -90],
+        [180, -90],
+        [180, 90],
+        [-180, 90],
+        [-180, -90]
+      ]
+    ]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2009-11-01T00:00:00Z",
+    "title": "Kaguya GRS Nuclide Map - Thorium",
+    "lri:data_use_note": "Elemental thorium abundance (ppm) from the Kaguya GRS Nuclide Map at 1° resolution (~30 km). Th is the primary tracer for the Procellarum KREEP Terrane, a key target for rare-earth-element and heat-producing-element prospecting.",
+    "lri:quality_note": "Global mean of 1.10 ppm Th, consistent with the global average of approximately 1.2 ppm reported by Kobayashi et al. for Kaguya GRS thorium. A small number of low-Th pixels compute to slightly negative values under the label's scaling formula, a normal artifact of gamma-ray count-rate fitting near the detection floor, also present in Lunar Prospector GRS products; these values are floored to 0.",
+    "mission": "Kaguya (SELENE)",
+    "instruments": [
+      "Gamma Ray Spectrometer"
+    ],
+    "platform": "kaguya",
+    "element": "Th",
+    "units": "ppm",
+    "grid_size_deg": 1.0,
+    "grid_size_km": 30.3233504,
+    "observation_period_start": "2007-12-14",
+    "observation_period_end": "2008-12-16",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
+    "processing:lineage": "Raw UInt16 binary (GRS_NMAP_Th_071214_081216.img, detached PDS3 label) read via GDAL's PDS driver and converted to Th ppm using gdal_calc.py with the label formula raw x 0.001 - 1.0, floored at 0 with numpy.maximum to remove small negative artifacts from background subtraction. Reassigned from the PDS driver's projected CRS (metres) to IAU:30100 (degrees, same sphere and grid) and written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.12.2"
+    },
+    "processing:level": "L3"
+  },
+  "assets": {
+    "data": {
+      "href": "thorium_nmap_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Th ppm COG - IAU:30100",
+      "roles": [
+        "data"
+      ]
+    },
+    "processing_script": {
+      "href": "thorium_nmap.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
+    },
+    "source_data": {
+      "href": "GRS_NMAP_Th_071214_081216.img",
+      "type": "application/octet-stream",
+      "title": "Original PDS3 binary - UInt16, BAND_SEQUENTIAL, 360x180",
+      "roles": [
+        "data",
+        "source"
+      ]
+    },
+    "source_label": {
+      "href": "GRS_NMAP_Th_071214_081216.lbl",
+      "type": "text/plain",
+      "title": "Detached PDS3 label describing the source binary",
+      "roles": [
+        "metadata",
+        "source"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./thorium_nmap.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://darts.isas.jaxa.jp/app/pdap/selene/index.html.en",
+      "type": "text/html",
+      "title": "JAXA DARTS SELENE (Kaguya) data archive - source of GRS_NMAP_Th_071214_081216, product version 1.0"
+    }
+  ]
+}

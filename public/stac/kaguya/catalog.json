@@ -1,0 +1,13 @@
+{
+  "type": "Catalog",
+  "id": "kaguya",
+  "stac_version": "1.0.0",
+  "title": "Kaguya (SELENE) Mission Data",
+  "description": "Data products from Kaguya (SELENE), JAXA's lunar orbiter mission (launched September 14 2007, deorbited June 11 2009). Source: JAXA DARTS PDS3 archive.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    { "rel": "child", "href": "./grs/catalog.json", "title": "Kaguya Gamma Ray Spectrometer (GRS)" }
+  ]
+}

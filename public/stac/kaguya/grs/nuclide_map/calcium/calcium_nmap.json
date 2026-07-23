@@ -1,0 +1,101 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "kaguya-grs-calcium-nmap",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [-180, -90],
+        [180, -90],
+        [180, 90],
+        [-180, 90],
+        [-180, -90]
+      ]
+    ]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2009-11-01T00:00:00Z",
+    "title": "Kaguya GRS Nuclide Map - Calcium (CaO)",
+    "lri:data_use_note": "CaO abundance (wt%) from the Kaguya GRS Nuclide Map at 1° resolution (~30 km). High CaO is associated with plagioclase-rich highland anorthosite; useful for mapping anorthositic crust extent, complementing the coarser LP GRS calcium product.",
+    "mission": "Kaguya (SELENE)",
+    "instruments": [
+      "Gamma Ray Spectrometer"
+    ],
+    "platform": "kaguya",
+    "compound": "CaO",
+    "units": "wt%",
+    "grid_size_deg": 1.0,
+    "grid_size_km": 30.3233504,
+    "observation_period_start": "2009-02-10",
+    "observation_period_end": "2009-05-27",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
+    "processing:lineage": "Raw UInt16 binary (GRS_NMAP_Ca_090210_090527.img, detached PDS3 label) read via GDAL's PDS driver and converted to CaO wt% using gdal_calc.py with the label formula raw x 0.01 - 0. Reassigned from the PDS driver's projected CRS (metres) to IAU:30100 (degrees, same sphere and grid) and written as COG via gdal_translate with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.12.2"
+    },
+    "processing:level": "L3",
+    "lri:quality_note": "Values represent CaO (calcium oxide) mass fraction, per the source label's COMMENT_TEXT. The observed maximum of 20.00 wt% corresponds to the CaO content of anorthite, the calcium-rich plagioclase feldspar dominant in the lunar highlands."
+  },
+  "assets": {
+    "data": {
+      "href": "calcium_nmap_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "CaO wt% COG - IAU:30100",
+      "roles": [
+        "data"
+      ]
+    },
+    "processing_script": {
+      "href": "calcium_nmap.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
+    },
+    "source_data": {
+      "href": "GRS_NMAP_Ca_090210_090527.img",
+      "type": "application/octet-stream",
+      "title": "Original PDS3 binary - UInt16, BAND_SEQUENTIAL, 360x180",
+      "roles": [
+        "data",
+        "source"
+      ]
+    },
+    "source_label": {
+      "href": "GRS_NMAP_Ca_090210_090527.lbl",
+      "type": "text/plain",
+      "title": "Detached PDS3 label describing the source binary",
+      "roles": [
+        "metadata",
+        "source"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./calcium_nmap.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://darts.isas.jaxa.jp/app/pdap/selene/index.html.en",
+      "type": "text/html",
+      "title": "JAXA DARTS SELENE (Kaguya) data archive - source of GRS_NMAP_Ca_090210_090527, product version 1.0"
+    }
+  ]
+}
