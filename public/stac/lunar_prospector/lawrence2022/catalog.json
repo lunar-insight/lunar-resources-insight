@@ -1,0 +1,19 @@
+{
+  "type": "Catalog",
+  "id": "lp-lawrence2022",
+  "stac_version": "1.0.0",
+  "title": "Lunar Prospector - Global Hydrogen Abundances (Lawrence et al., 2022)",
+  "description": "Global hydrogen abundance map in calibrated ppm, derived from Lunar Prospector Neutron Spectrometer epithermal count rates (Lawrence et al., 2022, JGR Planets, doi:10.1029/2022JE007197). Built on the Wilson et al. 2018 pixon-reconstructed epithermal map, with a rare-earth-element (REE) absorption correction and Apollo sample calibration applied to convert count rates to absolute ppm. Authors: D. J. Lawrence, P. N. Peplowski, J. T. Wilson, R. C. Elphic.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../../catalog.json" },
+    { "rel": "parent", "href": "../../catalog.json" },
+    { "rel": "item",   "href": "./hydrogen_abundance/hydrogen_abundance_lawrence.json", "title": "Global H abundance in calibrated ppm (REE-corrected, Apollo-calibrated)" },
+    {
+      "rel": "via",
+      "href": "https://doi.org/10.1029/2022JE007197",
+      "type": "text/html",
+      "title": "Lawrence et al. 2022 - JGR Planets source paper"
+    }
+  ]
+}
