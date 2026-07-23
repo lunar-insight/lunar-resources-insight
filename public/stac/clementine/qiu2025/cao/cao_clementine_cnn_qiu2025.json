@@ -72,7 +72,7 @@
     },
     {
       "rel": "related",
-      "href": "../../../../lunar_prospector/grs/5deg/calcium/calcium5d.json",
+      "href": "../../../lunar_prospector/grs/5deg/calcium/calcium5d.json",
       "type": "application/json",
       "title": "LP GRS Ca 5° — alternative calcium product from gamma-ray spectroscopy (~150 km resolution)"
     }

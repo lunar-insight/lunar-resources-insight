@@ -72,7 +72,7 @@
     },
     {
       "rel": "related",
-      "href": "../../../../lunar_prospector/grs/5deg/magnesium/magnesium5d.json",
+      "href": "../../../lunar_prospector/grs/5deg/magnesium/magnesium5d.json",
       "type": "application/json",
       "title": "LP GRS Mg 5° — alternative magnesium product from gamma-ray spectroscopy (~150 km resolution)"
     },

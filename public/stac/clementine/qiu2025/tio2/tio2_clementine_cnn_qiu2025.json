@@ -72,7 +72,7 @@
     },
     {
       "rel": "related",
-      "href": "../../../../lunar_prospector/grs/2deg/titanium/titanium2d.json",
+      "href": "../../../lunar_prospector/grs/2deg/titanium/titanium2d.json",
       "type": "application/json",
       "title": "LP GRS Ti 2° — alternative titanium product from gamma-ray spectroscopy (~60 km resolution)"
     }

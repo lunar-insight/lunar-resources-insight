@@ -72,7 +72,7 @@
     },
     {
       "rel": "related",
-      "href": "../../../../lunar_prospector/grs/5deg/aluminum/aluminum5d.json",
+      "href": "../../../lunar_prospector/grs/5deg/aluminum/aluminum5d.json",
       "type": "application/json",
       "title": "LP GRS Al 5° — alternative aluminum product from gamma-ray spectroscopy (~150 km resolution)"
     }

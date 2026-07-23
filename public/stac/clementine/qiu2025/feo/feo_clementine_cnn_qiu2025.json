@@ -72,7 +72,7 @@
     },
     {
       "rel": "related",
-      "href": "../../../../lunar_prospector/grs/0.5deg/iron/ironhd.json",
+      "href": "../../../lunar_prospector/grs/0.5deg/iron/ironhd.json",
       "type": "application/json",
       "title": "LP GRS FeO 0.5° — alternative FeO product from gamma-ray spectroscopy (~15 km resolution)"
     }
