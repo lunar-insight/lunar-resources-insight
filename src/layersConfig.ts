@@ -94,6 +94,15 @@ export const layersConfig: LayersConfig = {
       displayName: "Thorium Count Rate · Wilson 2018",
       stac: "lunar_prospector/wilson2018/thorium_grs/thorium_grs_wilson.json"
     },
+    thorium_kaguya_grs: {
+      filename: "chemical_elements/thorium/thorium_nmap_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "thorium",
+      units: "ppm",
+      displayName: "Thorium Abundance · Kaguya GRS",
+      stac: "kaguya/grs/nuclide_map/thorium/thorium_nmap.json"
+    },
     uranium_lp_grs: {
       filename: "chemical_elements/uranium/uranium5d_COG.tif",
       layerType: "raster",
@@ -102,6 +111,15 @@ export const layersConfig: LayersConfig = {
       units: "ppm",
       displayName: "Uranium Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/uranium/uranium5d.json"
+    },
+    uranium_kaguya_grs: {
+      filename: "chemical_elements/uranium/uranium_nmap_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "uranium",
+      units: "ppm",
+      displayName: "Uranium Abundance · Kaguya GRS",
+      stac: "kaguya/grs/nuclide_map/uranium/uranium_nmap.json"
     },
     titanium_lp_grs: {
       filename: "chemical_elements/titanium/titanium2d_COG.tif",
@@ -180,6 +198,15 @@ export const layersConfig: LayersConfig = {
           stac: "lunar_prospector/grs/5deg/potassium/potassium5d.json"
         }
       ]
+    },
+    potassium_kaguya_grs: {
+      filename: "chemical_elements/potassium/potassium_nmap_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "potassium",
+      units: "ppm",
+      displayName: "Potassium Abundance · Kaguya GRS",
+      stac: "kaguya/grs/nuclide_map/potassium/potassium_nmap.json"
     },
     polonium210_lp_aps: {
       filename: "chemical_elements/polonium/polonium210_COG.tif",
@@ -293,6 +320,15 @@ export const layersConfig: LayersConfig = {
       units: "wt%",
       displayName: "CaO Abundance · Clementine CNN (Qiu 2025)",
       stac: "clementine/qiu2025/cao/cao_clementine_cnn_qiu2025.json"
+    },
+    cao_kaguya_grs: {
+      filename: "compounds/cao/calcium_nmap_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "cao",
+      units: "wt%",
+      displayName: "CaO Abundance · Kaguya GRS",
+      stac: "kaguya/grs/nuclide_map/calcium/calcium_nmap.json"
     },
     /*
       -------------
