@@ -5,7 +5,7 @@ import {
   Disclosure, DisclosurePanel, Heading
 } from 'react-aria-components';
 import styles from './GridListLayerComponent.module.scss';
-import RemoveLayerButton from '../Button/RemoveLayerButton/RemoveLayerButton';
+import RemoveItemButton from '../Button/RemoveItemButton/RemoveItemButton';
 import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox/LayerVisibilityCheckbox';
 import { useLayerContext } from 'utils/context/LayerContext';
 import { elementToAccentColor, elementToSymbol, compoundToAccentColor, compoundToFormula } from 'utils/colorUtils';
@@ -198,7 +198,7 @@ export function GridListLayerItem<T extends { id: string | number }>({
                     </Heading>
 
                     <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
-                      <RemoveLayerButton onPress={onRemove} />
+                      <RemoveItemButton onPress={onRemove} />
                     </div>
                   </div>
 
@@ -231,7 +231,7 @@ export function GridListLayerItem<T extends { id: string | number }>({
               </div>
 
               <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
-                <RemoveLayerButton onPress={onRemove} />
+                <RemoveItemButton onPress={onRemove} />
               </div>
             </div>
           )}

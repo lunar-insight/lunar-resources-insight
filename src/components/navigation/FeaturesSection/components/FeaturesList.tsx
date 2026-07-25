@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { GridList, GridListItem } from 'react-aria-components';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useViewer } from 'utils/context/ViewerContext';
-import RemoveLayerButton from 'components/layout/Button/RemoveLayerButton/RemoveLayerButton';
+import RemoveItemButton from 'components/layout/Button/RemoveItemButton/RemoveItemButton';
 import { FeatureColorButton } from './FeatureColorButton';
 import { FeatureVisibilityButton } from './FeatureVisibilityButton';
 import { FeatureInsightsButton } from './FeatureInsightsButton';
@@ -94,7 +94,13 @@ export const FeaturesList: React.FC = () => {
                       onChange={() => toggleFeatureInsights(feature.id)}
                     />
 
-                    <RemoveLayerButton onPress={() => removeFeature(feature.id)} />
+                    <RemoveItemButton
+                      onPress={() => removeFeature(feature.id)}
+                      icon='delete'
+                      label='Remove shape'
+                      ariaLabel='remove shape'
+                      variant='danger'
+                    />
                   </div>
                 </>
               )}

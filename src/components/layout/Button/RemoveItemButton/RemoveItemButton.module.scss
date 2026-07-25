@@ -1,4 +1,4 @@
-.remove-layer-button {
+.button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -17,9 +17,18 @@
   &[data-pressed] {
     background-color: var(--color-neutral);
   }
+}
 
-  &__icon {
-    font-size: x-large;
-    color: var(--color-tertiary)
-  }
+.icon {
+  font-size: x-large;
+  color: var(--color-tertiary);
+}
+
+.danger {
+  color: var(--color-muted-red);
+  transition: color 0.15s ease;
+}
+
+.button[data-hovered] .icon.danger {
+  color: var(--color-redVariant);
 }
