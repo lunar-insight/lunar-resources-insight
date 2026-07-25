@@ -53,6 +53,8 @@ class CesiumLayerManager {
   private gradientLocked: Map<string, boolean>;
   private hasDisableRequests: (() => boolean) | null = null;
   private activeFilenames: Map<string, string>
+  // imageryLayers.add() calls happen in addLayer() call order.
+  private insertQueue: Promise<void> = Promise.resolve();
 
   constructor(
     private viewer: Cesium.Viewer | null,
@@ -83,6 +85,10 @@ class CesiumLayerManager {
       console.error(`Layer configuration not found for ${layerId}`);
       return;
     }
+
+    let releaseSlot: () => void;
+    const previousSlot = this.insertQueue;
+    this.insertQueue = new Promise(resolve => { releaseSlot = resolve; });
 
     try {
       const { bounds } = await fetchCogInfo(layerConfig.filename);
@@ -117,6 +123,10 @@ class CesiumLayerManager {
       const layer = new Cesium.ImageryLayer(imageryProvider, {
         alpha: 1.0
       });
+
+      await previousSlot;
+      if (!this.viewer) return;
+
       this.viewer.imageryLayers.add(layer);
       this.layerMap.set(layerId, layer);
       this.activeFilenames.set(layerId, layerConfig.filename);
@@ -124,6 +134,8 @@ class CesiumLayerManager {
       this.forceResumeMouseTracking();
     } catch (error) {
       console.error(`Failed to add layer ${layerId}:`, error);
+    } finally {
+      releaseSlot!();
     }
   }
 
