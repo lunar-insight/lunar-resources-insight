@@ -30,7 +30,7 @@
     "element": "K",
     "units": "ppm",
     "grid_size_deg": 1.0,
-    "grid_size_km": 30.3233504,
+    "grid_size_km": 30.32,
     "observation_period_start": "2007-12-14",
     "observation_period_end": "2008-12-16",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
