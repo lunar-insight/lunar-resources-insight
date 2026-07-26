@@ -9,6 +9,14 @@ import RemoveItemButton from '../Button/RemoveItemButton/RemoveItemButton';
 import { LayerVisibilityCheckbox } from '../Checkbox/LayerVisibilityCheckbox/LayerVisibilityCheckbox';
 import { useLayerContext } from 'utils/context/LayerContext';
 import { elementToAccentColor, elementToSymbol, compoundToAccentColor, compoundToFormula } from 'utils/colorUtils';
+import { LayerRole } from 'services/StacService';
+
+const ROLE_ICON: Record<LayerRole, { icon: string; color: string; tooltip: string }> = {
+  Measured: { icon: 'straighten', color: 'hsl(120, 45%, 62%)', tooltip: 'Measured (direct instrument reading)' },
+  Modeled: { icon: 'model_training', color: 'hsl(250, 62%, 75%)', tooltip: 'Modeled (ML model, indirect signal)' },
+  Estimated: { icon: 'functions', color: 'hsl(330, 45%, 72%)', tooltip: 'Estimated (computed from other layers)' },
+  Indicator: { icon: 'sensors', color: 'hsl(173, 60%, 50%)', tooltip: 'Indicator (proxy signal, not a real quantity)' },
+};
 
 interface GridListLayerProps<T extends { id: string | number }> extends Omit<GridListProps<T>, 'children'> {
   items: T[];
@@ -25,6 +33,7 @@ interface GridListLayerItemProps<T> extends Omit<GridListItemProps, 'children'> 
   element?: string;
   compound?: string;
   isFirstOfNewCategory?: boolean;
+  role?: LayerRole;
 }
 
 export function GridListLayer<T extends { id: string | number }>({
@@ -125,6 +134,7 @@ export function GridListLayerItem<T extends { id: string | number }>({
   element,
   compound,
   isFirstOfNewCategory,
+  role,
   ...props
 }: GridListLayerItemProps<T> & { textValue: string; layerId: string }) {
   const { visibleLayers, toggleLayerVisibility } = useLayerContext();
@@ -144,6 +154,31 @@ export function GridListLayerItem<T extends { id: string | number }>({
   ) : compound ? (
     <span className={styles.elBadge} aria-label={compound}>
       {compoundToFormula(compound)}
+    </span>
+  ) : null;
+
+  const titleText = typeof children === 'string' ? children : effectiveTextValue;
+  const dotIndex = titleText.indexOf('·');
+  const quantityLine = dotIndex === -1 ? titleText : titleText.slice(0, dotIndex).trim();
+  const instrumentLine = dotIndex === -1 ? undefined : titleText.slice(dotIndex + 1).trim();
+
+  const titleBlock = (
+    <div
+      className={styles.gridListItemHeaderItemText}
+      title={typeof children === 'string' ? children : undefined}
+    >
+      <span className={styles.titleLine1}>{quantityLine}</span>
+      {instrumentLine && <span className={styles.titleLine2}>{instrumentLine}</span>}
+    </div>
+  );
+
+  const roleIcon = role ? (
+    <span
+      className={styles.roleIcon}
+      style={{ '--role-color': ROLE_ICON[role].color } as React.CSSProperties}
+      title={ROLE_ICON[role].tooltip}
+    >
+      <i className="material-symbols-outlined">{ROLE_ICON[role].icon}</i>
     </span>
   ) : null;
 
@@ -176,12 +211,9 @@ export function GridListLayerItem<T extends { id: string | number }>({
 
                     {badge}
 
-                    <div
-                      className={styles.gridListItemHeaderItemText}
-                      title={typeof children === 'string' ? children : undefined}
-                    >
-                      {children}
-                    </div>
+                    {titleBlock}
+
+                    {roleIcon}
 
                     <Heading>
                       <Button
@@ -223,12 +255,9 @@ export function GridListLayerItem<T extends { id: string | number }>({
 
               {badge}
 
-              <div
-                className={styles.gridListItemHeaderItemText}
-                title={typeof children === 'string' ? children : undefined}
-              >
-                {children}
-              </div>
+              {titleBlock}
+
+              {roleIcon}
 
               <div className={styles.gridListItemHeaderRemoveLayerWrapper}>
                 <RemoveItemButton onPress={onRemove} />

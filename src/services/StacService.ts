@@ -1,5 +1,7 @@
 export const STAC_BASE_PATH = '/stac';
 
+export type LayerRole = 'Measured' | 'Modeled' | 'Estimated' | 'Indicator';
+
 export interface StacItemProperties {
   title?: string;
   mission?: string;
@@ -10,6 +12,7 @@ export interface StacItemProperties {
   achieved_resolution_km?: number;
   grid_size_deg?: number;
   grid_size_km?: number;
+  'lri:role'?: LayerRole;
   [key: string]: unknown;
 }
 
@@ -50,6 +53,10 @@ export function getStacSourceLabel(properties: StacItemProperties): string | und
 
   const instrument = properties.instruments?.[0];
   return instrument ? `${source} · ${instrument}` : source;
+}
+
+export function getStacRole(properties: StacItemProperties): LayerRole | undefined {
+  return properties['lri:role'];
 }
 
 export function getStacResolutionLabel(properties: StacItemProperties): string | undefined {

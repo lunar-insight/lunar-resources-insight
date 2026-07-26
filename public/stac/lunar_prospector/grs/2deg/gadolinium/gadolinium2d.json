@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2001-07-06T00:00:00Z",
     "title": "LP GRS/NS Gadolinium 2° Elemental Abundance (low-altitude)",
+    "lri:role": "Estimated",
     "lri:data_use_note": "Gadolinium abundance in µg/g (equivalent to ppm) derived by multiplying the LP Samarium map by 1.17 — the mean Gd/Sm ratio in Apollo mafic impact melt breccias (Korotev 2000). Gd and Sm are co-derived from the same LP neutron spectrometer measurement (excess neutron absorption AΣeff); neither element can be independently resolved without this geochemical ratio as a constraint. Elevated in KREEP-rich terrains.",
     "lri:quality_note_short": "Coverage limited to ~±71° latitude (polar caps masked as NoData). Negative pixel values within the data band are propagated from Sm counting-noise estimates, not missing data. The 1.17 Gd/Sm ratio is an approximation based on returned samples; the ratio varies between ~1.13 and ~1.38 across Apollo and Luna sites.",
     "mission": "Lunar Prospector",

@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Oxygen 5° Elemental Abundance",
+    "lri:role": "Measured",
     "lri:data_use_note": "Oxygen elemental abundance (wt%) from LP GRS at 5° resolution (~150 km). Dominant element in lunar regolith (~45 wt%); primary ISRU target for propellant and life support. Global distribution is relatively uniform.",
     "mission": "Lunar Prospector",
     "instruments": [

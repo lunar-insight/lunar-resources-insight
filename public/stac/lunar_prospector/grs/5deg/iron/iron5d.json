@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Iron 5° Elemental Abundance",
+    "lri:role": "Measured",
     "lri:data_use_note": "Iron elemental abundance as Fe (wt%) from LP GRS at 5° resolution (~150 km). Higher Fe indicates mare basalt regions. Note: a separate FeO map exists at 0.5° resolution (low-altitude), which is not shown here.",
     "mission": "Lunar Prospector",
     "instruments": [

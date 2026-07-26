@@ -15,6 +15,7 @@
   "properties": {
     "datetime": "2022-07-20T00:00:00Z",
     "title": "LP NS Global Hydrogen Abundance - Calibrated ppm (Lawrence et al., 2022)",
+    "lri:role": "Measured",
     "mission": "Lunar Prospector",
     "instruments": ["Neutron Spectrometer"],
     "platform": "lunar-prospector",

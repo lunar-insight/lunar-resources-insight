@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Titanium 5° Elemental Abundance",
+    "lri:role": "Measured",
     "lri:data_use_note": "Titanium abundance (wt%) from LP GRS at 5° resolution (~150 km). High Ti indicates ilmenite-rich mare basalts. Use the 2° map for finer spatial detail; use this 5° map for global comparisons and inter-element analysis.",
     "mission": "Lunar Prospector",
     "instruments": [

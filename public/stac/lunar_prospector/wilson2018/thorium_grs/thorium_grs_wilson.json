@@ -15,6 +15,7 @@
   "properties": {
     "datetime": "2018-06-19T00:00:00Z",
     "title": "LP GRS Th-Line Count Rate - Pixon Reconstruction (Wilson et al., 2018)",
+    "lri:role": "Indicator",
     "mission": "Lunar Prospector",
     "instruments": ["Gamma Ray Spectrometer"],
     "platform": "lunar-prospector",

@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Uranium 5° Elemental Abundance",
+    "lri:role": "Measured",
     "lri:data_use_note": "Uranium abundance (ppm) from LP GRS at 5° resolution (~150 km). KREEP-associated element; high concentrations in the Procellarum KREEP Terrain. Use for identifying KREEP-rich regions alongside thorium and potassium maps.",
     "mission": "Lunar Prospector",
     "instruments": [

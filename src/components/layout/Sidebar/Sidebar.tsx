@@ -1,9 +1,10 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useLayerContext } from 'utils/context/LayerContext';
 import { layersConfig } from 'geoConfigExporter';
 import { GridListLayer, GridListLayerItem } from '../GridListLayerComponent/GridListLayerComponent';
 import { layerStatsService } from 'services/LayerStatsService';
+import { stacService, getStacRole, LayerRole } from 'services/StacService';
 import LayerGradientSelect from 'components/ui/LayerGradientSelect/LayerGradientSelect';
 import { ColorRampSlider } from '../Slider/ColorRampSlider/ColorRampSlider';
 import OpacitySlider from '../Slider/OpacitySlider/OpacitySlider';
@@ -43,6 +44,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
 
   const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [layerRoles, setLayerRoles] = useState<Map<string, LayerRole | undefined>>(new Map());
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const layersWithStac = selectedLayers
+      .map((layerId) => ({ layerId, stac: layersConfig.layers[layerId]?.stac }))
+      .filter((entry): entry is { layerId: string; stac: string } => !!entry.stac);
+
+    Promise.all(
+      layersWithStac.map(({ layerId, stac }) =>
+        stacService.fetchStacItem(stac).then((item) => [layerId, item] as const)
+      )
+    ).then((entries) => {
+      if (cancelled) return;
+
+      setLayerRoles((prev) => {
+        const next = new Map(prev);
+        entries.forEach(([layerId, item]) => {
+          next.set(layerId, item ? getStacRole(item.properties) : undefined);
+        });
+        return next;
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedLayers]);
+
   // Layer ID to items
   const layerItems = selectedLayers.map((layerId, index) => {
     const config = layersConfig.layers[layerId];
@@ -66,6 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
       category: config?.category || dynamicMeta?.category,
       element: config?.element || dynamicMeta?.element,
       compound: config?.compound,
+      role: layerRoles.get(layerId),
       isFirstOfNewCategory
     };
   });
@@ -187,6 +219,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ width = 400 }) => {
                 category={item.category}
                 element={item.element}
                 compound={item.compound}
+                role={item.role}
                 isFirstOfNewCategory={item.isFirstOfNewCategory}
                 accordionContent={
                   <div className={styles.accordionContent}>

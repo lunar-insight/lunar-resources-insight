@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Magnesium 5° Elemental Abundance",
+    "lri:role": "Measured",
     "lri:data_use_note": "Magnesium elemental abundance (wt%) from LP GRS at 5° resolution (~150 km). High Mg indicates mafic minerals (pyroxene, olivine) in mare basalt. Useful for distinguishing mare and highland compositions.",
     "mission": "Lunar Prospector",
     "instruments": [

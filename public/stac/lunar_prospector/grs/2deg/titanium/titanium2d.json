@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2002-06-15T00:00:00Z",
     "title": "LP GRS Titanium 2° Elemental Abundance",
+    "lri:role": "Measured",
     "lri:data_use_note": "Titanium abundance (wt%) from LP GRS at 2° resolution (~60 km), low-altitude mission phase. Higher spatial resolution than the 5° global map. Useful for identifying ilmenite-rich mare deposits for ISRU.",
     "mission": "Lunar Prospector",
     "instruments": [

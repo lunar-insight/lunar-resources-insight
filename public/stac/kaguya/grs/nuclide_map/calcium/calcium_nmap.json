@@ -21,6 +21,7 @@
   "properties": {
     "datetime": "2009-11-01T00:00:00Z",
     "title": "Kaguya GRS Nuclide Map - Calcium (CaO)",
+    "lri:role": "Measured",
     "lri:data_use_note": "CaO abundance (wt%) from the Kaguya GRS Nuclide Map at 1° resolution (~30 km). High CaO is associated with plagioclase-rich highland anorthosite; useful for mapping anorthositic crust extent, complementing the coarser LP GRS calcium product.",
     "mission": "Kaguya (SELENE)",
     "instruments": [

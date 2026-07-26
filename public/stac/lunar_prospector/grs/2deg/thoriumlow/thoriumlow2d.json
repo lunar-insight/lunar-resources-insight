@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2001-07-06T00:00:00Z",
     "title": "LP GRS Thorium 2° Elemental Abundance (low-altitude)",
+    "lri:role": "Measured",
     "mission": "Lunar Prospector",
     "instruments": [
       "Gamma Ray Spectrometer"

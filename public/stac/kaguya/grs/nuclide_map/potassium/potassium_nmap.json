@@ -21,6 +21,7 @@
   "properties": {
     "datetime": "2009-11-01T00:00:00Z",
     "title": "Kaguya GRS Nuclide Map - Potassium",
+    "lri:role": "Measured",
     "lri:data_use_note": "Elemental potassium abundance (ppm) from the Kaguya GRS Nuclide Map at 1° resolution (~30 km). K is a KREEP indicator - high K, together with high Th, marks Procellarum KREEP Terrane material of interest for resource prospecting.",
     "mission": "Kaguya (SELENE)",
     "instruments": [

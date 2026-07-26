@@ -21,6 +21,7 @@
   "properties": {
     "datetime": "2009-11-01T00:00:00Z",
     "title": "Kaguya GRS Nuclide Map - Thorium",
+    "lri:role": "Measured",
     "lri:data_use_note": "Elemental thorium abundance (ppm) from the Kaguya GRS Nuclide Map at 1° resolution (~30 km). Th is the primary tracer for the Procellarum KREEP Terrane, a key target for rare-earth-element and heat-producing-element prospecting.",
     "lri:quality_note": "Global mean of 1.10 ppm Th, consistent with the global average of approximately 1.2 ppm reported by Kobayashi et al. for Kaguya GRS thorium. A small number of low-Th pixels compute to slightly negative values under the label's scaling formula, a normal artifact of gamma-ray count-rate fitting near the detection floor, also present in Lunar Prospector GRS products; these values are floored to 0.",
     "mission": "Kaguya (SELENE)",

@@ -41,6 +41,7 @@
   "properties": {
     "datetime": "2001-07-06T00:00:00Z",
     "title": "LP GRS Samarium 2° Elemental Abundance (low-altitude)",
+    "lri:role": "Measured",
     "lri:data_use_note": "Samarium abundance in µg/g (equivalent to ppm) from LP GRS at 2° resolution (~60 km), low-altitude phase. Rare earth element elevated in KREEP-rich terrains. Note: µg/g and ppm are equivalent units by mass.",
     "lri:quality_note_short": "Coverage limited to ~±71° latitude (polar caps masked as NoData). Negative pixel values within the data band are valid GRS counting-noise estimates, not missing data.",
     "mission": "Lunar Prospector",
