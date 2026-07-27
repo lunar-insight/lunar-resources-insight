@@ -207,7 +207,7 @@ class CesiumLayerManager {
         minimumLevel: 0,
         maximumLevel: 20,
         rectangle,
-        hasAlphaChannel: rangeFilterEnabled,
+        hasAlphaChannel: true,
         credit: layerConfig?.displayName ?? layerId,
       });
 
@@ -345,7 +345,7 @@ class CesiumLayerManager {
         minimumLevel: 0,
         maximumLevel: 20,
         rectangle: bounds,
-        hasAlphaChannel: rangeFilterEnabled,
+        hasAlphaChannel: true,
         credit: `${layerConfig.displayName || layerId}`
       });
 
