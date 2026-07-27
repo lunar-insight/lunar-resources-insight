@@ -1,0 +1,79 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "ch2-class-sodium",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [-178.141998, -86.352303],
+        [179.852005, -86.352303],
+        [179.852005, 86.8491],
+        [-178.141998, 86.8491],
+        [-178.141998, -86.352303]
+      ]
+    ]
+  },
+  "bbox": [-178.141998, -86.352303, 179.852005, 86.8491],
+  "properties": {
+    "datetime": "2023-02-15T06:46:00Z",
+    "title": "Chandrayaan-2 CLASS L2 Elemental Abundance Map - Sodium",
+    "lri:role": "Measured",
+    "lri:data_use_note": "Na wt% derived from CLASS X-ray fluorescence spectra along sparse orbital ground tracks at a fixed 150 km (along-track) x 12.5 km (across-track) ground pixel size, consistent with the Al/Fe/Mg/Si release (Narendranath et al. 2024b). Na is a volatile-related element mobilized by processes such as photodesorption and meteoritic impact into the lunar exosphere; CLASS observations show an increasing Na trend towards the poles, supporting this model. The Na K-alpha XRF line is weak, giving Na the sparsest coverage of the five CLASS elements.",
+    "lri:quality_note": "Coverage is 5.45% of the grid (2021-04-01 to 2022-05-31), well below the ~22% of Al/Fe/Mg/Si, reflecting the weaker Na XRF line. Pixels outside CLASS ground tracks carry no measurement and are stored as NoData rather than interpolated. L2 retrievals require elevated solar X-ray activity, which is why coverage is track-shaped rather than a filled global grid.",
+    "mission": "Chandrayaan-2",
+    "instruments": ["CLASS"],
+    "platform": "chandrayaan-2",
+    "element": "Na",
+    "units": "wt%",
+    "ground_pixel_km": "150 x 12.5 (along-track x across-track), fixed",
+    "observation_period_start": "2021-04-01",
+    "observation_period_end": "2022-05-31",
+    "measurement_depth": "tens of microns (X-ray fluorescence escape depth, true surface), much shallower than gamma-ray/neutron spectrometer techniques",
+    "processing:lineage": "Original Float32 GeoTIFF (ch2_cla_l2_map_na_v1.tif) has its CRS tag reassigned from EPSG:4326 to IAU:30100 via gdal_translate (same numeric lon/lat grid, corrected body reference), NoData explicitly set to 0, and is written as COG with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.12.2"
+    },
+    "processing:level": "L2"
+  },
+  "assets": {
+    "data": {
+      "href": "sodium_ch2_class_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Na wt% COG - IAU:30100",
+      "roles": ["data"]
+    },
+    "processing_script": {
+      "href": "sodium_ch2_class.sh",
+      "type": "application/x-sh",
+      "title": "Exact processing commands used to generate the COG",
+      "roles": ["metadata", "reproducibility"]
+    },
+    "source_data": {
+      "href": "ch2_cla_l2_map_na_v1.tif",
+      "type": "image/tiff",
+      "title": "Original PDS4 GeoTIFF - Float32, 1000x2000",
+      "roles": ["data", "source"]
+    },
+    "source_label": {
+      "href": "ch2_cla_l2_map_na_v1.xml",
+      "type": "application/xml",
+      "title": "PDS4 product label describing the source file",
+      "roles": ["metadata", "source"]
+    }
+  },
+  "links": [
+    { "rel": "self", "href": "./sodium_ch2_class.json" },
+    { "rel": "root", "href": "../../../../catalog.json" },
+    { "rel": "parent", "href": "../collection.json" },
+    {
+      "rel": "derived_from",
+      "href": "https://pradan.issdc.gov.in/ch2/",
+      "type": "text/html",
+      "title": "ISRO ISSDC PRADAN - Chandrayaan-2 data archive, source of ch2_cla_l2_map_na_v1"
+    }
+  ]
+}

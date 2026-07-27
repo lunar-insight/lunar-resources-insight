@@ -151,6 +151,15 @@ export const layersConfig: LayersConfig = {
       displayName: "Silicon Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/silicon/silicon5d.json"
     },
+    silicon_ch2_class: {
+      filename: "chemical_elements/silicon/silicon_ch2_class_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "silicon",
+      units: "wt%",
+      displayName: "Silicon Abundance · Chandrayaan-2 CLASS",
+      stac: "chandrayaan2/class/l2_map/silicon/silicon_ch2_class.json"
+    },
     samarium_lp_grs: {
       filename: "chemical_elements/samarium/samarium2d_COG.tif",
       layerType: "raster",
@@ -235,6 +244,15 @@ export const layersConfig: LayersConfig = {
       displayName: "Magnesium Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/magnesium/magnesium5d.json"
     },
+    magnesium_ch2_class: {
+      filename: "chemical_elements/magnesium/magnesium_ch2_class_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "magnesium",
+      units: "wt%",
+      displayName: "Magnesium Abundance · Chandrayaan-2 CLASS",
+      stac: "chandrayaan2/class/l2_map/magnesium/magnesium_ch2_class.json"
+    },
     iron_lp_grs: {
       filename: "chemical_elements/iron/iron5d_COG.tif",
       layerType: "raster",
@@ -243,6 +261,15 @@ export const layersConfig: LayersConfig = {
       units: "wt%",
       displayName: "Iron Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/iron/iron5d.json"
+    },
+    iron_ch2_class: {
+      filename: "chemical_elements/iron/iron_ch2_class_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "iron",
+      units: "wt%",
+      displayName: "Iron Abundance · Chandrayaan-2 CLASS",
+      stac: "chandrayaan2/class/l2_map/iron/iron_ch2_class.json"
     },
     calcium_lp_grs: {
       filename: "chemical_elements/calcium/calcium5d_COG.tif",
@@ -261,6 +288,24 @@ export const layersConfig: LayersConfig = {
       units: "wt%",
       displayName: "Aluminium Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/aluminum/aluminum5d.json"
+    },
+    aluminum_ch2_class: {
+      filename: "chemical_elements/aluminum/aluminum_ch2_class_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "aluminum",
+      units: "wt%",
+      displayName: "Aluminium Abundance · Chandrayaan-2 CLASS",
+      stac: "chandrayaan2/class/l2_map/aluminum/aluminum_ch2_class.json"
+    },
+    sodium_ch2_class: {
+      filename: "chemical_elements/sodium/sodium_ch2_class_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "sodium",
+      units: "wt%",
+      displayName: "Sodium Abundance · Chandrayaan-2 CLASS",
+      stac: "chandrayaan2/class/l2_map/sodium/sodium_ch2_class.json"
     },
     /*
       --------

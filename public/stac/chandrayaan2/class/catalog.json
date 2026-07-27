@@ -1,0 +1,13 @@
+{
+  "type": "Catalog",
+  "id": "chandrayaan2-class",
+  "stac_version": "1.0.0",
+  "title": "Chandrayaan-2 CLASS (Chandrayaan-2 Large Area Soft X-ray Spectrometer)",
+  "description": "CLASS is an X-ray fluorescence spectrometer on Chandrayaan-2 Orbiter mapping the elemental abundances of major and minor rock-forming elements (Mg, Al, Si, Ca, Ti, Fe, Na, Cr, Mn, and, during strong solar flares, P and K) on the lunar surface, using the simultaneous X-ray Solar Monitor (XSM) to calibrate the incident solar spectrum.",
+  "links": [
+    { "rel": "self",   "href": "./catalog.json" },
+    { "rel": "root",   "href": "../../catalog.json" },
+    { "rel": "parent", "href": "../catalog.json" },
+    { "rel": "child",  "href": "./l2_map/collection.json", "title": "CLASS L2 Elemental Abundance Maps (Al, Fe, Mg, Na, Si)" }
+  ]
+}
