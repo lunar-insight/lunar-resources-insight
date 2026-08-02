@@ -1,0 +1,93 @@
+{
+  "type": "Collection",
+  "id": "lp-grs-prettyman2006-2deg",
+  "stac_version": "1.0.0",
+  "stac_extensions": ["https://stac-extensions.github.io/processing/v1.1.0/schema.json"],
+  "title": "LP GRS 2° Compound & Elemental Abundance (Prettyman et al. 2006)",
+  "description": "Global lunar abundance maps of MgO, Al2O3, SiO2, CaO, TiO2, FeO, K, Th, and U at 2° quasi-equal-area resolution (~11306 pixels, ~60 km). Derived by linear spectral unmixing of Lunar Prospector gamma ray spectra, high-altitude (HIGH1, ~100 km) data set, by Prettyman et al. (2006). Oxides in wt%, K/Th/U in ppm.",
+  "license": "proprietary",
+  "extent": {
+    "spatial": {
+      "bbox": [[-180, -90, 180, 90]]
+    },
+    "temporal": {
+      "interval": [["1998-01-17T00:00:00Z", "1998-10-07T00:00:00Z"]]
+    }
+  },
+  "providers": [
+    {
+      "name": "Planetary Science Institute",
+      "roles": ["producer"],
+      "url": "https://www.psi.edu"
+    },
+    {
+      "name": "PDS Geosciences Node, Washington University",
+      "roles": ["host"],
+      "url": "https://pds-geosciences.wustl.edu"
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "href": "./collection.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json"
+    },
+    {
+      "rel": "item",
+      "href": "./mgo/mgo_2d_prettyman2006.json",
+      "title": "MgO Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "item",
+      "href": "./al2o3/al2o3_2d_prettyman2006.json",
+      "title": "Al₂O₃ Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "item",
+      "href": "./sio2/sio2_2d_prettyman2006.json",
+      "title": "SiO₂ Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "item",
+      "href": "./cao/cao_2d_prettyman2006.json",
+      "title": "CaO Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "item",
+      "href": "./tio2/tio2_2d_prettyman2006.json",
+      "title": "TiO₂ Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "item",
+      "href": "./feo/feo_2d_prettyman2006.json",
+      "title": "FeO Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "item",
+      "href": "./potassium/potassium_2d_prettyman2006.json",
+      "title": "K Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "item",
+      "href": "./thorium/thorium_2d_prettyman2006.json",
+      "title": "Th Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "item",
+      "href": "./uranium/uranium_2d_prettyman2006.json",
+      "title": "U Abundance · LP GRS 2° (Prettyman et al. 2006)"
+    },
+    {
+      "rel": "via",
+      "href": "https://pds-geosciences.wustl.edu/lunar/lp-l-grs-5-elem-abundance-v1/lp_9001/",
+      "title": "PDS bundle landing page"
+    }
+  ]
+}

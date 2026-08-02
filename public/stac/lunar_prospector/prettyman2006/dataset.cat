@@ -1,0 +1,290 @@
+PDS_VERSION_ID                     = PDS3
+LABEL_REVISION_NOTE                = "2012-06-15 Prettyman Original;
+                                      2012-10-24 GEO:Slavney Revised"
+RECORD_TYPE                        = STREAM
+                                   
+OBJECT                             = DATA_SET
+  DATA_SET_ID                      = "LP-L-GRS-5-ELEM-ABUNDANCE-V1.0"
+                                   
+  OBJECT                           = DATA_SET_INFORMATION
+    DATA_SET_NAME                  = "LUNAR PROSPECTOR GRS ELEMENTAL 
+                                     ABUNDANCE V1.0"
+    DATA_SET_COLLECTION_MEMBER_FLG = "N"
+    DATA_OBJECT_TYPE               = TABLE
+    START_TIME                     = 1998-01-17
+    STOP_TIME                      = 1998-10-07
+    DATA_SET_RELEASE_DATE          = 2012-10-24
+    PRODUCER_FULL_NAME             = "THOMAS H. PRETTYMAN"
+    DETAILED_CATALOG_FLAG          = "N"
+    ABSTRACT_DESC                  = "This data set provides tables of 
+       weight fractions and terms of the error matrix for major oxides and 
+       K, Th, and U for the Moon from Lunar Prospector Gamma Ray and Neutron 
+       Spectrometer data acquired at high altitude (100 km) and binned on 2, 
+       5, or 20 degree equal area pixels. The table contains the original 
+       elemental abundances reported by PRETTYMANETAL2006. The abundances 
+       were determined by gamma ray spectral unmixing."
+    DATA_SET_TERSE_DESC            = "Global, lunar elemental abundance maps
+       determined by unmixing of gamma ray spectra binned on 2-, 5- and 
+       20-deg equal area pixels [PRETTYMANETAL2006]."
+    CITATION_DESC                  = "
+       Prettyman, T.H., Lunar Prospector GRS Elemental Abundance, 
+       LP-L-GRS-5-ELEM-ABUNDANCE-V1.0, NASA Planetary Data System, 2012."
+    DATA_SET_DESC                  = "
+
+  Data Set Overview
+  =================
+     These tables provide maps of weight fractions and terms of the error
+     matrix for major oxides and K, Th, and U for the Moon from Lunar
+     Prospector Gamma Ray and Neutron Spectrometer data acquired at high
+     altitude (100 km) and binned on 2, 5, and 20 degree equal area pixels.  
+     The tables contain the original elemental abundances reported by 
+     PRETTYMANETAL2006. The abundances were determined by gamma ray spectral 
+     unmixing.
+
+     The data were acquired during the high altitude (approximately 100 km)
+     phase (HIGH1) with a northward orientation for Lunar Prospector's spin
+     axis.  At this altitude, the spatial resolution of the gamma ray 
+     spectrometer was about 5 degrees of arc length on the surface
+     (PRETTYMANETAL2006). 
+
+    
+  Parameters
+  ==========
+     Each row of the table provides composition information for a
+     single pixel.  The format for each row is '(i10,4(f7.1),57(1x,e14.4))'.
+     East longitude convention is used (-180 to 180 degrees). The column 
+     description follows:
+
+     COLUMN    NAME           FORMAT    DESCRIPTION                      UNITS
+     0         PIXEL_INDEX    (I10)     N/A
+     1         MIN_LAT        (F7.1)    Pixel latitude lower boundary     deg
+     2         MAX_LAT        (F7.1)    Pixel latitude upper boundary     deg
+     3         MIN_LON        (F7.1)    Pixel longitude lower boundary    deg
+     4         MAX_LON        (F7.1)    Pixel longitude upper boundary    deg
+     5         AM            (E14.4)    Average atomic mass              g/mol
+     6         NEUTRON_DEN   (E14.4)    Neutron number density           g/cm3
+     7         W_MGO         (E14.4)    Weight fraction MgO               g/g
+     8         W_AL2O3       (E14.4)    Weight fraction Al2O3             g/g
+     9         W_SIO2        (E14.4)    Weight fraction SiO2              g/g
+     10        W_CAO         (E14.4)    Weight fraction CaO               g/g
+     11        W_TIO2        (E14.4)    Weight fraction TiO2              g/g
+     12        W_FEO         (E14.4)    Weight fraction FeO               g/g
+     13        W_K           (E14.4)    Weight fraction K                 ppm
+     14        W_TH          (E14.4)    Weight fraction Th                ppm
+     15        W_U           (E14.4)    Weight fraction U (tied U=0.27Th) ppm
+
+     The following columns are elements of the error matrix that contains
+     covariance terms used to estimate errors in parameters and derived
+     quantities. The square root of the diagonal of the error matrix gives the
+     propogated uncertainty in the oxides and elemental abundances.  Example
+     usage of the error matrix is given by PRETTYMANETAL2006 (Eqs. 9 and
+     10). In this data set description, the components of the error matrix are
+     denoted E[I,J], where I and J are the row and column index of the
+     component, respectively.  The indices refer to major oxides and elements
+     as follows:
+
+      (0 - MgO, 1 - Al2O3, 2 - SiO2, 3 - CaO, 4 - TiO2, 5 - FeO,
+       6 - K, 7 - Th, 8 - U)
+
+     COLUMN    NAME           FORMAT    DESCRIPTION                      
+     16        E[0,0]        (E14.4)    Error matrix component           
+     17        E[0,1]        (E14.4)    Error matrix component           
+     18        E[0,2]        (E14.4)    Error matrix component           
+     19        E[0,3]        (E14.4)    Error matrix component           
+     20        E[0,4]        (E14.4)    Error matrix component           
+     21        E[0,5]        (E14.4)    Error matrix component           
+     22        E[0,6]        (E14.4)    Error matrix component           
+     23        E[0,7]        (E14.4)    Error matrix component           
+     24        E[0,8]        (E14.4)    Error matrix component           
+     25        E[1,1]        (E14.4)    Error matrix component           
+     26        E[1,2]        (E14.4)    Error matrix component           
+     27        E[1,3]        (E14.4)    Error matrix component           
+     28        E[1,4]        (E14.4)    Error matrix component           
+     29        E[1,5]        (E14.4)    Error matrix component           
+     30        E[1,6]        (E14.4)    Error matrix component           
+     31        E[1,7]        (E14.4)    Error matrix component           
+     32        E[1,8]        (E14.4)    Error matrix component           
+     33        E[2,2]        (E14.4)    Error matrix component           
+     34        E[2,3]        (E14.4)    Error matrix component           
+     35        E[2,4]        (E14.4)    Error matrix component           
+     36        E[2,5]        (E14.4)    Error matrix component           
+     37        E[2,6]        (E14.4)    Error matrix component           
+     38        E[2,7]        (E14.4)    Error matrix component           
+     39        E[2,8]        (E14.4)    Error matrix component           
+     40        E[3,3]        (E14.4)    Error matrix component           
+     41        E[3,4]        (E14.4)    Error matrix component           
+     42        E[3,5]        (E14.4)    Error matrix component           
+     43        E[3,6]        (E14.4)    Error matrix component           
+     44        E[3,7]        (E14.4)    Error matrix component           
+     45        E[3,8]        (E14.4)    Error matrix component           
+     46        E[4,4]        (E14.4)    Error matrix component           
+     47        E[4,5]        (E14.4)    Error matrix component           
+     48        E[4,6]        (E14.4)    Error matrix component           
+     49        E[4,7]        (E14.4)    Error matrix component           
+     50        E[4,8]        (E14.4)    Error matrix component           
+     51        E[5,5]        (E14.4)    Error matrix component           
+     52        E[5,6]        (E14.4)    Error matrix component           
+     53        E[5,7]        (E14.4)    Error matrix component           
+     54        E[5,8]        (E14.4)    Error matrix component           
+     55        E[6,6]        (E14.4)    Error matrix component           
+     56        E[6,7]        (E14.4)    Error matrix component           
+     57        E[6,8]        (E14.4)    Error matrix component           
+     58        E[7,7]        (E14.4)    Error matrix component           
+     59        E[7,8]        (E14.4)    Error matrix component           
+     60        E[8,8]        (E14.4)    Error matrix component           
+  "
+
+    CONFIDENCE_LEVEL_NOTE          = "
+
+
+  Confidence Level Overview
+  =========================
+  The data set is a high order data product derived from gamma ray and neutron
+  spectra measured by Lunar Prospector as described by PRETTYMANETAL2006. 
+  The gamma ray spectral data set from which elemental abundances were 
+  determined is described in LAWRENCEETAL2004.  Neutron data products used in 
+  the analysis are described by MAURICEETAL2004.
+  
+  Review
+  ======
+  This data set has passed a Planetary Data System peer review.
+  
+  Data Coverage and Quality
+  =========================
+  The data set contains a complete, global map of the lunar surface for 
+  major oxides and K, Th, and U.  Oxides and elemental abundances are compared
+  with lunar sample and meteorite compositional data by PRETTYMANETAL2006.  
+  
+  The data set was further validated by a pixel-by-pixel comparison of 2200 
+  m/s neutron macroscopic absorption cross sections (Sigma_a_GRS) determined 
+  from the 5-degree elemental abundance data of PRETTYMANETAL2006 to those 
+  determined by the Lunar Prospector Neutron Spectrometer (Sigma_a_NS).  
+  The Neutron Spectrometer absorption cross section was determined using a 
+  correlation derived from LAWRENCEETAL2006.  Namely,
+  
+   Sigma_a_NS (cm**2/g) = 5.0x10E-3 (C_epi/C_therm) - 3.4x10E-4,
+   
+  where C_epi and C_therm were the measured epithermal and thermal neutron 
+  counting rates, respectively, for the target pixel.  For each pixel, the 
+  macroscopic cross  section was determined from the elemental abundances by 
+  the following sum:
+  
+   Sigma_a_GRS = SUM_i  ( 0.0662 * sigma{i} * w{i} / A{i} ), 
+   
+  where SUM_i denotes the sum over all elements, i is the element index, 
+  sigma{i} is the microscopic absorption cross section at 2200 m/s in barns 
+  (10E-24 cm**2), w{i} is the weight fraction of element i, and A{i} is the 
+  atomic mass of element i. Gd and Sm were not determined by 
+  PRETTYMANETAL2006.  Abundances for these elements were determined by 
+  correlation with Th [ELPHICETAL2000].  
+  
+  The range of absorption cross sections over the lunar surface was found to 
+  be approximately 3 to 12 (E-3 cm**2/g).  Sigma_a_GRS and Sigma_a_NS were 
+  linearly correlated with a Pearson coeffient of r=0.9885. The best fit line 
+  was Sigma_a_GRS =  1.135 Sigma_a_NS - 0.732.  The percentage difference 
+  between the derived quantities was then
+  
+   %Diff = 100 (Sigma_a_GRS - Sigma_a_NS)/Sigma_a_NS = 13.5 - 73.2/Sigma_a_NS,
+    
+  which gives -10.9% for the low end and 7.4% difference for the high end of 
+  the range of values for the macroscopic absorption cross section.  For the 
+  feldspathic highlands terrane (FHT), Sigma_a_NS was approximately 
+  3.8E-3 cm2/g, correponding to a difference of -5.8%.  
+  
+  The NS analysis was carried out without recourse to lunar ground truth, 
+  relying only on the physical description of the detector (validated by 
+  laboratory calibration experiments) to determine the response function of 
+  the 3He sensors and models of the lunar leakage flux for typical lunar 
+  compositions. The validity of the leakage model was demonstrated by 
+  MCKINNEYETAL2006.  That the neutron and spectral unmixing analyses give 
+  similar results for macroscopic absorption supports the spectral unmixing 
+  calibration assumption. Namely, the composition of the highlands is 
+  adequately represented by the composition of the feldspathic lunar 
+  meteorites.
+  
+  A similar comparison was made for average atomic masses determined from 
+  the elemental data (A_GRS) and from the analysis of fast neutron data 
+  (A_NS) by GASNAULTETAL2001 for 5-degree equal area maps.  The range of 
+  values for the average atomic mass was 21.4 to 23.9 amu.  A_GRS and A_NS 
+  were linearly correlated with a Pearson coefficient of r=0.944. The best 
+  fit line was A_GRS = 1.174 A_NS - 3.81 and the percentage difference was
+  
+   %Diff = 100 (A_GRS - A_NS)/A_NS = 17.4 - 381/A_NS,
+   
+  which gives -0.4% for the low end and 1.5% difference for the high end of 
+  the range of values for average atomic mass.
+  
+  Limitations
+  ===========
+  The unmixing algorithm tied the weight fraction of U (w_U) to the weight 
+  fraction of Th (w_Th), such that w_U = 0.27 x w_Th.  Small deviations from 
+  this trend in the tabulated U and Th abundances, typically much less than 
+  a percent, were introduced by the optimization algorithm used to solve the 
+  least squares spectral unmixing problem.  Additional analysis  assumptions 
+  and sources of error are described by PRETTYMANETAL2006.
+  
+  The gamma ray spectrometer is not sensitive to minor components of the 
+  lunar regolith, such as CrO2, MnO, Na2O, P2O5, and ZrO2.  For lunar soils, 
+  regolith breccias, and meteorites (PRETTYMANETAL2006), these sum to about 
+  1% (g/g) on average and at most to 2%.  An analysis of oxide sums 
+  determined by spectral unmixing was reported by PRETTYMANETAL2006.  
+  The analysis shows that accumulated systematic errors in the elemental 
+  abundances determined by gamma ray spectroscopy are larger than can be 
+  accounted for by neglecting these minor components.
+  
+  Maps of FeO, TiO2, K, and Th, binned on 2-degree equal area pixels, were 
+  evaluated by PRETTYMANETAL2006.  For completeness, the other oxides 
+  determined by spectral unmixing (MgO, Al2O3, SiO2, CaO) are included in 
+  the 2-degree data set in this distribution.  These have not been thoroughly 
+  evaluated and have relatively poor precision in comparison to the 5- and 
+  20-degree data.  Consequently, caution is recommended in using 2-degree 
+  elemental abundances other than FeO, TiO2, K, and Th.
+  
+  "
+
+  END_OBJECT                      = DATA_SET_INFORMATION
+
+  OBJECT                          = DATA_SET_MISSION
+    MISSION_NAME                  = "LUNAR PROSPECTOR"
+  END_OBJECT                      = DATA_SET_MISSION
+  
+  OBJECT                          = DATA_SET_TARGET
+    TARGET_NAME                   = MOON
+  END_OBJECT                      = DATA_SET_TARGET
+
+  OBJECT                          = DATA_SET_HOST
+    INSTRUMENT_HOST_ID            = LP
+    INSTRUMENT_ID                 = {GRS, NS}
+  END_OBJECT                      = DATA_SET_HOST
+
+  OBJECT                          = DATA_SET_REFERENCE_INFORMATION
+    REFERENCE_KEY_ID              = "ELPHICETAL2000"
+  END_OBJECT                      = DATA_SET_REFERENCE_INFORMATION
+
+  OBJECT                          = DATA_SET_REFERENCE_INFORMATION
+    REFERENCE_KEY_ID              = "GASNAULTETAL2001"
+  END_OBJECT                      = DATA_SET_REFERENCE_INFORMATION
+
+  OBJECT                          = DATA_SET_REFERENCE_INFORMATION
+    REFERENCE_KEY_ID              = "LAWRENCEETAL2004"
+  END_OBJECT                      = DATA_SET_REFERENCE_INFORMATION
+
+  OBJECT                          = DATA_SET_REFERENCE_INFORMATION
+    REFERENCE_KEY_ID              = "LAWRENCEETAL2006"
+  END_OBJECT                      = DATA_SET_REFERENCE_INFORMATION
+
+  OBJECT                          = DATA_SET_REFERENCE_INFORMATION
+    REFERENCE_KEY_ID              = "MAURICEETAL2004"
+  END_OBJECT                      = DATA_SET_REFERENCE_INFORMATION
+
+  OBJECT                          = DATA_SET_REFERENCE_INFORMATION
+    REFERENCE_KEY_ID              = "MCKINNEYETAL2006"
+  END_OBJECT                      = DATA_SET_REFERENCE_INFORMATION
+
+  OBJECT                          = DATA_SET_REFERENCE_INFORMATION
+    REFERENCE_KEY_ID              = "PRETTYMANETAL2006"
+  END_OBJECT                      = DATA_SET_REFERENCE_INFORMATION
+
+END_OBJECT                       = DATA_SET
+END
+

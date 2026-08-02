@@ -1,0 +1,117 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": ["https://stac-extensions.github.io/processing/v1.1.0/schema.json"],
+  "id": "lp-tio2-5deg-prettyman2006",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
+  },
+  "bbox": [-180, -90, 180, 90],
+  "properties": {
+    "datetime": "2012-06-15T00:00:00Z",
+    "title": "TiO₂ Abundance · LP GRS 5° (Prettyman et al. 2006)",
+    "lri:role": "Measured",
+    "lri:data_use_note": "Higher TiO2 identifies ilmenite-rich mare basalt, a resource target for oxygen and iron extraction.",
+    "mission": "Lunar Prospector",
+    "instruments": ["Gamma Ray Spectrometer", "Neutron Spectrometer"],
+    "platform": "lunar-prospector",
+    "compound": "TiO2",
+    "units": "wt%",
+    "grid_size_deg": 5,
+    "grid_size_km": 150,
+    "pixel_count": 1790,
+    "observation_period_start": "1998-01-17",
+    "observation_period_end": "1998-10-07",
+    "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
+    "processing:lineage": "Column 11 (W_TIO2, g/g) of the 5° quasi-equal-area table lpgrs_high1_elem_abundance_5deg.tab (Prettyman et al. 2006) is converted to wt% (×100), then the table rows are written as WKT polygons (longitude bin width varies by latitude to preserve equal area; the two polar caps are half the latitude height of the interior bands). The polygons are rasterized onto a fine 0.1°×0.1° grid, then downsampled with mode resampling to a 2.5°×2.5° output grid (half the 5° nominal band height, so the polar caps land exactly on an output pixel edge), then written as a Cloud Optimized GeoTIFF.",
+    "processing:level": "L3",
+    "processing:software": {
+      "GDAL": "3.12.2"
+    },
+    "lri:quality_note_short": "Peer-reviewed PDS product, Prettyman et al. (2006). 5° grid (~150 km).",
+    "lri:quality_note": "Derived by linear spectral unmixing of Lunar Prospector gamma ray spectra (Prettyman et al. 2006), calibrated against the feldspathic lunar highlands meteorite composition. Validated against independent neutron-derived macroscopic absorption cross sections (Pearson r = 0.9885) and average atomic mass (Pearson r = 0.944). This dataset passed Planetary Data System peer review.",
+    "scale_factor": 100
+  },
+  "assets": {
+    "data": {
+      "href": "tio2_5d_prettyman2006_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "TiO₂ wt% COG - IAU:30100",
+      "roles": ["data"]
+    },
+    "source_data": {
+      "href": "../lpgrs_high1_elem_abundance_5deg.tab",
+      "type": "text/plain",
+      "title": "PDS ASCII table - column 11 (W_TIO2, g/g)",
+      "roles": ["data", "source"]
+    },
+    "pds_label": {
+      "href": "../lpgrs_high1_elem_abundance_5deg.lbl",
+      "type": "text/plain",
+      "title": "PDS3 table label",
+      "roles": ["metadata"]
+    },
+    "column_format": {
+      "href": "../../lpgrs_elem_abundance.fmt",
+      "type": "text/plain",
+      "title": "Shared column format specification (61 columns, all resolutions)",
+      "roles": ["metadata"]
+    },
+    "csv": {
+      "href": "../lpgrs_5deg_prettyman2006.csv",
+      "type": "text/csv",
+      "title": "Equal-area pixel table converted to WKT polygons with wt%/ppm values (shared for all Prettyman 2006 5° items)",
+      "roles": ["metadata", "source"]
+    },
+    "vrt": {
+      "href": "../lpgrs_5deg_prettyman2006.vrt",
+      "type": "application/xml",
+      "title": "OGR VRT - WKT polygon layer definition used for gdal_rasterize (shared for all Prettyman 2006 5° items)",
+      "roles": ["metadata", "source"]
+    },
+    "processing_script": {
+      "href": "../process_prettyman2006_5deg.sh",
+      "type": "application/x-sh",
+      "title": "Processing commands used to generate the COG (shared for all Prettyman 2006 5° items)",
+      "roles": ["metadata", "reproducibility"]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./tio2_5d_prettyman2006.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://pds-geosciences.wustl.edu/lunar/lp-l-grs-5-elem-abundance-v1/lp_9001/data/lpgrs_high1_elem_abundance_5deg.tab",
+      "type": "text/plain",
+      "title": "PDS source - lpgrs_high1_elem_abundance_5deg.tab, DATA_SET_ID LP-L-GRS-5-ELEM-ABUNDANCE-V1.0"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1029/2005JE002656",
+      "title": "Prettyman et al. 2006, JGR - Elemental composition of the lunar surface"
+    },
+    {
+      "rel": "related",
+      "href": "../../../grs/5deg/titanium/titanium5d.json",
+      "type": "application/json",
+      "title": "LP GRS Titanium 5 deg - elemental Ti abundance (reduced_special/Lawrence source)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../../clementine/qiu2025/tio2/tio2_clementine_cnn_qiu2025.json",
+      "type": "application/json",
+      "title": "TiO2 Abundance - Clementine CNN (Qiu 2025), alternate TiO2 product"
+    }
+  ]
+}

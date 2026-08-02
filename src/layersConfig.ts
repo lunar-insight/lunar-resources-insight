@@ -85,6 +85,32 @@ export const layersConfig: LayersConfig = {
         }
       ]
     },
+    thorium_lp_grs_prettyman2006: {
+      filename: "chemical_elements/thorium/thorium_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "thorium",
+      units: "ppm",
+      displayName: "Thorium Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/thorium/thorium_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "chemical_elements/thorium/thorium_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/thorium/thorium_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "chemical_elements/thorium/thorium_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/thorium/thorium_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "chemical_elements/thorium/thorium_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/thorium/thorium_20d_prettyman2006.json"
+        }
+      ]
+    },
     thorium_count_rate_wilson: {
       filename: "chemical_elements/thorium/thorium_grs_wilson_COG.tif",
       layerType: "raster",
@@ -111,6 +137,32 @@ export const layersConfig: LayersConfig = {
       units: "ppm",
       displayName: "Uranium Abundance · LP GRS",
       stac: "lunar_prospector/grs/5deg/uranium/uranium5d.json"
+    },
+    uranium_lp_grs_prettyman2006: {
+      filename: "chemical_elements/uranium/uranium_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "uranium",
+      units: "ppm",
+      displayName: "Uranium Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/uranium/uranium_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "chemical_elements/uranium/uranium_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/uranium/uranium_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "chemical_elements/uranium/uranium_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/uranium/uranium_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "chemical_elements/uranium/uranium_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/uranium/uranium_20d_prettyman2006.json"
+        }
+      ]
     },
     uranium_kaguya_grs: {
       filename: "chemical_elements/uranium/uranium_nmap_COG.tif",
@@ -205,6 +257,32 @@ export const layersConfig: LayersConfig = {
           label: "5°",
           filename: "chemical_elements/potassium/potassium5d_COG.tif",
           stac: "lunar_prospector/grs/5deg/potassium/potassium5d.json"
+        }
+      ]
+    },
+    potassium_lp_grs_prettyman2006: {
+      filename: "chemical_elements/potassium/potassium_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "chemical",
+      element: "potassium",
+      units: "ppm",
+      displayName: "Potassium Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/potassium/potassium_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "chemical_elements/potassium/potassium_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/potassium/potassium_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "chemical_elements/potassium/potassium_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/potassium/potassium_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "chemical_elements/potassium/potassium_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/potassium/potassium_20d_prettyman2006.json"
         }
       ]
     },
@@ -330,6 +408,32 @@ export const layersConfig: LayersConfig = {
       displayName: "FeO Abundance · Clementine CNN (Qiu 2025)",
       stac: "clementine/qiu2025/feo/feo_clementine_cnn_qiu2025.json"
     },
+    feo_lp_grs_prettyman2006: {
+      filename: "compounds/feo/feo_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "feo",
+      units: "wt%",
+      displayName: "FeO Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/feo/feo_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "compounds/feo/feo_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/feo/feo_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "compounds/feo/feo_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/feo/feo_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "compounds/feo/feo_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/feo/feo_20d_prettyman2006.json"
+        }
+      ]
+    },
     tio2_clementine_cnn_qiu2025: {
       filename: "compounds/tio2/tio2_clementine_cnn_qiu2025_COG.tif",
       layerType: "raster",
@@ -338,6 +442,32 @@ export const layersConfig: LayersConfig = {
       units: "wt%",
       displayName: "TiO₂ Abundance · Clementine CNN (Qiu 2025)",
       stac: "clementine/qiu2025/tio2/tio2_clementine_cnn_qiu2025.json"
+    },
+    tio2_lp_grs_prettyman2006: {
+      filename: "compounds/tio2/tio2_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "tio2",
+      units: "wt%",
+      displayName: "TiO₂ Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/tio2/tio2_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "compounds/tio2/tio2_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/tio2/tio2_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "compounds/tio2/tio2_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/tio2/tio2_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "compounds/tio2/tio2_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/tio2/tio2_20d_prettyman2006.json"
+        }
+      ]
     },
     al2o3_clementine_cnn_qiu2025: {
       filename: "compounds/al2o3/al2o3_clementine_cnn_qiu2025_COG.tif",
@@ -348,6 +478,58 @@ export const layersConfig: LayersConfig = {
       displayName: "Al₂O₃ Abundance · Clementine CNN (Qiu 2025)",
       stac: "clementine/qiu2025/al2o3/al2o3_clementine_cnn_qiu2025.json"
     },
+    al2o3_lp_grs_prettyman2006: {
+      filename: "compounds/al2o3/al2o3_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "al2o3",
+      units: "wt%",
+      displayName: "Al₂O₃ Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/al2o3/al2o3_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "compounds/al2o3/al2o3_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/al2o3/al2o3_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "compounds/al2o3/al2o3_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/al2o3/al2o3_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "compounds/al2o3/al2o3_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/al2o3/al2o3_20d_prettyman2006.json"
+        }
+      ]
+    },
+    sio2_lp_grs_prettyman2006: {
+      filename: "compounds/sio2/sio2_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "sio2",
+      units: "wt%",
+      displayName: "SiO₂ Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/sio2/sio2_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "compounds/sio2/sio2_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/sio2/sio2_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "compounds/sio2/sio2_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/sio2/sio2_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "compounds/sio2/sio2_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/sio2/sio2_20d_prettyman2006.json"
+        }
+      ]
+    },
     mgo_clementine_cnn_qiu2025: {
       filename: "compounds/mgo/mgo_clementine_cnn_qiu2025_COG.tif",
       layerType: "raster",
@@ -357,6 +539,32 @@ export const layersConfig: LayersConfig = {
       displayName: "MgO Abundance · Clementine CNN (Qiu 2025)",
       stac: "clementine/qiu2025/mgo/mgo_clementine_cnn_qiu2025.json"
     },
+    mgo_lp_grs_prettyman2006: {
+      filename: "compounds/mgo/mgo_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "mgo",
+      units: "wt%",
+      displayName: "MgO Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/mgo/mgo_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "compounds/mgo/mgo_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/mgo/mgo_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "compounds/mgo/mgo_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/mgo/mgo_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "compounds/mgo/mgo_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/mgo/mgo_20d_prettyman2006.json"
+        }
+      ]
+    },
     cao_clementine_cnn_qiu2025: {
       filename: "compounds/cao/cao_clementine_cnn_qiu2025_COG.tif",
       layerType: "raster",
@@ -365,6 +573,32 @@ export const layersConfig: LayersConfig = {
       units: "wt%",
       displayName: "CaO Abundance · Clementine CNN (Qiu 2025)",
       stac: "clementine/qiu2025/cao/cao_clementine_cnn_qiu2025.json"
+    },
+    cao_lp_grs_prettyman2006: {
+      filename: "compounds/cao/cao_2d_prettyman2006_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "cao",
+      units: "wt%",
+      displayName: "CaO Abundance · LP GRS (Prettyman 2006)",
+      stac: "lunar_prospector/prettyman2006/2deg/cao/cao_2d_prettyman2006.json",
+      variants: [
+        {
+          label: "2°",
+          filename: "compounds/cao/cao_2d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/2deg/cao/cao_2d_prettyman2006.json"
+        },
+        {
+          label: "5°",
+          filename: "compounds/cao/cao_5d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/5deg/cao/cao_5d_prettyman2006.json"
+        },
+        {
+          label: "20°",
+          filename: "compounds/cao/cao_20d_prettyman2006_COG.tif",
+          stac: "lunar_prospector/prettyman2006/20deg/cao/cao_20d_prettyman2006.json"
+        }
+      ]
     },
     cao_kaguya_grs: {
       filename: "compounds/cao/calcium_nmap_COG.tif",

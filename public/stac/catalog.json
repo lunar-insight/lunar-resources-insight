@@ -8,6 +8,7 @@
     { "rel": "self", "href": "./catalog.json" },
     { "rel": "root", "href": "./catalog.json" },
     { "rel": "child", "href": "./lunar_prospector/grs/catalog.json", "title": "LP Gamma Ray Spectrometer" },
+    { "rel": "child", "href": "./lunar_prospector/prettyman2006/catalog.json", "title": "LP GRS Elemental & Compound Abundance - Prettyman et al. 2006" },
     { "rel": "child", "href": "./lunar_prospector/aps/catalog.json", "title": "LP Alpha Particle Spectrometer" },
     { "rel": "child", "href": "./lunar_prospector/ns/catalog.json",  "title": "LP Neutron Spectrometer" },
     { "rel": "child", "href": "./lunar_prospector/wilson2018/catalog.json", "title": "LP Improved Maps - Wilson et al. 2018 (Pixon Reconstruction)" },

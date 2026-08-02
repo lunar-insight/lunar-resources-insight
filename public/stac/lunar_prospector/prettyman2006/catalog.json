@@ -1,0 +1,41 @@
+{
+  "type": "Catalog",
+  "id": "lp-grs-prettyman2006",
+  "stac_version": "1.0.0",
+  "title": "LP GRS Elemental & Compound Abundance - Prettyman et al. 2006",
+  "description": "Global lunar abundance maps of MgO, Al2O3, SiO2, CaO, TiO2, FeO, K, Th, and U derived by linear spectral unmixing of Lunar Prospector gamma ray spectra (Prettyman et al. 2006, JGR, doi:10.1029/2005JE002656). PDS bundle lp-l-grs-5-elem-abundance-v1. Available at 2, 5, and 20 degree quasi-equal-area resolution.",
+  "links": [
+    {
+      "rel": "self",
+      "href": "./catalog.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../../catalog.json"
+    },
+    {
+      "rel": "child",
+      "href": "./2deg/collection.json",
+      "title": "2 degree products"
+    },
+    {
+      "rel": "child",
+      "href": "./5deg/collection.json",
+      "title": "5 degree products"
+    },
+    {
+      "rel": "child",
+      "href": "./20deg/collection.json",
+      "title": "20 degree products"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1029/2005JE002656",
+      "title": "Prettyman et al. 2006, JGR - Elemental composition of the lunar surface"
+    }
+  ]
+}

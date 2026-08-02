@@ -105,6 +105,14 @@ export const COMPOUND_REFERENCE_RANGES: Record<string, ElementReferenceRange> = 
       'https://www.sciencedirect.com/science/article/pii/S0019103524002185', // Qiu et al. 2025 – CaO from Clementine CNN
     ],
   },
+  sio2: {
+    min: 0,
+    max: 55.0,
+    units: 'wt%',
+    sources: [
+      'https://doi.org/10.1029/2005JE002656', // Prettyman et al. 2006 – Figure 42 SiO2 axis range, LP GRS vs. lunar sample/meteorite data
+    ],
+  },
 };
 
 export const COMPOUND_SYMBOLS: Record<string, string> = {
@@ -113,4 +121,5 @@ export const COMPOUND_SYMBOLS: Record<string, string> = {
   al2o3: 'Al₂O₃',
   mgo: 'MgO',
   cao: 'CaO',
+  sio2: 'SiO₂',
 };

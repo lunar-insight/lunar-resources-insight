@@ -1,0 +1,18 @@
+<OGRVRTDataSource>
+  <OGRVRTLayer name="lpgrs_20deg_prettyman2006">
+    <SrcDataSource>lpgrs_20deg_prettyman2006.csv</SrcDataSource>
+    <SrcLayer>lpgrs_20deg_prettyman2006</SrcLayer>
+    <GeometryType>wkbPolygon</GeometryType>
+    <LayerSRS>IAU:30100</LayerSRS>
+    <GeometryField encoding="WKT" field="WKT"/>
+    <Field name="mgo" type="Real" src="mgo"/>
+    <Field name="al2o3" type="Real" src="al2o3"/>
+    <Field name="sio2" type="Real" src="sio2"/>
+    <Field name="cao" type="Real" src="cao"/>
+    <Field name="tio2" type="Real" src="tio2"/>
+    <Field name="feo" type="Real" src="feo"/>
+    <Field name="potassium" type="Real" src="potassium"/>
+    <Field name="thorium" type="Real" src="thorium"/>
+    <Field name="uranium" type="Real" src="uranium"/>
+  </OGRVRTLayer>
+</OGRVRTDataSource>
