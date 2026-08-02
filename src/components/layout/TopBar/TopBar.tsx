@@ -2,7 +2,9 @@ import React from 'react';
 import styles from './TopBar.module.scss';
 import TopBarButton from 'components/layout/Button/TopBarButton/TopBarButton';
 import { useSidebarContext } from 'utils/context/SidebarContext';
+import { useMeasurementContext } from 'utils/context/MeasurementContext';
 import ScannerButton from 'components/layout/Button/ScannerButton/ScannerButton';
+import MeasurementModeToggle from 'components/layout/Button/MeasurementModeToggle/MeasurementModeToggle';
 
 export interface TopBarProps {
   children?: React.ReactNode;
@@ -11,6 +13,7 @@ export interface TopBarProps {
 
 const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
   const { isSidebarOpen } = useSidebarContext();
+  const { isActive: isMeasurementActive, toggleMeasurement } = useMeasurementContext();
   const sidebarWidth = 400;
 
   return (
@@ -27,9 +30,9 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
             icon="straighten"
             ariaLabel='Line Measurement Tool'
             tooltipText='Line measurement'
-            onPress={() => {}}
+            onPress={toggleMeasurement}
             tooltipPlacement='bottom'
-            isSelected={false}
+            isSelected={isMeasurementActive}
           />
           <TopBarButton
             icon="square_foot"
@@ -40,6 +43,7 @@ const TopBar: React.FC<TopBarProps> = ({ children, className = '' }) => {
             isSelected={false}
           />
         </div>
+        <MeasurementModeToggle />
         <div className={styles.separator}></div>
         <span className={styles.selectionText}>Annotation</span>
         <TopBarButton

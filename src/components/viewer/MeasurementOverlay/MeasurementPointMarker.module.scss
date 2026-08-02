@@ -1,0 +1,35 @@
+.measurementPointMarker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  width: 0;
+  height: 0;
+}
+
+.hitTarget {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate(-50%, -50%);
+  width: 24px;
+  height: 24px;
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.beaconSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px rgba(0, 255, 255, 0.6));
+}
+
+.capRing {
+  fill: #00FFFF;
+  stroke: #FFFFFF;
+  stroke-width: 1.5;
+}

@@ -5,6 +5,7 @@ import CesiumComponent from 'components/viewer/CesiumComponent/CesiumComponent';
 import CompassWidget from 'components/viewer/CompassWidget/CompassWidget';
 import NomenclatureSearch from 'components/viewer/NomenclatureSearch/NomenclatureSearch';
 import FeaturePointsOverlay from 'components/navigation/FeaturesSection/components/FeaturePointsOverlay';
+import MeasurementOverlay from 'components/viewer/MeasurementOverlay/MeasurementOverlay';
 import { BoundaryRefProvider } from 'components/reference/BoundaryRefProvider';
 import { DialogProvider, DialogRenderer } from 'utils/DialogWindowManagement';
 import { SidebarProvider, useSidebarContext } from 'utils/context/SidebarContext';
@@ -12,6 +13,7 @@ import Sidebar from 'components/layout/Sidebar/Sidebar';
 import { LayerProvider } from 'utils/context/LayerContext';
 import { ViewerProvider } from 'utils/context/ViewerContext';
 import { FeaturesProvider } from 'utils/context/FeaturesContext';
+import { MeasurementProvider } from 'utils/context/MeasurementContext';
 import { initializeLayerStats } from 'services/LayerStatsService';
 import { initializeColormapService } from 'services/ColormapService';
 import { ZIndexProvider } from 'utils/ZIndexProvider';
@@ -44,6 +46,7 @@ const MainPageContent: React.FC = () => {
               <CompassWidget />
               <NomenclatureSearch />
               <FeaturePointsOverlay />
+              <MeasurementOverlay />
             </div>
           </div>
           <DialogRenderer />
@@ -79,13 +82,15 @@ const MainPage = () => {
       <MouseTrackingProvider>
         <LayerProvider>
           <FeaturesProvider>
-            <ZIndexProvider>
-              <SidebarProvider>
-                <ScannerProvider>
-                  <MainPageContent />
-                </ScannerProvider>
-              </SidebarProvider>
-            </ZIndexProvider>
+            <MeasurementProvider>
+              <ZIndexProvider>
+                <SidebarProvider>
+                  <ScannerProvider>
+                    <MainPageContent />
+                  </ScannerProvider>
+                </SidebarProvider>
+              </ZIndexProvider>
+            </MeasurementProvider>
           </FeaturesProvider>
         </LayerProvider>
       </MouseTrackingProvider>

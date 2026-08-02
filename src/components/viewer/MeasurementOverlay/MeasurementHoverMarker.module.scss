@@ -1,0 +1,33 @@
+.measurementHoverMarker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 49;
+  width: 0;
+  height: 0;
+}
+
+.beaconSvg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.4));
+}
+
+@keyframes measurementHoverPulse {
+  0%, 100% {
+    r: 3px;
+    opacity: 0.8;
+  }
+  50% {
+    r: 6px;
+    opacity: 0.25;
+  }
+}
+
+.capRing {
+  fill: #FFFFFF;
+  animation: measurementHoverPulse 1.4s ease-in-out infinite;
+}
