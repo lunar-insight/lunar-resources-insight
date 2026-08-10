@@ -329,6 +329,11 @@ export class PointValueService {
 
     try {
       const results = await Promise.allSettled(promises);
+
+      // Discards results for requests that outlive tracking being disabled,
+      // so a stale response can't overwrite the paused notification.
+      if (!this.isMouseTrackingEnabled) return;
+
       const pointValues: PointValue[] = [];
 
       results.forEach((results, index) => {
@@ -356,8 +361,8 @@ export class PointValueService {
       });
 
       // Notify callbacks only when there is valid values
-      if (Object.keys(allValues).length > 0 && this.isMouseTrackingEnabled) {
-        this.notifyValuesUpdate(allValues, false); // Second place is notification for "isPaused = false"
+      if (Object.keys(allValues).length > 0) {
+        this.notifyValuesUpdate(allValues, false);
       } else {
         // Send empty values but not paused state if we're just outside bounds
         this.notifyValuesUpdate({}, false);

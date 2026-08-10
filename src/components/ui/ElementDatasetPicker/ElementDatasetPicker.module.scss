@@ -1,0 +1,139 @@
+.wrapper {
+  position: absolute;
+  transform: translate(-50%, 0);
+}
+
+.trigger {
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary);
+  border: 1.5px solid var(--color-neutralVariant);
+  color: var(--color-neutralVariant);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+  transition: background 0.15s, border-color 0.15s;
+
+  &[data-hovered],
+  &[data-pressed],
+  &[data-open] {
+    background: var(--color-quaternary);
+  }
+
+  span {
+    font-size: 11px;
+    font-variation-settings: 'FILL' 1;
+  }
+}
+
+.popover {
+  width: 230px;
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-tertiary);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  padding: 0;
+  outline: none;
+
+  &[data-entering] {
+    animation: picker-popover-slide 200ms;
+  }
+
+  &[data-exiting] {
+    animation: picker-popover-slide 200ms reverse ease-in;
+  }
+}
+
+.dialog {
+  padding: 0.9rem 1rem;
+  outline: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-tertiary);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.68rem;
+  color: var(--color-neutralVariant);
+  line-height: 1.5;
+  margin: -0.2rem 0 0 0;
+}
+
+.pillGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.30);
+  border: 1px solid var(--color-quaternary);
+  border-radius: 4px;
+  color: var(--color-tertiary);
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  &[data-hovered] {
+    background: rgba(var(--color-secondary-rgb), 0.18);
+    border-color: var(--color-secondary);
+    color: var(--color-neutralVariant);
+  }
+
+  &.active {
+    background: rgba(var(--color-secondary-rgb), 0.35);
+    border-color: var(--color-secondary);
+    color: var(--color-neutralVariant);
+  }
+}
+
+.pillMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.pillLabel {
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.pillValue {
+  font-size: 0.65rem;
+  font-family: 'Roboto Mono', 'Courier New', monospace;
+  opacity: 0.85;
+}
+
+.check {
+  font-size: 15px;
+  opacity: 0;
+}
+
+.pill.active .check {
+  opacity: 1;
+}
+
+@keyframes picker-popover-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

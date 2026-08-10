@@ -54,8 +54,17 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   const [isHovered, setIsHovered] = useState(false);
   const [isPositionReady, setIsPositionReady] = useState(false);
   const [hasBeenPositioned, setHasBeenPositioned] = useState(false);
+  const hoverLeaveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useMouseTrackingControl(isDragging || isHovered, `draggable-box-${id}`);
+
+  useEffect(() => {
+    return () => {
+      if (hoverLeaveTimeoutRef.current) {
+        clearTimeout(hoverLeaveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Calculate initial centered position with cascade
   const initialPosition = useInitialPosition({
@@ -170,12 +179,24 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
 
   const titleBarProps = mergeProps(moveProps, pressProps);
 
+  // Leaving is delayed slightly to absorb sub-pixel mouseleave/mouseenter
+  // jitter at the box's edge, so scan tracking doesn't thrash on and off.
   const handleMouseEnter = () => {
+    if (hoverLeaveTimeoutRef.current) {
+      clearTimeout(hoverLeaveTimeoutRef.current);
+      hoverLeaveTimeoutRef.current = null;
+    }
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
-    setIsHovered(false);
+    if (hoverLeaveTimeoutRef.current) {
+      clearTimeout(hoverLeaveTimeoutRef.current);
+    }
+    hoverLeaveTimeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+      hoverLeaveTimeoutRef.current = null;
+    }, 120);
   }
 
   const inlineStyles: React.CSSProperties = {

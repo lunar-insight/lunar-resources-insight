@@ -12,6 +12,11 @@ $count-rate-color: #fcd34d;
   align-items: center;
   flex-direction: column;
 
+  .svgWrapper {
+    position: relative;
+    width: 100%;
+  }
+
   // ── D3-managed classes — :global prevents CSS Modules from hashing these names
   :global {
     svg {
@@ -226,5 +231,23 @@ $count-rate-color: #fcd34d;
   .nodataMuted {
     color: #555555;
     border-color: rgba(85, 85, 85, 0.4);
+  }
+
+  // Scanning is paused (cursor off the globe, or over this box's own UI):
+  // real bars and count-rate rows stay visible at their last known values,
+  // just dimmed. Nodata bars already communicate "no data" on their own and
+  // are left untouched.
+  &.paused {
+    :global {
+      .resource-group {
+        opacity: 0.4;
+        transition: opacity 0.3s ease;
+      }
+    }
+
+    .countRateRow:not(.countRateRowNodata) {
+      opacity: 0.4;
+      transition: opacity 0.3s ease;
+    }
   }
 }

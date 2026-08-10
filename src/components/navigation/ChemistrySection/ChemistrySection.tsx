@@ -29,6 +29,20 @@ const ChemistrySection: React.FC = () => {
   const [derivedIndexHoverValues, setDerivedIndexHoverValues] = useState<{[key: string]: number} | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Which layer feeds the bar for a given symbol, when more than one selected
+  // layer resolves to the same element/compound. State lives at this level
+  // so the choice survives the box unmounting on every scan pause/resume.
+  const [activeChemicalDataset, setActiveChemicalDataset] = useState<Map<string, string>>(new Map());
+  const [activeCompoundDataset, setActiveCompoundDataset] = useState<Map<string, string>>(new Map());
+
+  const selectChemicalDataset = (symbol: string, layerName: string) => {
+    setActiveChemicalDataset(prev => new Map(prev).set(symbol, layerName));
+  };
+
+  const selectCompoundDataset = (symbol: string, layerName: string) => {
+    setActiveCompoundDataset(prev => new Map(prev).set(symbol, layerName));
+  };
+
   const boundaryRef = useBoundaryRef();
   const { addLayer, removeLayer, selectedLayers } = useLayerContext();
   const { registerModal, unregisterModal } = useZIndex();
@@ -95,8 +109,8 @@ const ChemistrySection: React.FC = () => {
     const unsubscribe = pointValueService.onValuesUpdate((data) => {
       setIsPaused(data.isPaused || false);
       if (data.isPaused) {
-        setHoverValues(null);
-        setCompoundHoverValues(null);
+        // Element and compound bars keep their last real values here and dim
+        // via ResourceBarsVisualizer's isPaused prop.
         setDerivedIndexHoverValues(null);
         return;
       }
@@ -206,15 +220,6 @@ const ChemistrySection: React.FC = () => {
   };
 
   const renderCompoundBoxContent = () => {
-    if (isPaused) {
-      return (
-        <div>
-          <p>⏸️ Scan paused</p>
-          <small>Move the mouse on the globe to resume</small>
-        </div>
-      );
-    }
-
     if (compoundHoverValues === null) {
       return <p>Hover over the map to scan resources</p>;
     }
@@ -227,6 +232,9 @@ const ChemistrySection: React.FC = () => {
         values={compoundHoverValues}
         nodataLayerIds={nodataLayerIds}
         width={270}
+        activeDatasetBySymbol={activeCompoundDataset}
+        onSelectDataset={selectCompoundDataset}
+        isPaused={isPaused}
       />
     );
   };
@@ -258,15 +266,6 @@ const ChemistrySection: React.FC = () => {
   };
 
   const renderValueBoxContent = () => {
-    if (isPaused) {
-      return (
-        <div>
-          <p>⏸️ Scan paused</p>
-          <small>Move the mouse on the globe to resume</small>
-        </div>
-      );
-    }
-
     if (hoverValues === null) {
       return <p>Hover over the map to scan resources</p>;
     }
@@ -281,6 +280,9 @@ const ChemistrySection: React.FC = () => {
         nodataLayerIds={nodataLayerIds}
         width={270}
         height={250}
+        activeDatasetBySymbol={activeChemicalDataset}
+        onSelectDataset={selectChemicalDataset}
+        isPaused={isPaused}
       />
     );
   };

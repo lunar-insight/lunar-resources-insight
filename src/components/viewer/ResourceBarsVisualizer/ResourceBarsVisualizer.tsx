@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
-import { layersConfig } from 'geoConfigExporter';
+import { layersConfig, type LayerConfig } from 'geoConfigExporter';
 import { elements } from 'constants/periodicTableData';
 import { ELEMENT_REFERENCE_RANGES, COMPOUND_REFERENCE_RANGES, COMPOUND_SYMBOLS } from 'constants/elementReferenceRanges';
+import { ElementDatasetPicker, type DatasetCandidate } from 'components/ui/ElementDatasetPicker/ElementDatasetPicker';
 import styles from './ResourceBarsVisualizer.module.scss';
 
 export interface ResourceData {
@@ -31,16 +32,53 @@ export interface NodataResourceData {
   units: string;
 }
 
+interface SymbolCandidate {
+  layerName: string;
+  value: number;
+  layerConfig: LayerConfig;
+  elementName: string;
+  isCompound: boolean;
+}
+
+interface NodataSymbolCandidate {
+  layerName: string;
+  layerConfig: LayerConfig;
+}
+
+interface PickerInfo {
+  symbol: string;
+  layerName: string;
+  activeLayerName: string;
+  candidates: DatasetCandidate[];
+}
+
+interface PickerPosition {
+  x: number;
+  y: number;
+}
+
 interface ResourceBarsVisalizerProps {
   values: { [key: string]: number };
   allValues?: { [key: string]: number };
   nodataLayerIds?: string[];
   width?: number;
   height?: number;
+  activeDatasetBySymbol?: Map<string, string>;
+  onSelectDataset?: (symbol: string, layerName: string) => void;
+  isPaused?: boolean;
 }
 
 const PANEL_HEIGHT = 220;
 const MAX_HATCH_OPACITY = 0.35;
+
+const CHART_MARGIN_TOP = 30;
+const CHART_MARGIN_LEFT = 0;
+const CHART_AXIS_WIDTH = 50;
+const CHART_MARGIN_BOTTOM_DEFAULT = 55;
+// Extra room reserved below the value row so the dataset-picker toggle
+// (rendered as an HTML overlay, not SVG) never overlaps the next panel.
+const CHART_MARGIN_BOTTOM_WITH_PICKER = 71;
+const PICKER_Y_OFFSET = 59;
 
 function getElementSymbol(elementName: string): string {
   const element = elements.find(el => el.name.toLowerCase() === elementName.toLowerCase());
@@ -51,10 +89,14 @@ function getCompoundSymbol(compoundName: string): string {
   return COMPOUND_SYMBOLS[compoundName] ?? compoundName.substring(0, 3).toUpperCase();
 }
 
-export function calculateAbundanceScore(layerName: string, value: number): number {
-  const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
+function findLayerEntry(layerName: string): [string, LayerConfig] | undefined {
+  return Object.entries(layersConfig.layers).find(([layerId, config]) => {
     return layerId === layerName || config.element === layerName;
   });
+}
+
+export function calculateAbundanceScore(layerName: string, value: number): number {
+  const layerEntry = findLayerEntry(layerName);
 
   if (!layerEntry) {
     console.warn(`Layer configuration not found for: ${layerName}`);
@@ -127,7 +169,8 @@ function renderBarsPanel(
   data: ResourceData[],
   nodataData: NodataResourceData[],
   getColor: (d: ResourceData) => string,
-  valueTextFill: string
+  valueTextFill: string,
+  marginBottom: number
 ): ScaleRefs {
   const svg = d3.select(svgEl);
   svg.selectAll('*').remove();
@@ -147,8 +190,8 @@ function renderBarsPanel(
   const actualWidth = svgEl.clientWidth;
   const actualHeight = svgEl.clientHeight;
 
-  const margin = { top: 30, right: 0, bottom: 55, left: 0 };
-  const axisWidth = 50;
+  const margin = { top: CHART_MARGIN_TOP, right: 0, bottom: marginBottom, left: CHART_MARGIN_LEFT };
+  const axisWidth = CHART_AXIS_WIDTH;
   const innerWidth = actualWidth - margin.left - margin.right;
   const innerHeight = actualHeight - margin.top - margin.bottom;
 
@@ -495,10 +538,26 @@ function renderBarsPanel(
   return { yScale, xScale, innerHeight };
 }
 
+function computePickerPositions(pickers: PickerInfo[], scales: ScaleRefs): Record<string, PickerPosition> {
+  const positions: Record<string, PickerPosition> = {};
+  pickers.forEach(picker => {
+    const bandStart = scales.xScale(picker.layerName);
+    if (bandStart === undefined) return;
+    positions[picker.symbol] = {
+      x: CHART_MARGIN_LEFT + bandStart + scales.xScale.bandwidth() / 2,
+      y: CHART_MARGIN_TOP + scales.innerHeight + PICKER_Y_OFFSET,
+    };
+  });
+  return positions;
+}
+
 export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   values,
   nodataLayerIds = [],
-  width: propWidth
+  width: propWidth,
+  activeDatasetBySymbol,
+  onSelectDataset,
+  isPaused = false,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgElementWtRef = useRef<SVGSVGElement>(null);
@@ -511,6 +570,23 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const prevNodataElementWt = useRef<NodataResourceData[]>([]);
   const prevNodataElementPpm = useRef<NodataResourceData[]>([]);
   const prevNodataCompound = useRef<NodataResourceData[]>([]);
+  const prevHasPickersElementWt = useRef(false);
+  const prevHasPickersElementPpm = useRef(false);
+  const prevHasPickersCompound = useRef(false);
+
+  const [internalActiveDataset, setInternalActiveDataset] = useState<Map<string, string>>(new Map());
+  const activeDataset = activeDatasetBySymbol ?? internalActiveDataset;
+  const selectDataset = (symbol: string, layerName: string) => {
+    if (onSelectDataset) {
+      onSelectDataset(symbol, layerName);
+    } else {
+      setInternalActiveDataset(prev => new Map(prev).set(symbol, layerName));
+    }
+  };
+
+  const [elementWtPositions, setElementWtPositions] = useState<Record<string, PickerPosition>>({});
+  const [elementPpmPositions, setElementPpmPositions] = useState<Record<string, PickerPosition>>({});
+  const [compoundPositions, setCompoundPositions] = useState<Record<string, PickerPosition>>({});
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -537,27 +613,72 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     d3.scaleSequential(d3.interpolateGreens).domain([1, 0])
   , []);
 
-  const resourceData = useMemo(() => {
-    const seenSymbols = new Set<string>();
+  // Every selected layer that currently has a value, grouped by the symbol
+  // it resolves to. A symbol with more than one candidate needs the caller
+  // to pick which one is active, via activeDatasetBySymbol.
+  const symbolGroups = useMemo(() => {
+    const groups = new Map<string, SymbolCandidate[]>();
 
-    return Object.entries(values).flatMap(([layerName, value]) => {
-      const layerEntry = Object.entries(layersConfig.layers).find(([layerId, config]) => {
-        return layerId === layerName || config.element === layerName;
-      });
-
+    Object.entries(values).forEach(([layerName, value]) => {
+      const layerEntry = findLayerEntry(layerName);
       const layerConfig = layerEntry?.[1];
-      if (layerConfig?.units === 'count_rate') return [];
+      if (!layerConfig || layerConfig.units === 'count_rate') return;
 
-      const isCompound = layerConfig?.category === 'compound';
-      const compoundName = isCompound ? (layerConfig?.compound ?? '') : '';
-      const elementName = isCompound ? '' : (layerConfig?.element ?? '');
+      const isCompound = layerConfig.category === 'compound';
+      const compoundName = isCompound ? (layerConfig.compound ?? '') : '';
+      const elementName = isCompound ? '' : (layerConfig.element ?? '');
 
       const symbol = isCompound && compoundName
         ? getCompoundSymbol(compoundName)
         : elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
 
-      if (seenSymbols.has(symbol)) return [];
-      seenSymbols.add(symbol);
+      const list = groups.get(symbol) ?? [];
+      list.push({ layerName, value, layerConfig, elementName, isCompound });
+      groups.set(symbol, list);
+    });
+
+    return groups;
+  }, [values]);
+
+  // Every selected layer that has no value at the current point, grouped by
+  // the symbol it resolves to. A symbol's total candidate count (this plus
+  // symbolGroups) determines whether its picker is shown, so the picker
+  // stays available even while its preferred layer is temporarily nodata.
+  const nodataSymbolGroups = useMemo(() => {
+    const groups = new Map<string, NodataSymbolCandidate[]>();
+
+    nodataLayerIds.forEach(layerName => {
+      const layerConfig = layersConfig.layers[layerName];
+      if (!layerConfig || layerConfig.units === 'count_rate') return;
+
+      const isCompound = layerConfig.category === 'compound';
+      const compoundName = isCompound ? (layerConfig.compound ?? '') : '';
+      const elementName = isCompound ? '' : (layerConfig.element ?? '');
+
+      const symbol = isCompound && compoundName
+        ? getCompoundSymbol(compoundName)
+        : elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+
+      const list = groups.get(symbol) ?? [];
+      list.push({ layerName, layerConfig });
+      groups.set(symbol, list);
+    });
+
+    return groups;
+  }, [nodataLayerIds]);
+
+  const resourceData = useMemo(() => {
+    const result: ResourceData[] = [];
+
+    symbolGroups.forEach((candidates, symbol) => {
+      const preferredLayerName = activeDataset.get(symbol);
+
+      // A picked candidate with no current value is excluded here, so the
+      // symbol renders as nodata.
+      if (preferredLayerName && !candidates.some(c => c.layerName === preferredLayerName)) return;
+
+      const active = candidates.find(c => c.layerName === preferredLayerName) ?? candidates[0];
+      const { layerName, value, isCompound, elementName } = active;
 
       let units: string;
       if (isCompound) {
@@ -572,9 +693,11 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       const color = colorScale(1 - continuousPosition);
       const category: 'chemical' | 'compound' = isCompound ? 'compound' : 'chemical';
 
-      return [{ layerName, value, abundanceScore, continuousPosition, color, symbol, elementName, units, category }];
-    }) as ResourceData[];
-  }, [values, colorScale]);
+      result.push({ layerName, value, abundanceScore, continuousPosition, color, symbol, elementName, units, category });
+    });
+
+    return result;
+  }, [symbolGroups, activeDataset, colorScale]);
 
   const countRateData = useMemo((): CountRateData[] => {
     return Object.entries(values).flatMap(([layerName, value]) => {
@@ -591,53 +714,55 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const elementPpmData = useMemo(() => resourceData.filter(d => d.units === 'ppm'), [resourceData]);
   const compoundResourceData = useMemo(() => resourceData.filter(d => d.category === 'compound'), [resourceData]);
 
+  // One nodata layer per symbol: the picked candidate when it's nodata,
+  // otherwise the first nodata candidate. Keeps the N/A placeholder bar tied
+  // to the same layer the picker highlights as active.
+  const representativeNodataBySymbol = useMemo(() => {
+    const map = new Map<string, NodataSymbolCandidate>();
+    nodataSymbolGroups.forEach((candidates, symbol) => {
+      const preferredLayerName = activeDataset.get(symbol);
+      map.set(symbol, candidates.find(c => c.layerName === preferredLayerName) ?? candidates[0]);
+    });
+    return map;
+  }, [nodataSymbolGroups, activeDataset]);
+
   const nodataElementWtData = useMemo((): NodataResourceData[] => {
     const realSymbols = new Set(resourceData.map(d => d.symbol));
-    const seenSymbols = new Set<string>();
-    return nodataLayerIds.flatMap(layerName => {
-      const layerConfig = layersConfig.layers[layerName];
-      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return [];
+    const result: NodataResourceData[] = [];
+    representativeNodataBySymbol.forEach(({ layerName, layerConfig }, symbol) => {
+      if (realSymbols.has(symbol) || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return;
       const elementName = layerConfig.element ?? '';
-      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
-      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
-      seenSymbols.add(symbol);
       const range = ELEMENT_REFERENCE_RANGES[elementName];
       const units = range?.units ?? 'wt%';
-      if (units !== 'wt%') return [];
-      return [{ layerName, symbol, elementName, units }];
+      if (units !== 'wt%') return;
+      result.push({ layerName, symbol, elementName, units });
     });
-  }, [nodataLayerIds, resourceData]);
+    return result;
+  }, [representativeNodataBySymbol, resourceData]);
 
   const nodataElementPpmData = useMemo((): NodataResourceData[] => {
     const realSymbols = new Set(resourceData.map(d => d.symbol));
-    const seenSymbols = new Set<string>();
-    return nodataLayerIds.flatMap(layerName => {
-      const layerConfig = layersConfig.layers[layerName];
-      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return [];
+    const result: NodataResourceData[] = [];
+    representativeNodataBySymbol.forEach(({ layerName, layerConfig }, symbol) => {
+      if (realSymbols.has(symbol) || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return;
       const elementName = layerConfig.element ?? '';
-      const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
-      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
-      seenSymbols.add(symbol);
       const range = ELEMENT_REFERENCE_RANGES[elementName];
       const units = range?.units ?? 'wt%';
-      if (units !== 'ppm') return [];
-      return [{ layerName, symbol, elementName, units }];
+      if (units !== 'ppm') return;
+      result.push({ layerName, symbol, elementName, units });
     });
-  }, [nodataLayerIds, resourceData]);
+    return result;
+  }, [representativeNodataBySymbol, resourceData]);
 
   const nodataCompoundLayerData = useMemo((): NodataResourceData[] => {
     const realSymbols = new Set(resourceData.map(d => d.symbol));
-    const seenSymbols = new Set<string>();
-    return nodataLayerIds.flatMap(layerName => {
-      const layerConfig = layersConfig.layers[layerName];
-      if (!layerConfig || layerConfig.category !== 'compound') return [];
-      const compoundName = layerConfig.compound ?? '';
-      const symbol = compoundName ? getCompoundSymbol(compoundName) : layerName.substring(0, 3).toUpperCase();
-      if (realSymbols.has(symbol) || seenSymbols.has(symbol)) return [];
-      seenSymbols.add(symbol);
-      return [{ layerName, symbol, elementName: compoundName, units: 'wt%' }];
+    const result: NodataResourceData[] = [];
+    representativeNodataBySymbol.forEach(({ layerName, layerConfig }, symbol) => {
+      if (realSymbols.has(symbol) || layerConfig.category !== 'compound') return;
+      result.push({ layerName, symbol, elementName: layerConfig.compound ?? '', units: 'wt%' });
     });
-  }, [nodataLayerIds, resourceData]);
+    return result;
+  }, [representativeNodataBySymbol, resourceData]);
 
   const nodataCountRateData = useMemo((): NodataResourceData[] => {
     return nodataLayerIds.flatMap(layerName => {
@@ -649,40 +774,155 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     });
   }, [nodataLayerIds]);
 
+  const buildCandidateList = (symbol: string, units: string): DatasetCandidate[] => [
+    ...(symbolGroups.get(symbol) ?? []).map(c => ({
+      layerName: c.layerName,
+      label: c.layerConfig.displayName ?? c.layerName,
+      valueLabel: `${c.value.toFixed(2)} ${units}`,
+    })),
+    ...(nodataSymbolGroups.get(symbol) ?? []).map(c => ({
+      layerName: c.layerName,
+      label: c.layerConfig.displayName ?? c.layerName,
+      valueLabel: 'No data here',
+    })),
+  ];
+
+  // May be a nodata layer: the bar always falls back to a real value, but
+  // the popover still highlights the actual picked candidate.
+  const activeLayerNameFor = (symbol: string): string => {
+    const realCandidates = symbolGroups.get(symbol) ?? [];
+    const nodataCandidates = nodataSymbolGroups.get(symbol) ?? [];
+    const defaultLayerName = realCandidates[0]?.layerName ?? nodataCandidates[0]?.layerName ?? symbol;
+    return activeDataset.get(symbol) ?? defaultLayerName;
+  };
+
+  // A picker anchors to whichever bar is actually drawn for its symbol: the
+  // real bar when at least one candidate currently has a value, otherwise
+  // the dashed nodata placeholder (both are part of the same xScale domain).
+  // This keeps the picker available even when every candidate for a symbol
+  // is nodata at the current point, not only when some of them are.
+  const buildPickers = (panelData: ResourceData[], panelNodataData: NodataResourceData[]): PickerInfo[] => {
+    const pickers: PickerInfo[] = [];
+    const handledSymbols = new Set<string>();
+
+    panelData.forEach(d => {
+      handledSymbols.add(d.symbol);
+      const totalCandidates = (symbolGroups.get(d.symbol) ?? []).length + (nodataSymbolGroups.get(d.symbol) ?? []).length;
+      if (totalCandidates < 2) return;
+      pickers.push({
+        symbol: d.symbol,
+        layerName: d.layerName,
+        activeLayerName: activeLayerNameFor(d.symbol),
+        candidates: buildCandidateList(d.symbol, d.units),
+      });
+    });
+
+    panelNodataData.forEach(nd => {
+      if (handledSymbols.has(nd.symbol)) return;
+      handledSymbols.add(nd.symbol);
+      const totalCandidates = (symbolGroups.get(nd.symbol) ?? []).length + (nodataSymbolGroups.get(nd.symbol) ?? []).length;
+      if (totalCandidates < 2) return;
+      pickers.push({
+        symbol: nd.symbol,
+        layerName: nd.layerName,
+        activeLayerName: activeLayerNameFor(nd.symbol),
+        candidates: buildCandidateList(nd.symbol, nd.units),
+      });
+    });
+
+    return pickers;
+  };
+
+  const elementWtPickers = useMemo(
+    () => buildPickers(elementWtData, nodataElementWtData),
+    [elementWtData, nodataElementWtData, symbolGroups, nodataSymbolGroups]
+  );
+  const elementPpmPickers = useMemo(
+    () => buildPickers(elementPpmData, nodataElementPpmData),
+    [elementPpmData, nodataElementPpmData, symbolGroups, nodataSymbolGroups]
+  );
+  const compoundPickers = useMemo(
+    () => buildPickers(compoundResourceData, nodataCompoundLayerData),
+    [compoundResourceData, nodataCompoundLayerData, symbolGroups, nodataSymbolGroups]
+  );
+
   useEffect(() => {
     if (!svgElementWtRef.current || (elementWtData.length === 0 && nodataElementWtData.length === 0)) return;
-    if (!elementWtScalesRef.current || !shallowEqualNodataLayers(prevNodataElementWt.current, nodataElementWtData)) {
+    const hasPickers = elementWtPickers.length > 0;
+    if (
+      !elementWtScalesRef.current ||
+      !shallowEqualNodataLayers(prevNodataElementWt.current, nodataElementWtData) ||
+      prevHasPickersElementWt.current !== hasPickers
+    ) {
       prevNodataElementWt.current = nodataElementWtData;
-      elementWtScalesRef.current = renderBarsPanel(svgElementWtRef.current, elementWtData, nodataElementWtData, d => d.color, '#e0e0e0');
+      prevHasPickersElementWt.current = hasPickers;
+      const marginBottom = hasPickers ? CHART_MARGIN_BOTTOM_WITH_PICKER : CHART_MARGIN_BOTTOM_DEFAULT;
+      elementWtScalesRef.current = renderBarsPanel(svgElementWtRef.current, elementWtData, nodataElementWtData, d => d.color, '#e0e0e0', marginBottom);
+      setElementWtPositions(computePickerPositions(elementWtPickers, elementWtScalesRef.current));
     } else {
       updateBarsOnly(svgElementWtRef.current, elementWtData, '#e0e0e0');
     }
-  }, [elementWtData, nodataElementWtData]);
+  }, [elementWtData, nodataElementWtData, elementWtPickers]);
 
   useEffect(() => {
     if (!svgElementPpmRef.current || (elementPpmData.length === 0 && nodataElementPpmData.length === 0)) return;
     const getColor = (d: ResourceData) => ppmColorScale(1 - d.continuousPosition);
-    if (!elementPpmScalesRef.current || !shallowEqualNodataLayers(prevNodataElementPpm.current, nodataElementPpmData)) {
+    const hasPickers = elementPpmPickers.length > 0;
+    if (
+      !elementPpmScalesRef.current ||
+      !shallowEqualNodataLayers(prevNodataElementPpm.current, nodataElementPpmData) ||
+      prevHasPickersElementPpm.current !== hasPickers
+    ) {
       prevNodataElementPpm.current = nodataElementPpmData;
-      elementPpmScalesRef.current = renderBarsPanel(svgElementPpmRef.current, elementPpmData, nodataElementPpmData, getColor, '#e0e0e0');
+      prevHasPickersElementPpm.current = hasPickers;
+      const marginBottom = hasPickers ? CHART_MARGIN_BOTTOM_WITH_PICKER : CHART_MARGIN_BOTTOM_DEFAULT;
+      elementPpmScalesRef.current = renderBarsPanel(svgElementPpmRef.current, elementPpmData, nodataElementPpmData, getColor, '#e0e0e0', marginBottom);
+      setElementPpmPositions(computePickerPositions(elementPpmPickers, elementPpmScalesRef.current));
     } else {
       updateBarsOnly(svgElementPpmRef.current, elementPpmData, '#e0e0e0');
     }
-  }, [elementPpmData, nodataElementPpmData, ppmColorScale]);
+  }, [elementPpmData, nodataElementPpmData, elementPpmPickers, ppmColorScale]);
 
   useEffect(() => {
     if (!svgCompoundRef.current || (compoundResourceData.length === 0 && nodataCompoundLayerData.length === 0)) return;
     const getColor = (d: ResourceData) => compoundColorScale(1 - d.continuousPosition);
-    if (!compoundScalesRef.current || !shallowEqualNodataLayers(prevNodataCompound.current, nodataCompoundLayerData)) {
+    const hasPickers = compoundPickers.length > 0;
+    if (
+      !compoundScalesRef.current ||
+      !shallowEqualNodataLayers(prevNodataCompound.current, nodataCompoundLayerData) ||
+      prevHasPickersCompound.current !== hasPickers
+    ) {
       prevNodataCompound.current = nodataCompoundLayerData;
-      compoundScalesRef.current = renderBarsPanel(svgCompoundRef.current, compoundResourceData, nodataCompoundLayerData, getColor, '#e0e0e0');
+      prevHasPickersCompound.current = hasPickers;
+      const marginBottom = hasPickers ? CHART_MARGIN_BOTTOM_WITH_PICKER : CHART_MARGIN_BOTTOM_DEFAULT;
+      compoundScalesRef.current = renderBarsPanel(svgCompoundRef.current, compoundResourceData, nodataCompoundLayerData, getColor, '#e0e0e0', marginBottom);
+      setCompoundPositions(computePickerPositions(compoundPickers, compoundScalesRef.current));
     } else {
       updateBarsOnly(svgCompoundRef.current, compoundResourceData, '#e0e0e0');
     }
-  }, [compoundResourceData, nodataCompoundLayerData, compoundColorScale]);
+  }, [compoundResourceData, nodataCompoundLayerData, compoundPickers, compoundColorScale]);
+
+  const renderPickers = (pickers: PickerInfo[], positions: Record<string, PickerPosition>) =>
+    pickers.map(picker => {
+      const position = positions[picker.symbol];
+      if (!position) return null;
+      return (
+        <ElementDatasetPicker
+          key={picker.symbol}
+          symbolLabel={picker.symbol}
+          candidates={picker.candidates}
+          activeLayerName={picker.activeLayerName}
+          onSelect={layerName => selectDataset(picker.symbol, layerName)}
+          style={{ left: position.x, top: position.y }}
+        />
+      );
+    });
 
   return (
-    <div ref={containerRef} className={styles.resourceBarsVisualizer}>
+    <div
+      ref={containerRef}
+      className={`${styles.resourceBarsVisualizer}${isPaused ? ` ${styles.paused}` : ''}`}
+    >
 
       {(elementWtData.length > 0 || nodataElementWtData.length > 0) && (
         <>
@@ -691,7 +931,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
             <div className={styles.panelRule} />
             <span className={`${styles.unitBadge} ${styles.wt}`}>wt%</span>
           </div>
-          <svg ref={svgElementWtRef} width={width} height={PANEL_HEIGHT} />
+          <div className={styles.svgWrapper}>
+            <svg ref={svgElementWtRef} width={width} height={PANEL_HEIGHT} />
+            {renderPickers(elementWtPickers, elementWtPositions)}
+          </div>
         </>
       )}
 
@@ -703,7 +946,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
             <div className={styles.panelRule} />
             <span className={`${styles.unitBadge} ${styles.ppm}`}>ppm</span>
           </div>
-          <svg ref={svgElementPpmRef} width={width} height={PANEL_HEIGHT} />
+          <div className={styles.svgWrapper}>
+            <svg ref={svgElementPpmRef} width={width} height={PANEL_HEIGHT} />
+            {renderPickers(elementPpmPickers, elementPpmPositions)}
+          </div>
         </>
       )}
 
@@ -718,7 +964,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
             <div className={styles.panelRule} />
             <span className={`${styles.unitBadge} ${styles.wt}`}>wt%</span>
           </div>
-          <svg ref={svgCompoundRef} width={width} height={PANEL_HEIGHT} />
+          <div className={styles.svgWrapper}>
+            <svg ref={svgCompoundRef} width={width} height={PANEL_HEIGHT} />
+            {renderPickers(compoundPickers, compoundPositions)}
+          </div>
         </>
       )}
 

@@ -26,6 +26,7 @@ interface CesiumComponentProps {
 
 const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const [isCameraMoving, setIsCameraMoving] = useState(false);
+  const [isMouseOffCanvas, setIsMouseOffCanvas] = useState(false);
   const [localViewer, setLocalViewer] = useState<Cesium.Viewer | null>(null);
   const [terrainLoaded, setTerrainLoaded] = useState(false);
 
@@ -34,9 +35,11 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const { activeDrawingTool } = useFeaturesContext();
 
   const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const canvasLeaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const activeDrawingToolRef = useRef<string | null>(null);
 
   useMouseTrackingControl(isCameraMoving, 'cesium-camera');
+  useMouseTrackingControl(isMouseOffCanvas, 'cesium-canvas-boundary');
   useLoadingScreen(localViewer);
 
   // For Cesium initialisation
@@ -134,6 +137,16 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
 
       const mouseLeaveHandler = () => {
         canvas.style.cursor = 'default';
+
+        // Same grace-window debounce as the box-hover pause, absorbing
+        // leave/enter jitter at the canvas edge.
+        if (canvasLeaveTimeoutRef.current) {
+          clearTimeout(canvasLeaveTimeoutRef.current);
+        }
+        canvasLeaveTimeoutRef.current = setTimeout(() => {
+          setIsMouseOffCanvas(true);
+          canvasLeaveTimeoutRef.current = null;
+        }, 120);
       };
 
       const mouseEnterHandler = () => {
@@ -143,6 +156,12 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
         } else {
           canvas.style.cursor = 'default';
         }
+
+        if (canvasLeaveTimeoutRef.current) {
+          clearTimeout(canvasLeaveTimeoutRef.current);
+          canvasLeaveTimeoutRef.current = null;
+        }
+        setIsMouseOffCanvas(false);
       };
 
       const moveStartRemover = viewer.camera.moveStart.addEventListener(startMovement);
@@ -204,6 +223,10 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       return () => {
         if (resumeTimeoutRef.current) {
           clearTimeout(resumeTimeoutRef.current);
+        }
+
+        if (canvasLeaveTimeoutRef.current) {
+          clearTimeout(canvasLeaveTimeoutRef.current);
         }
 
         if (moveStartRemover) {
