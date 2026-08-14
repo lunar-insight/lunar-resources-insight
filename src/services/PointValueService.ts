@@ -33,6 +33,7 @@ export class PointValueService {
   private fetchThrottleMs: number = 100; // in ms, between requests. Can be 16, 33, 50-100
   private pendingFetch: NodeJS.Timeout | null = null;
   private isCurrentlyFetching: boolean = false;
+  private hasPendingRequest: boolean = false;
   private scanIndicator: ScanIndicator = new ScanIndicator();
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
   private layerBounds: Map<string, Cesium.Rectangle> = new Map();
@@ -166,14 +167,21 @@ export class PointValueService {
       this.pendingFetch = null;
     }
 
-    if (timeSinceLastFetch >= this.fetchThrottleMs && !this.isCurrentlyFetching) {
+    // A request is in flight. The newer position is recorded here and picked up
+    // by executeFetch once that request completes.
+    if (this.isCurrentlyFetching) {
+      this.hasPendingRequest = true;
+      return;
+    }
+
+    if (timeSinceLastFetch >= this.fetchThrottleMs) {
       this.executeFetch();
     } else {
       const delay = Math.max(this.fetchThrottleMs - timeSinceLastFetch, 10);
       this.pendingFetch = setTimeout(() => {
         this.pendingFetch = null;
-        if (this.isActive && this.isMouseTrackingEnabled && !this.isCurrentlyFetching) {
-          this.executeFetch();
+        if (this.isActive && this.isMouseTrackingEnabled) {
+          this.throttledFetchPointValues();
         }
       }, delay);
     }
@@ -182,9 +190,16 @@ export class PointValueService {
   private executeFetch() {
     this.lastFetchTime = Date.now();
     this.isCurrentlyFetching = true;
+    this.hasPendingRequest = false;
 
     this.fetchPointValues().finally(() => {
       this.isCurrentlyFetching = false;
+
+      // The cursor moved while this request was in flight, so the delivered
+      // value is for a stale position. Fetch the current position now.
+      if (this.hasPendingRequest && this.isActive && this.isMouseTrackingEnabled) {
+        this.throttledFetchPointValues();
+      }
     })
   }
 
@@ -193,6 +208,7 @@ export class PointValueService {
       this.isMouseTrackingEnabled = false;
       this.scanIndicator.hide();
       this.notifyValuesUpdate({}, true);
+      this.hasPendingRequest = false;
 
       if (this.pendingFetch) {
         clearTimeout(this.pendingFetch);
@@ -235,9 +251,10 @@ export class PointValueService {
     }
 
     this.scanIndicator.hide();
+    this.hasPendingRequest = false;
 
     if (this.pendingFetch) {
-      clearInterval(this.pendingFetch);
+      clearTimeout(this.pendingFetch);
       this.pendingFetch = null;
     }
   }
