@@ -15,6 +15,9 @@ export interface PointValue {
 
 export interface PointValueCallbackData {
   values: {[layerId: string]: number};
+  // Layers whose request failed. A layer absent from both this list and
+  // `values` has no data at this point, which the server reported successfully.
+  unavailableLayerIds: string[];
   isPaused?: boolean;
 }
 
@@ -31,6 +34,12 @@ export class PointValueService {
   private pendingFetch: NodeJS.Timeout | null = null;
   private isCurrentlyFetching: boolean = false;
   private hasPendingRequest: boolean = false;
+  // Coordinates of the last batch that resolved with every layer answering.
+  // pickEllipsoid is deterministic for a given screen pixel and camera, so
+  // exact equality skips repeat requests for a point already sampled.
+  private lastResolvedPosition: { lon: number; lat: number } | null = null;
+  private readonly maxFetchAttempts: number = 2;
+  private readonly retryDelayMs: number = 150;
   private scanIndicator: ScanIndicator = new ScanIndicator();
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
   private layerBounds: Map<string, Cesium.Rectangle> = new Map();
@@ -46,6 +55,9 @@ export class PointValueService {
 
   setSelectedLayers(layers: string[]) {
     this.selectedLayers = layers;
+    // The new selection has no values yet, so the current point needs sampling
+    // again even though it was already resolved for the previous selection.
+    this.lastResolvedPosition = null;
   }
 
   onValuesUpdate(callback: (data: PointValueCallbackData) => void): () => void {
@@ -58,9 +70,14 @@ export class PointValueService {
     };
   }
 
-  private notifyValuesUpdate(values: {[layerId: string]: number}, isPaused: boolean = false) {
+  private notifyValuesUpdate(
+    values: {[layerId: string]: number},
+    isPaused: boolean = false,
+    unavailableLayerIds: string[] = []
+  ) {
     const callbackData: PointValueCallbackData = {
       values: isPaused ? {} : values,
+      unavailableLayerIds: isPaused ? [] : unavailableLayerIds,
       isPaused
     };
 
@@ -169,6 +186,9 @@ export class PointValueService {
 
   resume() {
     this.isMouseTrackingEnabled = true;
+    // Pausing cleared the displayed values, so the current point is resampled
+    // even when the cursor never left it.
+    this.lastResolvedPosition = null;
     if (this.currentMousePosition && this.isActive) {
       this.scanIndicator.updatePosition(this.currentMousePosition);
       this.throttledFetchPointValues(); // Immediate fetch on recovery
@@ -195,6 +215,7 @@ export class PointValueService {
 
     this.scanIndicator.hide();
     this.hasPendingRequest = false;
+    this.lastResolvedPosition = null;
 
     if (this.pendingFetch) {
       clearTimeout(this.pendingFetch);
@@ -279,7 +300,16 @@ export class PointValueService {
 
     if (layersWithinBounds.length === 0) {
       // No layer have data at this position
+      this.lastResolvedPosition = position;
       this.notifyValuesUpdate({}, false);
+      return;
+    }
+
+    if (
+      this.lastResolvedPosition !== null &&
+      this.lastResolvedPosition.lon === position.lon &&
+      this.lastResolvedPosition.lat === position.lat
+    ) {
       return;
     }
 
@@ -313,20 +343,23 @@ export class PointValueService {
       });
 
       const values: {[layerId: string]: number} = {};
+      const unavailableLayerIds: string[] = [];
 
       pointValues.forEach(pv => {
-        if (pv.value !== null && !pv.error) {
+        if (pv.error) {
+          unavailableLayerIds.push(pv.layerId);
+        } else if (pv.value !== null) {
           values[pv.layerId] = pv.value;
         }
       });
 
-      // Notify callbacks only when there is valid values
-      if (Object.keys(values).length > 0) {
-        this.notifyValuesUpdate(values, false);
-      } else {
-        // Send empty values but not paused state if we're just outside bounds
-        this.notifyValuesUpdate({}, false);
+      // Only a batch where every layer answered marks the point as sampled.
+      // Leaving it unmarked after a failure lets the next mouse event retry it.
+      if (unavailableLayerIds.length === 0) {
+        this.lastResolvedPosition = position;
       }
+
+      this.notifyValuesUpdate(values, false, unavailableLayerIds);
 
     } catch(error) {
       console.error('Error fetching lunar point values:', error);
@@ -345,26 +378,42 @@ export class PointValueService {
       coord_crs: 'IAU:30100'
     });
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    let lastError: unknown = null;
+
+    for (let attempt = 1; attempt <= this.maxFetchAttempts; attempt++) {
+      try {
+        const response = await fetch(url);
+
+        // The tiler answers 404 for a point outside the raster. That is a
+        // successful answer of "no data here", not a failed request.
+        if (response.status === 404) {
+          return { layerId, filename, lon, lat, value: null };
+        }
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        const value = data.values && data.values.length > 0 ? data.values[0] : null;
+
+        return {
+          layerId,
+          filename,
+          lon,
+          lat,
+          value: typeof value === 'number' ? value : null
+        };
+      } catch (error) {
+        lastError = error;
+        if (attempt < this.maxFetchAttempts) {
+          await new Promise(resolve => setTimeout(resolve, this.retryDelayMs));
+        }
       }
-
-      const data = await response.json();
-
-      const value = data.values && data.values.length > 0 ? data.values[0] : null;
-
-      return {
-        layerId,
-        filename,
-        lon,
-        lat,
-        value: typeof value === 'number' ? value : null
-      };
-    } catch (error) {
-      throw new Error(`Failed to fetch point value: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+
+    throw new Error(`Failed to fetch point value: ${lastError instanceof Error ? lastError.message : 'Unknown error'}`);
   }
 
   updateActiveFilename(layerId: string, filename: string) {

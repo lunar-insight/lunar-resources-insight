@@ -27,12 +27,23 @@ function makeFakeViewer() {
     scene: {
       globe: {
         ellipsoid: {
-          cartesianToCartographic: () => ({ longitude: 1, latitude: 2 }),
+          // Screen position carries through to coordinates so distinct cursor
+          // positions resolve to distinct points, which the service's
+          // same-point dedupe depends on. Cesium.Math.toDegrees is mocked as
+          // identity, so lon/lat come out as the screen x/y.
+          cartesianToCartographic: (cartesian: { x: number; y: number }) => ({
+            longitude: cartesian.x,
+            latitude: cartesian.y,
+          }),
         },
       },
     },
     camera: {
-      pickEllipsoid: () => ({ x: 1, y: 2, z: 3 }),
+      pickEllipsoid: (position: { x: number; y: number }) => ({
+        x: position.x,
+        y: position.y,
+        z: 0,
+      }),
     },
   }
 }
@@ -41,6 +52,15 @@ function resolvedFetch(values: number[]) {
   return Promise.resolve({
     ok: true,
     json: async () => ({ values }),
+  })
+}
+
+function failedFetch(status: number) {
+  return Promise.resolve({
+    ok: false,
+    status,
+    statusText: 'Bad Gateway',
+    json: async () => ({}),
   })
 }
 
@@ -165,7 +185,7 @@ describe('PointValueService: pausing while a fetch is in flight', () => {
     await fetchCall
 
     expect(updates).toHaveLength(1)
-    expect(updates[0]).toEqual({ values: {}, isPaused: true })
+    expect(updates[0]).toEqual({ values: {}, unavailableLayerIds: [], isPaused: true })
   })
 
   it('still notifies normally when tracking stays enabled for the whole fetch', async () => {
@@ -184,7 +204,127 @@ describe('PointValueService: pausing while a fetch is in flight', () => {
     expect(updates).toHaveLength(1)
     expect(updates[0]).toEqual({
       values: { layer_a: 7.6 },
+      unavailableLayerIds: [],
       isPaused: false,
     })
+  })
+})
+
+describe('PointValueService: failure is distinct from no data', () => {
+  beforeEach(() => { vi.useFakeTimers() })
+  afterEach(() => { vi.useRealTimers() })
+
+  it('reports a layer as unavailable when its request keeps failing', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a']
+
+    vi.stubGlobal('fetch', vi.fn(() => failedFetch(502)))
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    const fetchCall = service.fetchPointValues()
+    await vi.advanceTimersByTimeAsync(1000)
+    await fetchCall
+
+    expect(updates).toHaveLength(1)
+    expect(updates[0]).toEqual({
+      values: {},
+      unavailableLayerIds: ['layer_a'],
+      isPaused: false,
+    })
+  })
+
+  it('reports no data rather than unavailable when the tiler answers 404', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a']
+
+    const fetchMock = vi.fn(() => failedFetch(404))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    await service.fetchPointValues()
+
+    expect(updates[0]).toEqual({ values: {}, unavailableLayerIds: [], isPaused: false })
+    // A point outside the raster is a definitive answer, so it is not retried.
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('retries a failing request once and reports the value when the retry succeeds', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a']
+
+    const fetchMock = vi.fn()
+      .mockReturnValueOnce(failedFetch(502))
+      .mockReturnValue(resolvedFetch([7.6]))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    const fetchCall = service.fetchPointValues()
+    await vi.advanceTimersByTimeAsync(1000)
+    await fetchCall
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(updates[0]).toEqual({
+      values: { layer_a: 7.6 },
+      unavailableLayerIds: [],
+      isPaused: false,
+    })
+  })
+})
+
+describe('PointValueService: same-point dedupe', () => {
+  beforeEach(() => { vi.useFakeTimers() })
+  afterEach(() => { vi.useRealTimers() })
+
+  it('does not refetch a point already sampled', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.selectedLayers = ['layer_a']
+
+    const fetchMock = vi.fn(() => resolvedFetch([7.6]))
+    vi.stubGlobal('fetch', fetchMock)
+
+    service.currentMousePosition = { x: 10, y: 10 }
+    await service.fetchPointValues()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    await service.fetchPointValues()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    service.currentMousePosition = { x: 11, y: 10 }
+    await service.fetchPointValues()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('resamples a point whose previous batch had a failure', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a']
+
+    const fetchMock = vi.fn(() => failedFetch(502))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const firstCall = service.fetchPointValues()
+    await vi.advanceTimersByTimeAsync(1000)
+    await firstCall
+    const afterFirst = fetchMock.mock.calls.length
+
+    const secondCall = service.fetchPointValues()
+    await vi.advanceTimersByTimeAsync(1000)
+    await secondCall
+
+    expect(fetchMock.mock.calls.length).toBeGreaterThan(afterFirst)
   })
 })

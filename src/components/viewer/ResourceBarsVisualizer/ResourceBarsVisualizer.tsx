@@ -30,6 +30,9 @@ export interface NodataResourceData {
   symbol: string;
   elementName: string;
   units: string;
+  // True when the layer's request failed, so no reading exists for this point.
+  // False when the server reported no data at the point.
+  isUnavailable: boolean;
 }
 
 interface SymbolCandidate {
@@ -43,6 +46,7 @@ interface SymbolCandidate {
 interface NodataSymbolCandidate {
   layerName: string;
   layerConfig: LayerConfig;
+  isUnavailable: boolean;
 }
 
 interface PickerInfo {
@@ -60,6 +64,7 @@ interface PickerPosition {
 interface ResourceBarsVisalizerProps {
   values: { [key: string]: number };
   nodataLayerIds?: string[];
+  unavailableLayerIds?: string[];
   width?: number;
   height?: number;
   activeDatasetBySymbol?: Map<string, string>;
@@ -137,7 +142,7 @@ interface ScaleRefs {
 
 function shallowEqualNodataLayers(a: NodataResourceData[], b: NodataResourceData[]): boolean {
   if (a.length !== b.length) return false;
-  return a.every((item, i) => item.layerName === b[i].layerName);
+  return a.every((item, i) => item.layerName === b[i].layerName && item.isUnavailable === b[i].isUnavailable);
 }
 
 function updateBarsOnly(
@@ -421,7 +426,7 @@ function renderBarsPanel(
     .append('g')
     .attr('class', 'nodata-group')
     .attr('transform', d => `translate(${xScale(d.layerName)}, 0)`)
-    .style('opacity', 0.2);
+    .style('opacity', d => d.isUnavailable ? 0.45 : 0.2);
 
   nodataGroups.append('rect')
     .attr('class', 'nodata-bar')
@@ -430,9 +435,9 @@ function renderBarsPanel(
     .attr('width', effectiveBandwidth)
     .attr('height', innerHeight)
     .attr('fill', 'none')
-    .attr('stroke', '#666')
+    .attr('stroke', d => d.isUnavailable ? '#8a6d3b' : '#666')
     .attr('stroke-width', 1.5)
-    .attr('stroke-dasharray', '5,3');
+    .attr('stroke-dasharray', d => d.isUnavailable ? '2,3' : '5,3');
 
   nodataGroups.append('text')
     .attr('class', 'nodata-label')
@@ -442,10 +447,10 @@ function renderBarsPanel(
     .attr('dominant-baseline', 'middle')
     .style('font-size', '11px')
     .style('font-weight', 'bold')
-    .style('fill', '#bbb')
+    .style('fill', d => d.isUnavailable ? '#d0a85c' : '#bbb')
     .style('font-family', 'Courier New, monospace')
     .style('letter-spacing', '0.08em')
-    .text('N/A');
+    .text(d => d.isUnavailable ? '?' : 'N/A');
 
   nodataGroups.append('rect')
     .attr('class', 'element-symbol-square')
@@ -478,7 +483,7 @@ function renderBarsPanel(
     .style('font-size', '12px')
     .style('fill', '#555')
     .style('font-family', 'Courier New, monospace')
-    .text('—');
+    .text(d => d.isUnavailable ? '?' : '—');
 
   const rollDur = 40;
   const rollPts = 30;
@@ -494,7 +499,12 @@ function renderBarsPanel(
       y: rollBaseY + (Math.random() - 0.5) * rollAmp * 2,
     }));
 
-  nodataGroups.each(function() {
+  // The sweeping trace and the pulse both read as a live reading that found
+  // nothing, which only applies to a point the server answered for. An
+  // unavailable layer renders static.
+  const scanningGroups = nodataGroups.filter(d => !d.isUnavailable);
+
+  scanningGroups.each(function() {
     const rollGroup = this;
     const rollPath = d3.select(rollGroup)
       .append('path')
@@ -517,7 +527,7 @@ function renderBarsPanel(
     rollMorph();
   });
 
-  nodataGroups.each(function() {
+  scanningGroups.each(function() {
     const node = this;
     function pulse() {
       d3.select(node)
@@ -553,6 +563,7 @@ function computePickerPositions(pickers: PickerInfo[], scales: ScaleRefs): Recor
 export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   values,
   nodataLayerIds = [],
+  unavailableLayerIds = [],
   width: propWidth,
   activeDatasetBySymbol,
   onSelectDataset,
@@ -646,7 +657,12 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const nodataSymbolGroups = useMemo(() => {
     const groups = new Map<string, NodataSymbolCandidate[]>();
 
-    nodataLayerIds.forEach(layerName => {
+    const candidates: Array<{ layerName: string; isUnavailable: boolean }> = [
+      ...nodataLayerIds.map(layerName => ({ layerName, isUnavailable: false })),
+      ...unavailableLayerIds.map(layerName => ({ layerName, isUnavailable: true })),
+    ];
+
+    candidates.forEach(({ layerName, isUnavailable }) => {
       const layerConfig = layersConfig.layers[layerName];
       if (!layerConfig || layerConfig.units === 'count_rate') return;
 
@@ -659,12 +675,12 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
         : elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
 
       const list = groups.get(symbol) ?? [];
-      list.push({ layerName, layerConfig });
+      list.push({ layerName, layerConfig, isUnavailable });
       groups.set(symbol, list);
     });
 
     return groups;
-  }, [nodataLayerIds]);
+  }, [nodataLayerIds, unavailableLayerIds]);
 
   const resourceData = useMemo(() => {
     const result: ResourceData[] = [];
@@ -728,13 +744,13 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const nodataElementWtData = useMemo((): NodataResourceData[] => {
     const realSymbols = new Set(resourceData.map(d => d.symbol));
     const result: NodataResourceData[] = [];
-    representativeNodataBySymbol.forEach(({ layerName, layerConfig }, symbol) => {
+    representativeNodataBySymbol.forEach(({ layerName, layerConfig, isUnavailable }, symbol) => {
       if (realSymbols.has(symbol) || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return;
       const elementName = layerConfig.element ?? '';
       const range = ELEMENT_REFERENCE_RANGES[elementName];
       const units = range?.units ?? 'wt%';
       if (units !== 'wt%') return;
-      result.push({ layerName, symbol, elementName, units });
+      result.push({ layerName, symbol, elementName, units, isUnavailable });
     });
     return result;
   }, [representativeNodataBySymbol, resourceData]);
@@ -742,13 +758,13 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const nodataElementPpmData = useMemo((): NodataResourceData[] => {
     const realSymbols = new Set(resourceData.map(d => d.symbol));
     const result: NodataResourceData[] = [];
-    representativeNodataBySymbol.forEach(({ layerName, layerConfig }, symbol) => {
+    representativeNodataBySymbol.forEach(({ layerName, layerConfig, isUnavailable }, symbol) => {
       if (realSymbols.has(symbol) || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return;
       const elementName = layerConfig.element ?? '';
       const range = ELEMENT_REFERENCE_RANGES[elementName];
       const units = range?.units ?? 'wt%';
       if (units !== 'ppm') return;
-      result.push({ layerName, symbol, elementName, units });
+      result.push({ layerName, symbol, elementName, units, isUnavailable });
     });
     return result;
   }, [representativeNodataBySymbol, resourceData]);
@@ -756,22 +772,23 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const nodataCompoundLayerData = useMemo((): NodataResourceData[] => {
     const realSymbols = new Set(resourceData.map(d => d.symbol));
     const result: NodataResourceData[] = [];
-    representativeNodataBySymbol.forEach(({ layerName, layerConfig }, symbol) => {
+    representativeNodataBySymbol.forEach(({ layerName, layerConfig, isUnavailable }, symbol) => {
       if (realSymbols.has(symbol) || layerConfig.category !== 'compound') return;
-      result.push({ layerName, symbol, elementName: layerConfig.compound ?? '', units: 'wt%' });
+      result.push({ layerName, symbol, elementName: layerConfig.compound ?? '', units: 'wt%', isUnavailable });
     });
     return result;
   }, [representativeNodataBySymbol, resourceData]);
 
   const nodataCountRateData = useMemo((): NodataResourceData[] => {
-    return nodataLayerIds.flatMap(layerName => {
+    const unavailable = new Set(unavailableLayerIds);
+    return [...nodataLayerIds, ...unavailableLayerIds].flatMap(layerName => {
       const layerConfig = layersConfig.layers[layerName];
       if (layerConfig?.units !== 'count_rate') return [];
       const elementName = layerConfig.element ?? '';
       const symbol = elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
-      return [{ layerName, symbol, elementName, units: 'count_rate' }];
+      return [{ layerName, symbol, elementName, units: 'count_rate', isUnavailable: unavailable.has(layerName) }];
     });
-  }, [nodataLayerIds]);
+  }, [nodataLayerIds, unavailableLayerIds]);
 
   const buildCandidateList = (symbol: string, units: string): DatasetCandidate[] => [
     ...(symbolGroups.get(symbol) ?? []).map(c => ({
@@ -782,7 +799,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     ...(nodataSymbolGroups.get(symbol) ?? []).map(c => ({
       layerName: c.layerName,
       label: c.layerConfig.displayName ?? c.layerName,
-      valueLabel: 'No data here',
+      valueLabel: c.isUnavailable ? 'Reading unavailable' : 'No data here',
     })),
   ];
 

@@ -26,6 +26,7 @@ const ChemistrySection: React.FC = () => {
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [compoundHoverValues, setCompoundHoverValues] = useState<{[key: string]: number} | null>(null);
   const [derivedIndexHoverValues, setDerivedIndexHoverValues] = useState<{[key: string]: number} | null>(null);
+  const [unavailableLayerIds, setUnavailableLayerIds] = useState<string[]>([]);
   const [isPaused, setIsPaused] = useState(false);
 
   // Which layer feeds the bar for a given symbol, when more than one selected
@@ -99,6 +100,7 @@ const ChemistrySection: React.FC = () => {
       setHoverValues(null);
       setCompoundHoverValues(null);
       setDerivedIndexHoverValues(null);
+      setUnavailableLayerIds([]);
       setIsPaused(false);
       return;
     }
@@ -106,6 +108,7 @@ const ChemistrySection: React.FC = () => {
     pointValueService.start();
     const unsubscribe = pointValueService.onValuesUpdate((data) => {
       setIsPaused(data.isPaused || false);
+      setUnavailableLayerIds(data.unavailableLayerIds);
       if (data.isPaused) {
         // Element and compound bars keep their last real values here and dim
         // via ResourceBarsVisualizer's isPaused prop.
@@ -222,12 +225,15 @@ const ChemistrySection: React.FC = () => {
     }
 
     const presentIds = new Set(Object.keys(compoundHoverValues));
-    const nodataLayerIds = selectedCompoundLayerIds.filter(id => !presentIds.has(id));
+    const unavailableIds = new Set(unavailableLayerIds);
+    const nodataLayerIds = selectedCompoundLayerIds.filter(id => !presentIds.has(id) && !unavailableIds.has(id));
+    const unavailableIdsForPanel = selectedCompoundLayerIds.filter(id => unavailableIds.has(id));
 
     return (
       <ResourceBarsVisualizer
         values={compoundHoverValues}
         nodataLayerIds={nodataLayerIds}
+        unavailableLayerIds={unavailableIdsForPanel}
         width={270}
         activeDatasetBySymbol={activeCompoundDataset}
         onSelectDataset={selectCompoundDataset}
@@ -251,12 +257,15 @@ const ChemistrySection: React.FC = () => {
     }
 
     const presentIds = new Set(Object.keys(derivedIndexHoverValues));
-    const nodataLayerIds = selectedDerivedIndexLayerIds.filter(id => !presentIds.has(id));
+    const unavailableIds = new Set(unavailableLayerIds);
+    const nodataLayerIds = selectedDerivedIndexLayerIds.filter(id => !presentIds.has(id) && !unavailableIds.has(id));
+    const unavailableIdsForPanel = selectedDerivedIndexLayerIds.filter(id => unavailableIds.has(id));
 
     return (
       <DerivedIndexVisualizer
         values={derivedIndexHoverValues}
         nodataLayerIds={nodataLayerIds}
+        unavailableLayerIds={unavailableIdsForPanel}
         width={270}
       />
     );
@@ -268,12 +277,15 @@ const ChemistrySection: React.FC = () => {
     }
 
     const presentIds = new Set(Object.keys(hoverValues));
-    const nodataLayerIds = selectedChemicalLayerIds.filter(id => !presentIds.has(id));
+    const unavailableIds = new Set(unavailableLayerIds);
+    const nodataLayerIds = selectedChemicalLayerIds.filter(id => !presentIds.has(id) && !unavailableIds.has(id));
+    const unavailableIdsForPanel = selectedChemicalLayerIds.filter(id => unavailableIds.has(id));
 
     return (
       <ResourceBarsVisualizer
         values={hoverValues}
         nodataLayerIds={nodataLayerIds}
+        unavailableLayerIds={unavailableIdsForPanel}
         width={270}
         height={250}
         activeDatasetBySymbol={activeChemicalDataset}

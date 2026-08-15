@@ -14,6 +14,7 @@ export function normalizePosition(value: number, range: [number, number]): numbe
 interface DerivedIndexVisualizerProps {
   values: { [layerId: string]: number };
   nodataLayerIds?: string[];
+  unavailableLayerIds?: string[];
   width?: number;
 }
 
@@ -25,6 +26,9 @@ interface DerivedIndexRow {
   value: number | null;
   position: number | null;
   gradientUrl: string;
+  // True when the layer's request failed, so no reading exists for this point.
+  // False when the server reported no data at the point.
+  isUnavailable: boolean;
 }
 
 interface RowProps {
@@ -61,7 +65,7 @@ const Row: React.FC<RowProps> = ({ row }) => {
           )}
 
           {isNodata && (
-            <span className={styles.nodataLabel}>N/A</span>
+            <span className={styles.nodataLabel}>{row.isUnavailable ? '?' : 'N/A'}</span>
           )}
         </div>
 
@@ -74,6 +78,7 @@ const Row: React.FC<RowProps> = ({ row }) => {
 export const DerivedIndexVisualizer: React.FC<DerivedIndexVisualizerProps> = ({
   values,
   nodataLayerIds = [],
+  unavailableLayerIds = [],
   width,
 }) => {
   const { getLayerStyle } = useLayerContext();
@@ -94,21 +99,24 @@ export const DerivedIndexVisualizer: React.FC<DerivedIndexVisualizerProps> = ({
       const displayName = raw.split('·')[0].trim();
       const position = normalizePosition(value, getRange(layerId));
       const gradientUrl = colormapService.getGradientUrl(getLayerStyle(layerId)?.type ?? 'gray');
-      return [{ layerId, displayName, lowLabel: meta.lowLabel, highLabel: meta.highLabel, value, position, gradientUrl }];
+      return [{ layerId, displayName, lowLabel: meta.lowLabel, highLabel: meta.highLabel, value, position, gradientUrl, isUnavailable: false }];
     });
 
-    const nodataRows = nodataLayerIds.flatMap(layerId => {
+    const buildValuelessRow = (layerId: string, isUnavailable: boolean): DerivedIndexRow[] => {
       const meta = DERIVED_INDEX_BY_LAYER_ID[layerId];
       if (!meta) return [];
       const raw = layersConfig.layers[layerId]?.displayName ?? layerId;
       const displayName = raw.split('·')[0].trim();
       const gradientUrl = colormapService.getGradientUrl(getLayerStyle(layerId)?.type ?? 'gray');
-      const row: DerivedIndexRow = { layerId, displayName, lowLabel: meta.lowLabel, highLabel: meta.highLabel, value: null, position: null, gradientUrl };
+      const row: DerivedIndexRow = { layerId, displayName, lowLabel: meta.lowLabel, highLabel: meta.highLabel, value: null, position: null, gradientUrl, isUnavailable };
       return [row];
-    });
+    };
 
-    return [...activeRows, ...nodataRows];
-  }, [values, nodataLayerIds, getLayerStyle]);
+    const nodataRows = nodataLayerIds.flatMap(layerId => buildValuelessRow(layerId, false));
+    const unavailableRows = unavailableLayerIds.flatMap(layerId => buildValuelessRow(layerId, true));
+
+    return [...activeRows, ...nodataRows, ...unavailableRows];
+  }, [values, nodataLayerIds, unavailableLayerIds, getLayerStyle]);
 
   if (rows.length === 0) {
     return (

@@ -15,7 +15,12 @@ server {
         proxy_max_temp_file_size 10m;
 
         proxy_intercept_errors on;
-        error_page 400 401 403 404 500 502 503 504 = @tile_error;
+        # 404 means the point or tile falls outside the raster. It is kept
+        # distinct from a service failure so the client can tell "no data here"
+        # from "the request failed", and is rewritten to drop the upstream body,
+        # which names the file path.
+        error_page 404 = @tile_no_data;
+        error_page 400 401 403 500 502 503 504 = @tile_error;
 
         header_filter_by_lua_block {
             local keep = {
@@ -76,6 +81,11 @@ server {
     location @tile_error {
         default_type application/json;
         return 502 '{"error":"tile service unavailable"}';
+    }
+
+    location @tile_no_data {
+        default_type application/json;
+        return 404 '{"error":"no data at this location"}';
     }
 
     location / {
