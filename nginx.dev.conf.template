@@ -1,3 +1,18 @@
+# Tile responses are deterministic for a given request URI, so they are stored
+# here and served without reaching the tiler. keys_zone holds metadata only,
+# max_size caps the payload on disk, and nginx evicts least recently used
+# entries once that cap is reached.
+proxy_cache_path /var/cache/nginx/tiles levels=1:2 keys_zone=tiles:10m
+                 max_size=1g inactive=7d use_temp_path=off;
+
+# Point queries carry one URI per coordinate, an unbounded set of keys with no
+# reuse, so only tiles are cached. Both the lookup and the store are skipped
+# when this is non-zero.
+map $uri $skip_tile_cache {
+    default        1;
+    ~^/cog/tiles/  0;
+}
+
 server {
     listen 5173;
 
@@ -13,6 +28,19 @@ server {
         proxy_connect_timeout    5s;
         proxy_read_timeout       30s;
         proxy_max_temp_file_size 10m;
+
+        proxy_cache        tiles;
+        proxy_cache_bypass $skip_tile_cache;
+        proxy_no_cache     $skip_tile_cache;
+        proxy_cache_key    $request_uri;
+        # Held for a day rather than indefinitely so a regenerated COG appears
+        # without a manual purge. Clear early with the worker user, which owns
+        # the cache directory, since the container drops CAP_DAC_OVERRIDE:
+        #   docker exec -u nobody <proxy> rm -rf /var/cache/nginx/tiles/*
+        proxy_cache_valid  200 1d;
+        proxy_cache_valid  404 1m;
+        # Collapses concurrent requests for the same tile into one upstream call.
+        proxy_cache_lock   on;
 
         proxy_intercept_errors on;
         # 404 means the point or tile falls outside the raster. It is kept
@@ -41,6 +69,14 @@ server {
                 end
             end
             ngx.header["X-Content-Type-Options"] = "nosniff"
+
+            -- A tile is fixed for its URI, so the browser reuses it without
+            -- reissuing the request. Point responses stay uncached, which the
+            -- keep list above already ensures by dropping upstream directives.
+            if ngx.var.uri:find("^/cog/tiles/") then
+                ngx.header["Cache-Control"] = "public, max-age=86400"
+                ngx.header["X-Cache-Status"] = ngx.var.upstream_cache_status
+            end
         }
     }
 
