@@ -32,8 +32,9 @@ export class PointValueService {
   private lastFetchTime: number = 0;
   private fetchThrottleMs: number = 100; // in ms, between requests. Can be 16, 33, 50-100
   private pendingFetch: NodeJS.Timeout | null = null;
-  private isCurrentlyFetching: boolean = false;
-  private hasPendingRequest: boolean = false;
+  // Aborts the batch still running for a previous cursor position when a newer
+  // batch starts, so the fresh position is not queued behind stale requests.
+  private inFlightAbort: AbortController | null = null;
   // Coordinates of the last batch that resolved with every layer answering.
   // pickEllipsoid is deterministic for a given screen pixel and camera, so
   // exact equality skips repeat requests for a point already sampled.
@@ -127,13 +128,9 @@ export class PointValueService {
       this.pendingFetch = null;
     }
 
-    // A request is in flight. The newer position is recorded here and picked up
-    // by executeFetch once that request completes.
-    if (this.isCurrentlyFetching) {
-      this.hasPendingRequest = true;
-      return;
-    }
-
+    // A batch already running for an older position does not block this one.
+    // executeFetch aborts it, so the throttle interval is the only thing
+    // pacing requests.
     if (timeSinceLastFetch >= this.fetchThrottleMs) {
       this.executeFetch();
     } else {
@@ -149,18 +146,12 @@ export class PointValueService {
 
   private executeFetch() {
     this.lastFetchTime = Date.now();
-    this.isCurrentlyFetching = true;
-    this.hasPendingRequest = false;
+    this.fetchPointValues();
+  }
 
-    this.fetchPointValues().finally(() => {
-      this.isCurrentlyFetching = false;
-
-      // The cursor moved while this request was in flight, so the delivered
-      // value is for a stale position. Fetch the current position now.
-      if (this.hasPendingRequest && this.isActive && this.isMouseTrackingEnabled) {
-        this.throttledFetchPointValues();
-      }
-    })
+  private abortInFlight() {
+    this.inFlightAbort?.abort();
+    this.inFlightAbort = null;
   }
 
   disableMouseTracking() {
@@ -168,7 +159,7 @@ export class PointValueService {
       this.isMouseTrackingEnabled = false;
       this.scanIndicator.hide();
       this.notifyValuesUpdate({}, true);
-      this.hasPendingRequest = false;
+      this.abortInFlight();
 
       if (this.pendingFetch) {
         clearTimeout(this.pendingFetch);
@@ -214,7 +205,7 @@ export class PointValueService {
     }
 
     this.scanIndicator.hide();
-    this.hasPendingRequest = false;
+    this.abortInFlight();
     this.lastResolvedPosition = null;
 
     if (this.pendingFetch) {
@@ -313,12 +304,20 @@ export class PointValueService {
       return;
     }
 
+    this.abortInFlight();
+    const controller = new AbortController();
+    this.inFlightAbort = controller;
+
     const promises = this.selectedLayers.map(layerId =>
-      this.fetchSinglePointValue(layerId, position.lon, position.lat)
+      this.fetchSinglePointValue(layerId, position.lon, position.lat, controller.signal)
     );
 
     try {
       const results = await Promise.allSettled(promises);
+
+      // A newer batch superseded this one, so these results describe a position
+      // the cursor has already left.
+      if (controller.signal.aborted) return;
 
       // Discards results for requests that outlive tracking being disabled,
       // so a stale response can't overwrite the paused notification.
@@ -366,7 +365,7 @@ export class PointValueService {
     }
   }
 
-  private async fetchSinglePointValue(layerId: string, lon: number, lat: number): Promise<PointValue> {
+  private async fetchSinglePointValue(layerId: string, lon: number, lat: number, signal?: AbortSignal): Promise<PointValue> {
     const layerConfig = layersConfig.layers[layerId];
     if (!layerConfig) {
       throw new Error(`Layer config not found for ${layerId}`);
@@ -382,7 +381,7 @@ export class PointValueService {
 
     for (let attempt = 1; attempt <= this.maxFetchAttempts; attempt++) {
       try {
-        const response = await fetch(url);
+        const response = await fetch(url, { signal });
 
         // The tiler answers 404 for a point outside the raster. That is a
         // successful answer of "no data here", not a failed request.
@@ -406,6 +405,10 @@ export class PointValueService {
           value: typeof value === 'number' ? value : null
         };
       } catch (error) {
+        // An aborted request was superseded rather than failed, so it is not
+        // retried and never counts towards the unavailable layers.
+        if (signal?.aborted) throw error;
+
         lastError = error;
         if (attempt < this.maxFetchAttempts) {
           await new Promise(resolve => setTimeout(resolve, this.retryDelayMs));

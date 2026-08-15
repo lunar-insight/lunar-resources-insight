@@ -70,11 +70,11 @@ function failedFetch(status: number) {
 // race can be reproduced without standing up Cesium's full mouse-move
 // event pipeline.
 
-describe('PointValueService: throttle trailing edge', () => {
+describe('PointValueService: superseding an in-flight batch', () => {
   beforeEach(() => { vi.useFakeTimers() })
   afterEach(() => { vi.useRealTimers() })
 
-  it('fetches the latest position once a slow in-flight request completes', async () => {
+  it('fetches the latest position without waiting for the in-flight request', async () => {
     const service = new PointValueService() as any
     service.viewer = makeFakeViewer()
     service.isActive = true
@@ -92,20 +92,55 @@ describe('PointValueService: throttle trailing edge', () => {
     service.throttledFetchPointValues()
     expect(fetchMock).toHaveBeenCalledTimes(1)
 
-    // The cursor moves to position B and stops there. The throttle timer fires
-    // while the position A request is still in flight.
+    // The cursor moves to position B and stops. Once the throttle interval
+    // elapses, position B is requested even though position A never resolved.
     vi.advanceTimersByTime(50)
     service.currentMousePosition = { x: 20, y: 20 }
     service.throttledFetchPointValues()
-    vi.advanceTimersByTime(100)
-    expect(fetchMock).toHaveBeenCalledTimes(1)
-
-    // Position B must still be fetched when the slow request resolves, without
-    // waiting for another mouse-move event.
-    resolveFirst(resolvedFetch([7.6]))
-    await vi.advanceTimersByTimeAsync(200)
-
+    await vi.advanceTimersByTimeAsync(100)
     expect(fetchMock).toHaveBeenCalledTimes(2)
+
+    // The superseded request resolving afterwards adds no further requests.
+    resolveFirst(resolvedFetch([7.6]))
+    await vi.advanceTimersByTimeAsync(500)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('ignores a superseded batch instead of reporting its layers unavailable', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.isActive = true
+    service.selectedLayers = ['layer_a']
+
+    // The superseded request rejects on abort, the way a real fetch does.
+    const abortingFetch = (_url: string, init?: { signal?: AbortSignal }) =>
+      new Promise((_resolve, reject) => {
+        init?.signal?.addEventListener('abort', () => reject(new Error('AbortError')))
+      })
+    const fetchMock = vi.fn()
+      .mockImplementationOnce(abortingFetch)
+      .mockReturnValue(resolvedFetch([2.2]))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.throttledFetchPointValues()
+
+    vi.advanceTimersByTime(50)
+    service.currentMousePosition = { x: 20, y: 20 }
+    service.throttledFetchPointValues()
+    await vi.advanceTimersByTimeAsync(500)
+
+    // Only the surviving batch reports, and the aborted layer is not listed as
+    // unavailable, which would render as a failed reading.
+    expect(updates).toHaveLength(1)
+    expect(updates[0]).toEqual({
+      values: { layer_a: 2.2 },
+      unavailableLayerIds: [],
+      isPaused: false,
+    })
   })
 
   it('stops issuing requests once the cursor is stationary', async () => {
