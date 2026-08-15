@@ -13,12 +13,59 @@ map $uri $skip_tile_cache {
     ~^/cog/tiles/  0;
 }
 
+# Response header allowlist for proxied tiler responses, defined once so the
+# locations below cannot drift apart. Anything the upstream injects (cookies,
+# server identity, CORS overrides) is dropped. Called from header_filter_by_lua_block,
+# the only phase where ngx.resp.get_headers is available.
+init_by_lua_block {
+    local keep = {
+        ["content-type"]      = true,
+        ["content-length"]    = true,
+        ["content-encoding"]  = true,
+        ["content-range"]     = true,
+        ["transfer-encoding"] = true,
+        ["accept-ranges"]     = true,
+        ["cache-control"]     = true,
+        ["etag"]              = true,
+        ["last-modified"]     = true,
+        ["expires"]           = true,
+    }
+
+    function sanitize_upstream_headers()
+        for k in pairs(ngx.resp.get_headers()) do
+            if not keep[k:lower()] then
+                ngx.header[k] = nil
+            end
+        end
+        ngx.header["X-Content-Type-Options"] = "nosniff"
+    end
+}
+
 server {
     listen 5173;
 
     # Planetcantile tile server — sanitize all upstream responses before they reach the client.
     # Any header the upstream injects (cookies, server info, CORS overrides) is stripped here.
     # Upstream errors are intercepted and returned as a clean 502 JSON response.
+
+    # Point queries go to an instance that renders no tiles. Tile rendering is
+    # CPU bound and holds each worker process's GIL, so a point query sharing an
+    # instance with it waits for that work to finish.
+    location /cog/point {
+        proxy_pass         http://planetcantile-point:8000/cog/point;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+
+        proxy_connect_timeout    5s;
+        proxy_read_timeout       30s;
+        proxy_max_temp_file_size 10m;
+
+        proxy_intercept_errors on;
+        error_page 404 = @tile_no_data;
+        error_page 400 401 403 500 502 503 504 = @tile_error;
+
+        header_filter_by_lua_block { sanitize_upstream_headers() }
+    }
 
     location /cog/ {
         proxy_pass         http://planetcantile:8000/cog/;
@@ -51,24 +98,7 @@ server {
         error_page 400 401 403 500 502 503 504 = @tile_error;
 
         header_filter_by_lua_block {
-            local keep = {
-                ["content-type"]      = true,
-                ["content-length"]    = true,
-                ["content-encoding"]  = true,
-                ["content-range"]     = true,
-                ["transfer-encoding"] = true,
-                ["accept-ranges"]     = true,
-                ["cache-control"]     = true,
-                ["etag"]              = true,
-                ["last-modified"]     = true,
-                ["expires"]           = true,
-            }
-            for k in pairs(ngx.resp.get_headers()) do
-                if not keep[k:lower()] then
-                    ngx.header[k] = nil
-                end
-            end
-            ngx.header["X-Content-Type-Options"] = "nosniff"
+            sanitize_upstream_headers()
 
             -- A tile is fixed for its URI, so the browser reuses it without
             -- reissuing the request. Point responses stay uncached, which the
@@ -92,26 +122,7 @@ server {
         proxy_intercept_errors on;
         error_page 400 401 403 404 500 502 503 504 = @tile_error;
 
-        header_filter_by_lua_block {
-            local keep = {
-                ["content-type"]      = true,
-                ["content-length"]    = true,
-                ["content-encoding"]  = true,
-                ["content-range"]     = true,
-                ["transfer-encoding"] = true,
-                ["accept-ranges"]     = true,
-                ["cache-control"]     = true,
-                ["etag"]              = true,
-                ["last-modified"]     = true,
-                ["expires"]           = true,
-            }
-            for k in pairs(ngx.resp.get_headers()) do
-                if not keep[k:lower()] then
-                    ngx.header[k] = nil
-                end
-            end
-            ngx.header["X-Content-Type-Options"] = "nosniff"
-        }
+        header_filter_by_lua_block { sanitize_upstream_headers() }
     }
 
     location @tile_error {
