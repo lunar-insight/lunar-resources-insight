@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import { getPointValueUrl, layersConfig, fetchCogInfo } from '../geoConfigExporter';
+import { getPointValueUrl, layersConfig } from '../geoConfigExporter';
 import * as Cesium from 'cesium';
-import { layerStatsService } from './LayerStatsService';
 import { ScanIndicator } from '../components/viewer/ScanIndicator/ScanIndicator';
 import { tree } from 'd3';
 
@@ -15,16 +14,14 @@ export interface PointValue {
 }
 
 export interface PointValueCallbackData {
-  displayValues: {[layerId: string]: number}; // Only explicited selected layers
-  allValues: {[layerId: string]: number}; // Every layers for the calculation
+  values: {[layerId: string]: number};
   isPaused?: boolean;
 }
 
 export class PointValueService {
   private viewer: Cesium.Viewer | null = null;
   private isActive: boolean = false;
-  private selectedLayers: string[] = []; // All layers to fetch (selected + required)
-  private explicitlySelectedLayers: string[] = []; // Only user-selected layers
+  private selectedLayers: string[] = [];
   private currentMousePosition: Cesium.Cartesian2 | null = null;
   private mouseMoveHandler: Cesium.ScreenSpaceEventHandler | null = null;
   private isMouseTrackingEnabled: boolean = true;
@@ -47,55 +44,8 @@ export class PointValueService {
     this.setupMouseTracking();
   }
 
-  /**
-   * Get the layer IDs for required terrain classification elements (Ca, Fe, Ti)
-   */
-  private getRequiredTerrainLayers(): string[] {
-    const requiredElements = ['calcium', 'iron', 'titanium'];
-    const requiredLayers: string[] = [];
-
-    requiredElements.forEach(element => {
-      const layers = layerStatsService.getLayersByElement(element);
-      if (layers.length > 0) {
-        // Get first layer available for each elements
-        requiredLayers.push(layers[0][0]);
-      }
-    });
-
-    return requiredLayers;
-  }
-
-  async setSelectedLayers(layers: string[]) {
-    this.explicitlySelectedLayers = layers;
-
-    if (layers.length > 0) {
-      const requiredLayers = this.getRequiredTerrainLayers();
-      const allLayers = new Set([...layers, ...requiredLayers]);
-      this.selectedLayers = Array.from(allLayers);
-
-      // Ensure bounds are loaded for required layers that might not be explicitly added
-      await this.ensureBoundsForRequiredLayers(requiredLayers);
-    } else {
-      this.selectedLayers = [];
-    }
-  }
-
-  private async ensureBoundsForRequiredLayers(requiredLayers: string[]) {
-    const boundPromises = requiredLayers
-      .filter(layerId => !this.layerBounds.has(layerId))
-      .map(async (layerId) => {
-        try {
-          const layerConfig = layersConfig.layers[layerId];
-          if (layerConfig) {
-            const { bounds } = await fetchCogInfo(layerConfig.filename);
-            await this.setLayerBounds(layerId, bounds);
-          }
-        } catch (error) {
-          console.warn(`Failed to load bounds for required layer ${layerId}:`, error);
-        }
-      });
-    
-    await Promise.all(boundPromises);
+  setSelectedLayers(layers: string[]) {
+    this.selectedLayers = layers;
   }
 
   onValuesUpdate(callback: (data: PointValueCallbackData) => void): () => void {
@@ -108,16 +58,9 @@ export class PointValueService {
     };
   }
 
-  private notifyValuesUpdate(allValues: {[layerId: string]: number}, isPaused: boolean = false) {
-    const displayValues = Object.fromEntries(
-      Object.entries(allValues).filter(([layerId]) =>
-        this.explicitlySelectedLayers.includes(layerId)
-      )
-    );
-
+  private notifyValuesUpdate(values: {[layerId: string]: number}, isPaused: boolean = false) {
     const callbackData: PointValueCallbackData = {
-      displayValues: isPaused ? {} : displayValues,
-      allValues: isPaused ? {} : allValues,
+      values: isPaused ? {} : values,
       isPaused
     };
 
@@ -369,17 +312,17 @@ export class PointValueService {
         }
       });
 
-      const allValues: {[layerId: string]: number} = {};
+      const values: {[layerId: string]: number} = {};
 
       pointValues.forEach(pv => {
         if (pv.value !== null && !pv.error) {
-          allValues[pv.layerId] = pv.value;
+          values[pv.layerId] = pv.value;
         }
       });
 
       // Notify callbacks only when there is valid values
-      if (Object.keys(allValues).length > 0) {
-        this.notifyValuesUpdate(allValues, false);
+      if (Object.keys(values).length > 0) {
+        this.notifyValuesUpdate(values, false);
       } else {
         // Send empty values but not paused state if we're just outside bounds
         this.notifyValuesUpdate({}, false);

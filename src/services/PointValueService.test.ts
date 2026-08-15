@@ -5,14 +5,6 @@ vi.mock('../geoConfigExporter', () => ({
     },
   },
   getPointValueUrl: vi.fn(() => 'http://example.test/point'),
-  fetchCogInfo: vi.fn(),
-}))
-
-vi.mock('./LayerStatsService', () => ({
-  layerStatsService: {
-    getLayersByElement: vi.fn(() => []),
-    refreshStats: vi.fn(),
-  },
 }))
 
 vi.mock('../components/viewer/ScanIndicator/ScanIndicator', () => ({
@@ -66,7 +58,6 @@ describe('PointValueService: throttle trailing edge', () => {
     const service = new PointValueService() as any
     service.viewer = makeFakeViewer()
     service.isActive = true
-    service.explicitlySelectedLayers = ['layer_a']
     service.selectedLayers = ['layer_a']
 
     let resolveFirst: (value: unknown) => void = () => {}
@@ -101,7 +92,6 @@ describe('PointValueService: throttle trailing edge', () => {
     const service = new PointValueService() as any
     service.viewer = makeFakeViewer()
     service.isActive = true
-    service.explicitlySelectedLayers = ['layer_a']
     service.selectedLayers = ['layer_a']
 
     const fetchMock = vi.fn(() => resolvedFetch([7.6]))
@@ -126,7 +116,6 @@ describe('PointValueService: throttle trailing edge', () => {
     const service = new PointValueService() as any
     service.viewer = makeFakeViewer()
     service.isActive = true
-    service.explicitlySelectedLayers = ['layer_a']
     service.selectedLayers = ['layer_a']
 
     let resolveFirst: (value: unknown) => void = () => {}
@@ -157,7 +146,6 @@ describe('PointValueService: pausing while a fetch is in flight', () => {
     const service = new PointValueService() as any
     service.viewer = makeFakeViewer()
     service.currentMousePosition = { x: 10, y: 10 }
-    service.explicitlySelectedLayers = ['layer_a']
     service.selectedLayers = ['layer_a']
 
     let resolveFetch: (value: unknown) => void = () => {}
@@ -177,14 +165,13 @@ describe('PointValueService: pausing while a fetch is in flight', () => {
     await fetchCall
 
     expect(updates).toHaveLength(1)
-    expect(updates[0]).toEqual({ displayValues: {}, allValues: {}, isPaused: true })
+    expect(updates[0]).toEqual({ values: {}, isPaused: true })
   })
 
   it('still notifies normally when tracking stays enabled for the whole fetch', async () => {
     const service = new PointValueService() as any
     service.viewer = makeFakeViewer()
     service.currentMousePosition = { x: 10, y: 10 }
-    service.explicitlySelectedLayers = ['layer_a']
     service.selectedLayers = ['layer_a']
 
     vi.stubGlobal('fetch', vi.fn(() => resolvedFetch([7.6])))
@@ -196,8 +183,7 @@ describe('PointValueService: pausing while a fetch is in flight', () => {
 
     expect(updates).toHaveLength(1)
     expect(updates[0]).toEqual({
-      displayValues: { layer_a: 7.6 },
-      allValues: { layer_a: 7.6 },
+      values: { layer_a: 7.6 },
       isPaused: false,
     })
   })

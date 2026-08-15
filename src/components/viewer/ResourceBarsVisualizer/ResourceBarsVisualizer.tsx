@@ -59,7 +59,6 @@ interface PickerPosition {
 
 interface ResourceBarsVisalizerProps {
   values: { [key: string]: number };
-  allValues?: { [key: string]: number };
   nodataLayerIds?: string[];
   width?: number;
   height?: number;

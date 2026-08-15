@@ -24,7 +24,6 @@ const ChemistrySection: React.FC = () => {
   const [isCompoundModalOpen, setIsCompoundModalOpen] = useState(false);
   const [isDerivedIndicesModalOpen, setIsDerivedIndicesModalOpen] = useState(false);
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
-  const [allHoverValues, setAllHoverValues] = useState<{[key: string]: number} | null>(null);
   const [compoundHoverValues, setCompoundHoverValues] = useState<{[key: string]: number} | null>(null);
   const [derivedIndexHoverValues, setDerivedIndexHoverValues] = useState<{[key: string]: number} | null>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -98,7 +97,6 @@ const ChemistrySection: React.FC = () => {
     if (!eitherOpen) {
       pointValueService.stop();
       setHoverValues(null);
-      setAllHoverValues(null);
       setCompoundHoverValues(null);
       setDerivedIndexHoverValues(null);
       setIsPaused(false);
@@ -116,20 +114,19 @@ const ChemistrySection: React.FC = () => {
       }
       if (showElementScanner) {
         const elementVals = Object.fromEntries(
-          Object.entries(data.displayValues).filter(([id]) => selectedChemicalLayerIds.includes(id))
+          Object.entries(data.values).filter(([id]) => selectedChemicalLayerIds.includes(id))
         );
         setHoverValues(elementVals);
-        setAllHoverValues(data.allValues);
       }
       if (showCompoundScanner) {
         const compoundVals = Object.fromEntries(
-          Object.entries(data.displayValues).filter(([id]) => selectedCompoundLayerIds.includes(id))
+          Object.entries(data.values).filter(([id]) => selectedCompoundLayerIds.includes(id))
         );
         setCompoundHoverValues(compoundVals);
       }
       if (showDerivedIndexScanner) {
         const derivedIndexVals = Object.fromEntries(
-          Object.entries(data.displayValues).filter(([id]) => selectedDerivedIndexLayerIds.includes(id))
+          Object.entries(data.values).filter(([id]) => selectedDerivedIndexLayerIds.includes(id))
         );
         setDerivedIndexHoverValues(derivedIndexVals);
       }
@@ -276,7 +273,6 @@ const ChemistrySection: React.FC = () => {
     return (
       <ResourceBarsVisualizer
         values={hoverValues}
-        allValues={allHoverValues ?? undefined}
         nodataLayerIds={nodataLayerIds}
         width={270}
         height={250}
