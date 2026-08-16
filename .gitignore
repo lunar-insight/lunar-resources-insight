@@ -6,5 +6,5 @@ dist
 .claude
 claude.md
 settings.local.json
-docs
 mockups
+docs/local-only
