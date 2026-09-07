@@ -43,6 +43,8 @@ services:
       dockerfile: Dockerfile.proxy
     volumes:
       - ./nginx.dev.conf.template:/etc/nginx/templates/default.conf.template:ro
+      # Point index output directory. Only assets.json is served from it.
+      - ${DATA_PATH}/index:/srv/point-index:ro
     environment:
       - TERRAIN_PORT=${TERRAIN_PORT}
     ports:

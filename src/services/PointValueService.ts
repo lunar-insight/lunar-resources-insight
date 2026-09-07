@@ -1,17 +1,16 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react'
-import { getPointValueUrl, layersConfig } from '../geoConfigExporter';
+import {
+  getBatchedPointValueUrl,
+  layersConfig,
+  pointIndexAssetKey,
+  pointIndexAssetsUrl,
+} from '../geoConfigExporter';
 import * as Cesium from 'cesium';
 import { ScanIndicator } from '../components/viewer/ScanIndicator/ScanIndicator';
 import { tree } from 'd3';
 
-export interface PointValue {
-  layerId: string;
-  filename: string;
-  lon: number;
-  lat: number;
-  value: number | null;
-  error?: string;
-}
+// A 404 names an asset the index does not hold. A retry returns the same.
+class UnknownAssetError extends Error {}
 
 export interface PointValueCallbackData {
   values: {[layerId: string]: number};
@@ -45,6 +44,10 @@ export class PointValueService {
   private callbacks: Array<(data: PointValueCallbackData) => void> = [];
   private layerBounds: Map<string, Cesium.Rectangle> = new Map();
   private activeFilenames: Map<string, string> = new Map();
+  // Asset keys the index holds, fetched once. While null, no key is known to
+  // be absent and every selected layer is requested.
+  private indexAssetKeys: Set<string> | null = null;
+  private indexAssetKeysRequest: Promise<void> | null = null;
 
   constructor() {}
 
@@ -59,6 +62,12 @@ export class PointValueService {
     // The new selection has no values yet, so the current point needs sampling
     // again even though it was already resolved for the previous selection.
     this.lastResolvedPosition = null;
+
+    // Opening a window changes the selection while the cursor is stationary.
+    // Nothing else dispatches until the next mouse event.
+    if (layers.length > 0 && this.isActive && this.isMouseTrackingEnabled && this.currentMousePosition) {
+      this.throttledFetchPointValues();
+    }
   }
 
   onValuesUpdate(callback: (data: PointValueCallbackData) => void): () => void {
@@ -186,9 +195,30 @@ export class PointValueService {
     }
   }
       
+  // A request naming a key the index does not hold fails the whole batch, so
+  // the keys are read before the first scan. A layer whose key is absent is
+  // reported unavailable on its own.
+  private loadIndexAssetKeys(): Promise<void> {
+    this.indexAssetKeysRequest ??= fetch(pointIndexAssetsUrl)
+      .then(response => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        return response.json();
+      })
+      .then(data => {
+        this.indexAssetKeys = new Set<string>(data?.assets ?? []);
+      })
+      .catch(error => {
+        console.warn('Failed to load the point index asset list:', error);
+        this.indexAssetKeysRequest = null;
+      });
+
+    return this.indexAssetKeysRequest;
+  }
+
   start() {
     if (this.isActive || !this.viewer) return;
-    
+
+    void this.loadIndexAssetKeys();
     this.isActive = true;
 
     // Continous render for animation
@@ -284,7 +314,8 @@ export class PointValueService {
       return;
     }
 
-    // Filter layers to only those within bounds
+    // The tiler fails the whole request when one asset does not cover the
+    // point, so a layer outside its raster is omitted.
     const layersWithinBounds = this.selectedLayers.filter(layerId =>
       this.isPositionWithinLayerBounds(layerId, position.lon, position.lat)
     );
@@ -304,16 +335,37 @@ export class PointValueService {
       return;
     }
 
+    // Layers reading the same file share one asset key, so each key carries
+    // the layers it answers for.
+    const layersByAsset = new Map<string, string[]>();
+    const unavailableLayerIds: string[] = [];
+
+    layersWithinBounds.forEach(layerId => {
+      const assetKey = this.assetKeyForLayer(layerId);
+      if (!assetKey || (this.indexAssetKeys !== null && !this.indexAssetKeys.has(assetKey))) {
+        unavailableLayerIds.push(layerId);
+        return;
+      }
+      const layers = layersByAsset.get(assetKey);
+      if (layers) layers.push(layerId);
+      else layersByAsset.set(assetKey, [layerId]);
+    });
+
+    if (layersByAsset.size === 0) {
+      this.notifyValuesUpdate({}, false, unavailableLayerIds);
+      return;
+    }
+
     this.abortInFlight();
     const controller = new AbortController();
     this.inFlightAbort = controller;
 
-    const promises = this.selectedLayers.map(layerId =>
-      this.fetchSinglePointValue(layerId, position.lon, position.lat, controller.signal)
-    );
+    const values: {[layerId: string]: number} = {};
 
     try {
-      const results = await Promise.allSettled(promises);
+      const assetValues = await this.fetchAssetValues(
+        [...layersByAsset.keys()], position.lon, position.lat, controller.signal
+      );
 
       // A newer batch superseded this one, so these results describe a position
       // the cursor has already left.
@@ -323,59 +375,43 @@ export class PointValueService {
       // so a stale response can't overwrite the paused notification.
       if (!this.isMouseTrackingEnabled) return;
 
-      const pointValues: PointValue[] = [];
-
-      results.forEach((results, index) => {
-        const layerId = this.selectedLayers[index];
-        if (results.status === 'fulfilled') {
-          pointValues.push(results.value);
-        } else {
-          pointValues.push({
-            layerId,
-            filename: layersConfig.layers[layerId]?.filename || 'unknown',
-            lon: position.lon,
-            lat: position.lat,
-            value: null,
-            error: results.reason?.message || 'Unknown error'
-          });
-        }
+      layersByAsset.forEach((layerIds, assetKey) => {
+        const value = assetValues.get(assetKey);
+        if (typeof value !== 'number') return;
+        layerIds.forEach(layerId => { values[layerId] = value; });
       });
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      if (!this.isMouseTrackingEnabled) return;
 
-      const values: {[layerId: string]: number} = {};
-      const unavailableLayerIds: string[] = [];
-
-      pointValues.forEach(pv => {
-        if (pv.error) {
-          unavailableLayerIds.push(pv.layerId);
-        } else if (pv.value !== null) {
-          values[pv.layerId] = pv.value;
-        }
-      });
-
-      // Only a batch where every layer answered marks the point as sampled.
-      // Leaving it unmarked after a failure lets the next mouse event retry it.
-      if (unavailableLayerIds.length === 0) {
-        this.lastResolvedPosition = position;
-      }
-
-      this.notifyValuesUpdate(values, false, unavailableLayerIds);
-
-    } catch(error) {
       console.error('Error fetching lunar point values:', error);
+      // A failed request leaves every layer it named without a reading.
+      layersByAsset.forEach(layerIds => unavailableLayerIds.push(...layerIds));
     }
+
+    // Only a batch where every layer answered marks the point as sampled.
+    // Leaving it unmarked after a failure lets the next mouse event retry it.
+    if (unavailableLayerIds.length === 0) {
+      this.lastResolvedPosition = position;
+    }
+
+    this.notifyValuesUpdate(values, false, unavailableLayerIds);
   }
 
-  private async fetchSinglePointValue(layerId: string, lon: number, lat: number, signal?: AbortSignal): Promise<PointValue> {
-    const layerConfig = layersConfig.layers[layerId];
-    if (!layerConfig) {
-      throw new Error(`Layer config not found for ${layerId}`);
-    }
+  private assetKeyForLayer(layerId: string): string | null {
+    const filename = this.activeFilenames.get(layerId) ?? layersConfig.layers[layerId]?.filename;
+    return filename ? pointIndexAssetKey(filename) : null;
+  }
 
-    const filename = this.activeFilenames.get(layerId) ?? layerConfig.filename;
-    const url = getPointValueUrl(filename, lon, lat, {
-      bidx: [1],
-      coord_crs: 'IAU:30100'
-    });
+  /**
+   * Reads every asset at one coordinate in one request. Values map back by
+   * asset name. An asset with no data at that coordinate returns null in its
+   * own position.
+   */
+  private async fetchAssetValues(
+    assetKeys: string[], lon: number, lat: number, signal?: AbortSignal
+  ): Promise<Map<string, number | null>> {
+    const url = getBatchedPointValueUrl(assetKeys, lon, lat, { coord_crs: 'IAU:30100' });
 
     let lastError: unknown = null;
 
@@ -383,10 +419,8 @@ export class PointValueService {
       try {
         const response = await fetch(url, { signal });
 
-        // The tiler answers 404 for a point outside the raster. That is a
-        // successful answer of "no data here", not a failed request.
         if (response.status === 404) {
-          return { layerId, filename, lon, lat, value: null };
+          throw new UnknownAssetError('the point index does not hold every requested asset');
         }
 
         if (!response.ok) {
@@ -394,20 +428,24 @@ export class PointValueService {
         }
 
         const data = await response.json();
+        // The tiler returns the asset name in `band_descriptions`, and b1, b2
+        // and so on in `band_names`. The fallback covers rio-tiler versions
+        // that put the asset name in `band_names`.
+        const bandNames: string[] = data?.band_descriptions ?? data?.band_names ?? [];
+        const bandValues: unknown[] = data?.values ?? [];
 
-        const value = data.values && data.values.length > 0 ? data.values[0] : null;
+        const valuesByAsset = new Map<string, number | null>();
+        bandNames.forEach((name, index) => {
+          const value = bandValues[index];
+          valuesByAsset.set(name, typeof value === 'number' ? value : null);
+        });
 
-        return {
-          layerId,
-          filename,
-          lon,
-          lat,
-          value: typeof value === 'number' ? value : null
-        };
+        return valuesByAsset;
       } catch (error) {
-        // An aborted request was superseded rather than failed, so it is not
-        // retried and never counts towards the unavailable layers.
+        // An aborted request was superseded, so it is not retried and never
+        // counts towards the unavailable layers.
         if (signal?.aborted) throw error;
+        if (error instanceof UnknownAssetError) throw error;
 
         lastError = error;
         if (attempt < this.maxFetchAttempts) {
@@ -416,7 +454,7 @@ export class PointValueService {
       }
     }
 
-    throw new Error(`Failed to fetch point value: ${lastError instanceof Error ? lastError.message : 'Unknown error'}`);
+    throw new Error(`Failed to fetch point values: ${lastError instanceof Error ? lastError.message : 'Unknown error'}`);
   }
 
   updateActiveFilename(layerId: string, filename: string) {

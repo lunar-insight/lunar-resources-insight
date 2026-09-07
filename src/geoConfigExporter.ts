@@ -4,12 +4,19 @@ export const workspacePath = import.meta.env.VITE_WORKSPACE_PATH;
 export const tilerEndpoints = {
   tiles: `${mapServerUrl}/cog/tiles/MoonGeographicSphere/{z}/{x}/{y}`,
   tilejson: `${mapServerUrl}/cog/MoonGeographicSphere/tilejson.json`,
-  point: `${mapServerUrl}/cog/point/{lon},{lat}`,
+  stacPoint: `${mapServerUrl}/stac/point/{lon},{lat}`,
   info: `${mapServerUrl}/cog/info`,
   statistics: `${mapServerUrl}/cog/statistics`,
   preview: `${mapServerUrl}/cog/preview`,
   colorMap: `${mapServerUrl}/colorMaps/{colormap}`
 };
+
+// The point index, a STAC item holding every raster as an asset, read by the
+// tiler from its own mount. scripts/generate-point-index.mjs writes it.
+export const pointIndexItemPath = `${workspacePath}/index/point-index.json`;
+
+// The asset keys that item holds, served by the proxy from the same directory.
+export const pointIndexAssetsUrl = `${mapServerUrl}/point-index/assets.json`;
 
 if (mapServerUrl === undefined) {
   throw new Error('VITE_SERVER_URL is not defined in environment variables.');
@@ -199,26 +206,32 @@ export function getCogTileJsonUrl(filename: string, options: {
   return url;
 }
 
-export function getPointValueUrl(filename: string, lon: number, lat: number, options: {
-  bidx?: number[];
-  expression?: string;
+/**
+ * Asset key for a raster: the basename without its extension and without a
+ * trailing _COG. scripts/generate-point-index.mjs applies the same rule.
+ */
+export function pointIndexAssetKey(filename: string): string {
+  const base = filename.slice(filename.lastIndexOf('/') + 1);
+  return base.replace(/\.[^.]*$/, '').replace(/_cog$/i, '');
+}
+
+/**
+ * Builds the URL for reading several rasters at one coordinate in one request.
+ * The tiler opens only the assets named here.
+ */
+export function getBatchedPointValueUrl(assetKeys: string[], lon: number, lat: number, options: {
   coord_crs?: string;
 } = {}): string {
-  const fileUrl = `${workspacePath}/${filename}`;
-  const encodedFileUrl = safeEncodeURI(fileUrl);
+  let url = tilerEndpoints.stacPoint.replace('{lon}', lon.toString()).replace('{lat}', lat.toString());
+  url += `?url=${safeEncodeURI(pointIndexItemPath)}`;
 
-  let url = tilerEndpoints.point.replace('{lon}', lon.toString()).replace('{lat}', lat.toString());
-  url += `?url=${encodedFileUrl}`;
+  assetKeys.forEach(key => {
+    url += `&assets=${encodeURIComponent(key)}`;
+  });
 
-  if (options.bidx && options.bidx.length > 0) {
-    options.bidx.forEach(band => {
-      url += `&bidx=${band}`;
-    });
-  }
-
-  if (options.expression) {
-    url += `&expression=${encodeURIComponent(options.expression)}`;
-  }
+  // Names each band for its asset, so values map back by name and not by
+  // position. An asset holding more than one band is rejected.
+  url += '&asset_as_band=true';
 
   if (options.coord_crs) {
     url += `&coord_crs=${encodeURIComponent(options.coord_crs)}`;

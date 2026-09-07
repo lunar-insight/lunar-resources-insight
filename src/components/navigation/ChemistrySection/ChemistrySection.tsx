@@ -85,13 +85,18 @@ const ChemistrySection: React.FC = () => {
     pointValueService.setViewer(viewer);
   }, [viewer]);
 
+  // A scan costs per layer, and a closed window displays nothing, so only the
+  // open windows contribute layers.
   useEffect(() => {
     pointValueService.setSelectedLayers([
-      ...selectedChemicalLayerIds,
-      ...selectedCompoundLayerIds,
-      ...selectedDerivedIndexLayerIds,
+      ...(showElementScanner ? selectedChemicalLayerIds : []),
+      ...(showCompoundScanner ? selectedCompoundLayerIds : []),
+      ...(showDerivedIndexScanner ? selectedDerivedIndexLayerIds : []),
     ]);
-  }, [selectedChemicalLayerIds, selectedCompoundLayerIds, selectedDerivedIndexLayerIds]);
+  }, [
+    showElementScanner, showCompoundScanner, showDerivedIndexScanner,
+    selectedChemicalLayerIds, selectedCompoundLayerIds, selectedDerivedIndexLayerIds,
+  ]);
 
   useEffect(() => {
     const eitherOpen = showElementScanner || showCompoundScanner || showDerivedIndexScanner;

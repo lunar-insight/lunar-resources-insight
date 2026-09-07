@@ -188,6 +188,14 @@ The batched form is roughly a third faster. The tiler still opens and reads six
 COGs within one worker, so the reduction comes from removing per-request
 overhead and not from parallel reads.
 
+The `/stac/point` row predates rio-tiler 9.4.3, so it carries the cost of
+building the reader's asset list by copying the item once per asset
+([issue 987](https://github.com/cogeotiff/rio-tiler/issues/987), changed in
+9.4.3). At six assets that term is a few milliseconds and does not affect the
+comparison. It grows with the assets the item carries, measured on a 65-asset
+item in `docs/measurements/point-index/`. A repeat of this section on 9.4.3
+lowers the batched row by that term.
+
 Comparing the two forms splits the cost. The 95ms saved across five removed
 requests puts HTTP and routing at roughly 19ms per request. That leaves about
 39ms per asset for opening the COG, transforming the coordinate and reading the
@@ -317,6 +325,12 @@ third while removing no reads.
    that limit returns the same third, so competing for connections does not
    amplify the advantage. Any remaining benefit falls on tile loading, which no
    measurement here covers.
+
+   This third holds for the seven-asset item measured here. An item also
+   charges every request for the assets it carries, which the probe item is too
+   small to show and a whole-catalog item is not.
+   `docs/measurements/point-index/` measures that term, which rio-tiler 9.4.3
+   removes.
 
 8. Raster storage does not account for point query latency. Serving the layers
    from container RAM, the fastest storage available, returns under 10 percent

@@ -10,7 +10,8 @@
     "start": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "terrain": "node --env-file=.env terrain-server.js"
+    "terrain": "node --env-file=.env terrain-server.js",
+    "point-index": "node --env-file=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-point-index.mjs"
   },
   "keywords": [],
   "author": "",

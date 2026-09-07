@@ -45,6 +45,10 @@ TERRAIN_PORT=3001
 
 # Host path to the Cesium terrain tiles directory, mounted read-only into the terrain container.
 TERRAIN_PATH=D:/Terrain/cesium-terrain
+
+# Host path to the raster directory, the same value as DATA_PATH in planetcantile's .env.
+# Read by the point index generator and mounted read-only into the proxy.
+DATA_PATH=D:/Data/titiler_custom/map
 ```
 
 **`.env.production`** (production only, not committed):
@@ -83,6 +87,20 @@ gdal_translate -of COG -co "COMPRESS=DEFLATE" -co "PREDICTOR=2" ^
 -co "OVERVIEW_RESAMPLING=AVERAGE" ^
 -co "OVERVIEWS=AUTO" geology_moon.tif geology_moon_cog.tif
 ```
+
+### Point index
+
+The scanner reads every selected layer in one request, against a STAC item that
+lists the rasters as assets. The item is generated from the raster directory:
+
+```sh
+npm run point-index
+```
+
+It writes `<DATA_PATH>/index/point-index.json` and `<DATA_PATH>/index/assets.json`,
+restarts the point tiler instance, and compares the raster directory with
+`src/layersConfig.ts`. Run it after adding, removing or renaming a raster.
+Neither file is committed.
 
 ### Launch
 
@@ -128,8 +146,10 @@ docker run -p 8080:80 lunar-resources-insight
 
 Open `http://localhost:8080`.
 
-The production image proxies `/cog/`, `/stac/`, and `/colorMaps/` to a `planetcantile` upstream. For this to resolve, the container must be on the same Docker network as a running planetcantile instance:
+The production image proxies `/cog/` and `/colorMaps/` to a `planetcantile` upstream and `/stac/point` to a `planetcantile-point` upstream. For these to resolve, the container must be on the same Docker network as both running instances. `/point-index/assets.json` is served from a read-only mount of the point index directory:
 
 ```sh
-docker run -p 8080:80 --network planetcantile_app-net lunar-resources-insight
+docker run -p 8080:80 --network planetcantile_app-net \
+  -v D:/Data/titiler_custom/map/index:/srv/point-index:ro \
+  lunar-resources-insight
 ```

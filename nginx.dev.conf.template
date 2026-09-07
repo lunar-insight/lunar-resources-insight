@@ -44,7 +44,7 @@ init_by_lua_block {
 server {
     listen 5173;
 
-    # Planetcantile tile server — sanitize all upstream responses before they reach the client.
+    # Planetcantile tile server. Upstream responses are sanitized before they reach the client.
     # Any header the upstream injects (cookies, server info, CORS overrides) is stripped here.
     # Upstream errors are intercepted and returned as a clean 502 JSON response.
 
@@ -65,6 +65,35 @@ server {
         error_page 400 401 403 500 502 503 504 = @tile_error;
 
         header_filter_by_lua_block { sanitize_upstream_headers() }
+    }
+
+    # Multi-asset point queries, which read several rasters in one request.
+    # Routed alongside /cog/point because it is the same point workload.
+    location /stac/point {
+        proxy_pass         http://planetcantile-point:8000/stac/point;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+
+        proxy_connect_timeout    5s;
+        proxy_read_timeout       30s;
+        proxy_max_temp_file_size 10m;
+
+        proxy_intercept_errors on;
+        error_page 404 = @tile_no_data;
+        error_page 400 401 403 500 502 503 504 = @tile_error;
+
+        header_filter_by_lua_block { sanitize_upstream_headers() }
+    }
+
+    # Asset keys the point index holds, from a read-only mount of the directory
+    # scripts/generate-point-index.mjs writes. The index itself is not served:
+    # it names paths inside the tiler container and the browser never reads it.
+    location = /point-index/assets.json {
+        alias /srv/point-index/assets.json;
+        default_type application/json;
+        # The keys change whenever the data directory does.
+        add_header Cache-Control "no-cache" always;
+        add_header X-Content-Type-Options "nosniff" always;
     }
 
     location /cog/ {

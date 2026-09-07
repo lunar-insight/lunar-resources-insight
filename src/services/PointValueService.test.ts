@@ -2,9 +2,12 @@ vi.mock('../geoConfigExporter', () => ({
   layersConfig: {
     layers: {
       layer_a: { filename: 'a.tif', category: 'chemical', element: 'iron', units: 'wt%' },
+      layer_b: { filename: 'b.tif', category: 'chemical', element: 'thorium', units: 'ppm' },
     },
   },
-  getPointValueUrl: vi.fn(() => 'http://example.test/point'),
+  pointIndexAssetKey: (filename: string) => filename.replace(/\.[^.]*$/, ''),
+  pointIndexAssetsUrl: 'http://example.test/point-index/assets.json',
+  getBatchedPointValueUrl: vi.fn(() => 'http://example.test/stac/point'),
 }))
 
 vi.mock('../components/viewer/ScanIndicator/ScanIndicator', () => ({
@@ -48,10 +51,18 @@ function makeFakeViewer() {
   }
 }
 
-function resolvedFetch(values: number[]) {
+// One /stac/point response: one value per asset, with the asset names in
+// band_descriptions.
+function resolvedFetch(values: (number | null)[], assetKeys: string[] = ['a']) {
   return Promise.resolve({
     ok: true,
-    json: async () => ({ values }),
+    status: 200,
+    json: async () => ({
+      coordinates: [0, 0],
+      values,
+      band_names: assetKeys.map((_, index) => `b${index + 1}`),
+      band_descriptions: assetKeys,
+    }),
   })
 }
 
@@ -272,7 +283,23 @@ describe('PointValueService: failure is distinct from no data', () => {
     })
   })
 
-  it('reports no data rather than unavailable when the tiler answers 404', async () => {
+  it('reports no data when an asset returns null', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a']
+
+    vi.stubGlobal('fetch', vi.fn(() => resolvedFetch([null])))
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    await service.fetchPointValues()
+
+    expect(updates[0]).toEqual({ values: {}, unavailableLayerIds: [], isPaused: false })
+  })
+
+  it('reports unavailable without retrying when the index does not hold an asset', async () => {
     const service = new PointValueService() as any
     service.viewer = makeFakeViewer()
     service.currentMousePosition = { x: 10, y: 10 }
@@ -286,8 +313,12 @@ describe('PointValueService: failure is distinct from no data', () => {
 
     await service.fetchPointValues()
 
-    expect(updates[0]).toEqual({ values: {}, unavailableLayerIds: [], isPaused: false })
-    // A point outside the raster is a definitive answer, so it is not retried.
+    expect(updates[0]).toEqual({
+      values: {},
+      unavailableLayerIds: ['layer_a'],
+      isPaused: false,
+    })
+    // A retry returns the same 404.
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
@@ -318,6 +349,99 @@ describe('PointValueService: failure is distinct from no data', () => {
   })
 })
 
+describe('PointValueService: one request across the selection', () => {
+  it('reads every selected layer in a single request', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a', 'layer_b']
+
+    const fetchMock = vi.fn(() => resolvedFetch([7.6, 2.2], ['a', 'b']))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    await service.fetchPointValues()
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(updates[0]).toEqual({
+      values: { layer_a: 7.6, layer_b: 2.2 },
+      unavailableLayerIds: [],
+      isPaused: false,
+    })
+  })
+
+  it('maps values by asset name and not by request order', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a', 'layer_b']
+
+    vi.stubGlobal('fetch', vi.fn(() => resolvedFetch([2.2, 7.6], ['b', 'a'])))
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    await service.fetchPointValues()
+
+    expect(updates[0].values).toEqual({ layer_a: 7.6, layer_b: 2.2 })
+  })
+
+  it('drops a layer the index does not hold and scans for the rest', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a', 'layer_b']
+
+    const fetchMock = vi.fn((url: string) =>
+      url.includes('assets.json')
+        ? Promise.resolve({ ok: true, status: 200, json: async () => ({ assets: ['a'] }) })
+        : resolvedFetch([7.6], ['a'])
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    await service.loadIndexAssetKeys()
+    await service.fetchPointValues()
+
+    expect(updates[0]).toEqual({
+      values: { layer_a: 7.6 },
+      unavailableLayerIds: ['layer_b'],
+      isPaused: false,
+    })
+  })
+
+  it('issues no request when the index holds none of the selected layers', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_b']
+
+    const fetchMock = vi.fn((url: string) =>
+      url.includes('assets.json')
+        ? Promise.resolve({ ok: true, status: 200, json: async () => ({ assets: ['a'] }) })
+        : resolvedFetch([7.6], ['a'])
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const updates: PointValueCallbackData[] = []
+    service.onValuesUpdate((data: PointValueCallbackData) => updates.push(data))
+
+    await service.loadIndexAssetKeys()
+    await service.fetchPointValues()
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(updates[0]).toEqual({
+      values: {},
+      unavailableLayerIds: ['layer_b'],
+      isPaused: false,
+    })
+  })
+})
+
 describe('PointValueService: same-point dedupe', () => {
   beforeEach(() => { vi.useFakeTimers() })
   afterEach(() => { vi.useRealTimers() })
@@ -339,6 +463,26 @@ describe('PointValueService: same-point dedupe', () => {
 
     service.currentMousePosition = { x: 11, y: 10 }
     await service.fetchPointValues()
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('resamples the current point when the selection changes', async () => {
+    const service = new PointValueService() as any
+    service.viewer = makeFakeViewer()
+    service.isActive = true
+    service.currentMousePosition = { x: 10, y: 10 }
+    service.selectedLayers = ['layer_a']
+
+    const fetchMock = vi.fn(() => resolvedFetch([7.6, 2.2], ['a', 'b']))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await service.fetchPointValues()
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+
+    // Opening a scanner window adds its layers while the cursor is stationary.
+    service.setSelectedLayers(['layer_a', 'layer_b'])
+    await vi.advanceTimersByTimeAsync(200)
+
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
