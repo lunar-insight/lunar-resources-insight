@@ -5,6 +5,7 @@
     "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
   ],
   "id": "lro-lroc-wac-global-morphology-100m-june2013",
+  "collection": "lro-lroc-wac",
   "geometry": {
     "type": "Polygon",
     "coordinates": [[[-180, -90], [180, -90], [180, 90], [-180, 90], [-180, -90]]]
