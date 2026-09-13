@@ -1,0 +1,26 @@
+{
+  "type": "Catalog",
+  "id": "kaguya-mi",
+  "stac_version": "1.0.0",
+  "title": "Kaguya (SELENE) Multiband Imager (MI)",
+  "description": "Products derived from the Kaguya Multiband Imager, a UVVIS and NIR multiband camera. Includes mineral abundance maps between 50N and 50S distributed by USGS Astrogeology.",
+  "links": [
+    {
+      "rel": "self",
+      "href": "./catalog.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json"
+    },
+    {
+      "rel": "child",
+      "href": "./mineral_map/collection.json",
+      "title": "Kaguya MI Mineral Maps 50N-50S (Lemelin et al. 2016)"
+    }
+  ]
+}

@@ -1,0 +1,134 @@
+{
+  "type": "Collection",
+  "id": "kaguya-sp-polar-mineral-map",
+  "stac_version": "1.0.0",
+  "title": "Kaguya SP Polar Mineral Maps (Lemelin et al. 2022)",
+  "description": "Abundance maps of plagioclase, olivine, low-calcium pyroxene and high-calcium pyroxene for the north and south polar regions (50-90N, 50-90S), derived from Kaguya Spectral Profiler reflectance scaled to LRO LOLA 1064 nm reflectance (Lemelin et al. 2022). Polar Stereographic, 1 km/pixel. Low- and high-calcium pyroxene are grouped with the MI orthopyroxene and clinopyroxene maps. Source GeoTIFFs store weight fraction; the COGs store wt% in IAU:30130 (north) and IAU:30135 (south).",
+  "license": "CC-BY-4.0",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -180,
+          -90,
+          180,
+          90
+        ],
+        [
+          -180,
+          49.8,
+          180,
+          90
+        ],
+        [
+          -180,
+          -90,
+          180,
+          -49.8
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2007-09-14T00:00:00Z",
+          "2009-06-11T00:00:00Z"
+        ]
+      ]
+    }
+  },
+  "providers": [
+    {
+      "name": "Japan Aerospace Exploration Agency (JAXA)",
+      "roles": [
+        "producer"
+      ],
+      "url": "https://www.kaguya.jaxa.jp"
+    },
+    {
+      "name": "Université de Sherbrooke and University of Hawaii (Lemelin, Lucey, Camon)",
+      "roles": [
+        "processor",
+        "licensor"
+      ]
+    },
+    {
+      "name": "Zenodo",
+      "roles": [
+        "host"
+      ],
+      "url": "https://zenodo.org/records/7108163"
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "href": "./collection.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.3847/PSJ/ac532c",
+      "title": "Lemelin et al. 2022, The Planetary Science Journal 3, 63"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://doi.org/10.5281/zenodo.7108163",
+      "type": "text/html",
+      "title": "Zenodo dataset, version 2"
+    },
+    {
+      "rel": "license",
+      "href": "https://creativecommons.org/licenses/by/4.0/",
+      "type": "text/html",
+      "title": "CC-BY-4.0"
+    },
+    {
+      "rel": "item",
+      "href": "./clinopyroxene/clinopyroxene_kaguya_sp_lemelin2022_north_pole.json",
+      "title": "Clinopyroxene Abundance · Kaguya SP North Polar 50-90N"
+    },
+    {
+      "rel": "item",
+      "href": "./clinopyroxene/clinopyroxene_kaguya_sp_lemelin2022_south_pole.json",
+      "title": "Clinopyroxene Abundance · Kaguya SP South Polar 50-90S"
+    },
+    {
+      "rel": "item",
+      "href": "./olivine/olivine_kaguya_sp_lemelin2022_north_pole.json",
+      "title": "Olivine Abundance · Kaguya SP North Polar 50-90N"
+    },
+    {
+      "rel": "item",
+      "href": "./olivine/olivine_kaguya_sp_lemelin2022_south_pole.json",
+      "title": "Olivine Abundance · Kaguya SP South Polar 50-90S"
+    },
+    {
+      "rel": "item",
+      "href": "./orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_north_pole.json",
+      "title": "Orthopyroxene Abundance · Kaguya SP North Polar 50-90N"
+    },
+    {
+      "rel": "item",
+      "href": "./orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_south_pole.json",
+      "title": "Orthopyroxene Abundance · Kaguya SP South Polar 50-90S"
+    },
+    {
+      "rel": "item",
+      "href": "./plagioclase/plagioclase_kaguya_sp_lemelin2022_north_pole.json",
+      "title": "Plagioclase Abundance · Kaguya SP North Polar 50-90N"
+    },
+    {
+      "rel": "item",
+      "href": "./plagioclase/plagioclase_kaguya_sp_lemelin2022_south_pole.json",
+      "title": "Plagioclase Abundance · Kaguya SP South Polar 50-90S"
+    }
+  ]
+}

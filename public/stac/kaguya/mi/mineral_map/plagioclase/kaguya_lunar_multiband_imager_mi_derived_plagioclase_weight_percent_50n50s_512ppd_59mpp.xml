@@ -1,0 +1,228 @@
+<?xml version="1.0" ?>
+<metadata>
+   <file_identifier>USGS:37a3b56f-0e74-437e-923e-ae9bfcee07dd</file_identifier>
+   <idinfo>
+      <citation>
+         <citeinfo>
+            <origin>USGS Astrogeology Science Center,Lemelin et al.,University of Hawaii,JAXA - SELENE MI Instrument Team (M. Ohtake,PI)</origin>
+            <originator/>
+            <pubdate>2016-09-01</pubdate>
+            <title>Kaguya Lunar Multiband Imager MI Derived Plagioclase Weight Percent 50N50S 512ppd 59mpp</title>
+            <edition/>
+            <geoform>Mineral Map,Raster Data,Remote-sensing Data</geoform>
+            <serinfo>
+               <sername/>
+               <issue/>
+            </serinfo>
+            <pubinfo>
+               <pubplace>Flagstaff, AZ</pubplace>
+               <publish>USGS Astrogeology Science Center</publish>
+            </pubinfo>
+            <onlink>https://astrogeology.usgs.gov/search/map/kaguya_lunar_multiband_imager_mi_derived_plagioclase_weight_percent_50n50s_512ppd_59mpp</onlink>
+         </citeinfo>
+      </citation>
+      <descript>
+         <abstract>[![CDATA[This mosaic represents the abundance of the mineral plagioclase on the surface of the Moon, expressed as weight percent (wt%).
+
+The mosaic was created from topographically-corrected MI reflectance data acquired by the JAXA SELENE/Kaguya mission (see Ohtake et al., 2013) from the Kaguya Archive MI MAP processing level version 2 (MI MAP_02) products. The MI collects images of the lunar surface at 5 wavelengths in the ultraviolet-visible (UVVIS; 415, 750, 900, 950, 1001 nm) region of the electromagnetic spectrum and at 4 wavelengths in the near-infrared region (NIR; 1000, 1050, 1100, 1250 nm). These multispectral images have been used to derive 9 new near-global maps of the four common lunar minerals, FeO, optical maturity (OMAT), the abundance of SMFe, the grain size for plagioclase, and an estimation of the modeling error using Hapkeâs radiative transfer equations (Lemelin et al., 2015; 2016; 2019). These products only cover the latitudinal range +/-50 degrees due to the difficulty of applying adequate corrections for topographic shading at higher latitudes. Preparation details and information on limitations of these products will be presented in a future publication. 
+
+The mosaic presented here has been resampled to 512 ppd (59 meters/pixel) from its original resolution of 2048 ppd (15 meters/pixel).
+
+Retrieve the graphical 8bit-stretched full-res GeoTiff and legend from the Ancillary Products section at the right-side of this page.
+
+For usage rights, please refer to the JAXA Conditions for material usage page ( http://jda.jaxa.jp/en/service.php ) and please credit JAXA and the SELENE/Kaguya data. Â©JAXA/SELENE
+
+&lt;b&gt;References:&lt;/b&gt;
+
+Lemelin, M., P. G. Lucey, K. MiljkoviÄ, L. R. Gaddis, T. M. Hare, and M. Ohtake (2019), The compositions of the lunar crust and upper mantle: Spectral analysis of the inner rings of lunar impact basins, Planetary and Space Science, 165, 230-243.
+
+Lemelin, M., P. G. Lucey, L.R. Gaddis, T. Hare, and M. Ohtake (2016), Global map products from the Kaguya Multiband Imager at 512 ppd: Minerals, FeO and OMAT, 47th LPSC, abs. #2994. http://www.hou.usra.edu/meetings/lpsc2016/pdf/2994.pdf
+
+Lemelin, M., P. G. Lucey, E. Song, and G. J. Taylor (2015), Lunar central peak mineralogy and iron content using the Kaguya Multiband Imager: Reassessment of the compositional structure of the lunar crust, J. Geophys. Res. Planets, 120, 869â887. doi:10.1002/2014JE004778.
+
+Ohtake, M., C.M. Pieters, P. Isaacson, S. Besse, Y. Yokota, T. Matsunaga, J. Boardman, S. Yamamoto, J. Haruyama, M. Staid, U. Mall, R.O. Green (2013), One Moon, Many Measurements 3: Spectral reflectance, Icarus, Volume 226, Issue 1, 364â374.
+
+Ohtake, M., J. Haruyama, T. Matsunaga, Y. Yokota, T. Morota, C. Honda and the LISM team (2008), Performance and scientific objectives of the SELENE (KAGUYA) Multiband Imager, Earth Planets Space, 60, 257-264.
+
+Taylor, L. A., C. Pieters, A. Patchen, D. S. Taylor, R. V. Morris, L. P. Keller, and D. S. McKay (2010), Mineralogical and chemical characterization of lunar highland soils: Insights into the space weathering of soils on airless bodies, J. Geophys. Res., 115, E02002, doi:10.1029/2009JE003427.]]&gt;</abstract>
+         <purpose>[![CDATA[The SELENE (KAGUYA) mission addressed the origin and evolution of the Moon by obtaining global element and mineral compositions,  topological structure,  gravity field and electromagnetic and particle environment of the Moon. The MI was a high-resolution multiband imaging camera with a spatial resolution in visible bands of 20 mpp and a spatial resolution in near-infrared bands of 62 mpp from the 100 km SELENE (KAGUYA) orbit altitude. These data support the derivation of many new products,  including mineral and elemental abundance maps such as those presented here.]]&gt;</purpose>
+         <supplinf>[![CDATA[http://jda.jaxa.jp/en/service.php, http://l2db.selene.darts.isas.jaxa.jp/index.html.en, http://www.hou.usra.edu/meetings/lpsc2016/pdf/2994.pdf]]&gt;</supplinf>
+      </descript>
+      <timeperd>
+         <current/>
+         <timeinfo>
+            <rngdates>
+               <begdate/>
+               <enddate/>
+            </rngdates>
+         </timeinfo>
+      </timeperd>
+      <status>
+         <progress/>
+         <update/>
+      </status>
+      <spdom>
+         <bounding>
+            <westbc/>
+            <eastbc/>
+            <northbc/>
+            <southbc/>
+         </bounding>
+      </spdom>
+      <keywords>
+         <theme>
+            <themekt/>
+            <themekey>Mineral resources,Remote Sensing,Selenography</themekey>
+         </theme>
+         <theme>
+            <themekt>USGS Metadata Identifier</themekt>
+            <themekey>USGS:37a3b56f-0e74-437e-923e-ae9bfcee07dd</themekey>
+         </theme>
+      </keywords>
+      <accscope>Astrogeology</accscope>
+      <accconst/>
+      <useconst/>
+      <browse>
+         <browsen>https://astrogeology.usgs.gov/ckan/dataset/7bb1f85d-de38-4ea0-b46b-847243b576f6/resource/b01b036c-cb2c-4e9d-b7cc-56d0a22c037a/download/lunar_kaguya_mimap_mineraldeconv_plagioclasepercent_50n50s_1024.jpg</browsen>
+      </browse>
+      <native>ISIS v3</native>
+   </idinfo>
+   <cntinfo>
+      <cntorgp>
+         <cntorg>USGS Astrogeology Science Center</cntorg>
+      </cntorgp>
+      <cntaddr>
+         <addrtype>mailing and physical</addrtype>
+         <address>2255 N. Gemini Drive</address>
+         <city>Flagstaff</city>
+         <state>AZ</state>
+         <postal>86001</postal>
+      </cntaddr>
+      <cntvoice>928-556-7011</cntvoice>
+      <cntemail>astropedia@usgs.gov</cntemail>
+   </cntinfo>
+   <dataqual>
+      <attracc>
+         <attraccr/>
+         <logic>The MI reflectance data were provided by the SELENE team; information about the MAP processing level reflectance can be found in KAGUYA (SELENE) Product Format Description â Lunar Imager/Spectrometer (LISM (TC/MI/SP)) / SPICE Kernel,  version 1.3 (2010). See Source Online Linkage below. The MI ultraviolet-visible (UVVIS) data (5 spectral bands,  at 415,  750,  900,  950,  1001 nm) were used to derive 9 new near-global maps of common lunar minerals,  FeO,  TiO2,  and optical maturity (OMAT) using Hapkeâs radiative transfer equations (Lemelin et al.,  2016).</logic>
+         <complete>The MAP level reflectance data product has been derived from 50N to 50S latitude of the Moon. There are data gaps within the mosaic set to NoData.</complete>
+      </attracc>
+      <posacc>
+         <horizpa>
+            <horizpar>Best Effort</horizpar>
+         </horizpa>
+         <vertacc>
+            <vertaccr/>
+         </vertacc>
+      </posacc>
+      <lineage>
+         <srcinfo>
+            <srccite>
+               <citeinfo>
+                  <origin/>
+                  <pubdate/>
+                  <title/>
+                  <online>https://planetarymaps.usgs.gov/mosaic/Lunar MI_mineral_maps/</online>
+               </citeinfo>
+            </srccite>
+            <typesrc/>
+         </srcinfo>
+         <procstep>
+            <procdesc>[![CDATA[KAGUYA (SELENE) Product Format Description â Lunar Imager/Spectrometer (LISM (TC/MI/SP)) / SPICE Kernel,  version 1.3 (2010). See Source Online Linkage below. Original product at 2048ppd (15 m/p) data was sub-sampled to 512ppd (59 m/p).]]&gt;</procdesc>
+            <procdate>2015-08-01</procdate>
+         </procstep>
+      </lineage>
+   </dataqual>
+   <spdoinfo>
+      <direct>Raster</direct>
+      <rastinfo>
+         <rasttype>Grid Cell</rasttype>
+         <rowcount>51200</rowcount>
+         <colcount>184320</colcount>
+      </rastinfo>
+   </spdoinfo>
+   <spref>
+      <horizsys>
+         <planar>
+            <mapproj>
+               <mapprojn>Simple Cylindrical</mapprojn>
+            </mapproj>
+            <planci>
+               <coordrep>
+                  <absres>59.225294</absres>
+                  <ordres>59.225294</ordres>
+               </coordrep>
+            </planci>
+         </planar>
+         <geodetic>
+            <horizdn/>
+            <semiaxis>1737400</semiaxis>
+         </geodetic>
+      </horizsys>
+      <vertdef>
+         <altdatum/>
+         <altres/>
+         <altunits/>
+      </vertdef>
+   </spref>
+   <distinfo>
+      <distrib>
+         <cntinfo>
+            <cntorgp>
+               <cntorg>USGS Astrogeology Science Center</cntorg>
+            </cntorgp>
+            <cntaddr>
+               <addrtype>mailing and physical</addrtype>
+               <address>2255 N. Gemini Drive</address>
+               <city>Flagstaff</city>
+               <state>AZ</state>
+               <postal>86001</postal>
+            </cntaddr>
+            <cntvoice>928-556-7011</cntvoice>
+            <cntemail>astropedia@usgs.gov</cntemail>
+         </cntinfo>
+      </distrib>
+      <stdorder>
+         <digform>
+            <diginfo>
+               <formname/>
+               <transize>36 GB</transize>
+            </diginfo>
+            <digtopt>
+               <onlinopt>
+                  <computer>
+                     <networka>
+                        <networkr>https://astrogeology.usgs.gov/search/map/kaguya_lunar_multiband_imager_mi_derived_plagioclase_weight_percent_50n50s_512ppd_59mpp</networkr>
+                     </networka>
+                  </computer>
+               </onlinopt>
+            </digtopt>
+         </digform>
+      </stdorder>
+   </distinfo>
+   <metainfo>
+      <metd>2026-09-12</metd>
+      <metc>
+         <cntinfo>
+            <cntorgp>
+               <cntorg>USGS Astrogeology Science Center</cntorg>
+            </cntorgp>
+            <cntaddr>
+               <addrtype>mailing and physical</addrtype>
+               <address>2255 N. Gemini Drive</address>
+               <city>Flagstaff</city>
+               <state>AZ</state>
+               <postal>86001</postal>
+            </cntaddr>
+            <cntvoice>928-556-7011</cntvoice>
+            <cntemail>astropedia@usgs.gov</cntemail>
+         </cntinfo>
+      </metc>
+      <metsdn>FGDC Content Standard for Digital Geospatial Metadata</metsdn>
+      <metstdv>Modifided FGDC standard for use with planetary data</metstdv>
+      <mettc>local time</mettc>
+      <metextns>
+         <metprof>USGS Astrogeology Planetary Geoscience Metadata Standard</metprof>
+      </metextns>
+   </metainfo>
+</metadata>

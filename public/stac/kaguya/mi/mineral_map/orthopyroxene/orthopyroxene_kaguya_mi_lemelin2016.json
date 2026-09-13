@@ -1,0 +1,239 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "kaguya-mi-orthopyroxene-lemelin2016",
+  "collection": "kaguya-mi-mineral-map",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -180,
+          -50
+        ],
+        [
+          180,
+          -50
+        ],
+        [
+          180,
+          50
+        ],
+        [
+          -180,
+          50
+        ],
+        [
+          -180,
+          -50
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -180,
+    -50,
+    180,
+    50
+  ],
+  "properties": {
+    "datetime": "2016-09-01T00:00:00Z",
+    "title": "Orthopyroxene Abundance · Kaguya MI 50N-50S (Lemelin et al. 2016)",
+    "lri:role": "Modeled",
+    "mission": "Kaguya (SELENE)",
+    "instruments": [
+      "Multiband Imager (MI)"
+    ],
+    "platform": "kaguya",
+    "target": "Moon",
+    "mineral": "orthopyroxene",
+    "units": "wt%",
+    "data_set_id": "Kaguya_MIMap_MineralDeconv_OrthopyroxenePercent",
+    "product_id": "MI Mineral Map",
+    "version": "May 2016",
+    "publication_date": "2016-09-01",
+    "producer_id": "JAXA",
+    "producer_full_name": "Lemelin M., et al.",
+    "producer_institution_name": "Univ. of Hawaii; Japan Aerospace Exploration Agency",
+    "usgs_metadata_id": "USGS:09f96ced-df77-4113-8237-e271900f34b8",
+    "spatial_resolution_m": 59.225,
+    "gsd": 59.225,
+    "raster_samples": 184320,
+    "raster_lines": 51200,
+    "sample_bits": 32,
+    "sample_type": "Float32",
+    "bands": 1,
+    "map_projection": "SimpleCylindrical",
+    "map_scale_m_per_px": 59.225293797166955,
+    "map_resolution_px_per_deg": 512,
+    "crs": "Source: geographic GCS_Moon_2000 in degrees on the 1737400 m sphere (GDAL reports a BOUNDCRS to WGS 84 with zero parameters). COG: IAU:30100, same sphere and grid.",
+    "coordinate_system": "Planetocentric",
+    "longitude_direction": "PositiveEast",
+    "lunar_radius_m": 1737400.0,
+    "source_nodata": -3.4028227e+38,
+    "nodata": -9999,
+    "source_value_range": [
+      0.0,
+      1.0
+    ],
+    "source_nodata_pixel_count": 0,
+    "mean_wt_pct": 11.27,
+    "pixels_at_100_wt_pct": 39889,
+    "zero_pixel_pct": 7.68,
+    "processing:level": "L4",
+    "processing:lineage": "Topographically corrected Kaguya MI UVVIS reflectance (MI MAP processing level version 2, bands 415, 750, 900, 950 and 1001 nm) inverted for mineral abundance with Hapke radiative transfer modeling (Lemelin et al. 2015, 2016, 2019). Produced at 2048 ppd (15 m/pixel) and resampled by USGS to 512 ppd (59 m/pixel). Distributed as a Float32 GeoTIFF with ISIS3 and PDS3 labels, values in weight fraction. COG: gdal_calc.py multiplies values by 100 to wt% and maps the source NoData (-3.4028227e+38) to -9999; gdal_translate assigns IAU:30100 (same sphere and 512 ppd grid, no resampling) and writes a COG with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.12.2"
+    },
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "Orthopyroxene abundance at 59 m/pixel between 50N and 50S. Low-calcium pyroxene is characteristic of noritic crustal lithologies.",
+    "lri:quality_note_short": "Hapke-model mineral abundance from Kaguya MI, 59 m/pixel, 50N-50S only. Source values are weight fraction, stored as wt% in the COG.",
+    "lri:quality_note": "Coverage is limited to 50N-50S because topographic shading corrections are inadequate at higher latitudes. The source GeoTIFF contains no NoData pixels: every pixel holds a value from 0 to 1, so the COG NoData value (-9999) is declared but unused. The four MI mineral maps sum to exactly 100 wt% at every pixel except 8 pixels where all four are 0, so 0 is a zero abundance (7.68% of pixels in this map). The source stores weight fraction under a product name that says weight percent; the COG multiplies values by 100. Full-resolution mean 11.27 wt%; 39889 pixels are exactly 100 wt%. USGS lists a publication on preparation details and limitations as in review and recommends citing Lemelin et al. (2019); the LPSC 2016 abstract describes these map products."
+  },
+  "assets": {
+    "data": {
+      "href": "orthopyroxene_kaguya_mi_lemelin2016_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Orthopyroxene wt% COG · IAU:30100",
+      "roles": [
+        "data"
+      ]
+    },
+    "thumbnail": {
+      "href": "./lunar_kaguya_mimap_mineraldeconv_orthopyroxenepercent_50n50s_100.jpg",
+      "type": "image/jpeg",
+      "title": "Thumbnail (100px)",
+      "roles": [
+        "thumbnail"
+      ]
+    },
+    "overview_512": {
+      "href": "./lunar_kaguya_mimap_mineraldeconv_orthopyroxenepercent_50n50s_512.jpg",
+      "type": "image/jpeg",
+      "title": "Browse image (512px)",
+      "roles": [
+        "overview"
+      ]
+    },
+    "overview_1024": {
+      "href": "./lunar_kaguya_mimap_mineraldeconv_orthopyroxenepercent_50n50s_1024.jpg",
+      "type": "image/jpeg",
+      "title": "Browse image (1024px)",
+      "roles": [
+        "overview"
+      ]
+    },
+    "processing_script": {
+      "href": "./process.sh",
+      "type": "application/x-sh",
+      "title": "COG conversion script",
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
+    },
+    "source_xml": {
+      "href": "./kaguya_lunar_multiband_imager_mi_derived_orthopyroxene_weight_percent_50n50s_512ppd_59mpp.xml",
+      "type": "application/xml",
+      "title": "USGS product metadata (XML)",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "source_pds3_label": {
+      "href": "./lunar_kaguya_mimap_mineraldeconv_orthopyroxenepercent_50n50s_pds3.lbl",
+      "type": "text/plain",
+      "title": "PDS3 label",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "source_isis3_label": {
+      "href": "./lunar_kaguya_mimap_mineraldeconv_orthopyroxenepercent_50n50s_isis3.lbl",
+      "type": "text/plain",
+      "title": "ISIS3 label",
+      "roles": [
+        "metadata"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./orthopyroxene_kaguya_mi_lemelin2016.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "collection",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://astrogeology.usgs.gov/search/map/kaguya_lunar_multiband_imager_mi_derived_orthopyroxene_weight_percent_50n50s_512ppd_59mpp",
+      "type": "text/html",
+      "title": "USGS Astrogeology: Kaguya Lunar Multiband Imager MI Derived Orthopyroxene Weight Percent 50N50S 512ppd 59mpp"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1016/j.pss.2018.10.003",
+      "title": "Lemelin et al. 2019, The compositions of the lunar crust and upper mantle: Spectral analysis of the inner rings of lunar impact basins, Planetary and Space Science 165, 230-243 (USGS recommended citation)"
+    },
+    {
+      "rel": "describedby",
+      "href": "https://www.hou.usra.edu/meetings/lpsc2016/pdf/2994.pdf",
+      "type": "application/pdf",
+      "title": "Lemelin et al. 2016, Global map products from the Kaguya Multiband Imager at 512 ppd: Minerals, FeO and OMAT, 47th LPSC, abs. #2994"
+    },
+    {
+      "rel": "related",
+      "href": "https://doi.org/10.1002/2014JE004778",
+      "title": "Lemelin et al. 2015, Lunar central peak mineralogy and iron content using the Kaguya Multiband Imager, JGR Planets 120, 869-887"
+    },
+    {
+      "rel": "related",
+      "href": "https://www.hou.usra.edu/meetings/lpsc2020/pdf/1615.pdf",
+      "type": "application/pdf",
+      "title": "Blalock et al. 2020, Updated global lunar mineral map products from Kaguya Multiband Imager, 51st LPSC, abs. #1615 (near-global version from MAP Level 2 Version 3 reflectance)"
+    },
+    {
+      "rel": "via",
+      "href": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_MI_mineral_maps/Lunar_Kaguya_MIMap_MineralDeconv_OrthopyroxenePercent_50N50S.tif",
+      "type": "image/tiff; application=geotiff",
+      "title": "Source GeoTIFF (37.7 GB), upstream USGS source"
+    },
+    {
+      "rel": "related",
+      "href": "https://asc-pds-services.s3.us-west-2.amazonaws.com/mosaic/Lunar_MI_mineral_maps/Lunar_Kaguya_MIMap_MineralDeconv_OrthopyroxenePercent_legend.png",
+      "type": "image/png",
+      "title": "USGS colorized legend"
+    },
+    {
+      "rel": "license",
+      "href": "http://jda.jaxa.jp/en/service.php",
+      "type": "text/html",
+      "title": "JAXA conditions for material usage"
+    },
+    {
+      "rel": "related",
+      "href": "../../../sp/polar_mineral_map/orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_north_pole.json",
+      "type": "application/json",
+      "title": "Orthopyroxene abundance, Kaguya SP north polar region (50-90N)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../sp/polar_mineral_map/orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_south_pole.json",
+      "type": "application/json",
+      "title": "Orthopyroxene abundance, Kaguya SP south polar region (50-90S)"
+    }
+  ]
+}

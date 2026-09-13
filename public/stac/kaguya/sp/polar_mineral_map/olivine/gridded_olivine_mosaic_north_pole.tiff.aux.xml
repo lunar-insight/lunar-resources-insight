@@ -1,0 +1,67 @@
+<PAMDataset>
+  <Metadata domain="Esri">
+    <MDI key="PyramidResamplingType">NEAREST</MDI>
+  </Metadata>
+  <Metadata domain="xml:ESRI" format="xml">
+    <GeodataXform xsi:type="typens:PolynomialXform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:typens="http://www.esri.com/schemas/ArcGIS/2.9.0">
+      <PolynomialOrder>1</PolynomialOrder>
+      <SpatialReference xsi:type="typens:ProjectedCoordinateSystem">
+        <WKT>PROJCS["Moon_2000_Stereographic_North_Pole",GEOGCS["GCS_Moon_2000",DATUM["D_Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400.0,0.0]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Stereographic_North_Pole"],PARAMETER["false_easting",0.0],PARAMETER["false_northing",0.0],PARAMETER["central_meridian",0.0],PARAMETER["standard_parallel_1",90.0],UNIT["Meter",1.0]]</WKT>
+        <XOrigin>-8389100</XOrigin>
+        <YOrigin>-8389100</YOrigin>
+        <XYScale>536839425.84669334</XYScale>
+        <ZOrigin>-100000</ZOrigin>
+        <ZScale>10000</ZScale>
+        <MOrigin>-100000</MOrigin>
+        <MScale>10000</MScale>
+        <XYTolerance>0.001</XYTolerance>
+        <ZTolerance>0.001</ZTolerance>
+        <MTolerance>0.001</MTolerance>
+        <HighPrecision>true</HighPrecision>
+      </SpatialReference>
+      <SourceGCPs xsi:type="typens:ArrayOfDouble">
+        <Double>25.289999999999999</Double>
+        <Double>0</Double>
+        <Double>0</Double>
+        <Double>0</Double>
+        <Double>0</Double>
+        <Double>25.289999999999999</Double>
+        <Double>25.289999999999999</Double>
+        <Double>25.289999999999999</Double>
+      </SourceGCPs>
+      <TargetGCPs xsi:type="typens:ArrayOfDouble">
+        <Double>1267472</Double>
+        <Double>1267472</Double>
+        <Double>-1267472</Double>
+        <Double>1267472</Double>
+        <Double>-1267472</Double>
+        <Double>-1267472</Double>
+        <Double>1267472</Double>
+        <Double>-1267472</Double>
+      </TargetGCPs>
+      <Name />
+    </GeodataXform>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <Histograms>
+      <HistItem>
+        <HistMin>0</HistMin>
+        <HistMax>0.7599999904632568</HistMax>
+        <BucketCount>256</BucketCount>
+        <IncludeOutOfRange>1</IncludeOutOfRange>
+        <Approximate>0</Approximate>
+        <HistCounts>4136824|0|5|2963|28771|86696|64408|62710|68064|79125|103017|88400|81573|63691|56008|42089|62342|60420|93308|65689|96975|55229|49009|31182|44639|48902|59772|24524|62116|34812|57937|36216|33726|39468|33782|25620|48105|19717|38083|7448|31579|16825|16691|11073|13645|11575|16751|2792|13771|7237|9656|7428|10038|6889|6722|5932|8332|5951|5881|4161|6100|5937|2758|6971|4039|5357|1028|5508|4609|3119|3262|1410|4801|3480|394|3396|975|3410|2141|487|3437|647|1508|2659|819|1059|371|1851|974|197|1273|182|599|714|183|302|255|367|387|28|431|0|271|41|289|137|93|108|128|53|186|6|101|0|90|58|31|55|47|20|55|0|34|12|54|0|43|10|16|16|16|13|4|7|21|2|10|7|8|2|8|2|2|2|7|3|0|13|0|0|8|0|1|0|4|1|0|1|0|1|2|3|0|1|3|0|2|1|0|0|0|3|0|1|1|0|0|3|0|0|0|0|0|0|0|0|0|2|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|1|0|0|0|1|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|0|1</HistCounts>
+      </HistItem>
+    </Histograms>
+    <Metadata>
+      <MDI key="STATISTICS_COVARIANCES">0.001950485326713603</MDI>
+      <MDI key="STATISTICS_MAXIMUM">0.75999999046326</MDI>
+      <MDI key="STATISTICS_MEAN">0.025101284912627</MDI>
+      <MDI key="STATISTICS_MEDIAN">0.000000</MDI>
+      <MDI key="STATISTICS_MINIMUM">0</MDI>
+      <MDI key="STATISTICS_SKIPFACTORX">1</MDI>
+      <MDI key="STATISTICS_SKIPFACTORY">1</MDI>
+      <MDI key="STATISTICS_STDDEV">0.044164299232679</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

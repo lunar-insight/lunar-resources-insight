@@ -1,0 +1,195 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "kaguya-sp-olivine-lemelin2022-south-pole",
+  "collection": "kaguya-sp-polar-mineral-map",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -180,
+          -90
+        ],
+        [
+          180,
+          -90
+        ],
+        [
+          180,
+          -49.8
+        ],
+        [
+          -180,
+          -49.8
+        ],
+        [
+          -180,
+          -90
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -180,
+    -90,
+    180,
+    -49.8
+  ],
+  "properties": {
+    "datetime": "2022-09-23T00:00:00Z",
+    "title": "Olivine Abundance · Kaguya SP South Polar 50-90S (Lemelin et al. 2022)",
+    "lri:role": "Modeled",
+    "mission": "Kaguya (SELENE)",
+    "instruments": [
+      "Spectral Profiler (SP)"
+    ],
+    "platform": "kaguya",
+    "target": "Moon",
+    "mineral": "olivine",
+    "source_mineral_name": "olivine",
+    "units": "wt%",
+    "region": "south polar region (50-90S)",
+    "doi": "10.3847/PSJ/ac532c",
+    "dataset_doi": "10.5281/zenodo.7108163",
+    "dataset_version": "2",
+    "authors": "Myriam Lemelin, Paul G. Lucey, Alex Camon",
+    "publication_date": "2022-09-23",
+    "spatial_resolution_m": 1002.3503,
+    "gsd": 1002.3503,
+    "raster_samples": 2529,
+    "raster_lines": 2529,
+    "sample_bits": 32,
+    "sample_type": "Float32",
+    "bands": 1,
+    "map_projection": "Polar Stereographic",
+    "crs": "Source: Moon_2000_Stereographic_South_Pole (1737400 m sphere, true scale at the pole), georeferenced only by corner GCPs in the .aux.xml sidecar, rows stored bottom-up. COG: IAU:30135, north-up, same grid.",
+    "coordinate_system": "Planetocentric",
+    "lunar_radius_m": 1737400.0,
+    "nodata": null,
+    "source_value_range": [
+      0.0,
+      0.59
+    ],
+    "max_wt_pct": 59.0,
+    "zero_pixel_pct_within_50deg": 47.3,
+    "processing:level": "L4",
+    "processing:lineage": "Kaguya Spectral Profiler reflectance, gridded, interpolated and scaled to LRO LOLA 1064 nm reflectance; mineral abundance modeled as described in Lemelin et al. (2022), section 3.4. Distributed on Zenodo as a Float32 GeoTIFF in weight fraction with Esri sidecars. COG: gdal_translate assigns IAU:30135 and the bottom-up geotransform given by the GCP corners (+/-1267472 m); gdal_calc.py multiplies values by 100 to wt%; gdalwarp with nearest neighbor onto the identical extent and size flips rows to north-up with pixel values unchanged, and writes a COG with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.12.2"
+    },
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "Olivine abundance at 1 km/pixel for the south polar region (50-90S). Olivine-rich exposures in crater central peaks and basin rings are candidate deep-crust or upper-mantle material (Lemelin et al. 2015, 2019).",
+    "lri:quality_note_short": "Spectral Profiler mineral model at 1 km/pixel, 50-90S. No NoData value; pixels outside the mapped circle are 0 in all four mineral maps.",
+    "lri:quality_note": "The raster has no NoData value. Inside the mapped circle (data reach 49.9 deg latitude) the four SP mineral maps sum to exactly 100 wt% at every pixel, so 0 is a zero abundance there; 47.3% of pixels poleward of 50 deg are 0 in this map. Outside the circle all four maps are 0 as fill. Source values are weight fraction (maximum 0.59); the COG stores wt%. Source rows are stored bottom-up and georeferenced only by GCPs; the COG is north-up. Along the 49.9-50 deg boundary ring the mean is 2.2 wt% here and 3.7 wt% in the Kaguya MI 50N-50S map (correlation 0.19), so the two products do not join seamlessly."
+  },
+  "assets": {
+    "data": {
+      "href": "olivine_kaguya_sp_lemelin2022_south_pole_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Olivine wt% COG · IAU:30135",
+      "roles": [
+        "data"
+      ]
+    },
+    "overview": {
+      "href": "./gridded_olivine_mosaic_south_pole.JPG",
+      "type": "image/jpeg",
+      "title": "Browse image (Esri export)",
+      "roles": [
+        "overview"
+      ]
+    },
+    "processing_script": {
+      "href": "./process.sh",
+      "type": "application/x-sh",
+      "title": "COG conversion script (north and south polar items)",
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
+    },
+    "source_aux_xml": {
+      "href": "./gridded_olivine_mosaic_south_pole.tiff.aux.xml",
+      "type": "application/xml",
+      "title": "GDAL PAM sidecar: GCP georeferencing and band statistics",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "source_world_file": {
+      "href": "./gridded_olivine_mosaic_south_pole.tfwx",
+      "type": "text/plain",
+      "title": "Esri world file",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "source_esri_metadata": {
+      "href": "./gridded_olivine_mosaic_south_pole.tiff.xml",
+      "type": "application/xml",
+      "title": "Esri ArcGIS metadata (XML)",
+      "roles": [
+        "metadata"
+      ]
+    },
+    "zenodo_record": {
+      "href": "https://zenodo.org/records/7108163",
+      "type": "text/html",
+      "title": "Zenodo record, download source gridded_olivine_mosaic_south_pole.tiff.zip",
+      "roles": [
+        "source"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./olivine_kaguya_sp_lemelin2022_south_pole.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "collection",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.3847/PSJ/ac532c",
+      "title": "Lemelin et al. 2022, Compositional Maps of the Lunar Polar Regions Derived from the Kaguya Spectral Profiler and the Lunar Orbiter Laser Altimeter Data, The Planetary Science Journal 3, 63"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://doi.org/10.5281/zenodo.7108163",
+      "type": "text/html",
+      "title": "Zenodo dataset, version 2 (2022-09-23)"
+    },
+    {
+      "rel": "license",
+      "href": "https://creativecommons.org/licenses/by/4.0/",
+      "type": "text/html",
+      "title": "CC-BY-4.0"
+    },
+    {
+      "rel": "related",
+      "href": "./olivine_kaguya_sp_lemelin2022_north_pole.json",
+      "type": "application/json",
+      "title": "Olivine abundance, Kaguya SP north polar region (50-90N)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../mi/mineral_map/olivine/olivine_kaguya_mi_lemelin2016.json",
+      "type": "application/json",
+      "title": "Olivine abundance, Kaguya MI 50N-50S at 59 m/pixel"
+    }
+  ]
+}
