@@ -115,6 +115,22 @@ export const COMPOUND_REFERENCE_RANGES: Record<string, ElementReferenceRange> = 
   },
 };
 
+// Mineral abundance maps report a share of the whole surface, so bars span the full 0-100 wt%.
+export const MINERAL_REFERENCE_RANGES: Record<string, ElementReferenceRange> = {
+  plagioclase: { min: 0, max: 100, units: 'wt%', sources: [] },
+  orthopyroxene: { min: 0, max: 100, units: 'wt%', sources: [] },
+  clinopyroxene: { min: 0, max: 100, units: 'wt%', sources: [] },
+  olivine: { min: 0, max: 100, units: 'wt%', sources: [] },
+};
+
+// Abbreviations from Whitney & Evans 2010, American Mineralogist 95(1)
+export const MINERAL_SYMBOLS: Record<string, string> = {
+  plagioclase: 'Pl',
+  orthopyroxene: 'Opx',
+  clinopyroxene: 'Cpx',
+  olivine: 'Ol',
+};
+
 export const COMPOUND_SYMBOLS: Record<string, string> = {
   feo: 'FeO',
   tio2: 'TiO₂',

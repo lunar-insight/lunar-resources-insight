@@ -11,6 +11,9 @@ vi.mock('geoConfigExporter', () => ({
       neutron_primary:       { category: 'chemical', element: 'neutron',   units: 'count_rate', displayName: 'Neutron flux' },
       feo_primary:           { category: 'compound', compound: 'feo',      units: 'wt%'        },
       tio2_primary:          { category: 'compound', compound: 'tio2',     units: 'wt%'        },
+      olivine_mi:            { category: 'mineral',  mineral: 'olivine',   units: 'wt%'        },
+      olivine_sp_north:      { category: 'mineral',  mineral: 'olivine',   units: 'wt%', displayName: 'Olivine Abundance · Kaguya SP, North Pole' },
+      plagioclase_mi:        { category: 'mineral',  mineral: 'plagioclase', units: 'wt%'      },
     },
   },
 }))
@@ -24,6 +27,7 @@ import { calculateAbundanceScore, ResourceBarsVisualizer } from './ResourceBarsV
 //   magnesium: 0 – 13.0 wt%   titanium:  0 – 6.0  wt%
 //   hydrogen:  0 – 150  ppm   thorium:   0 – 14.0 ppm
 //   feo:       0 – 22.0 wt%   tio2:      0 – 15.0 wt%
+//   minerals:  0 – 100  wt%
 
 beforeAll(() => {
   vi.stubGlobal('ResizeObserver', class {
@@ -132,6 +136,16 @@ describe('calculateAbundanceScore', () => {
 
     it('returns 100 at max value', () => {
       expect(calculateAbundanceScore('tio2_primary', 15)).toBe(100)
+    })
+  })
+
+  describe('mineral — olivine', () => {
+    it('returns 50 at midpoint', () => {
+      expect(calculateAbundanceScore('olivine_mi', 50)).toBeCloseTo(50)
+    })
+
+    it('clamps to 100 above max', () => {
+      expect(calculateAbundanceScore('olivine_mi', 120)).toBe(100)
     })
   })
 
@@ -252,6 +266,38 @@ describe('ResourceBarsVisualizer — compound panel', () => {
     })
   })
 
+})
+
+// ─── Mineral panel ────────────────────────────────────────────────────────────
+
+describe('ResourceBarsVisualizer — mineral panel', () => {
+  it('renders the Minerals panel when mineral values are provided', () => {
+    render(<ResourceBarsVisualizer values={{ plagioclase_mi: 60 }} nodataLayerIds={[]} />)
+    expect(screen.getByText('Minerals')).toBeInTheDocument()
+    expect(screen.getByText('60.00')).toBeInTheDocument()
+  })
+
+  it('renders the Minerals panel when a mineral nodata layer is provided', () => {
+    render(<ResourceBarsVisualizer values={{}} nodataLayerIds={['plagioclase_mi']} />)
+    expect(screen.getByText('Minerals')).toBeInTheDocument()
+    expect(screen.getByText('N/A')).toBeInTheDocument()
+  })
+
+  it('does not render element or compound panels when only mineral values are provided', () => {
+    render(<ResourceBarsVisualizer values={{ plagioclase_mi: 60 }} nodataLayerIds={[]} />)
+    expect(screen.queryByText('Major Elements')).not.toBeInTheDocument()
+    expect(screen.queryByText('Compounds')).not.toBeInTheDocument()
+  })
+
+  it('renders a picker for a mineral with two selected layers', () => {
+    render(
+      <ResourceBarsVisualizer
+        values={{ olivine_mi: 12 }}
+        nodataLayerIds={['olivine_sp_north']}
+      />
+    )
+    expect(screen.getByRole('button', { name: /Ol: choose which dataset/i })).toBeInTheDocument()
+  })
 })
 
 // ─── Dataset picker (multiple layers resolving to one element) ────────────────

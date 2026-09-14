@@ -132,6 +132,7 @@ const ScannerButton: React.FC = () => {
     showElementScanner, toggleElementScanner,
     showCompoundScanner, toggleCompoundScanner,
     showDerivedIndexScanner, toggleDerivedIndexScanner,
+    showMineralScanner, toggleMineralScanner,
     anyScannerOpen,
   } = useScannerContext();
 
@@ -171,6 +172,13 @@ const ScannerButton: React.FC = () => {
             isSelected={showDerivedIndexScanner}
             onChange={toggleDerivedIndexScanner}
             accentColor="rgb(var(--color-category-derived-index-rgb))"
+          />
+          <ScannerToggleRow
+            icon="diamond"
+            label="Mineral"
+            isSelected={showMineralScanner}
+            onChange={toggleMineralScanner}
+            accentColor="rgb(var(--color-category-mineral-rgb))"
           />
         </Dialog>
       </Popover>

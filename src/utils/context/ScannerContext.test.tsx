@@ -13,6 +13,7 @@ describe('initial state', () => {
     expect(result.current.showElementScanner).toBe(false)
     expect(result.current.showCompoundScanner).toBe(false)
     expect(result.current.showDerivedIndexScanner).toBe(false)
+    expect(result.current.showMineralScanner).toBe(false)
   })
 
   it('anyScannerOpen is false by default', () => {
@@ -68,6 +69,21 @@ describe('toggleDerivedIndexScanner', () => {
   })
 })
 
+describe('toggleMineralScanner', () => {
+  it('turns the mineral scanner on', () => {
+    const { result } = renderHook(() => useScannerContext(), { wrapper })
+    act(() => result.current.toggleMineralScanner(true))
+    expect(result.current.showMineralScanner).toBe(true)
+  })
+
+  it('turns the mineral scanner off', () => {
+    const { result } = renderHook(() => useScannerContext(), { wrapper })
+    act(() => result.current.toggleMineralScanner(true))
+    act(() => result.current.toggleMineralScanner(false))
+    expect(result.current.showMineralScanner).toBe(false)
+  })
+})
+
 // ─── anyScannerOpen derived value ─────────────────────────────────────────────
 
 describe('anyScannerOpen', () => {
@@ -89,17 +105,25 @@ describe('anyScannerOpen', () => {
     expect(result.current.anyScannerOpen).toBe(true)
   })
 
+  it('is true when only the mineral scanner is on', () => {
+    const { result } = renderHook(() => useScannerContext(), { wrapper })
+    act(() => result.current.toggleMineralScanner(true))
+    expect(result.current.anyScannerOpen).toBe(true)
+  })
+
   it('is false after all scanners are turned off', () => {
     const { result } = renderHook(() => useScannerContext(), { wrapper })
     act(() => {
       result.current.toggleElementScanner(true)
       result.current.toggleCompoundScanner(true)
       result.current.toggleDerivedIndexScanner(true)
+      result.current.toggleMineralScanner(true)
     })
     act(() => {
       result.current.toggleElementScanner(false)
       result.current.toggleCompoundScanner(false)
       result.current.toggleDerivedIndexScanner(false)
+      result.current.toggleMineralScanner(false)
     })
     expect(result.current.anyScannerOpen).toBe(false)
   })

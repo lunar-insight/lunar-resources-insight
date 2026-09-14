@@ -7,6 +7,8 @@ interface ScannerContextValue {
   toggleCompoundScanner: (val: boolean) => void;
   showDerivedIndexScanner: boolean;
   toggleDerivedIndexScanner: (val: boolean) => void;
+  showMineralScanner: boolean;
+  toggleMineralScanner: (val: boolean) => void;
   anyScannerOpen: boolean;
 }
 
@@ -24,8 +26,9 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [showElementScanner, setShowElementScanner] = useState(false);
   const [showCompoundScanner, setShowCompoundScanner] = useState(false);
   const [showDerivedIndexScanner, setShowDerivedIndexScanner] = useState(false);
+  const [showMineralScanner, setShowMineralScanner] = useState(false);
 
-  const anyScannerOpen = showElementScanner || showCompoundScanner || showDerivedIndexScanner;
+  const anyScannerOpen = showElementScanner || showCompoundScanner || showDerivedIndexScanner || showMineralScanner;
 
   return (
     <ScannerContext.Provider value={{
@@ -35,6 +38,8 @@ export const ScannerProvider: React.FC<{ children: React.ReactNode }> = ({ child
       toggleCompoundScanner: setShowCompoundScanner,
       showDerivedIndexScanner,
       toggleDerivedIndexScanner: setShowDerivedIndexScanner,
+      showMineralScanner,
+      toggleMineralScanner: setShowMineralScanner,
       anyScannerOpen,
     }}>
       {children}

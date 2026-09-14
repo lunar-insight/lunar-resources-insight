@@ -26,14 +26,16 @@ const ChemistrySection: React.FC = () => {
   const [hoverValues, setHoverValues] = useState<{[key: string]: number} | null>(null);
   const [compoundHoverValues, setCompoundHoverValues] = useState<{[key: string]: number} | null>(null);
   const [derivedIndexHoverValues, setDerivedIndexHoverValues] = useState<{[key: string]: number} | null>(null);
+  const [mineralHoverValues, setMineralHoverValues] = useState<{[key: string]: number} | null>(null);
   const [unavailableLayerIds, setUnavailableLayerIds] = useState<string[]>([]);
   const [isPaused, setIsPaused] = useState(false);
 
   // Which layer feeds the bar for a given symbol, when more than one selected
-  // layer resolves to the same element/compound. State lives at this level
-  // so the choice survives the box unmounting on every scan pause/resume.
+  // layer resolves to the same element, compound or mineral. State lives at this
+  // level so the choice survives the box unmounting on every scan pause/resume.
   const [activeChemicalDataset, setActiveChemicalDataset] = useState<Map<string, string>>(new Map());
   const [activeCompoundDataset, setActiveCompoundDataset] = useState<Map<string, string>>(new Map());
+  const [activeMineralDataset, setActiveMineralDataset] = useState<Map<string, string>>(new Map());
 
   const selectChemicalDataset = (symbol: string, layerName: string) => {
     setActiveChemicalDataset(prev => new Map(prev).set(symbol, layerName));
@@ -41,6 +43,10 @@ const ChemistrySection: React.FC = () => {
 
   const selectCompoundDataset = (symbol: string, layerName: string) => {
     setActiveCompoundDataset(prev => new Map(prev).set(symbol, layerName));
+  };
+
+  const selectMineralDataset = (symbol: string, layerName: string) => {
+    setActiveMineralDataset(prev => new Map(prev).set(symbol, layerName));
   };
 
   const boundaryRef = useBoundaryRef();
@@ -51,6 +57,7 @@ const ChemistrySection: React.FC = () => {
     showElementScanner, toggleElementScanner,
     showCompoundScanner, toggleCompoundScanner,
     showDerivedIndexScanner, toggleDerivedIndexScanner,
+    showMineralScanner, toggleMineralScanner,
   } = useScannerContext();
 
   const selectedChemicalLayerIds = useMemo(
@@ -65,6 +72,12 @@ const ChemistrySection: React.FC = () => {
 
   const selectedDerivedIndexLayerIds = useMemo(
     () => selectedLayers.filter(id => layersConfig.layers[id]?.category === 'derived-index'),
+    [selectedLayers]
+  );
+
+  // Ground-data-only minerals are selected under their own id with no layer config, so they are excluded
+  const selectedMineralLayerIds = useMemo(
+    () => selectedLayers.filter(id => layersConfig.layers[id]?.category === 'mineral'),
     [selectedLayers]
   );
 
@@ -92,19 +105,21 @@ const ChemistrySection: React.FC = () => {
       ...(showElementScanner ? selectedChemicalLayerIds : []),
       ...(showCompoundScanner ? selectedCompoundLayerIds : []),
       ...(showDerivedIndexScanner ? selectedDerivedIndexLayerIds : []),
+      ...(showMineralScanner ? selectedMineralLayerIds : []),
     ]);
   }, [
-    showElementScanner, showCompoundScanner, showDerivedIndexScanner,
-    selectedChemicalLayerIds, selectedCompoundLayerIds, selectedDerivedIndexLayerIds,
+    showElementScanner, showCompoundScanner, showDerivedIndexScanner, showMineralScanner,
+    selectedChemicalLayerIds, selectedCompoundLayerIds, selectedDerivedIndexLayerIds, selectedMineralLayerIds,
   ]);
 
   useEffect(() => {
-    const eitherOpen = showElementScanner || showCompoundScanner || showDerivedIndexScanner;
+    const eitherOpen = showElementScanner || showCompoundScanner || showDerivedIndexScanner || showMineralScanner;
     if (!eitherOpen) {
       pointValueService.stop();
       setHoverValues(null);
       setCompoundHoverValues(null);
       setDerivedIndexHoverValues(null);
+      setMineralHoverValues(null);
       setUnavailableLayerIds([]);
       setIsPaused(false);
       return;
@@ -115,7 +130,7 @@ const ChemistrySection: React.FC = () => {
       setIsPaused(data.isPaused || false);
       setUnavailableLayerIds(data.unavailableLayerIds);
       if (data.isPaused) {
-        // Element and compound bars keep their last real values here and dim
+        // Element, compound and mineral bars keep their last real values here and dim
         // via ResourceBarsVisualizer's isPaused prop.
         setDerivedIndexHoverValues(null);
         return;
@@ -138,9 +153,18 @@ const ChemistrySection: React.FC = () => {
         );
         setDerivedIndexHoverValues(derivedIndexVals);
       }
+      if (showMineralScanner) {
+        const mineralVals = Object.fromEntries(
+          Object.entries(data.values).filter(([id]) => selectedMineralLayerIds.includes(id))
+        );
+        setMineralHoverValues(mineralVals);
+      }
     });
     return unsubscribe;
-  }, [showElementScanner, showCompoundScanner, showDerivedIndexScanner, selectedChemicalLayerIds, selectedCompoundLayerIds, selectedDerivedIndexLayerIds]);
+  }, [
+    showElementScanner, showCompoundScanner, showDerivedIndexScanner, showMineralScanner,
+    selectedChemicalLayerIds, selectedCompoundLayerIds, selectedDerivedIndexLayerIds, selectedMineralLayerIds,
+  ]);
 
   // Auto close element scanner when all elements are deselected while scanner is open
   useEffect(() => {
@@ -165,6 +189,14 @@ const ChemistrySection: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDerivedIndexLayerIds.length]);
+
+  // Auto close mineral scanner when all mineral layers are deselected while scanner is open
+  useEffect(() => {
+    if (selectedMineralLayerIds.length === 0 && showMineralScanner) {
+      toggleMineralScanner(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMineralLayerIds.length]);
 
   const handleOpenPeriodicTable = () => {
     setIsModalOpen(true);
@@ -272,6 +304,29 @@ const ChemistrySection: React.FC = () => {
         nodataLayerIds={nodataLayerIds}
         unavailableLayerIds={unavailableIdsForPanel}
         width={270}
+      />
+    );
+  };
+
+  const renderMineralBoxContent = () => {
+    if (mineralHoverValues === null) {
+      return <p>Hover over the map to scan resources</p>;
+    }
+
+    const presentIds = new Set(Object.keys(mineralHoverValues));
+    const unavailableIds = new Set(unavailableLayerIds);
+    const nodataLayerIds = selectedMineralLayerIds.filter(id => !presentIds.has(id) && !unavailableIds.has(id));
+    const unavailableIdsForPanel = selectedMineralLayerIds.filter(id => unavailableIds.has(id));
+
+    return (
+      <ResourceBarsVisualizer
+        values={mineralHoverValues}
+        nodataLayerIds={nodataLayerIds}
+        unavailableLayerIds={unavailableIdsForPanel}
+        width={270}
+        activeDatasetBySymbol={activeMineralDataset}
+        onSelectDataset={selectMineralDataset}
+        isPaused={isPaused}
       />
     );
   };
@@ -391,6 +446,22 @@ const ChemistrySection: React.FC = () => {
         >
           <div className='map-hover-values-box__content'>
             {renderDerivedIndexBoxContent()}
+          </div>
+        </DraggableBoxContentContainer>
+      </Portal>
+
+      <Portal>
+        <DraggableBoxContentContainer
+          width={400}
+          title="Mineral Scanner"
+          isOpen={showMineralScanner}
+          onClose={() => toggleMineralScanner(false)}
+          boundaryRef={boundaryRef}
+          id="mineral-scanner-box"
+          cascadeIndex={3}
+        >
+          <div className='map-hover-values-box__content'>
+            {renderMineralBoxContent()}
           </div>
         </DraggableBoxContentContainer>
       </Portal>

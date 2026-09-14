@@ -19,6 +19,8 @@ function makeContext(overrides = {}) {
     toggleCompoundScanner: vi.fn(),
     showDerivedIndexScanner: false,
     toggleDerivedIndexScanner: vi.fn(),
+    showMineralScanner: false,
+    toggleMineralScanner: vi.fn(),
     anyScannerOpen: false,
     ...overrides,
   } as any
@@ -51,12 +53,23 @@ describe('button rendering', () => {
 // ─── Popover ──────────────────────────────────────────────────────────────────
 
 describe('popover', () => {
-  it('shows all three toggle rows after clicking the button', async () => {
+  it('shows all four toggle rows after clicking the button', async () => {
     render(<ScannerButton />)
     await userEvent.click(screen.getByRole('button', { name: 'Scanner' }))
     expect(screen.getByRole('button', { name: 'Chemical Elements' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Compound' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Derived Index' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mineral' })).toBeInTheDocument()
+  })
+
+  it('calls toggleMineralScanner with true when Mineral is clicked', async () => {
+    const toggleMineralScanner = vi.fn()
+    vi.mocked(useScannerContext).mockReturnValue(makeContext({ toggleMineralScanner }))
+    render(<ScannerButton />)
+    await userEvent.click(screen.getByRole('button', { name: 'Scanner' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Mineral' }))
+    expect(toggleMineralScanner).toHaveBeenCalledOnce()
+    expect(toggleMineralScanner).toHaveBeenCalledWith(true)
   })
 
   it('calls toggleElementScanner with true when Chemical Elements is clicked', async () => {
@@ -112,5 +125,12 @@ describe('toggle selected state', () => {
     render(<ScannerButton />)
     await userEvent.click(screen.getByRole('button', { name: 'Scanner' }))
     expect(screen.getByRole('button', { name: 'Derived Index' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  it('marks Mineral as pressed when showMineralScanner is true', async () => {
+    vi.mocked(useScannerContext).mockReturnValue(makeContext({ showMineralScanner: true }))
+    render(<ScannerButton />)
+    await userEvent.click(screen.getByRole('button', { name: 'Scanner' }))
+    expect(screen.getByRole('button', { name: 'Mineral' })).toHaveAttribute('aria-pressed', 'true')
   })
 })

@@ -2,6 +2,7 @@
 $wt-color:         #6ee7b7;
 $ppm-color:        #93c5fd;
 $count-rate-color: #fcd34d;
+$mineral-color:    #c4b5fd;
 
 .resourceBarsVisualizer {
   position: relative;
@@ -140,6 +141,7 @@ $count-rate-color: #fcd34d;
     &.wt        { color: $wt-color; }
     &.ppm       { color: $ppm-color; }
     &.countRate { color: $count-rate-color; }
+    &.mineral   { color: $mineral-color; }
   }
 
   .panelRule {
@@ -172,6 +174,12 @@ $count-rate-color: #fcd34d;
       color: $count-rate-color;
       border-color: rgba(252, 211, 77, 0.75);
       background: rgba(252, 211, 77, 0.15);
+    }
+
+    &.mineral {
+      color: $mineral-color;
+      border-color: rgba(196, 181, 253, 0.75);
+      background: rgba(196, 181, 253, 0.15);
     }
   }
 

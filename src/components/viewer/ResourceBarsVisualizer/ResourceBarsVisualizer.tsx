@@ -2,9 +2,17 @@ import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { layersConfig, type LayerConfig } from 'geoConfigExporter';
 import { elements } from 'constants/periodicTableData';
-import { ELEMENT_REFERENCE_RANGES, COMPOUND_REFERENCE_RANGES, COMPOUND_SYMBOLS } from 'constants/elementReferenceRanges';
+import {
+  ELEMENT_REFERENCE_RANGES,
+  COMPOUND_REFERENCE_RANGES,
+  COMPOUND_SYMBOLS,
+  MINERAL_REFERENCE_RANGES,
+  MINERAL_SYMBOLS,
+} from 'constants/elementReferenceRanges';
 import { ElementDatasetPicker, type DatasetCandidate } from 'components/ui/ElementDatasetPicker/ElementDatasetPicker';
 import styles from './ResourceBarsVisualizer.module.scss';
+
+export type BarCategory = 'chemical' | 'compound' | 'mineral';
 
 export interface ResourceData {
   layerName: string;
@@ -15,7 +23,7 @@ export interface ResourceData {
   symbol: string;
   elementName: string;
   units: string;
-  category: 'chemical' | 'compound';
+  category: BarCategory;
 }
 
 export interface CountRateData {
@@ -40,7 +48,7 @@ interface SymbolCandidate {
   value: number;
   layerConfig: LayerConfig;
   elementName: string;
-  isCompound: boolean;
+  category: BarCategory;
 }
 
 interface NodataSymbolCandidate {
@@ -93,6 +101,34 @@ function getCompoundSymbol(compoundName: string): string {
   return COMPOUND_SYMBOLS[compoundName] ?? compoundName.substring(0, 3).toUpperCase();
 }
 
+function getMineralSymbol(mineralName: string): string {
+  return MINERAL_SYMBOLS[mineralName] ?? mineralName.substring(0, 3);
+}
+
+function barCategoryOf(layerConfig: LayerConfig): BarCategory {
+  if (layerConfig.category === 'compound') return 'compound';
+  if (layerConfig.category === 'mineral') return 'mineral';
+  return 'chemical';
+}
+
+// Layers resolving to the same symbol are candidates for one bar
+function resolveSymbol(layerName: string, layerConfig: LayerConfig): string {
+  const fallback = layerName.substring(0, 2).toUpperCase();
+  switch (barCategoryOf(layerConfig)) {
+    case 'compound':
+      return layerConfig.compound ? getCompoundSymbol(layerConfig.compound) : fallback;
+    case 'mineral':
+      return layerConfig.mineral ? getMineralSymbol(layerConfig.mineral) : fallback;
+    default:
+      return layerConfig.element ? getElementSymbol(layerConfig.element) : fallback;
+  }
+}
+
+function scoreInRange(value: number, range: { min: number; max: number }): number {
+  const score = ((value - range.min) / (range.max - range.min)) * 100;
+  return Math.min(100, Math.max(0, score));
+}
+
 function findLayerEntry(layerName: string): [string, LayerConfig] | undefined {
   return Object.entries(layersConfig.layers).find(([layerId, config]) => {
     return layerId === layerName || config.element === layerName;
@@ -111,9 +147,12 @@ export function calculateAbundanceScore(layerName: string, value: number): numbe
 
   if (layerConfig.category === 'compound' && layerConfig.compound) {
     const range = COMPOUND_REFERENCE_RANGES[layerConfig.compound];
-    if (!range) return 50;
-    const score = ((value - range.min) / (range.max - range.min)) * 100;
-    return Math.min(100, Math.max(0, score));
+    return range ? scoreInRange(value, range) : 50;
+  }
+
+  if (layerConfig.category === 'mineral' && layerConfig.mineral) {
+    const range = MINERAL_REFERENCE_RANGES[layerConfig.mineral];
+    return range ? scoreInRange(value, range) : 50;
   }
 
   const elementName = layerConfig.element;
@@ -130,8 +169,7 @@ export function calculateAbundanceScore(layerName: string, value: number): numbe
     return 50;
   }
 
-  const score = ((value - range.min) / (range.max - range.min)) * 100;
-  return Math.min(100, Math.max(0, score));
+  return scoreInRange(value, range);
 }
 
 interface ScaleRefs {
@@ -573,6 +611,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const svgElementWtRef = useRef<SVGSVGElement>(null);
   const svgElementPpmRef = useRef<SVGSVGElement>(null);
   const svgCompoundRef = useRef<SVGSVGElement>(null);
+  const svgMineralRef = useRef<SVGSVGElement>(null);
   const [width, setWidth] = useState(propWidth);
   const elementWtScalesRef = useRef<ScaleRefs | null>(null);
   const elementPpmScalesRef = useRef<ScaleRefs | null>(null);
@@ -583,6 +622,9 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const prevHasPickersElementWt = useRef(false);
   const prevHasPickersElementPpm = useRef(false);
   const prevHasPickersCompound = useRef(false);
+  const mineralScalesRef = useRef<ScaleRefs | null>(null);
+  const prevNodataMineral = useRef<NodataResourceData[]>([]);
+  const prevHasPickersMineral = useRef(false);
 
   const [internalActiveDataset, setInternalActiveDataset] = useState<Map<string, string>>(new Map());
   const activeDataset = activeDatasetBySymbol ?? internalActiveDataset;
@@ -597,6 +639,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
   const [elementWtPositions, setElementWtPositions] = useState<Record<string, PickerPosition>>({});
   const [elementPpmPositions, setElementPpmPositions] = useState<Record<string, PickerPosition>>({});
   const [compoundPositions, setCompoundPositions] = useState<Record<string, PickerPosition>>({});
+  const [mineralPositions, setMineralPositions] = useState<Record<string, PickerPosition>>({});
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -623,6 +666,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     d3.scaleSequential(d3.interpolateGreens).domain([1, 0])
   , []);
 
+  const mineralColorScale = useMemo(() =>
+    d3.scaleSequential(d3.interpolatePurples).domain([1, 0])
+  , []);
+
   // Every selected layer that currently has a value, grouped by the symbol
   // it resolves to. A symbol with more than one candidate needs the caller
   // to pick which one is active, via activeDatasetBySymbol.
@@ -632,18 +679,14 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     Object.entries(values).forEach(([layerName, value]) => {
       const layerEntry = findLayerEntry(layerName);
       const layerConfig = layerEntry?.[1];
-      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'mineral') return;
+      if (!layerConfig || layerConfig.units === 'count_rate') return;
 
-      const isCompound = layerConfig.category === 'compound';
-      const compoundName = isCompound ? (layerConfig.compound ?? '') : '';
-      const elementName = isCompound ? '' : (layerConfig.element ?? '');
-
-      const symbol = isCompound && compoundName
-        ? getCompoundSymbol(compoundName)
-        : elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
+      const category = barCategoryOf(layerConfig);
+      const elementName = category === 'chemical' ? (layerConfig.element ?? '') : '';
+      const symbol = resolveSymbol(layerName, layerConfig);
 
       const list = groups.get(symbol) ?? [];
-      list.push({ layerName, value, layerConfig, elementName, isCompound });
+      list.push({ layerName, value, layerConfig, elementName, category });
       groups.set(symbol, list);
     });
 
@@ -664,16 +707,9 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
 
     candidates.forEach(({ layerName, isUnavailable }) => {
       const layerConfig = layersConfig.layers[layerName];
-      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'mineral') return;
+      if (!layerConfig || layerConfig.units === 'count_rate') return;
 
-      const isCompound = layerConfig.category === 'compound';
-      const compoundName = isCompound ? (layerConfig.compound ?? '') : '';
-      const elementName = isCompound ? '' : (layerConfig.element ?? '');
-
-      const symbol = isCompound && compoundName
-        ? getCompoundSymbol(compoundName)
-        : elementName ? getElementSymbol(elementName) : layerName.substring(0, 2).toUpperCase();
-
+      const symbol = resolveSymbol(layerName, layerConfig);
       const list = groups.get(symbol) ?? [];
       list.push({ layerName, layerConfig, isUnavailable });
       groups.set(symbol, list);
@@ -693,20 +729,15 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       if (preferredLayerName && !candidates.some(c => c.layerName === preferredLayerName)) return;
 
       const active = candidates.find(c => c.layerName === preferredLayerName) ?? candidates[0];
-      const { layerName, value, isCompound, elementName } = active;
+      const { layerName, value, category, elementName } = active;
 
-      let units: string;
-      if (isCompound) {
-        units = 'wt%';
-      } else {
-        const range = ELEMENT_REFERENCE_RANGES[elementName];
-        units = range?.units ?? 'wt%';
-      }
+      const units = category === 'chemical'
+        ? (ELEMENT_REFERENCE_RANGES[elementName]?.units ?? 'wt%')
+        : 'wt%';
 
       const abundanceScore = calculateAbundanceScore(layerName, value);
       const continuousPosition = abundanceScore / 100;
       const color = colorScale(1 - continuousPosition);
-      const category: 'chemical' | 'compound' = isCompound ? 'compound' : 'chemical';
 
       result.push({ layerName, value, abundanceScore, continuousPosition, color, symbol, elementName, units, category });
     });
@@ -725,9 +756,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     });
   }, [values]);
 
-  const elementWtData = useMemo(() => resourceData.filter(d => d.units === 'wt%' && d.category !== 'compound'), [resourceData]);
-  const elementPpmData = useMemo(() => resourceData.filter(d => d.units === 'ppm'), [resourceData]);
+  const elementWtData = useMemo(() => resourceData.filter(d => d.units === 'wt%' && d.category === 'chemical'), [resourceData]);
+  const elementPpmData = useMemo(() => resourceData.filter(d => d.units === 'ppm' && d.category === 'chemical'), [resourceData]);
   const compoundResourceData = useMemo(() => resourceData.filter(d => d.category === 'compound'), [resourceData]);
+  const mineralResourceData = useMemo(() => resourceData.filter(d => d.category === 'mineral'), [resourceData]);
 
   // One nodata layer per symbol: the picked candidate when it's nodata,
   // otherwise the first nodata candidate. Keeps the N/A placeholder bar tied
@@ -745,7 +777,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     const realSymbols = new Set(resourceData.map(d => d.symbol));
     const result: NodataResourceData[] = [];
     representativeNodataBySymbol.forEach(({ layerName, layerConfig, isUnavailable }, symbol) => {
-      if (realSymbols.has(symbol) || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return;
+      if (realSymbols.has(symbol) || layerConfig.units === 'count_rate' || barCategoryOf(layerConfig) !== 'chemical') return;
       const elementName = layerConfig.element ?? '';
       const range = ELEMENT_REFERENCE_RANGES[elementName];
       const units = range?.units ?? 'wt%';
@@ -759,7 +791,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     const realSymbols = new Set(resourceData.map(d => d.symbol));
     const result: NodataResourceData[] = [];
     representativeNodataBySymbol.forEach(({ layerName, layerConfig, isUnavailable }, symbol) => {
-      if (realSymbols.has(symbol) || layerConfig.units === 'count_rate' || layerConfig.category === 'compound') return;
+      if (realSymbols.has(symbol) || layerConfig.units === 'count_rate' || barCategoryOf(layerConfig) !== 'chemical') return;
       const elementName = layerConfig.element ?? '';
       const range = ELEMENT_REFERENCE_RANGES[elementName];
       const units = range?.units ?? 'wt%';
@@ -775,6 +807,16 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     representativeNodataBySymbol.forEach(({ layerName, layerConfig, isUnavailable }, symbol) => {
       if (realSymbols.has(symbol) || layerConfig.category !== 'compound') return;
       result.push({ layerName, symbol, elementName: layerConfig.compound ?? '', units: 'wt%', isUnavailable });
+    });
+    return result;
+  }, [representativeNodataBySymbol, resourceData]);
+
+  const nodataMineralLayerData = useMemo((): NodataResourceData[] => {
+    const realSymbols = new Set(resourceData.map(d => d.symbol));
+    const result: NodataResourceData[] = [];
+    representativeNodataBySymbol.forEach(({ layerName, layerConfig, isUnavailable }, symbol) => {
+      if (realSymbols.has(symbol) || layerConfig.category !== 'mineral') return;
+      result.push({ layerName, symbol, elementName: layerConfig.mineral ?? '', units: 'wt%', isUnavailable });
     });
     return result;
   }, [representativeNodataBySymbol, resourceData]);
@@ -861,6 +903,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     () => buildPickers(compoundResourceData, nodataCompoundLayerData),
     [compoundResourceData, nodataCompoundLayerData, symbolGroups, nodataSymbolGroups]
   );
+  const mineralPickers = useMemo(
+    () => buildPickers(mineralResourceData, nodataMineralLayerData),
+    [mineralResourceData, nodataMineralLayerData, symbolGroups, nodataSymbolGroups]
+  );
 
   useEffect(() => {
     if (!svgElementWtRef.current || (elementWtData.length === 0 && nodataElementWtData.length === 0)) return;
@@ -917,6 +963,25 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       updateBarsOnly(svgCompoundRef.current, compoundResourceData, '#e0e0e0');
     }
   }, [compoundResourceData, nodataCompoundLayerData, compoundPickers, compoundColorScale]);
+
+  useEffect(() => {
+    if (!svgMineralRef.current || (mineralResourceData.length === 0 && nodataMineralLayerData.length === 0)) return;
+    const getColor = (d: ResourceData) => mineralColorScale(1 - d.continuousPosition);
+    const hasPickers = mineralPickers.length > 0;
+    if (
+      !mineralScalesRef.current ||
+      !shallowEqualNodataLayers(prevNodataMineral.current, nodataMineralLayerData) ||
+      prevHasPickersMineral.current !== hasPickers
+    ) {
+      prevNodataMineral.current = nodataMineralLayerData;
+      prevHasPickersMineral.current = hasPickers;
+      const marginBottom = hasPickers ? CHART_MARGIN_BOTTOM_WITH_PICKER : CHART_MARGIN_BOTTOM_DEFAULT;
+      mineralScalesRef.current = renderBarsPanel(svgMineralRef.current, mineralResourceData, nodataMineralLayerData, getColor, '#e0e0e0', marginBottom);
+      setMineralPositions(computePickerPositions(mineralPickers, mineralScalesRef.current));
+    } else {
+      updateBarsOnly(svgMineralRef.current, mineralResourceData, '#e0e0e0');
+    }
+  }, [mineralResourceData, nodataMineralLayerData, mineralPickers, mineralColorScale]);
 
   const renderPickers = (pickers: PickerInfo[], positions: Record<string, PickerPosition>) =>
     pickers.map(picker => {
@@ -983,6 +1048,25 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
           <div className={styles.svgWrapper}>
             <svg ref={svgCompoundRef} width={width} height={PANEL_HEIGHT} />
             {renderPickers(compoundPickers, compoundPositions)}
+          </div>
+        </>
+      )}
+
+      {(mineralResourceData.length > 0 || nodataMineralLayerData.length > 0) && (
+        <>
+          {(elementWtData.length > 0 || nodataElementWtData.length > 0 ||
+            elementPpmData.length > 0 || nodataElementPpmData.length > 0 ||
+            compoundResourceData.length > 0 || nodataCompoundLayerData.length > 0) && (
+            <div className={styles.panelSep} />
+          )}
+          <div className={styles.panelHeader}>
+            <span className={`${styles.panelTitle} ${styles.mineral}`}>Minerals</span>
+            <div className={styles.panelRule} />
+            <span className={`${styles.unitBadge} ${styles.mineral}`}>wt%</span>
+          </div>
+          <div className={styles.svgWrapper}>
+            <svg ref={svgMineralRef} width={width} height={PANEL_HEIGHT} />
+            {renderPickers(mineralPickers, mineralPositions)}
           </div>
         </>
       )}
