@@ -632,7 +632,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     Object.entries(values).forEach(([layerName, value]) => {
       const layerEntry = findLayerEntry(layerName);
       const layerConfig = layerEntry?.[1];
-      if (!layerConfig || layerConfig.units === 'count_rate') return;
+      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'mineral') return;
 
       const isCompound = layerConfig.category === 'compound';
       const compoundName = isCompound ? (layerConfig.compound ?? '') : '';
@@ -664,7 +664,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
 
     candidates.forEach(({ layerName, isUnavailable }) => {
       const layerConfig = layersConfig.layers[layerName];
-      if (!layerConfig || layerConfig.units === 'count_rate') return;
+      if (!layerConfig || layerConfig.units === 'count_rate' || layerConfig.category === 'mineral') return;
 
       const isCompound = layerConfig.category === 'compound';
       const compoundName = isCompound ? (layerConfig.compound ?? '') : '';

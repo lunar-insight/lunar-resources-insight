@@ -20,6 +20,7 @@ export interface Mineral {
   discoveryInfo?: DiscoveryInfo;
   mineralType?: 'silicate' | 'oxide' | 'phosphate'; // For moon-discovered minerals
   grouping?: MineralGrouping; // Distinguishes mineral groups from individual species
+  mapMinerals?: string[]; // Values of LayerConfig.mineral whose layers this entry loads
 }
 
 export interface Rock {
@@ -38,6 +39,7 @@ export interface RockGridProps {
   onSelectionChange: (selected: Selection) => void;
   highlightedRocks: Set<string>;
   onRockHover: (rockId: string | null) => void;
+  disabledRocks: Set<string>;
 }
 
 export interface MineralGridProps {
@@ -46,4 +48,5 @@ export interface MineralGridProps {
   onSelectionChange: (selected: Selection) => void;
   highlightedMinerals: Set<string>;
   onMineralHover: (mineralId: string | null) => void;
+  disabledMinerals: Set<string>;
 }

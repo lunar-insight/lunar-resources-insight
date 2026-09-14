@@ -55,6 +55,33 @@
   &[data-pressed] {
     transform: scale(0.98);
   }
+
+  // Disabled state
+  &[data-disabled] {
+    border-color: var(--color-selection-unavailable);
+    background-color: rgba(var(--color-selection-unavailable-bg-rgb), 0.5);
+    cursor: default;
+    opacity: 0.6;
+
+    .rockIcon,
+    .rockName,
+    .rockType {
+      opacity: 0.25;
+    }
+
+    &[data-hovered] {
+      box-shadow: none;
+      transform: none;
+    }
+
+    &[data-focus-visible] {
+      outline: none;
+    }
+
+    &[data-pressed] {
+      transform: none;
+    }
+  }
 }
 
 // Rock item content layout

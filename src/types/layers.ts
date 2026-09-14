@@ -19,6 +19,7 @@ export type LayerConfig = {
   displayName?: string;
   element?: string;
   compound?: string;
+  mineral?: string;
   units?: string;
   available?: boolean;
   isDerivedIndex?: boolean;

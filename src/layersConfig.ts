@@ -610,6 +610,119 @@ export const layersConfig: LayersConfig = {
       stac: "kaguya/grs/nuclide_map/calcium/calcium_nmap.json"
     },
     /*
+      -------
+      Mineral
+      -------
+    */
+    plagioclase_kaguya_mi_lemelin2016: {
+      filename: "minerals/Plagioclase/plagioclase_kaguya_mi_lemelin2016_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "plagioclase",
+      units: "wt%",
+      displayName: "Plagioclase Abundance · Kaguya Multiband Imager, 50°N-50°S (Lemelin 2016)",
+      stac: "kaguya/mi/mineral_map/plagioclase/plagioclase_kaguya_mi_lemelin2016.json"
+    },
+    plagioclase_kaguya_sp_lemelin2022_north_pole: {
+      filename: "minerals/Plagioclase/plagioclase_kaguya_sp_lemelin2022_north_pole_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "plagioclase",
+      units: "wt%",
+      displayName: "Plagioclase Abundance · Kaguya Spectral Profiler, North Pole (Lemelin 2022)",
+      stac: "kaguya/sp/polar_mineral_map/plagioclase/plagioclase_kaguya_sp_lemelin2022_north_pole.json"
+    },
+    plagioclase_kaguya_sp_lemelin2022_south_pole: {
+      filename: "minerals/Plagioclase/plagioclase_kaguya_sp_lemelin2022_south_pole_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "plagioclase",
+      units: "wt%",
+      displayName: "Plagioclase Abundance · Kaguya Spectral Profiler, South Pole (Lemelin 2022)",
+      stac: "kaguya/sp/polar_mineral_map/plagioclase/plagioclase_kaguya_sp_lemelin2022_south_pole.json"
+    },
+    clinopyroxene_kaguya_mi_lemelin2016: {
+      filename: "minerals/Clinopyroxene/clinopyroxene_kaguya_mi_lemelin2016_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "clinopyroxene",
+      units: "wt%",
+      displayName: "Clinopyroxene Abundance · Kaguya Multiband Imager, 50°N-50°S (Lemelin 2016)",
+      stac: "kaguya/mi/mineral_map/clinopyroxene/clinopyroxene_kaguya_mi_lemelin2016.json"
+    },
+    clinopyroxene_kaguya_sp_lemelin2022_north_pole: {
+      filename: "minerals/Clinopyroxene/clinopyroxene_kaguya_sp_lemelin2022_north_pole_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "clinopyroxene",
+      units: "wt%",
+      displayName: "Clinopyroxene Abundance · Kaguya Spectral Profiler, North Pole (Lemelin 2022)",
+      stac: "kaguya/sp/polar_mineral_map/clinopyroxene/clinopyroxene_kaguya_sp_lemelin2022_north_pole.json"
+    },
+    clinopyroxene_kaguya_sp_lemelin2022_south_pole: {
+      filename: "minerals/Clinopyroxene/clinopyroxene_kaguya_sp_lemelin2022_south_pole_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "clinopyroxene",
+      units: "wt%",
+      displayName: "Clinopyroxene Abundance · Kaguya Spectral Profiler, South Pole (Lemelin 2022)",
+      stac: "kaguya/sp/polar_mineral_map/clinopyroxene/clinopyroxene_kaguya_sp_lemelin2022_south_pole.json"
+    },
+    orthopyroxene_kaguya_mi_lemelin2016: {
+      filename: "minerals/Orthopyroxene/orthopyroxene_kaguya_mi_lemelin2016_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "orthopyroxene",
+      units: "wt%",
+      displayName: "Orthopyroxene Abundance · Kaguya Multiband Imager, 50°N-50°S (Lemelin 2016)",
+      stac: "kaguya/mi/mineral_map/orthopyroxene/orthopyroxene_kaguya_mi_lemelin2016.json"
+    },
+    orthopyroxene_kaguya_sp_lemelin2022_north_pole: {
+      filename: "minerals/Orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_north_pole_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "orthopyroxene",
+      units: "wt%",
+      displayName: "Orthopyroxene Abundance · Kaguya Spectral Profiler, North Pole (Lemelin 2022)",
+      stac: "kaguya/sp/polar_mineral_map/orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_north_pole.json"
+    },
+    orthopyroxene_kaguya_sp_lemelin2022_south_pole: {
+      filename: "minerals/Orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_south_pole_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "orthopyroxene",
+      units: "wt%",
+      displayName: "Orthopyroxene Abundance · Kaguya Spectral Profiler, South Pole (Lemelin 2022)",
+      stac: "kaguya/sp/polar_mineral_map/orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_south_pole.json"
+    },
+    olivine_kaguya_mi_lemelin2016: {
+      filename: "minerals/Olivine/olivine_kaguya_mi_lemelin2016_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "olivine",
+      units: "wt%",
+      displayName: "Olivine Abundance · Kaguya Multiband Imager, 50°N-50°S (Lemelin 2016)",
+      stac: "kaguya/mi/mineral_map/olivine/olivine_kaguya_mi_lemelin2016.json"
+    },
+    olivine_kaguya_sp_lemelin2022_north_pole: {
+      filename: "minerals/Olivine/olivine_kaguya_sp_lemelin2022_north_pole_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "olivine",
+      units: "wt%",
+      displayName: "Olivine Abundance · Kaguya Spectral Profiler, North Pole (Lemelin 2022)",
+      stac: "kaguya/sp/polar_mineral_map/olivine/olivine_kaguya_sp_lemelin2022_north_pole.json"
+    },
+    olivine_kaguya_sp_lemelin2022_south_pole: {
+      filename: "minerals/Olivine/olivine_kaguya_sp_lemelin2022_south_pole_COG.tif",
+      layerType: "raster",
+      category: "mineral",
+      mineral: "olivine",
+      units: "wt%",
+      displayName: "Olivine Abundance · Kaguya Spectral Profiler, South Pole (Lemelin 2022)",
+      stac: "kaguya/sp/polar_mineral_map/olivine/olivine_kaguya_sp_lemelin2022_south_pole.json"
+    },
+    /*
       -------------
       Derived index
       -------------

@@ -66,11 +66,18 @@ export interface CogStatistics {
 }
 
 import { layersConfig } from './layersConfig';
+import { stacService } from './services/StacService';
 export { layersConfig };
 
 export function getLayersByCompound(compoundId: string): string[] {
   return Object.entries(layersConfig.layers)
     .filter(([, config]) => config.compound === compoundId)
+    .map(([id]) => id);
+}
+
+export function getLayersByMineral(mineral: string): string[] {
+  return Object.entries(layersConfig.layers)
+    .filter(([, config]) => config.mineral === mineral)
     .map(([id]) => id);
 }
 
@@ -123,6 +130,7 @@ export function buildCogTileUrl(filename: string, options: {
 // TODO check if saved cache on app start
 export async function fetchCogInfo(filename: string): Promise<{
   bounds: number[];
+  crs?: string;
 }> {
   const fileUrl = `${workspacePath}/${filename}`;
   const encodedFileUrl = safeEncodeURI(fileUrl);
@@ -136,12 +144,30 @@ export async function fetchCogInfo(filename: string): Promise<{
     const data = await response.json();
 
     return {
-      bounds: data.bounds || [-180.0, -90, 180.0, 90.0]
+      bounds: data.bounds || [-180.0, -90, 180.0, 90.0],
+      crs: data.crs
     };
   } catch (error) {
     console.error("Failed to fetch COG info:", error);
     throw error;
   }
+}
+
+/**
+ * Layer bounds in degrees, [west, south, east, north]. The tiler reports bounds
+ * in the raster's own CRS, so a projected raster (such as a polar stereographic
+ * map) takes the bbox of its catalog item.
+ */
+export async function fetchLayerBounds(filename: string, stacPath?: string): Promise<number[]> {
+  const { bounds, crs } = await fetchCogInfo(filename);
+  if (!crs || !/^PROJ(CS|CRS)\[/.test(crs)) return bounds;
+
+  const item = stacPath ? await stacService.fetchStacItem(stacPath) : null;
+  const bbox = item?.bbox;
+  if (Array.isArray(bbox) && bbox.length === 4) return bbox as number[];
+
+  console.warn(`${filename} is projected and has no catalog bbox, using global bounds`);
+  return [-180, -90, 180, 90];
 }
 
 export async function fetchCogStatistics(filename: string): Promise<CogStatistics> {

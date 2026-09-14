@@ -11,6 +11,7 @@ export const RockGrid: React.FC<RockGridProps> = ({
   onSelectionChange,
   highlightedRocks,
   onRockHover,
+  disabledRocks,
 }) => {
   return (
     <ListBox
@@ -20,6 +21,7 @@ export const RockGrid: React.FC<RockGridProps> = ({
       selectionMode="multiple"
       selectedKeys={selectedRocks}
       onSelectionChange={onSelectionChange}
+      disabledKeys={disabledRocks}
     >
       {rocks.map((rock) => {
         const isHighlighted = highlightedRocks.has(rock.id);

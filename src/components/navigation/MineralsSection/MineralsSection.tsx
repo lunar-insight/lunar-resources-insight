@@ -5,9 +5,24 @@ import ModalOverlayContainer from 'components/layout/ModalOverlayContainer/Modal
 import { DataSourceLegend } from 'components/ui/DataSourceLegend/DataSourceLegend';
 import { useZIndex } from 'utils/ZIndexProvider';
 import { useLayerContext } from 'utils/context/LayerContext';
+import { getLayersByMineral, layersConfig } from 'geoConfigExporter';
 import { RockGrid } from './RockGrid';
 import { MineralGrid } from './MineralGrid';
 import { ROCKS, MINERALS } from './data';
+
+// Layer ids loaded by a mineral entry, empty for ground-data-only minerals
+function mapLayerIds(mineralId: string): string[] {
+  const mineral = MINERALS.find(m => m.id === mineralId);
+  return (mineral?.mapMinerals ?? []).flatMap(getLayersByMineral);
+}
+
+// An entry with no map layer cannot be selected
+const DISABLED_MINERAL_KEYS = new Set(
+  MINERALS.filter(m => mapLayerIds(m.id).length === 0).map(m => m.id)
+);
+const DISABLED_ROCK_KEYS = new Set(
+  ROCKS.filter(r => !layersConfig.layers[r.id]).map(r => r.id)
+);
 
 const MineralsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -91,23 +106,32 @@ const MineralsSection: React.FC = () => {
       const oldMinerals = new Set(prevSelectedMinerals);
       const newMinerals = new Set(keys);
 
-      // Add newly selected minerals with metadata
+      // A mineral with map layers loads those; one without is a ground-data-only entry
       newMinerals.forEach(mineralId => {
         if (!oldMinerals.has(mineralId)) {
           const mineral = MINERALS.find(m => m.id === mineralId);
           if (mineral) {
-            addLayer(mineralId as string, {
-              displayName: mineral.name,
-              category: 'mineral'
-            });
+            const layerIds = mapLayerIds(mineral.id);
+            if (layerIds.length > 0) {
+              layerIds.forEach(layerId => addLayer(layerId));
+            } else {
+              addLayer(mineralId as string, {
+                displayName: mineral.name,
+                category: 'mineral'
+              });
+            }
           }
         }
       });
 
-      // Remove deselected minerals
       oldMinerals.forEach(mineralId => {
         if (!newMinerals.has(mineralId)) {
-          removeLayer(mineralId as string);
+          const layerIds = mapLayerIds(mineralId as string);
+          if (layerIds.length > 0) {
+            layerIds.forEach(layerId => removeLayer(layerId));
+          } else {
+            removeLayer(mineralId as string);
+          }
         }
       });
 
@@ -170,6 +194,7 @@ const MineralsSection: React.FC = () => {
               onSelectionChange={handleRockSelection}
               highlightedRocks={highlightedRocksFromMineral}
               onRockHover={handleRockHover}
+              disabledRocks={DISABLED_ROCK_KEYS}
             />
           </div>
 
@@ -182,6 +207,7 @@ const MineralsSection: React.FC = () => {
               onSelectionChange={handleMineralSelection}
               highlightedMinerals={highlightedMineralsFromRock}
               onMineralHover={handleMineralHover}
+              disabledMinerals={DISABLED_MINERAL_KEYS}
             />
           </div>
         </div>

@@ -9,6 +9,7 @@ export const MINERALS: Mineral[] = [
     category: 'silicate',
     dataType: 'map+ground',
     grouping: 'group',
+    mapMinerals: ['plagioclase'],
   },
   {
     id: 'pyroxene',
@@ -17,6 +18,7 @@ export const MINERALS: Mineral[] = [
     category: 'silicate',
     dataType: 'map+ground',
     grouping: 'group',
+    mapMinerals: ['clinopyroxene', 'orthopyroxene'],
   },
   {
     id: 'olivine',
@@ -25,6 +27,7 @@ export const MINERALS: Mineral[] = [
     category: 'silicate',
     dataType: 'map+ground',
     grouping: 'group',
+    mapMinerals: ['olivine'],
   },
   {
     id: 'quartz',

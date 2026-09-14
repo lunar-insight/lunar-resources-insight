@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useRef, useCallback, useMemo } from 'react';
 import { useViewer } from './ViewerContext';
 import * as Cesium from 'cesium';
-import { layersConfig, buildCogTileUrl, fetchCogInfo, fetchCogStatistics, getLayersByCompound } from 'geoConfigExporter';
+import { layersConfig, buildCogTileUrl, fetchLayerBounds, fetchCogStatistics, getLayersByCompound } from 'geoConfigExporter';
 import { colormapService } from 'services/ColormapService';
 import { layerStatsService } from 'services/LayerStatsService';
 import { pointValueService } from 'services/PointValueService';
@@ -91,7 +91,7 @@ class CesiumLayerManager {
     this.insertQueue = new Promise(resolve => { releaseSlot = resolve; });
 
     try {
-      const { bounds } = await fetchCogInfo(layerConfig.filename);
+      const bounds = await fetchLayerBounds(layerConfig.filename, layerConfig.stac);
 
       // Bounds checking
       await pointValueService.setLayerBounds(layerId, bounds);
@@ -153,7 +153,7 @@ class CesiumLayerManager {
   }
 
 
-  async swapVariant(layerId: string, newFilename: string) {
+  async swapVariant(layerId: string, newFilename: string, newStac?: string) {
     if (!this.viewer) return;
 
     const existingLayer = this.layerMap.get(layerId);
@@ -169,7 +169,7 @@ class CesiumLayerManager {
     this.viewer.imageryLayers.remove(existingLayer, false);
 
     try {
-      const { bounds } = await fetchCogInfo(newFilename);
+      const bounds = await fetchLayerBounds(newFilename, newStac);
       await pointValueService.setLayerBounds(layerId, bounds);
 
       // Prefer the style's explicit min/max; fall back to cached stats then safe default
@@ -610,7 +610,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setSwappingLayers(prev => new Set(prev).add(layerId));
 
     try {
-      await cesiumManagerRef.current.swapVariant(layerId, variant.filename);
+      await cesiumManagerRef.current.swapVariant(layerId, variant.filename, variant.stac);
     } catch (error) {
       console.error(`Variant swap failed for ${layerId}:`, error);
       swappingRef.current.delete(layerId);

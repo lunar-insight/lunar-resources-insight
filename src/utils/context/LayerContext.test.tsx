@@ -22,7 +22,7 @@ vi.mock('cesium', () => ({
   },
 }))
 
-// Each layer's fetchCogInfo resolves via its own deferred promise, so the test
+// Each layer's fetchLayerBounds resolves via its own deferred promise, so the test
 // controls resolution order independently of call order.
 const deferredByFilename = new Map<string, { resolve: (v: any) => void }>()
 
@@ -35,7 +35,7 @@ vi.mock('geoConfigExporter', () => ({
     },
   },
   buildCogTileUrl: (filename: string) => `https://example.test/${filename}`,
-  fetchCogInfo: (filename: string) =>
+  fetchLayerBounds: (filename: string) =>
     new Promise(resolve => {
       deferredByFilename.set(filename, { resolve })
     }),
@@ -90,7 +90,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 )
 
 describe('addLayer insertion order', () => {
-  it('inserts into imageryLayers in call order, not fetchCogInfo resolution order', async () => {
+  it('inserts into imageryLayers in call order, not fetchLayerBounds resolution order', async () => {
     fakeImageryLayers.order = []
     deferredByFilename.clear()
 
@@ -108,13 +108,13 @@ describe('addLayer insertion order', () => {
 
     // Resolve out of call order: the count-rate layer (called second) finishes last.
     act(() => {
-      deferredByFilename.get('thorium_grs.tif')!.resolve({ bounds: [0, 0, 1, 1] })
+      deferredByFilename.get('thorium_grs.tif')!.resolve([0, 0, 1, 1])
     })
     act(() => {
-      deferredByFilename.get('thorium_kaguya.tif')!.resolve({ bounds: [0, 0, 1, 1] })
+      deferredByFilename.get('thorium_kaguya.tif')!.resolve([0, 0, 1, 1])
     })
     act(() => {
-      deferredByFilename.get('thorium_count_rate.tif')!.resolve({ bounds: [0, 0, 1, 1] })
+      deferredByFilename.get('thorium_count_rate.tif')!.resolve([0, 0, 1, 1])
     })
 
     await waitFor(() => {
