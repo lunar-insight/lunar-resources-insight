@@ -12,13 +12,22 @@ export const MINERALS: Mineral[] = [
     mapMinerals: ['plagioclase'],
   },
   {
-    id: 'pyroxene',
-    name: 'Pyroxene',
-    formula: '(Ca,Mg,Fe)₂Si₂O₆',
+    id: 'orthopyroxene',
+    name: 'Orthopyroxene',
+    formula: '(Mg,Fe)₂Si₂O₆',
     category: 'silicate',
     dataType: 'map+ground',
     grouping: 'group',
-    mapMinerals: ['clinopyroxene', 'orthopyroxene'],
+    mapMinerals: ['orthopyroxene'],
+  },
+  {
+    id: 'clinopyroxene',
+    name: 'Clinopyroxene',
+    formula: 'Ca(Mg,Fe)Si₂O₆',
+    category: 'silicate',
+    dataType: 'map+ground',
+    grouping: 'group',
+    mapMinerals: ['clinopyroxene'],
   },
   {
     id: 'olivine',
@@ -159,7 +168,7 @@ export const ROCKS: Rock[] = [
     name: 'Basalt',
     icon: '⬛',
     rockType: 'Mare',
-    composition: ['pyroxene', 'plagioclase', 'ilmenite', 'olivine'],
+    composition: ['clinopyroxene', 'plagioclase', 'ilmenite', 'olivine'],
     dataType: 'map+ground',
   },
   {
@@ -167,7 +176,7 @@ export const ROCKS: Rock[] = [
     name: 'Breccia',
     icon: '💥',
     rockType: 'Impact',
-    composition: ['plagioclase', 'pyroxene', 'olivine'], // mixed fragments
+    composition: ['plagioclase', 'orthopyroxene', 'clinopyroxene', 'olivine'], // mixed fragments
     dataType: 'map+ground',
   },
   {
@@ -175,7 +184,7 @@ export const ROCKS: Rock[] = [
     name: 'KREEP',
     icon: '⚡',
     rockType: 'Highland',
-    composition: ['plagioclase', 'pyroxene', 'k-feldspar'],
+    composition: ['plagioclase', 'orthopyroxene', 'k-feldspar'],
     dataType: 'map+ground',
     description: 'KREEP is a geochemical component of the Moon enriched in incompatible elements, especially potassium (K), rare earth elements (REE), and phosphorus (P). These elements were excluded from early-forming lunar minerals during crystallization of the lunar magma ocean and became concentrated in the residual melt. KREEP-rich rocks provide important clues to the Moon\’s magma ocean evolution and late-stage differentiation.',
   },
@@ -184,7 +193,7 @@ export const ROCKS: Rock[] = [
     name: 'Norite',
     icon: '🟫',
     rockType: 'Deep Crust/Highland',
-    composition: ['plagioclase', 'pyroxene'],
+    composition: ['plagioclase', 'orthopyroxene'],
     dataType: 'ground',
   },
   {
@@ -208,7 +217,7 @@ export const ROCKS: Rock[] = [
     name: 'Gabbro',
     icon: '⬜',
     rockType: 'Deep Crust/Highland',
-    composition: ['plagioclase', 'pyroxene'],
+    composition: ['plagioclase', 'clinopyroxene'],
     dataType: 'ground',
   },
 ];
