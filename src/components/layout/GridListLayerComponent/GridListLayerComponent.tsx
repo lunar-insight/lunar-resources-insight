@@ -13,7 +13,7 @@ import { LayerRole } from 'services/StacService';
 
 const ROLE_ICON: Record<LayerRole, { icon: string; color: string; tooltip: string }> = {
   Measured: { icon: 'straighten', color: 'hsl(120, 45%, 62%)', tooltip: 'Measured (direct instrument reading)' },
-  Modeled: { icon: 'model_training', color: 'hsl(250, 62%, 75%)', tooltip: 'Modeled (ML model, indirect signal)' },
+  Modeled: { icon: 'model_training', color: 'hsl(250, 62%, 75%)', tooltip: 'Modeled (derived by a model from an indirect signal)' },
   Estimated: { icon: 'functions', color: 'hsl(330, 45%, 72%)', tooltip: 'Estimated (computed from other layers)' },
   Indicator: { icon: 'sensors', color: 'hsl(173, 60%, 50%)', tooltip: 'Indicator (proxy signal, not a real quantity)' },
 };

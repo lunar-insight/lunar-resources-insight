@@ -79,7 +79,7 @@ describe('badge rendering', () => {
 
 const ROLE_TOOLTIPS = {
   Measured: 'Measured (direct instrument reading)',
-  Modeled: 'Modeled (ML model, indirect signal)',
+  Modeled: 'Modeled (derived by a model from an indirect signal)',
   Estimated: 'Estimated (computed from other layers)',
   Indicator: 'Indicator (proxy signal, not a real quantity)',
 } as const
