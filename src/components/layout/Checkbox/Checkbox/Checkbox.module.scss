@@ -1,0 +1,80 @@
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  color: var(--color-neutralVariant);
+
+  &[data-hovered] .box {
+    background-color: var(--color-quaternary);
+  }
+
+  &[data-hovered]:not([data-selected]) .check {
+    opacity: 0.5;
+  }
+
+  &[data-pressed] .box {
+    background-color: var(--color-neutral);
+  }
+
+  &[data-focus-visible] .box {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 2px;
+  }
+
+  &[data-selected] .check {
+    opacity: 1;
+    stroke-width: 3px;
+  }
+
+  &[data-disabled] {
+    cursor: default;
+    opacity: 0.5;
+  }
+}
+
+// Same frame as the icon buttons, in every state
+.box {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background-color: var(--color-primary);
+  border: 1px solid var(--color-quaternary);
+  border-radius: 0.25rem;
+  box-shadow: inset 0 0 1px 1px black;
+  transition: background-color 0.15s ease;
+}
+
+.check {
+  fill: none;
+  stroke: var(--color-tertiary);
+  stroke-width: 2px;
+  opacity: 0.2;
+  transition: opacity 0.15s ease;
+}
+
+.md .box {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.md .check {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.sm .box {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.sm .check {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.label {
+  cursor: inherit;
+}

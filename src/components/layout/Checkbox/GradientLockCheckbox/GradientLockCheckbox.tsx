@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Checkbox, Label } from 'react-aria-components';
+import { Checkbox } from 'components/layout/Checkbox/Checkbox/Checkbox';
 import styles from './GradientLockCheckbox.module.scss';
 import { useLayerContext } from 'utils/context/LayerContext';
 
@@ -11,28 +11,8 @@ export const GradientLockCheckbox: React.FC<GradientLockCheckboxProps> = ({ laye
   const [isChecked, setIsChecked] = useState(false);
   const { updateLayerGradientLock } = useLayerContext();
 
-  if (!layerId) {
-    return (
-      <div className={styles.container}>
-        <Checkbox isDisabled className={styles.checkbox}>
-          {({ isSelected }) => (
-            <>
-              <div className={styles.indicator}>
-                {isSelected && (
-                  <svg viewBox="0 0 18 18">
-                    <polyline points="1 9 7 14 17 4" />
-                  </svg>
-                )}
-              </div>
-              <Label>Lock gradient to data range</Label>
-            </>
-          )}
-        </Checkbox>
-      </div>
-    );
-  }
-
   const handleChange = (isSelected: boolean) => {
+    if (!layerId) return;
     setIsChecked(isSelected);
     updateLayerGradientLock(layerId, isSelected);
   };
@@ -40,23 +20,12 @@ export const GradientLockCheckbox: React.FC<GradientLockCheckboxProps> = ({ laye
   return (
     <div className={styles.container}>
       <Checkbox
+        label="Lock gradient to data range"
         isSelected={isChecked}
         onChange={handleChange}
+        isDisabled={!layerId}
         className={styles.checkbox}
-      >
-        {({ isSelected }) => (
-          <>
-            <div className={styles.indicator}>
-              {isSelected && (
-                <svg viewBox="0 0 18 18">
-                  <polyline points="1 9 7 14 17 4" />
-                </svg>
-              )}
-            </div>
-            <Label>Lock gradient to data range</Label>
-          </>
-        )}
-      </Checkbox>
+      />
     </div>
   );
 };

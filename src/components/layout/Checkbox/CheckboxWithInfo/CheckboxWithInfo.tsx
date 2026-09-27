@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Checkbox, Label } from 'react-aria-components';
+import { Checkbox } from 'components/layout/Checkbox/Checkbox/Checkbox';
 import InfoButton from 'components/layout/Button/InfoButton/InfoButton';
 import styles from './CheckboxWithInfo.module.scss';
 
@@ -54,26 +54,12 @@ export const CheckboxWithInfo: React.FC<CheckboxWithInfoProps> = ({
   return (
     <div className={`${styles.container} ${className}`}>
       <Checkbox
+        label={label}
         isSelected={checked}
         onChange={handleChange}
         isDisabled={isDisabled}
         className={`${styles.checkbox} ${checkboxClassName}`}
-      >
-        {({ isSelected }) => (
-          <>
-            <div className={styles.checkboxIndicator}>
-              {isSelected && (
-                <svg viewBox="0 0 18 18" className={styles.checkboxIcon}>
-                  <polyline points="1 9 7 14 17 4" />
-                </svg>
-              )}
-            </div>
-            <Label className={styles.checkboxLabel}>
-              {label}
-            </Label>
-          </>
-        )}
-      </Checkbox>
+      />
 
       <InfoButton
         tooltipText={infoTooltipText}
