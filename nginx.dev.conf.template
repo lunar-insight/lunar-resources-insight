@@ -1,16 +1,18 @@
-# Tile responses are deterministic for a given request URI, so they are stored
-# here and served without reaching the tiler. keys_zone holds metadata only,
-# max_size caps the payload on disk, and nginx evicts least recently used
-# entries once that cap is reached.
-proxy_cache_path /var/cache/nginx/tiles levels=1:2 keys_zone=tiles:10m
+# Tile and whole file statistics responses are deterministic for a given
+# request URI, so they are stored here and served without reaching the tiler.
+# keys_zone holds metadata only, max_size caps the payload on disk, and nginx
+# evicts least recently used entries once that cap is reached.
+proxy_cache_path /var/cache/nginx/tiler levels=1:2 keys_zone=tiler:10m
                  max_size=1g inactive=7d use_temp_path=off;
 
 # Point queries carry one URI per coordinate, an unbounded set of keys with no
-# reuse, so only tiles are cached. Both the lookup and the store are skipped
-# when this is non-zero.
-map $uri $skip_tile_cache {
-    default        1;
-    ~^/cog/tiles/  0;
+# reuse, so only tiles and statistics are cached. Both the lookup and the store
+# are skipped when this is non-zero. Shape statistics are POST requests, which
+# proxy_cache_methods leaves uncached.
+map $uri $skip_cache {
+    default             1;
+    ~^/cog/tiles/       0;
+    ~^/cog/statistics   0;
 }
 
 # Response header allowlist for proxied tiler responses, defined once so the
@@ -105,17 +107,17 @@ server {
         proxy_read_timeout       30s;
         proxy_max_temp_file_size 10m;
 
-        proxy_cache        tiles;
-        proxy_cache_bypass $skip_tile_cache;
-        proxy_no_cache     $skip_tile_cache;
+        proxy_cache        tiler;
+        proxy_cache_bypass $skip_cache;
+        proxy_no_cache     $skip_cache;
         proxy_cache_key    $request_uri;
         # Held for a day rather than indefinitely so a regenerated COG appears
         # without a manual purge. Clear early with the worker user, which owns
         # the cache directory, since the container drops CAP_DAC_OVERRIDE:
-        #   docker exec -u nobody <proxy> rm -rf /var/cache/nginx/tiles/*
+        #   docker exec -u nobody <proxy> rm -rf /var/cache/nginx/tiler/*
         proxy_cache_valid  200 1d;
         proxy_cache_valid  404 1m;
-        # Collapses concurrent requests for the same tile into one upstream call.
+        # Collapses concurrent identical requests into one upstream call.
         proxy_cache_lock   on;
 
         proxy_intercept_errors on;

@@ -613,7 +613,7 @@ export class CircleDrawingService extends DrawingServiceBase {
         ...metadata,
         createdAt: new Date(),
       },
-      insightsOpen: false,
+      inspectorOpen: false,
       visible: true,
     };
 

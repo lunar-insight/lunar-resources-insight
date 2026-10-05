@@ -29,7 +29,7 @@ export const DERIVED_INDEX_BY_LAYER_ID: Record<string, {
   highLabel: string;
   range: [number, number];
 }> = {
-  mg_number: { lowLabel: 'Mare', highLabel: 'Highland', range: [0, 1] },
+  mg_number: { lowLabel: 'Mare', highLabel: 'Highland', range: [0, 100] },
 };
 
 export const DERIVED_INDICES: DerivedIndex[] = [
@@ -37,7 +37,7 @@ export const DERIVED_INDICES: DerivedIndex[] = [
     id: 'mg-number',
     symbol: 'Mg#',
     name: 'Magnesium Number',
-    formula: 'MgO / (MgO + FeO) × 100',
+    formula: 'Mg / (Mg + Fe) × 100, molar',
     inputs: ['mgo', 'feo'],
     purpose: 'Discriminates mare basalt from highland crust and flags potential mantle exposures.',
     lowLabel: 'Mare',

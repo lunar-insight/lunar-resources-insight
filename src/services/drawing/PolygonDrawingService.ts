@@ -261,7 +261,7 @@ export class PolygonDrawingService extends DrawingServiceBase {
         positions: cartographicPositions,
         createdAt: new Date(),
       },
-      insightsOpen: false,
+      inspectorOpen: false,
       visible: true,
     };
 

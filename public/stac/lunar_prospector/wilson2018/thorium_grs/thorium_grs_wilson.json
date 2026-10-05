@@ -35,6 +35,7 @@
     "original_psf_fwhm_km": 45,
     "psf_function": "kappa function (Lawrence et al., 2003; Maurice et al., 2004)",
     "psf_smoothed_resolution_km": 63,
+    "lri:resolution_km": 26,
     "gamma_background_window_MeV": "2.5 - 2.7",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
     "publication_date": "2018-06-19",

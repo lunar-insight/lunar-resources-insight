@@ -52,7 +52,11 @@ export const layersConfig: LayersConfig = {
       layerType: "raster",
       category: "chemical",
       element: "hydrogen",
+      units: "ppm",
       displayName: "Hydrogen Abundance ppm (Lawrence 2022)",
+      datasetLabel: "LP NS (Lawrence 2022)",
+      datasetShort: "Lawrence",
+      decimals: 0,
       stac: "lunar_prospector/lawrence2022/hydrogen_abundance/hydrogen_abundance_lawrence.json"
     },
     thorium_grs: {
@@ -60,7 +64,11 @@ export const layersConfig: LayersConfig = {
       layerType: "raster",
       category: "chemical",
       element: "thorium",
+      units: "ppm",
       displayName: "Thorium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/0.5deg/thorium/thoriumhd.json",
       variants: [
         {
@@ -92,6 +100,9 @@ export const layersConfig: LayersConfig = {
       element: "thorium",
       units: "ppm",
       displayName: "Thorium Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 1,
       stac: "lunar_prospector/prettyman2006/2deg/thorium/thorium_2d_prettyman2006.json",
       variants: [
         {
@@ -127,6 +138,9 @@ export const layersConfig: LayersConfig = {
       element: "thorium",
       units: "ppm",
       displayName: "Thorium Abundance · Kaguya GRS",
+      datasetLabel: "Kaguya GRS",
+      datasetShort: "Kaguya",
+      decimals: 1,
       stac: "kaguya/grs/nuclide_map/thorium/thorium_nmap.json"
     },
     uranium_lp_grs: {
@@ -136,6 +150,9 @@ export const layersConfig: LayersConfig = {
       element: "uranium",
       units: "ppm",
       displayName: "Uranium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 2,
       stac: "lunar_prospector/grs/5deg/uranium/uranium5d.json"
     },
     uranium_lp_grs_prettyman2006: {
@@ -145,6 +162,9 @@ export const layersConfig: LayersConfig = {
       element: "uranium",
       units: "ppm",
       displayName: "Uranium Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 2,
       stac: "lunar_prospector/prettyman2006/2deg/uranium/uranium_2d_prettyman2006.json",
       variants: [
         {
@@ -171,6 +191,9 @@ export const layersConfig: LayersConfig = {
       element: "uranium",
       units: "ppm",
       displayName: "Uranium Abundance · Kaguya GRS",
+      datasetLabel: "Kaguya GRS",
+      datasetShort: "Kaguya",
+      decimals: 2,
       stac: "kaguya/grs/nuclide_map/uranium/uranium_nmap.json"
     },
     titanium_lp_grs: {
@@ -180,6 +203,9 @@ export const layersConfig: LayersConfig = {
       element: "titanium",
       units: "wt%",
       displayName: "Titanium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 2,
       stac: "lunar_prospector/grs/2deg/titanium/titanium2d.json",
       variants: [
         {
@@ -201,6 +227,9 @@ export const layersConfig: LayersConfig = {
       element: "silicon",
       units: "wt%",
       displayName: "Silicon Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/5deg/silicon/silicon5d.json"
     },
     silicon_ch2_class: {
@@ -210,6 +239,9 @@ export const layersConfig: LayersConfig = {
       element: "silicon",
       units: "wt%",
       displayName: "Silicon Abundance · Chandrayaan-2 CLASS",
+      datasetLabel: "Chandrayaan-2 CLASS",
+      datasetShort: "CLASS",
+      decimals: 1,
       stac: "chandrayaan2/class/l2_map/silicon/silicon_ch2_class.json"
     },
     samarium_lp_grs: {
@@ -219,6 +251,9 @@ export const layersConfig: LayersConfig = {
       element: "samarium",
       units: "ppm",
       displayName: "Samarium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 0,
       stac: "lunar_prospector/grs/2deg/samarium/samarium2d.json"
     },
     gadolinium_lp_grs: {
@@ -228,6 +263,9 @@ export const layersConfig: LayersConfig = {
       element: "gadolinium",
       units: "ppm",
       displayName: "Gadolinium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/2deg/gadolinium/gadolinium2d.json"
     },
     radon222_lp_aps: {
@@ -246,6 +284,9 @@ export const layersConfig: LayersConfig = {
       element: "potassium",
       units: "ppm",
       displayName: "Potassium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 0,
       stac: "lunar_prospector/grs/2deg/potassium/potassium2d.json",
       variants: [
         {
@@ -267,6 +308,9 @@ export const layersConfig: LayersConfig = {
       element: "potassium",
       units: "ppm",
       displayName: "Potassium Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 0,
       stac: "lunar_prospector/prettyman2006/2deg/potassium/potassium_2d_prettyman2006.json",
       variants: [
         {
@@ -293,6 +337,9 @@ export const layersConfig: LayersConfig = {
       element: "potassium",
       units: "ppm",
       displayName: "Potassium Abundance · Kaguya GRS",
+      datasetLabel: "Kaguya GRS",
+      datasetShort: "Kaguya",
+      decimals: 0,
       stac: "kaguya/grs/nuclide_map/potassium/potassium_nmap.json"
     },
     polonium210_lp_aps: {
@@ -311,6 +358,9 @@ export const layersConfig: LayersConfig = {
       element: "oxygen",
       units: "wt%",
       displayName: "Oxygen Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/5deg/oxygen/oxygen5d.json"
     },
     magnesium_lp_grs: {
@@ -320,6 +370,9 @@ export const layersConfig: LayersConfig = {
       element: "magnesium",
       units: "wt%",
       displayName: "Magnesium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/5deg/magnesium/magnesium5d.json"
     },
     magnesium_ch2_class: {
@@ -329,6 +382,9 @@ export const layersConfig: LayersConfig = {
       element: "magnesium",
       units: "wt%",
       displayName: "Magnesium Abundance · Chandrayaan-2 CLASS",
+      datasetLabel: "Chandrayaan-2 CLASS",
+      datasetShort: "CLASS",
+      decimals: 1,
       stac: "chandrayaan2/class/l2_map/magnesium/magnesium_ch2_class.json"
     },
     iron_lp_grs: {
@@ -338,6 +394,9 @@ export const layersConfig: LayersConfig = {
       element: "iron",
       units: "wt%",
       displayName: "Iron Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/5deg/iron/iron5d.json"
     },
     iron_ch2_class: {
@@ -347,6 +406,9 @@ export const layersConfig: LayersConfig = {
       element: "iron",
       units: "wt%",
       displayName: "Iron Abundance · Chandrayaan-2 CLASS",
+      datasetLabel: "Chandrayaan-2 CLASS",
+      datasetShort: "CLASS",
+      decimals: 1,
       stac: "chandrayaan2/class/l2_map/iron/iron_ch2_class.json"
     },
     calcium_lp_grs: {
@@ -356,6 +418,9 @@ export const layersConfig: LayersConfig = {
       element: "calcium",
       units: "wt%",
       displayName: "Calcium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/5deg/calcium/calcium5d.json"
     },
     aluminum_lp_grs: {
@@ -365,6 +430,9 @@ export const layersConfig: LayersConfig = {
       element: "aluminum",
       units: "wt%",
       displayName: "Aluminium Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/5deg/aluminum/aluminum5d.json"
     },
     aluminum_ch2_class: {
@@ -374,6 +442,9 @@ export const layersConfig: LayersConfig = {
       element: "aluminum",
       units: "wt%",
       displayName: "Aluminium Abundance · Chandrayaan-2 CLASS",
+      datasetLabel: "Chandrayaan-2 CLASS",
+      datasetShort: "CLASS",
+      decimals: 1,
       stac: "chandrayaan2/class/l2_map/aluminum/aluminum_ch2_class.json"
     },
     sodium_ch2_class: {
@@ -383,6 +454,9 @@ export const layersConfig: LayersConfig = {
       element: "sodium",
       units: "wt%",
       displayName: "Sodium Abundance · Chandrayaan-2 CLASS",
+      datasetLabel: "Chandrayaan-2 CLASS",
+      datasetShort: "CLASS",
+      decimals: 2,
       stac: "chandrayaan2/class/l2_map/sodium/sodium_ch2_class.json"
     },
     /*
@@ -397,6 +471,9 @@ export const layersConfig: LayersConfig = {
       compound: "feo",
       units: "wt% FeO",
       displayName: "FeO Abundance · LP GRS",
+      datasetLabel: "LP GRS",
+      datasetShort: "LP GRS",
+      decimals: 1,
       stac: "lunar_prospector/grs/0.5deg/iron/ironhd.json"
     },
     feo_clementine_cnn_qiu2025: {
@@ -406,6 +483,9 @@ export const layersConfig: LayersConfig = {
       compound: "feo",
       units: "wt%",
       displayName: "FeO Abundance · Clementine CNN (Qiu 2025)",
+      datasetLabel: "Clementine CNN (Qiu 2025)",
+      datasetShort: "Clementine",
+      decimals: 1,
       stac: "clementine/qiu2025/feo/feo_clementine_cnn_qiu2025.json"
     },
     feo_lp_grs_prettyman2006: {
@@ -415,6 +495,9 @@ export const layersConfig: LayersConfig = {
       compound: "feo",
       units: "wt%",
       displayName: "FeO Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 1,
       stac: "lunar_prospector/prettyman2006/2deg/feo/feo_2d_prettyman2006.json",
       variants: [
         {
@@ -441,6 +524,9 @@ export const layersConfig: LayersConfig = {
       compound: "tio2",
       units: "wt%",
       displayName: "TiO₂ Abundance · Clementine CNN (Qiu 2025)",
+      datasetLabel: "Clementine CNN (Qiu 2025)",
+      datasetShort: "Clementine",
+      decimals: 1,
       stac: "clementine/qiu2025/tio2/tio2_clementine_cnn_qiu2025.json"
     },
     tio2_lp_grs_prettyman2006: {
@@ -450,6 +536,9 @@ export const layersConfig: LayersConfig = {
       compound: "tio2",
       units: "wt%",
       displayName: "TiO₂ Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 1,
       stac: "lunar_prospector/prettyman2006/2deg/tio2/tio2_2d_prettyman2006.json",
       variants: [
         {
@@ -476,6 +565,9 @@ export const layersConfig: LayersConfig = {
       compound: "al2o3",
       units: "wt%",
       displayName: "Al₂O₃ Abundance · Clementine CNN (Qiu 2025)",
+      datasetLabel: "Clementine CNN (Qiu 2025)",
+      datasetShort: "Clementine",
+      decimals: 1,
       stac: "clementine/qiu2025/al2o3/al2o3_clementine_cnn_qiu2025.json"
     },
     al2o3_lp_grs_prettyman2006: {
@@ -485,6 +577,9 @@ export const layersConfig: LayersConfig = {
       compound: "al2o3",
       units: "wt%",
       displayName: "Al₂O₃ Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 1,
       stac: "lunar_prospector/prettyman2006/2deg/al2o3/al2o3_2d_prettyman2006.json",
       variants: [
         {
@@ -511,6 +606,9 @@ export const layersConfig: LayersConfig = {
       compound: "sio2",
       units: "wt%",
       displayName: "SiO₂ Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 1,
       stac: "lunar_prospector/prettyman2006/2deg/sio2/sio2_2d_prettyman2006.json",
       variants: [
         {
@@ -537,6 +635,9 @@ export const layersConfig: LayersConfig = {
       compound: "mgo",
       units: "wt%",
       displayName: "MgO Abundance · Clementine CNN (Qiu 2025)",
+      datasetLabel: "Clementine CNN (Qiu 2025)",
+      datasetShort: "Clementine",
+      decimals: 1,
       stac: "clementine/qiu2025/mgo/mgo_clementine_cnn_qiu2025.json"
     },
     mgo_lp_grs_prettyman2006: {
@@ -546,6 +647,9 @@ export const layersConfig: LayersConfig = {
       compound: "mgo",
       units: "wt%",
       displayName: "MgO Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 1,
       stac: "lunar_prospector/prettyman2006/2deg/mgo/mgo_2d_prettyman2006.json",
       variants: [
         {
@@ -572,6 +676,9 @@ export const layersConfig: LayersConfig = {
       compound: "cao",
       units: "wt%",
       displayName: "CaO Abundance · Clementine CNN (Qiu 2025)",
+      datasetLabel: "Clementine CNN (Qiu 2025)",
+      datasetShort: "Clementine",
+      decimals: 1,
       stac: "clementine/qiu2025/cao/cao_clementine_cnn_qiu2025.json"
     },
     cao_lp_grs_prettyman2006: {
@@ -581,6 +688,9 @@ export const layersConfig: LayersConfig = {
       compound: "cao",
       units: "wt%",
       displayName: "CaO Abundance · LP GRS (Prettyman 2006)",
+      datasetLabel: "LP GRS (Prettyman 2006)",
+      datasetShort: "Prettyman",
+      decimals: 1,
       stac: "lunar_prospector/prettyman2006/2deg/cao/cao_2d_prettyman2006.json",
       variants: [
         {
@@ -607,6 +717,9 @@ export const layersConfig: LayersConfig = {
       compound: "cao",
       units: "wt%",
       displayName: "CaO Abundance · Kaguya GRS",
+      datasetLabel: "Kaguya GRS",
+      datasetShort: "Kaguya",
+      decimals: 1,
       stac: "kaguya/grs/nuclide_map/calcium/calcium_nmap.json"
     },
     /*
@@ -621,6 +734,9 @@ export const layersConfig: LayersConfig = {
       mineral: "plagioclase",
       units: "wt%",
       displayName: "Plagioclase Abundance · Kaguya Multiband Imager, 50°N-50°S (Lemelin 2016)",
+      datasetLabel: "Kaguya Multiband Imager (Lemelin 2016)",
+      datasetShort: "Kaguya MI",
+      decimals: 0,
       stac: "kaguya/mi/mineral_map/plagioclase/plagioclase_kaguya_mi_lemelin2016.json"
     },
     plagioclase_kaguya_sp_lemelin2022_north_pole: {
@@ -630,6 +746,10 @@ export const layersConfig: LayersConfig = {
       mineral: "plagioclase",
       units: "wt%",
       displayName: "Plagioclase Abundance · Kaguya Spectral Profiler, North Pole (Lemelin 2022)",
+      datasetLabel: "Kaguya Spectral Profiler, poles (Lemelin 2022)",
+      datasetShort: "Kaguya SP",
+      decimals: 0,
+      inspectorPair: "plagioclase_kaguya_sp_lemelin2022",
       stac: "kaguya/sp/polar_mineral_map/plagioclase/plagioclase_kaguya_sp_lemelin2022_north_pole.json"
     },
     plagioclase_kaguya_sp_lemelin2022_south_pole: {
@@ -639,6 +759,10 @@ export const layersConfig: LayersConfig = {
       mineral: "plagioclase",
       units: "wt%",
       displayName: "Plagioclase Abundance · Kaguya Spectral Profiler, South Pole (Lemelin 2022)",
+      datasetLabel: "Kaguya Spectral Profiler, poles (Lemelin 2022)",
+      datasetShort: "Kaguya SP",
+      decimals: 0,
+      inspectorPair: "plagioclase_kaguya_sp_lemelin2022",
       stac: "kaguya/sp/polar_mineral_map/plagioclase/plagioclase_kaguya_sp_lemelin2022_south_pole.json"
     },
     clinopyroxene_kaguya_mi_lemelin2016: {
@@ -648,6 +772,9 @@ export const layersConfig: LayersConfig = {
       mineral: "clinopyroxene",
       units: "wt%",
       displayName: "Clinopyroxene Abundance · Kaguya Multiband Imager, 50°N-50°S (Lemelin 2016)",
+      datasetLabel: "Kaguya Multiband Imager (Lemelin 2016)",
+      datasetShort: "Kaguya MI",
+      decimals: 0,
       stac: "kaguya/mi/mineral_map/clinopyroxene/clinopyroxene_kaguya_mi_lemelin2016.json"
     },
     clinopyroxene_kaguya_sp_lemelin2022_north_pole: {
@@ -657,6 +784,10 @@ export const layersConfig: LayersConfig = {
       mineral: "clinopyroxene",
       units: "wt%",
       displayName: "Clinopyroxene Abundance · Kaguya Spectral Profiler, North Pole (Lemelin 2022)",
+      datasetLabel: "Kaguya Spectral Profiler, poles (Lemelin 2022)",
+      datasetShort: "Kaguya SP",
+      decimals: 0,
+      inspectorPair: "clinopyroxene_kaguya_sp_lemelin2022",
       stac: "kaguya/sp/polar_mineral_map/clinopyroxene/clinopyroxene_kaguya_sp_lemelin2022_north_pole.json"
     },
     clinopyroxene_kaguya_sp_lemelin2022_south_pole: {
@@ -666,6 +797,10 @@ export const layersConfig: LayersConfig = {
       mineral: "clinopyroxene",
       units: "wt%",
       displayName: "Clinopyroxene Abundance · Kaguya Spectral Profiler, South Pole (Lemelin 2022)",
+      datasetLabel: "Kaguya Spectral Profiler, poles (Lemelin 2022)",
+      datasetShort: "Kaguya SP",
+      decimals: 0,
+      inspectorPair: "clinopyroxene_kaguya_sp_lemelin2022",
       stac: "kaguya/sp/polar_mineral_map/clinopyroxene/clinopyroxene_kaguya_sp_lemelin2022_south_pole.json"
     },
     orthopyroxene_kaguya_mi_lemelin2016: {
@@ -675,6 +810,9 @@ export const layersConfig: LayersConfig = {
       mineral: "orthopyroxene",
       units: "wt%",
       displayName: "Orthopyroxene Abundance · Kaguya Multiband Imager, 50°N-50°S (Lemelin 2016)",
+      datasetLabel: "Kaguya Multiband Imager (Lemelin 2016)",
+      datasetShort: "Kaguya MI",
+      decimals: 0,
       stac: "kaguya/mi/mineral_map/orthopyroxene/orthopyroxene_kaguya_mi_lemelin2016.json"
     },
     orthopyroxene_kaguya_sp_lemelin2022_north_pole: {
@@ -684,6 +822,10 @@ export const layersConfig: LayersConfig = {
       mineral: "orthopyroxene",
       units: "wt%",
       displayName: "Orthopyroxene Abundance · Kaguya Spectral Profiler, North Pole (Lemelin 2022)",
+      datasetLabel: "Kaguya Spectral Profiler, poles (Lemelin 2022)",
+      datasetShort: "Kaguya SP",
+      decimals: 0,
+      inspectorPair: "orthopyroxene_kaguya_sp_lemelin2022",
       stac: "kaguya/sp/polar_mineral_map/orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_north_pole.json"
     },
     orthopyroxene_kaguya_sp_lemelin2022_south_pole: {
@@ -693,6 +835,10 @@ export const layersConfig: LayersConfig = {
       mineral: "orthopyroxene",
       units: "wt%",
       displayName: "Orthopyroxene Abundance · Kaguya Spectral Profiler, South Pole (Lemelin 2022)",
+      datasetLabel: "Kaguya Spectral Profiler, poles (Lemelin 2022)",
+      datasetShort: "Kaguya SP",
+      decimals: 0,
+      inspectorPair: "orthopyroxene_kaguya_sp_lemelin2022",
       stac: "kaguya/sp/polar_mineral_map/orthopyroxene/orthopyroxene_kaguya_sp_lemelin2022_south_pole.json"
     },
     olivine_kaguya_mi_lemelin2016: {
@@ -702,6 +848,9 @@ export const layersConfig: LayersConfig = {
       mineral: "olivine",
       units: "wt%",
       displayName: "Olivine Abundance · Kaguya Multiband Imager, 50°N-50°S (Lemelin 2016)",
+      datasetLabel: "Kaguya Multiband Imager (Lemelin 2016)",
+      datasetShort: "Kaguya MI",
+      decimals: 0,
       stac: "kaguya/mi/mineral_map/olivine/olivine_kaguya_mi_lemelin2016.json"
     },
     olivine_kaguya_sp_lemelin2022_north_pole: {
@@ -711,6 +860,10 @@ export const layersConfig: LayersConfig = {
       mineral: "olivine",
       units: "wt%",
       displayName: "Olivine Abundance · Kaguya Spectral Profiler, North Pole (Lemelin 2022)",
+      datasetLabel: "Kaguya Spectral Profiler, poles (Lemelin 2022)",
+      datasetShort: "Kaguya SP",
+      decimals: 0,
+      inspectorPair: "olivine_kaguya_sp_lemelin2022",
       stac: "kaguya/sp/polar_mineral_map/olivine/olivine_kaguya_sp_lemelin2022_north_pole.json"
     },
     olivine_kaguya_sp_lemelin2022_south_pole: {
@@ -720,6 +873,10 @@ export const layersConfig: LayersConfig = {
       mineral: "olivine",
       units: "wt%",
       displayName: "Olivine Abundance · Kaguya Spectral Profiler, South Pole (Lemelin 2022)",
+      datasetLabel: "Kaguya Spectral Profiler, poles (Lemelin 2022)",
+      datasetShort: "Kaguya SP",
+      decimals: 0,
+      inspectorPair: "olivine_kaguya_sp_lemelin2022",
       stac: "kaguya/sp/polar_mineral_map/olivine/olivine_kaguya_sp_lemelin2022_south_pole.json"
     },
     /*
@@ -732,8 +889,11 @@ export const layersConfig: LayersConfig = {
       layerType: "raster",
       category: "derived-index",
       displayName: "Mg# Magnesium Number · Clementine CNN (Qiu 2025)",
+      datasetLabel: "Clementine CNN (Qiu 2025)",
+      datasetShort: "Clementine",
+      decimals: 0,
       isDerivedIndex: true,
-      units: "Mg# (0 to 1)",
+      units: "Mg# (0 to 100)",
       stac: "clementine/qiu2025/mg_number/mg_number_clementine_cnn_qiu2025.json"
     }
   }

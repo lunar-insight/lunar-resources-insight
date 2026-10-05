@@ -45,6 +45,7 @@
     ],
     "grid_size_deg": 0.5,
     "spatial_resolution_km": 50,
+    "lri:resolution_km": 50,
     "grid_cols": 720,
     "grid_rows": 360,
     "observation_period_start": "1998-12-19",

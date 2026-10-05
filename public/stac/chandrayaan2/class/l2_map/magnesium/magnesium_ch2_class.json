@@ -29,6 +29,7 @@
     "platform": "chandrayaan-2",
     "element": "Mg",
     "units": "wt%",
+    "lri:resolution_km": 43.3,
     "ground_pixel_km": "150 x 12.5 (along-track x across-track), fixed",
     "observation_period_start": "2021-04-01",
     "observation_period_end": "2022-08-31",

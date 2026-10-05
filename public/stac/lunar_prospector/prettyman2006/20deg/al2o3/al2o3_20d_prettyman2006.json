@@ -20,6 +20,7 @@
     "units": "wt%",
     "grid_size_deg": 20,
     "grid_size_km": 600,
+    "lri:resolution_km": 600,
     "pixel_count": 114,
     "observation_period_start": "1998-01-17",
     "observation_period_end": "1998-10-07",

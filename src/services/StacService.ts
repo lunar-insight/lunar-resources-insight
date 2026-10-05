@@ -13,6 +13,9 @@ export interface StacItemProperties {
   grid_size_deg?: number;
   grid_size_km?: number;
   'lri:role'?: LayerRole;
+  // Size of one independent measurement, as the source states it. Can exceed
+  // the grid size, since a detector footprint is often larger than the bins.
+  'lri:resolution_km'?: number;
   [key: string]: unknown;
 }
 

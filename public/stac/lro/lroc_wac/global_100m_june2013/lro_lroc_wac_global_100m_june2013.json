@@ -36,6 +36,7 @@
     "map_projection": "SimpleCylindrical",
     "map_scale_m_per_px": 100.0,
     "map_resolution_px_per_deg": 303.2333,
+    "lri:resolution_km": 0.1,
     "crs": "PROJCRS[\"SimpleCylindrical MOON\"] — Equidistant Cylindrical on D_MOON sphere (1737400 m), units: metres. No EPSG/IAU code assigned.",
     "coordinate_system": "Planetocentric",
     "longitude_direction": "PositiveEast",

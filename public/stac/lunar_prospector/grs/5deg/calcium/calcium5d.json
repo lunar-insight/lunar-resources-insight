@@ -53,6 +53,7 @@
     "scale_factor": 0.1,
     "grid_size_deg": 5.0,
     "grid_size_km": 150,
+    "lri:resolution_km": 150,
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",

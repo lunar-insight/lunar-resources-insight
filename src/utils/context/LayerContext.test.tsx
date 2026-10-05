@@ -48,7 +48,12 @@ vi.mock('services/ColormapService', () => ({
 }))
 
 vi.mock('services/LayerStatsService', () => ({
-  layerStatsService: { getLayerStats: () => ({ min: 0, max: 100, loaded: false }) },
+  layerStatsService: {
+    getLayerStats: () => ({ min: 0, max: 100, loaded: false }),
+    getFileStats: () => ({ min: 0, max: 100, loaded: false }),
+    setActiveFile: vi.fn().mockResolvedValue({ min: 0, max: 100, loaded: false }),
+    clearActiveFile: vi.fn(),
+  },
 }))
 
 vi.mock('services/PointValueService', () => ({

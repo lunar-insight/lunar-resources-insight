@@ -1,18 +1,53 @@
 import React, { useState } from 'react';
-import { GridList, GridListItem } from 'react-aria-components';
+import { Button, GridList, GridListItem } from 'react-aria-components';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useViewer } from 'utils/context/ViewerContext';
+import { useFeatureResults, useInspectorContext } from 'utils/context/InspectorContext';
 import RemoveItemButton from 'components/layout/Button/RemoveItemButton/RemoveItemButton';
+import { Checkbox } from 'components/layout/Checkbox/Checkbox/Checkbox';
 import { FeatureColorButton } from './FeatureColorButton';
 import { FeatureVisibilityButton } from './FeatureVisibilityButton';
-import { FeatureInsightsButton } from './FeatureInsightsButton';
+import { FeatureInspectButton } from './FeatureInspectButton';
 import { FeatureJumpButton } from './FeatureJumpButton';
 import { FeatureNameEditor } from './FeatureNameEditor';
 import { flyToFeature } from 'utils/featureUtils';
+import { shapeWord } from 'services/inspector/featureGeometry';
+import type { Feature } from '../types';
 import styles from './FeaturesList.module.scss';
 
+const SHAPE_ICONS: Record<string, string> = {
+  point: 'location_on',
+  line: 'timeline',
+  polygon: 'hexagon',
+  circle: 'circle',
+};
+
+/** Shape type, then the computation progress or the ready state, counted in dataset lines. */
+const FeatureStatus: React.FC<{ feature: Feature }> = ({ feature }) => {
+  const results = useFeatureResults(feature.id);
+  const computing = !results || results.status === 'computing';
+
+  return (
+    <span className={styles.featureStatus}>
+      <span className={styles.shapeLabel}>{shapeWord(feature.type)}</span>
+      <span aria-hidden="true">·</span>
+      {computing ? (
+        <>
+          <span className={styles.miniProgress} aria-hidden="true">
+            <span style={{ width: `${results ? (results.done / results.total) * 100 : 0}%` }} />
+          </span>
+          <span>{results ? `${results.done} of ${results.total} layers` : 'Computing'}</span>
+        </>
+      ) : (
+        <span>{results.total} layers ready</span>
+      )}
+    </span>
+  );
+};
+
 export const FeaturesList: React.FC = () => {
-  const { features, removeFeature, toggleFeatureInsights, toggleFeatureVisible, renameFeature } = useFeaturesContext();
+  const { features, removeFeature, toggleFeatureInspector, toggleFeatureVisible, renameFeature } = useFeaturesContext();
+  const { comparedIds, toggleCompared, setComparisonOpen } = useInspectorContext();
   const { viewer } = useViewer();
   const [editingFeatureId, setEditingFeatureId] = useState<string | null>(null);
 
@@ -39,6 +74,8 @@ export const FeaturesList: React.FC = () => {
     );
   }
 
+  const ticked = features.filter(feature => comparedIds.has(feature.id)).length;
+
   return (
     <div className={styles.selectionFrame}>
       <GridList
@@ -46,10 +83,11 @@ export const FeaturesList: React.FC = () => {
         selectionMode="none"
         className={styles.featuresList}
         aria-label="Features list"
-        dependencies={[editingFeatureId]}
+        dependencies={[editingFeatureId, comparedIds]}
       >
         {(feature) => {
           const isEditing = editingFeatureId === feature.id;
+          const word = shapeWord(feature.type);
 
           return (
           <GridListItem
@@ -66,17 +104,31 @@ export const FeaturesList: React.FC = () => {
                 />
               ) : (
                 <>
+                  <Checkbox
+                    size="md"
+                    aria-label="Add to comparison"
+                    isSelected={comparedIds.has(feature.id)}
+                    onChange={() => toggleCompared(feature.id)}
+                  />
+
                   <FeatureColorButton
                     featureId={feature.id}
                     currentColor={feature.color}
                   />
 
-                  <span
-                    className={styles.featureName}
-                    onClick={(e) => handleStartEdit(feature.id, e)}
-                    title="Click to rename"
-                  >
-                    {feature.name}
+                  <span className={`material-symbols-outlined ${styles.shapeIcon}`} title={word} aria-hidden="true">
+                    {SHAPE_ICONS[word]}
+                  </span>
+
+                  <span className={styles.featureMain}>
+                    <span
+                      className={styles.featureName}
+                      onClick={(e) => handleStartEdit(feature.id, e)}
+                      title="Click to rename"
+                    >
+                      {feature.name}
+                    </span>
+                    <FeatureStatus feature={feature} />
                   </span>
 
                   <div className={styles.featureActions}>
@@ -89,9 +141,9 @@ export const FeaturesList: React.FC = () => {
                       onChange={() => toggleFeatureVisible(feature.id)}
                     />
 
-                    <FeatureInsightsButton
-                      isSelected={feature.insightsOpen}
-                      onChange={() => toggleFeatureInsights(feature.id)}
+                    <FeatureInspectButton
+                      isSelected={feature.inspectorOpen}
+                      onChange={() => toggleFeatureInspector(feature.id)}
                     />
 
                     <RemoveItemButton
@@ -109,6 +161,18 @@ export const FeaturesList: React.FC = () => {
           );
         }}
       </GridList>
+
+      <div className={styles.compareFooter}>
+        <span>{ticked} ticked</span>
+        <Button
+          className={styles.compareButton}
+          isDisabled={ticked === 0}
+          onPress={() => setComparisonOpen(true)}
+        >
+          <span className="material-symbols-outlined" aria-hidden="true">compare_arrows</span>
+          Compare ({ticked})
+        </Button>
+      </div>
     </div>
   );
 };

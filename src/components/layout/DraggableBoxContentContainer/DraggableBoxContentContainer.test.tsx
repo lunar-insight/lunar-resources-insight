@@ -18,6 +18,7 @@ vi.mock('utils/ZIndexProvider', () => ({
 import { act, fireEvent, render } from '@testing-library/react'
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl'
 import { DraggableBoxContentContainer } from './DraggableBoxContentContainer'
+import styles from './DraggableBoxContentContainer.module.scss'
 
 const boundaryRef = { current: document.createElement('div') } as React.RefObject<HTMLDivElement>
 
@@ -96,5 +97,25 @@ describe('hover-driven scan pause', () => {
     expect(lastShouldDisable()).toBe(true)
     act(() => { vi.advanceTimersByTime(100) })
     expect(lastShouldDisable()).toBe(false)
+  })
+})
+
+describe('tone', () => {
+  const renderTitled = (tone?: 'light' | 'dark') => render(
+    <DraggableBoxContentContainer isOpen={true} onClose={vi.fn()} boundaryRef={boundaryRef} title="Window" tone={tone}>
+      <p>content</p>
+    </DraggableBoxContentContainer>
+  ).container
+
+  it('keeps the light glass and the light close button by default', () => {
+    const container = renderTitled()
+    expect(container.firstChild).not.toHaveClass(styles.dark)
+    expect(container.querySelector('.close-button')).toHaveClass('close-button--light')
+  })
+
+  it('takes the dark glass and the dark close button', () => {
+    const container = renderTitled('dark')
+    expect(container.firstChild).toHaveClass(styles.dark)
+    expect(container.querySelector('.close-button')).not.toHaveClass('close-button--light')
   })
 })

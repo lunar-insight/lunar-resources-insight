@@ -76,3 +76,21 @@ $margin: 0.75rem;
   font-size: 0.85rem;
   pointer-events: auto;
 }
+
+// Dark glass, with the title bar on the primary color
+.dark {
+  background: var(--surface-window);
+  border: 1px solid rgba(35, 41, 53, 0.85);
+
+  .moveArea {
+    background: var(--color-primary);
+    border-bottom: 1px solid var(--color-tertiary);
+    color: var(--color-secondary);
+  }
+
+  .title {
+    color: var(--color-secondary);
+    font-weight: 500;
+    min-width: 0;
+  }
+}

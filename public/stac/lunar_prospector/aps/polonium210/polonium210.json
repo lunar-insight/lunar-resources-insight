@@ -50,6 +50,7 @@
     "platform": "lunar-prospector",
     "element": "Po-210",
     "units": "counts/s",
+    "lri:resolution_km": 150,
     "scale_factor": 0.001,
     "pixel_count": 336,
     "grid_note": "336 equal-area pixels, ~300 km (longitude) × ~450 km (latitude) at equator. Within the 720×360 binary container, each cell value is repeated across all 0.5° pixels covering that cell.",

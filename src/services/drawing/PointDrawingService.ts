@@ -40,7 +40,7 @@ export function createPointFeature(
       sourceId,
       autoNamedFromCoordinate: sourceId?.startsWith('coordinate-') ?? false,
     },
-    insightsOpen: false,
+    inspectorOpen: false,
     visible: true,
   };
 }

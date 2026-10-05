@@ -21,6 +21,9 @@ import { MouseTrackingProvider } from 'utils/MouseTrackingProvider';
 import BottomBar from 'components/layout/BottomBar/BottomBar';
 import TopBar from 'components/layout/TopBar/TopBar';
 import { ScannerProvider } from 'utils/context/ScannerContext';
+import { InspectorProvider } from 'utils/context/InspectorContext';
+import { InspectorWindows } from 'components/inspector/InspectorWindows';
+import { ComparisonView } from 'components/inspector/ComparisonView/ComparisonView';
 
 const MainPageContent: React.FC = () => {
   const mainContentRef = useRef<HTMLDivElement>(null);
@@ -50,6 +53,8 @@ const MainPageContent: React.FC = () => {
             </div>
           </div>
           <DialogRenderer />
+          <InspectorWindows />
+          <ComparisonView />
           <TopBar />
           <BottomBar />
         </div>
@@ -82,15 +87,17 @@ const MainPage = () => {
       <MouseTrackingProvider>
         <LayerProvider>
           <FeaturesProvider>
-            <MeasurementProvider>
-              <ZIndexProvider>
-                <SidebarProvider>
-                  <ScannerProvider>
-                    <MainPageContent />
-                  </ScannerProvider>
-                </SidebarProvider>
-              </ZIndexProvider>
-            </MeasurementProvider>
+            <InspectorProvider>
+              <MeasurementProvider>
+                <ZIndexProvider>
+                  <SidebarProvider>
+                    <ScannerProvider>
+                      <MainPageContent />
+                    </ScannerProvider>
+                  </SidebarProvider>
+                </ZIndexProvider>
+              </MeasurementProvider>
+            </InspectorProvider>
           </FeaturesProvider>
         </LayerProvider>
       </MouseTrackingProvider>

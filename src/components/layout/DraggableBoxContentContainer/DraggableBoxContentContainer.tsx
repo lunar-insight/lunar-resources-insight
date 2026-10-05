@@ -18,6 +18,10 @@ export interface DraggableBoxContentContainerProps {
   boundaryRef: React.RefObject<HTMLDivElement>;
   id?: string;
   cascadeIndex?: number;
+  /** `dark` is the Inspector's glass; the default keeps the light glass of the scanners. */
+  tone?: 'light' | 'dark';
+  /** Replaces the padding and gap of the content area. */
+  contentClassName?: string;
 }
 
 interface ViewerContainerSize {
@@ -41,6 +45,8 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
   boundaryRef,
   id = 'draggable-box-' + Math.random().toString(36).substring(2, 11),
   cascadeIndex = 0,
+  tone = 'light',
+  contentClassName = '',
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
   const { dialogProps, titleProps } = useDialog({}, dialogRef);
@@ -252,7 +258,7 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
       {...dialogProps}
       {...pressProps}
       ref={dialogRef}
-      className={`${styles.draggableBoxContentContainer} ${className} ${!isVisible ? styles.hidden : ''}`}
+      className={`${styles.draggableBoxContentContainer} ${tone === 'dark' ? styles.dark : ''} ${className} ${!isVisible ? styles.hidden : ''}`}
       style={isVisible ? containerStyle : undefined}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -268,12 +274,12 @@ export const DraggableBoxContentContainer: React.FC<DraggableBoxContentContainer
           <CloseButton
             onPress={onClose}
             className={styles.closeButton}
-            light
+            light={tone === 'light'}
           />
         </div>
       )}
 
-      <div className={styles.contentArea}>
+      <div className={`${styles.contentArea} ${contentClassName}`}>
         {children}
       </div>
     </div>

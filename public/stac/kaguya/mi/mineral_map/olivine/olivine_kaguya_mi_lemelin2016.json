@@ -69,6 +69,7 @@
     "map_projection": "SimpleCylindrical",
     "map_scale_m_per_px": 59.225293797166955,
     "map_resolution_px_per_deg": 512,
+    "lri:resolution_km": 0.059,
     "crs": "Source: geographic GCS_Moon_2000 in degrees on the 1737400 m sphere (GDAL reports a BOUNDCRS to WGS 84 with zero parameters). COG: IAU:30100, same sphere and grid.",
     "coordinate_system": "Planetocentric",
     "longitude_direction": "PositiveEast",

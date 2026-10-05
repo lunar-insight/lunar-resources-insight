@@ -69,7 +69,7 @@ const stopEventPropagation = (event: React.SyntheticEvent) => {
 const NomenclatureSearch: React.FC = () => {
   const { viewer } = useViewer();
   const { features: nomenclatureFeatures } = useNomenclatureFeatures();
-  const { features, addFeature, toggleFeatureInsights } = useFeaturesContext();
+  const { features, addFeature, openFeatureInspector } = useFeaturesContext();
   const { contains } = useFilter({ sensitivity: 'base' });
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -198,7 +198,7 @@ const NomenclatureSearch: React.FC = () => {
     const existing = features.find((feature) => feature.metadata.sourceId === activeMarker.sourceId);
     const feature = existing ?? saveAsFeaturePoint(activeMarker);
     if (feature) {
-      toggleFeatureInsights(feature.id);
+      openFeatureInspector(feature.id);
     }
     setActiveMarker(null);
   };

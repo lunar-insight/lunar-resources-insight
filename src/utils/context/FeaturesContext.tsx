@@ -17,7 +17,8 @@ interface FeaturesContextType {
   updateCircleCenter: (id: string, newCenter: Cesium.Cartographic) => void;
   updateFeatureColor: (id: string, newColor: string) => void;
   setActiveDrawingTool: (tool: string | null) => void;
-  toggleFeatureInsights: (id: string) => void;
+  toggleFeatureInspector: (id: string) => void;
+  openFeatureInspector: (id: string) => void;
   toggleFeatureVisible: (id: string) => void;
   showFeatures: boolean;
   showLabels: boolean;
@@ -164,10 +165,18 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     );
   }, []);
 
-  const toggleFeatureInsights = useCallback((id: string) => {
+  const toggleFeatureInspector = useCallback((id: string) => {
     setFeatures(prev =>
       prev.map(f =>
-        f.id === id ? { ...f, insightsOpen: !f.insightsOpen } : f
+        f.id === id ? { ...f, inspectorOpen: !f.inspectorOpen } : f
+      )
+    );
+  }, []);
+
+  const openFeatureInspector = useCallback((id: string) => {
+    setFeatures(prev =>
+      prev.map(f =>
+        f.id === id && !f.inspectorOpen ? { ...f, inspectorOpen: true } : f
       )
     );
   }, []);
@@ -275,7 +284,8 @@ export const FeaturesProvider: React.FC<{ children: ReactNode }> = ({ children }
     updateCircleCenter,
     updateFeatureColor,
     setActiveDrawingTool,
-    toggleFeatureInsights,
+    toggleFeatureInspector,
+    openFeatureInspector,
     toggleFeatureVisible,
     showFeatures,
     showLabels,

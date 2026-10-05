@@ -18,7 +18,7 @@ const makeFeature = (overrides: Partial<Feature>): Feature => ({
   entity: {} as Cesium.Entity,
   color: '#00FFFFFF',
   metadata: { createdAt: new Date() },
-  insightsOpen: false,
+  inspectorOpen: false,
   visible: true,
   ...overrides,
 })
@@ -91,5 +91,27 @@ describe('updateFeaturePosition', () => {
 
     act(() => result.current.updateFeaturePosition('feature-1', Cesium.Cartographic.fromDegrees(20, -5)))
     expect(result.current.features[0].name).toBe(formatCoordinateFeatureName(20, -5))
+  })
+})
+
+describe('Inspector open state', () => {
+  it('toggles the Inspector of one feature', () => {
+    const { result } = renderHook(() => useFeaturesContext(), { wrapper })
+    act(() => result.current.addFeature(makeFeature({})))
+
+    act(() => result.current.toggleFeatureInspector('feature-1'))
+    expect(result.current.features[0].inspectorOpen).toBe(true)
+
+    act(() => result.current.toggleFeatureInspector('feature-1'))
+    expect(result.current.features[0].inspectorOpen).toBe(false)
+  })
+
+  it('opens the Inspector and keeps an open one open', () => {
+    const { result } = renderHook(() => useFeaturesContext(), { wrapper })
+    act(() => result.current.addFeature(makeFeature({})))
+
+    act(() => result.current.openFeatureInspector('feature-1'))
+    act(() => result.current.openFeatureInspector('feature-1'))
+    expect(result.current.features[0].inspectorOpen).toBe(true)
   })
 })

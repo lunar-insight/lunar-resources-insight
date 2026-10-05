@@ -33,6 +33,7 @@
     "achieved_resolution_km": 38,
     "original_psf_fwhm_km": 45,
     "psf_function": "kappa function (Lawrence et al., 2003; Maurice et al., 2004)",
+    "lri:resolution_km": 38,
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",
     "publication_date": "2018-06-19",
     "doi": "10.1029/2018JE005589",

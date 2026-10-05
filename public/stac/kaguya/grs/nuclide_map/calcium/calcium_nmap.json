@@ -32,6 +32,7 @@
     "units": "wt%",
     "grid_size_deg": 1.0,
     "grid_size_km": 30.32,
+    "lri:resolution_km": 130,
     "observation_period_start": "2009-02-10",
     "observation_period_end": "2009-05-27",
     "measurement_depth": "few tens of centimeters (bulk subsurface, not surface)",

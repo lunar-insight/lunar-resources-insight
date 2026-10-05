@@ -52,6 +52,7 @@
     "scale_factor": 0.1,
     "grid_size_deg": 2.0,
     "grid_size_km": 60,
+    "lri:resolution_km": 150,
     "altitude_phase": "high-altitude",
     "observation_period_start": "1998-01-16",
     "observation_period_end": "1999-07-31",

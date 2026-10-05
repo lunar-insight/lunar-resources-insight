@@ -1,0 +1,75 @@
+.popover {
+  // Above the floating windows and the comparison overlay
+  z-index: 3000;
+  min-width: 11rem;
+  max-width: 16rem;
+  background: rgba(var(--color-primary-rgb), 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
+  border-radius: 0.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  outline: none;
+
+  &[data-entering] {
+    animation: popover-slide 150ms;
+  }
+
+  &[data-exiting] {
+    animation: popover-slide 150ms reverse ease-in;
+  }
+}
+
+.dialog {
+  padding: 0.75rem 0.9rem;
+  outline: none;
+}
+
+.title {
+  margin: 0 0 0.45rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-tertiary);
+}
+
+.lines {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.9rem;
+  margin: 0;
+  font-size: 0.78rem;
+
+  dt {
+    color: var(--color-tertiary);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-neutralVariant);
+    text-align: right;
+    font-family: var(--font-text);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.sentence {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-neutralVariant);
+}
+
+.lines + .sentence {
+  margin-top: 0.45rem;
+}
+
+@keyframes popover-slide {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

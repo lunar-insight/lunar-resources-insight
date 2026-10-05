@@ -92,6 +92,11 @@ and the styling parameters, so a URI always denotes the same image. The proxy
 cache is size-capped and evicts least recently used entries, and concurrent
 requests for one tile collapse into a single upstream call.
 
+Whole file statistics, which the client requests for every layer at start, share
+that cache. Their URI names the file and the requested percentiles, so it also
+denotes one answer, and many clients starting at once cost one read per file.
+Statistics over a drawn shape are POST requests, which the proxy never caches.
+
 Point queries are deliberately not cached. Each carries a distinct coordinate,
 so the key space is unbounded and entries are never reused. Repeat suppression
 is performed on the client, where the scanner omits a request when the cursor

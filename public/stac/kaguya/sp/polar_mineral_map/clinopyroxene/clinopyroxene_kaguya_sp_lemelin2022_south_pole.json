@@ -59,6 +59,7 @@
     "authors": "Myriam Lemelin, Paul G. Lucey, Alex Camon",
     "publication_date": "2022-09-23",
     "spatial_resolution_m": 1002.3503,
+    "lri:resolution_km": 1.0,
     "gsd": 1002.3503,
     "raster_samples": 2529,
     "raster_lines": 2529,

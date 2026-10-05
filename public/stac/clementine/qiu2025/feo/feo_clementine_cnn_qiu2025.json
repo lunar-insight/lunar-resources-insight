@@ -20,6 +20,7 @@
     "compound": "FeO",
     "units": "wt%",
     "spatial_resolution_m": 100,
+    "lri:resolution_km": 0.1,
     "observation_period_start": "1994-02-19",
     "observation_period_end": "1994-05-03",
     "doi": "10.1038/s43247-025-02914-w",

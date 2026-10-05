@@ -172,8 +172,10 @@ class CesiumLayerManager {
       const bounds = await fetchLayerBounds(newFilename, newStac);
       await pointValueService.setLayerBounds(layerId, bounds);
 
-      // Prefer the style's explicit min/max; fall back to cached stats then safe default
-      const cachedStats = this.layerStats.get(layerId);
+      // Prefer the style's explicit min/max, then the new file's statistics when
+      // already stored, then the previous file's, then a safe default
+      const newFileStats = layerStatsService.getFileStats(newFilename);
+      const cachedStats = newFileStats.loaded ? newFileStats : this.layerStats.get(layerId);
       const min = currentStyle?.min ?? cachedStats?.min ?? 0;
       const max = currentStyle?.max ?? cachedStats?.max ?? 100;
 
@@ -513,6 +515,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         next.delete(layerId);
         return next;
       });
+      layerStatsService.clearActiveFile(layerId);
       cesiumManagerRef.current?.removeLayer(layerId);
     });
   }, []);
@@ -635,9 +638,8 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return next;
     });
 
-    // Re-fetch stats for the new variant file. The old stats remain visible
-    // until the new ones arrive, avoiding a "not loaded" flash.
-    layerStatsService.refreshStats(layerId, variant.filename)
+    // Statistics are stored by file, so a variant already read needs no request.
+    layerStatsService.setActiveFile(layerId, variant.filename)
       .then(() => setStatsVersion(v => v + 1))
       .catch(console.error);
   }, []);

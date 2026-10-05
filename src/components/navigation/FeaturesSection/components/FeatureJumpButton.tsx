@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
-import styles from './FeatureInsightsButton.module.scss';
+import styles from './FeatureActionButton.module.scss';
 
 interface FeatureJumpButtonProps {
   onPress: () => void;
@@ -15,7 +15,7 @@ export const FeatureJumpButton: React.FC<FeatureJumpButtonProps> = ({
       <Button
         onPress={onPress}
         aria-label="Jump to Feature"
-        className={styles.insightsButton}
+        className={styles.actionButton}
       >
         <span className="material-symbols-outlined">
           location_searching

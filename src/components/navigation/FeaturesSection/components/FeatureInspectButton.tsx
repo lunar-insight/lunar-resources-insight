@@ -1,14 +1,14 @@
 import React from 'react';
 import { ToggleButton, TooltipTrigger } from 'react-aria-components';
 import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
-import styles from './FeatureInsightsButton.module.scss';
+import styles from './FeatureActionButton.module.scss';
 
-interface FeatureInsightsButtonProps {
+interface FeatureInspectButtonProps {
   isSelected: boolean;
   onChange: (selected: boolean) => void;
 }
 
-export const FeatureInsightsButton: React.FC<FeatureInsightsButtonProps> = ({
+export const FeatureInspectButton: React.FC<FeatureInspectButtonProps> = ({
   isSelected,
   onChange,
 }) => {
@@ -17,15 +17,15 @@ export const FeatureInsightsButton: React.FC<FeatureInsightsButtonProps> = ({
       <ToggleButton
         isSelected={isSelected}
         onChange={onChange}
-        aria-label="Feature Insights"
-        className={styles.insightsButton}
+        aria-label="Inspect"
+        className={styles.actionButton}
       >
         <span className="material-symbols-outlined">
           search_insights
         </span>
       </ToggleButton>
       <ButtonTooltip placement="bottom">
-        Feature Insights
+        Inspect
       </ButtonTooltip>
     </TooltipTrigger>
   );

@@ -61,6 +61,40 @@ export const ELEMENT_REFERENCE_RANGES: Record<string, ElementReferenceRange> = {
       'https://iopscience.iop.org/article/10.1088/1674-4527/19/6/76', // Zhu et al. 2019 – Thorium distribution on the Moon (Chang'E-2 GRS), RAA
     ],
   },
+  // K, U, Sm and Gd end at Apollo 14 soil 14163, the most KREEP-rich soil, as Th does.
+  // K is converted from K2O (0.58 wt%, the highest analysis) at 0.830 K per K2O.
+  potassium: {
+    min: 0,
+    max: 4800,
+    units: 'ppm',
+    sources: [
+      'https://curator.jsc.nasa.gov/lunar/lsc/14163.pdf', // Meyer 2011 – Lunar Sample Compendium, 14163, Table 1a
+    ],
+  },
+  uranium: {
+    min: 0,
+    max: 4.1,
+    units: 'ppm',
+    sources: [
+      'https://curator.jsc.nasa.gov/lunar/lsc/14163.pdf', // Meyer 2011 – Lunar Sample Compendium, 14163, Table 1a
+    ],
+  },
+  samarium: {
+    min: 0,
+    max: 32,
+    units: 'ppm',
+    sources: [
+      'https://curator.jsc.nasa.gov/lunar/lsc/14163.pdf', // Meyer 2011 – Lunar Sample Compendium, 14163, Table 1a
+    ],
+  },
+  gadolinium: {
+    min: 0,
+    max: 37,
+    units: 'ppm',
+    sources: [
+      'https://curator.jsc.nasa.gov/lunar/lsc/14163.pdf', // Meyer 2011 – Lunar Sample Compendium, 14163, Table 1a
+    ],
+  },
 };
 
 export const COMPOUND_REFERENCE_RANGES: Record<string, ElementReferenceRange> = {
@@ -129,6 +163,22 @@ export const MINERAL_SYMBOLS: Record<string, string> = {
   orthopyroxene: 'Opx',
   clinopyroxene: 'Cpx',
   olivine: 'Ol',
+};
+
+export const MINERAL_NAMES: Record<string, string> = {
+  plagioclase: 'Plagioclase',
+  orthopyroxene: 'Orthopyroxene',
+  clinopyroxene: 'Clinopyroxene',
+  olivine: 'Olivine',
+};
+
+export const COMPOUND_NAMES: Record<string, string> = {
+  feo: 'Iron oxide',
+  tio2: 'Titanium dioxide',
+  al2o3: 'Aluminium oxide',
+  mgo: 'Magnesium oxide',
+  cao: 'Calcium oxide',
+  sio2: 'Silicon dioxide',
 };
 
 export const COMPOUND_SYMBOLS: Record<string, string> = {

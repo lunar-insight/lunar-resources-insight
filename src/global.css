@@ -64,6 +64,37 @@
   --color-category-derived-index-rgb: 249, 115, 22; /* Orange */
   --color-category-rock-rgb: 59, 212, 246; /* Cyan */
   --color-category-mineral-rgb: 59, 130, 246; /* Blue */
+
+  /* Font families. Roboto Mono is not shipped, so the monospace stack renders in Courier New. */
+  --font-text: 'Roboto', sans-serif;
+  --font-mono: 'Roboto Mono', 'Courier New', monospace;
+
+  /* Semantic tokens. The Inspector, the features panel and the comparison read their colors from these. */
+  --surface-window: linear-gradient(to right, rgba(35, 41, 53, 0.92), rgba(43, 53, 62, 0.92));
+  --surface-card: rgba(0, 0, 0, 0.22);
+  --border-card: rgba(50, 64, 73, 0.55);
+  --surface-track: rgba(0, 0, 0, 0.4);
+  --text-primary: #e0e0e0;
+  --text-secondary: #97a5ab;
+  --divider: #324049;
+  --control-bg: #232935;
+  --control-border: #324049;
+  --control-icon: #97a5ab;
+  --color-coverage: rgba(240, 159, 17, 0.95);
+}
+
+/* Light theme placeholders, which nothing applies. The values are not designed. */
+[data-theme="light"] {
+  --surface-window: linear-gradient(45deg, rgba(133, 162, 175, 0.75), rgba(182, 187, 193, 0.75));
+  --surface-card: rgba(35, 41, 53, 0.35);
+  --border-card: rgba(255, 255, 255, 0.18);
+  --surface-track: rgba(35, 41, 53, 0.5);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.7);
+  --divider: rgba(255, 255, 255, 0.3);
+  --control-bg: transparent;
+  --control-border: #232935;
+  --control-icon: #232935;
 }
 
 /*

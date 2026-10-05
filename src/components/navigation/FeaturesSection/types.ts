@@ -20,6 +20,6 @@ export interface Feature {
     sourceId?: string;
     autoNamedFromCoordinate?: boolean;
   };
-  insightsOpen: boolean;
+  inspectorOpen: boolean;
   visible: boolean;
 }

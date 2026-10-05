@@ -1,14 +1,12 @@
 import React, { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import { layersConfig, type LayerConfig } from 'geoConfigExporter';
-import { elements } from 'constants/periodicTableData';
 import {
   ELEMENT_REFERENCE_RANGES,
   COMPOUND_REFERENCE_RANGES,
-  COMPOUND_SYMBOLS,
   MINERAL_REFERENCE_RANGES,
-  MINERAL_SYMBOLS,
 } from 'constants/elementReferenceRanges';
+import { getElementSymbol, getCompoundSymbol, getMineralSymbol } from 'utils/layerSymbols';
 import { ElementDatasetPicker, type DatasetCandidate } from 'components/ui/ElementDatasetPicker/ElementDatasetPicker';
 import styles from './ResourceBarsVisualizer.module.scss';
 
@@ -92,17 +90,9 @@ const CHART_MARGIN_BOTTOM_DEFAULT = 55;
 const CHART_MARGIN_BOTTOM_WITH_PICKER = 71;
 const PICKER_Y_OFFSET = 59;
 
-function getElementSymbol(elementName: string): string {
-  const element = elements.find(el => el.name.toLowerCase() === elementName.toLowerCase());
-  return element?.symbol || elementName.toUpperCase().substring(0, 2);
-}
-
-function getCompoundSymbol(compoundName: string): string {
-  return COMPOUND_SYMBOLS[compoundName] ?? compoundName.substring(0, 3).toUpperCase();
-}
-
-function getMineralSymbol(mineralName: string): string {
-  return MINERAL_SYMBOLS[mineralName] ?? mineralName.substring(0, 3);
+// Decimals set per dataset in the layer config, 2 when it sets none
+function formatLayerValue(layerName: string, value: number): string {
+  return value.toFixed(layersConfig.layers[layerName]?.decimals ?? 2);
 }
 
 function barCategoryOf(layerConfig: LayerConfig): BarCategory {
@@ -195,7 +185,7 @@ function updateBarsOnly(
 
   groups.select<SVGTextElement>('.data-value')
     .style('fill', valueTextFill)
-    .text(d => d.value.toFixed(2));
+    .text(d => formatLayerValue(d.layerName, d.value));
 
   groups.each(function(d) {
     const groupId = d.layerName.replace(/[^a-zA-Z0-9]/g, '-');
@@ -456,7 +446,7 @@ function renderBarsPanel(
     .style('font-size', '12px')
     .style('fill', valueTextFill)
     .style('font-family', 'Courier New, monospace')
-    .text(d => d.value.toFixed(2));
+    .text(d => formatLayerValue(d.layerName, d.value));
 
   const nodataGroups = g.selectAll<SVGGElement, NodataResourceData>('.nodata-group')
     .data(nodataData)
@@ -836,7 +826,7 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
     ...(symbolGroups.get(symbol) ?? []).map(c => ({
       layerName: c.layerName,
       label: c.layerConfig.displayName ?? c.layerName,
-      valueLabel: `${c.value.toFixed(2)} ${units}`,
+      valueLabel: `${formatLayerValue(c.layerName, c.value)} ${units}`,
     })),
     ...(nodataSymbolGroups.get(symbol) ?? []).map(c => ({
       layerName: c.layerName,

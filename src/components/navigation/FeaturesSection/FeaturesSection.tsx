@@ -8,13 +8,9 @@ import { FeaturesList } from './components/FeaturesList';
 import { VisibilityToggleButton } from './components/VisibilityToggleButton';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useViewer } from 'utils/context/ViewerContext';
-import { useBoundaryRef } from 'components/reference/BoundaryRefProvider';
 import { FeatureDrawingService } from 'services/FeatureDrawingService';
 import { hexaToCesiumColor } from 'utils/colorUtils';
-import DraggableBoxContentContainer from 'components/layout/DraggableBoxContentContainer/DraggableBoxContentContainer';
-import { Portal } from 'components/ui/Portal/Portal';
 import styles from './FeaturesSection.module.scss';
-import insightsStyles from './FeatureInsightsBox.module.scss';
 
 const FeaturesSection: React.FC = () => {
   const {
@@ -25,14 +21,12 @@ const FeaturesSection: React.FC = () => {
     updateLinePositions,
     updatePolygonPositions,
     updateCircleCenter,
-    toggleFeatureInsights,
     showFeatures,
     showLabels,
     toggleFeatureVisibility,
     toggleLabelVisibility,
   } = useFeaturesContext();
   const { viewer } = useViewer();
-  const boundaryRef = useBoundaryRef();
   const featureDrawingServiceRef = useRef<FeatureDrawingService | null>(null);
 
   // Initialize drawing service (once, destroy only on unmount)
@@ -255,34 +249,6 @@ const FeaturesSection: React.FC = () => {
         </div>
         <FeaturesList />
       </div>
-
-      {/* Insights Boxes */}
-      {features.map((feature) => {
-        // Calculate cascade index based only on currently open insights
-        const openFeatures = features.filter(f => f.insightsOpen);
-        const cascadeIndex = openFeatures.findIndex(f => f.id === feature.id);
-
-        return (
-          <Portal key={feature.id}>
-            <DraggableBoxContentContainer
-              className={insightsStyles.featureInsightsBox}
-              isOpen={feature.insightsOpen}
-              onClose={() => toggleFeatureInsights(feature.id)}
-              title={`Insights: ${feature.name}`}
-              boundaryRef={boundaryRef}
-              cascadeIndex={cascadeIndex >= 0 ? cascadeIndex : 0}
-              width={400}
-              height={300}
-              id={`feature-insights-${feature.id}`}
-            >
-              <div className={insightsStyles.content}>
-                <p>Insights content</p>
-                <small>Feature: {feature.name}</small>
-              </div>
-            </DraggableBoxContentContainer>
-          </Portal>
-        );
-      })}
     </>
   );
 };

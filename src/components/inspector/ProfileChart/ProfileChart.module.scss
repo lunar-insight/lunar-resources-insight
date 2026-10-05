@@ -1,0 +1,163 @@
+.chartBlock {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--divider);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.4rem;
+}
+
+.label {
+  flex: 1;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--control-border);
+  color: var(--text-secondary);
+  font: 500 0.72rem var(--font-text);
+  cursor: pointer;
+  outline: none;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  &[data-hovered] {
+    background: rgba(var(--color-secondary-rgb), 0.18);
+    border-color: var(--color-secondary);
+    color: var(--color-neutralVariant);
+  }
+
+  &[data-selected] {
+    background: rgba(var(--color-secondary-rgb), 0.3);
+    border-color: var(--color-secondary);
+    color: var(--color-neutralVariant);
+  }
+
+  &[data-focus-visible] {
+    outline: 2px solid var(--color-secondary);
+    outline-offset: 1px;
+  }
+}
+
+// Count of picked layers, set apart from the unit by a thin rule
+.count {
+  margin-left: 0.35rem;
+  padding-left: 0.35rem;
+  border-left: 1px solid rgba(var(--color-tertiary-rgb), 0.5);
+}
+
+.wrap {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.yAxis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 2.4rem;
+  padding: 2px 0;
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  text-align: right;
+  font-family: var(--font-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.plot {
+  position: relative;
+  flex: 1;
+  display: flex;
+}
+
+.chart {
+  flex: 1;
+  display: block;
+  height: 116px;
+  background: var(--surface-card);
+  border-radius: 2px;
+}
+
+.grid {
+  stroke: rgba(var(--color-tertiary-rgb), 0.18);
+  stroke-width: 1;
+}
+
+.empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.xAxis {
+  display: flex;
+  justify-content: space-between;
+  margin: 2px 0 0 2.75rem;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  min-height: 1.125rem;
+  margin: 0.35rem 0 0 2.75rem;
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+}
+
+// A legend tag removes its layer from the chart
+.key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  height: 1.125rem;
+  padding: 0 0.2rem 0 0.35rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  font: 500 0.65rem var(--font-text);
+  color: var(--color-neutralVariant);
+  cursor: pointer;
+  outline: none;
+
+  :global(.material-symbols-outlined) {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+
+  &[data-hovered],
+  &[data-focus-visible] {
+    border-color: var(--color-tertiary);
+  }
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}
+
+.full {
+  align-self: center;
+}

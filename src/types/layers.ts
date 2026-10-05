@@ -26,6 +26,14 @@ export type LayerConfig = {
   stac?: string;
   layerType?: 'raster' | 'point' | 'vector';
   variants?: LayerVariant[];
+  /** Dataset name on the Inspector's line, e.g. "LP GRS (Prettyman 2006)". */
+  datasetLabel?: string;
+  /** Dataset name on a chart legend tag, e.g. "Prettyman". */
+  datasetShort?: string;
+  /** Decimals displayed for a value of this dataset. */
+  decimals?: number;
+  /** Layers sharing this id form one Inspector line, reading the file on the feature's side of the Moon. */
+  inspectorPair?: string;
 };
 
 export type LayersConfig = {

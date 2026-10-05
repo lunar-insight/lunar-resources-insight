@@ -47,7 +47,7 @@ const makeFeature = (overrides: Partial<Feature> = {}): Feature => ({
     position: Cesium.Cartographic.fromDegrees(10, 20, 0),
     createdAt: new Date(),
   },
-  insightsOpen: false,
+  inspectorOpen: false,
   visible: true,
   ...overrides,
 })

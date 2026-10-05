@@ -50,7 +50,7 @@ vi.mock('hooks/useNomenclatureFeatures', () => ({
   }),
 }))
 
-const toggleFeatureInsightsMock = vi.fn()
+const openFeatureInspectorMock = vi.fn()
 
 // A minimal stand-in for FeaturesContext backed by real useState, so that
 // addFeature calls actually cause NomenclatureSearch to re-render with the
@@ -62,7 +62,7 @@ vi.mock('utils/context/FeaturesContext', () => ({
       features,
       addFeature: (feature: { id: string; metadata: { sourceId?: string } }) =>
         setFeatures((prev) => [...prev, feature]),
-      toggleFeatureInsights: toggleFeatureInsightsMock,
+      openFeatureInspector: openFeatureInspectorMock,
       showFeatures: true,
       showLabels: true,
     }
@@ -79,7 +79,7 @@ beforeEach(() => {
   flyToMock.mockClear()
   entitiesAddMock.mockClear()
   entitiesRemoveMock.mockClear()
-  toggleFeatureInsightsMock.mockClear()
+  openFeatureInspectorMock.mockClear()
   cartesianToCanvasCoordinatesMock.mockClear()
 })
 
@@ -257,7 +257,7 @@ describe('temporary search marker', () => {
     expect(screen.getByRole('button', { name: 'Dismiss marker' })).toBeInTheDocument()
   })
 
-  it('creates a feature point and opens its insights when Analyze is pressed', async () => {
+  it('creates a feature point and opens its Inspector when Analyze is pressed', async () => {
     const user = userEvent.setup()
     render(<NomenclatureSearch />)
     await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
@@ -267,11 +267,11 @@ describe('temporary search marker', () => {
     await user.click(screen.getByRole('button', { name: 'Analyze' }))
 
     expect(entitiesAddMock).toHaveBeenCalledTimes(1)
-    expect(toggleFeatureInsightsMock).toHaveBeenCalledTimes(1)
+    expect(openFeatureInspectorMock).toHaveBeenCalledTimes(1)
     expect(screen.queryByRole('button', { name: 'Analyze' })).not.toBeInTheDocument()
   })
 
-  it('creates a feature point without opening insights when Save is pressed', async () => {
+  it('creates a feature point without opening the Inspector when Save is pressed', async () => {
     const user = userEvent.setup()
     render(<NomenclatureSearch />)
     await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
@@ -281,14 +281,14 @@ describe('temporary search marker', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }))
 
     expect(entitiesAddMock).toHaveBeenCalledTimes(1)
-    expect(toggleFeatureInsightsMock).not.toHaveBeenCalled()
+    expect(openFeatureInspectorMock).not.toHaveBeenCalled()
     // The callout stays open, reflecting the saved state.
     expect(screen.getByText('Saved')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Analyze' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument()
   })
 
-  it('keeps Analyze available after saving, opening insights on the existing feature without duplicating it', async () => {
+  it('keeps Analyze available after saving, opening the Inspector on the existing feature without duplicating it', async () => {
     const user = userEvent.setup()
     render(<NomenclatureSearch />)
     await user.click(screen.getByRole('button', { name: SEARCH_LABEL }))
@@ -300,7 +300,7 @@ describe('temporary search marker', () => {
     await user.click(screen.getByRole('button', { name: 'Analyze' }))
 
     expect(entitiesAddMock).not.toHaveBeenCalled() // no duplicate feature created
-    expect(toggleFeatureInsightsMock).toHaveBeenCalledTimes(1)
+    expect(openFeatureInspectorMock).toHaveBeenCalledTimes(1)
   })
 
   it('dismisses the marker without saving when the dismiss button is pressed', async () => {
