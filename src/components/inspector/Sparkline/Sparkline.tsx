@@ -47,11 +47,11 @@ interface SparklineProps {
   fractions: number[];
   scale: SparkScale;
   moon: LayerStats;
-  categoryRgb: string;
+  categoryColor: string;
 }
 
 /** How a layer varies along a line, axis free, in a dark well. */
-export const Sparkline: React.FC<SparklineProps> = ({ profile, fractions, scale, moon, categoryRgb }) => {
+export const Sparkline: React.FC<SparklineProps> = ({ profile, fractions, scale, moon, categoryColor }) => {
   const values = profile.filter((v): v is number => v !== null);
   if (values.length === 0) return <span className={styles.spark} aria-hidden="true" />;
 
@@ -65,7 +65,7 @@ export const Sparkline: React.FC<SparklineProps> = ({ profile, fractions, scale,
       <path
         d={seriesPath(profile, x, y)}
         fill="none"
-        stroke={`rgb(${categoryRgb})`}
+        stroke={categoryColor}
         strokeWidth={1}
         vectorEffect="non-scaling-stroke"
       />

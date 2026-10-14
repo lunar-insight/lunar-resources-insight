@@ -5,7 +5,7 @@ import { ValueBar } from 'components/inspector/ValueBar/ValueBar';
 import { CoverageIcon, EmptySlot, SpreadIcon } from 'components/inspector/RowIcons/RowIcons';
 import { Sparkline, type SparkScale } from 'components/inspector/Sparkline/Sparkline';
 import { StatPopover } from 'components/inspector/StatPopover/StatPopover';
-import { barView, CATEGORY_RGB, fullLineName } from 'components/inspector/lineView';
+import { barView, CATEGORY_COLOR, fullLineName } from 'components/inspector/lineView';
 import { layerStatsService } from 'services/LayerStatsService';
 import type { InspectorLine } from 'services/inspector/inspectorLayers';
 import type { FeatureResults, LineResult } from 'services/inspector/InspectorStore';
@@ -62,15 +62,15 @@ export const DatasetName: React.FC<{ line: InspectorLine }> = ({ line }) => (
 
 export const DatasetLine: React.FC<DatasetLineProps> = ({ line, result, results, sparkScale, sparkFractions, chart }) => {
   const moon = layerStatsService.getFileStats(result.file.filename);
-  const categoryRgb = CATEGORY_RGB[line.category];
+  const categoryColor = CATEGORY_COLOR[line.category];
   const bar = barView(line, result, moon);
   const isShape = results.kind === 'shape';
   const isLine = results.kind === 'line';
   const hasValue = result.value !== undefined && !result.noData;
 
-  let graphic: React.ReactNode = <ValueBar view={bar} categoryRgb={categoryRgb} />;
+  let graphic: React.ReactNode = <ValueBar view={bar} categoryColor={categoryColor} />;
   if (isLine && hasValue && result.profile) {
-    graphic = <Sparkline profile={result.profile} fractions={sparkFractions} scale={sparkScale} moon={moon} categoryRgb={categoryRgb} />;
+    graphic = <Sparkline profile={result.profile} fractions={sparkFractions} scale={sparkScale} moon={moon} categoryColor={categoryColor} />;
   } else if (isShape) {
     const spread = hasValue && result.stats
       ? spreadState(result.stats, moon, results.areaKm2 ?? 0, result.resolutionKm)

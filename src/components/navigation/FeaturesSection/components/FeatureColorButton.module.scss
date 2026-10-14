@@ -8,16 +8,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--color-quaternary);
+  border: 1px solid var(--control-border);
   background-color: transparent;
   overflow: hidden;
 
   &[data-hovered] {
-    border-color: var(--color-tertiary);
+    border-color: var(--border-strong);
   }
 
   &[data-pressed] {
-    border-color: var(--color-secondary);
+    border-color: var(--accent);
   }
 }
 
@@ -39,11 +39,10 @@
 }
 
 .colorPickerPopover {
-  background-color: transparent;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: linear-gradient(to right, rgba(35, 41, 53, 0.75), rgba(43, 53, 62, 0.75));
-  border: 1px solid rgba(35, 41, 53, 0.85);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  background: var(--surface-menu);
+  border: 1px solid var(--border-pane);
 
   border-radius: 0.5rem;
   box-shadow: 0px 0px 3px black; 
@@ -95,7 +94,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      border: 2px solid var(--color-secondary);
+      border: 2px solid var(--accent);
       opacity: 0;
       pointer-events: none;
     }
@@ -125,7 +124,7 @@
 .sliderLabel {
   grid-area: label;
   font-size: 0.75rem;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -134,7 +133,7 @@
   grid-area: output;
   text-align: end;
   font-size: 0.75rem;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
   font-family: 'Roboto Mono', monospace;
 }
 
@@ -169,7 +168,7 @@
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      border: 2px solid var(--color-secondary);
+      border: 2px solid var(--accent);
       opacity: 0;
       pointer-events: none;
     }
@@ -195,22 +194,22 @@
 
 .fieldLabel {
   font-size: 0.75rem;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .fieldInput {
   padding: 0.5rem;
-  background-color: rgba(35, 41, 53, 0.5);
-  border: 1px solid var(--color-quaternary);
+  background-color: color-mix(in srgb, var(--control-bg) 50%, transparent);
+  border: 1px solid var(--control-border);
   border-radius: 0.25rem;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
   font-family: 'Roboto Mono', monospace;
   font-size: 0.875rem;
 
   &:focus {
-    outline: 2px solid var(--color-secondary);
+    outline: 2px solid var(--focus-ring);
     outline-offset: 1px;
   }
 }

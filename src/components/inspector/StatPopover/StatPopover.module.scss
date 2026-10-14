@@ -3,10 +3,10 @@
   z-index: 3000;
   min-width: 11rem;
   max-width: 16rem;
-  background: rgba(var(--color-primary-rgb), 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(var(--color-tertiary-rgb), 0.3);
+  background: var(--surface-popover);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--border-glass);
   border-radius: 0.5rem;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
   outline: none;
@@ -29,7 +29,7 @@
   margin: 0 0 0.45rem;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
 }
 
 .lines {
@@ -40,12 +40,12 @@
   font-size: 0.78rem;
 
   dt {
-    color: var(--color-tertiary);
+    color: var(--text-secondary);
   }
 
   dd {
     margin: 0;
-    color: var(--color-neutralVariant);
+    color: var(--text-body);
     text-align: right;
     font-family: var(--font-text);
     font-variant-numeric: tabular-nums;
@@ -55,7 +55,7 @@
 .sentence {
   margin: 0;
   font-size: 0.78rem;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
 }
 
 .lines + .sentence {

@@ -8,9 +8,9 @@ $close-button-margin-right: 0.75rem;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(25, 29, 37, 0.75);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--surface-modal);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
   z-index: 1500;
 
   &[data-entering] {
@@ -42,11 +42,11 @@ $close-button-margin-right: 0.75rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-bottom: 1px solid var(--color-tertiary);
+        border-bottom: 1px solid var(--border-strong);
         position: relative;
 
         &__title {
-          color: var(--color-tertiary);
+          color: var(--text-secondary);
         }
 
         &__close-button {

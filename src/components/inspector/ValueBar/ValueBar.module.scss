@@ -16,7 +16,7 @@
 
   &[data-hovered],
   &[data-focus-visible] {
-    outline: 1px solid var(--color-tertiary);
+    outline: 1px solid var(--border-strong);
     outline-offset: 0;
   }
 }
@@ -37,11 +37,11 @@
   top: 0;
   bottom: 0;
   border-radius: 2px;
-  background: rgba(var(--cat), 0.8);
+  background: color-mix(in srgb, var(--cat) 80%, transparent);
 }
 
 .noData {
-  background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.4) 0 3px, rgba(50, 64, 73, 0.7) 3px 6px);
+  background: repeating-linear-gradient(45deg, rgba(0, 0, 0, 0.4) 0 3px, color-mix(in srgb, var(--border-subtle) 70%, transparent) 3px 6px);
 }
 
 // 14 × 2 px with rounded ends, the table convention for a value that cannot be given
@@ -54,5 +54,5 @@
   height: 2px;
   margin-left: -7px;
   border-radius: 1px;
-  background: var(--color-tertiary);
+  background: var(--border-strong);
 }

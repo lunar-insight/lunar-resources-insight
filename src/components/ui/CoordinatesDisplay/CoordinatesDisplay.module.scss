@@ -15,7 +15,7 @@
 
 .label {
   font-weight: 600;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -23,7 +23,7 @@
 
 .value {
   font-weight: 500;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   padding: 0.125rem 0.5rem;
   border-radius: 0.25rem;
   min-width: 5rem;

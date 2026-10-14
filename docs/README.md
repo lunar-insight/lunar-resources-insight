@@ -1,6 +1,6 @@
 # Documentation
 
-Organisation of the folders under `docs/` and the structure expected of the
+Organization of the folders under `docs/` and the structure expected of the
 documents in each.
 
 | folder | holds |
@@ -17,7 +17,7 @@ A measurement document answers "what was observed, and under what conditions".
 It accumulates dated results, and existing entries remain unchanged as new
 results are added.
 
-A change that alters behaviour and was justified by measurement produces both:
+A change that alters behavior and was justified by measurement produces both:
 the measurement document records the evidence, and the architecture document
 describes the resulting design.
 

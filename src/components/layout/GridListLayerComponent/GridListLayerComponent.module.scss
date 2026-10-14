@@ -6,7 +6,7 @@ $heading-item-min-height: 3rem;
   height: 100%;
   min-width: 22.5rem;
   box-shadow: inset 0 0 25px black;
-  background-color: var(--color-primary);
+  background-color: var(--surface-app);
   position: relative;
   overflow-y: auto;
   overflow-x: hidden;
@@ -27,7 +27,7 @@ $heading-item-min-height: 3rem;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
   pointer-events: none;
   white-space: normal;
   word-wrap: break-word;
@@ -52,7 +52,6 @@ $heading-item-min-height: 3rem;
   padding-right: 0.7rem;
   position: relative;
   overflow: hidden; // For keeping shadow inside
-  // border: 1px solid (var(--color-primary));
 
   // Border between items in the same group
   border-bottom: 1px solid rgb(28, 28, 28);
@@ -64,7 +63,6 @@ $heading-item-min-height: 3rem;
     left: 0;
     width: 100%;
     height: 1px;
-    // background: linear-gradient(to right, var(--color-secondary), var(--color-tertiary));
   }
 
   // First item of a category, directional box-shadow towards the top only
@@ -88,7 +86,7 @@ $heading-item-min-height: 3rem;
     border-bottom: none;
   }
 
-  // Element/compound accent — left border using per-layer color set as CSS custom property
+  // Element/compound accent: a left border in the per-layer color, set as a CSS custom property
   &[data-element],
   &[data-compound] {
     &::before {
@@ -106,31 +104,31 @@ $heading-item-min-height: 3rem;
 
   // Chemical elements - Violet
   &[data-category="chemical"] {
-    background-color: rgba(var(--color-category-chemical-rgb), 0.15);
+    background-color: color-mix(in srgb, var(--category-chemical) 15%, transparent);
   }
 
   // Compounds - Yellow
   &[data-category="compound"] {
-    background-color: rgba(var(--color-category-compound-rgb), 0.15);
+    background-color: color-mix(in srgb, var(--category-compound) 15%, transparent);
   }
 
   // Geographical Layers - Green
   &[data-category="geographical"] {
-    background-color: rgba(var(--color-category-geographical-rgb), 0.15);
+    background-color: color-mix(in srgb, var(--category-geographical) 15%, transparent);
   }
 
   // Derived Indices - Orange
   &[data-category="derived-index"] {
-    background-color: rgba(var(--color-category-derived-index-rgb), 0.15);
+    background-color: color-mix(in srgb, var(--category-derived-index) 15%, transparent);
   }
 
   // Rocks & Minerals - Blue
   &[data-category="rock"] {
-    background-color: rgba(var(--color-category-rock-rgb), 0.15);
+    background-color: color-mix(in srgb, var(--category-rock) 15%, transparent);
   }
 
   &[data-category="mineral"] {
-    background-color: rgba(var(--color-category-mineral-rgb), 0.15);
+    background-color: color-mix(in srgb, var(--category-mineral) 15%, transparent);
   }
 
   // Spacing for category transitions
@@ -147,9 +145,8 @@ $heading-item-min-height: 3rem;
   padding: 1px 5px;
   flex-shrink: 0;
   border: 1px solid var(--el-accent-color);
-  color: var(--el-accent-color);
+  color: color-mix(in srgb, var(--el-accent-color) var(--tinted-text), white);
   background: transparent;
-  opacity: 0.85;
   line-height: 1.4;
   display: inline-flex;
   align-items: center;
@@ -173,7 +170,7 @@ $heading-item-min-height: 3rem;
 
 .gridListItemHeaderDrag {
   pointer-events: none;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
   background-color: transparent;
   border: none;
   width: 1.5rem;
@@ -203,7 +200,7 @@ $heading-item-min-height: 3rem;
   display: block;
   font-size: 0.9rem;
   font-weight: 500;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -214,7 +211,7 @@ $heading-item-min-height: 3rem;
   font-size: 0.7rem;
   font-weight: 400;
   letter-spacing: 0.02em;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -241,12 +238,12 @@ $heading-item-min-height: 3rem;
   background: none;
   border-top: none;
   border-bottom: none;
-  border-left: 1px solid var(--color-quaternary);
-  border-right: 1px solid var(--color-quaternary);
+  border-left: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
   box-shadow:
     -2px 0 4px rgba(0, 0, 0, 0.25),
     2px 0 4px rgba(0, 0, 0, 0.25);
-  color: var(--color-secondary);
+  color: var(--text-accent);
   cursor: pointer;
   width: 4.75rem;
   height: $heading-item-min-height;
@@ -257,7 +254,7 @@ $heading-item-min-height: 3rem;
 }
 
 .gridListItemHeaderAccordionHeaderText {
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
 }
 
 .gridListItemHeaderRemoveLayerWrapper {
@@ -286,7 +283,7 @@ $heading-item-min-height: 3rem;
     left: 0;
     width: 100%;
     height: 1px;
-    background-image: linear-gradient(to right, var(--color-secondary) 50%, transparent 50%);
+    background-image: linear-gradient(to right, var(--accent) 50%, transparent 50%);
     background-size: 4px 8px;
     opacity: 0;
     transition: opacity 0.4s ease;

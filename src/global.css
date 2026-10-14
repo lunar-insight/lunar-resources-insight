@@ -1,108 +1,131 @@
+/* Dark is the only theme. Text and icons on glass meet WCAG AA (4.5:1 text, 3:1 icons) over a white globe,
+   the brightest it gets, seen through the glass filter. Each glass opacity is one step above the lowest that
+   passes for what it carries. */
 :root {
-  --color-primary: #232935; /* dark color 35 41 53*/
-  --color-secondary: #85a2af; /* light color */
-  --color-tertiary: #97a5ab; /* light color */
-  --color-quaternary: #324049; /* dark color 50 64 73*/
-  --color-red: #ff5449;/* red for error or cancel */
-  --color-redVariant: #e05353; /* Less flashy but still red */
-  --color-green: #2eaf2e; /* green for validation */
-  --color-dark-intermediary: #2d3a42; /* 45 58 66 dark color, used for sidebar for "is-active + pressed" state */
-  --color-neutral: #2b353e; /* dark color 43 53 62 */
-  --color-neutralVariant: #b6bbc1; /* light color */
-  --color-light-button-pressed: #9ca7ab; /* Used for close button (light version) pressed state */
-  /* Or #2f3c46 */
-  /* Other color */
-  /* 25, 29, 37, 0.75 --> Used for the modal background */
+  /* Palette */
+  --slate-100: #e0e0e0;
+  --slate-300: #b6bbc1;
+  --slate-350: #aab6bb;
+  --slate-400: #97a5ab;
+  --slate-700: #324049;
+  --slate-750: #2d3a42;
+  --slate-800: #2b353e;
+  --slate-850: #232935;
+  --slate-900: #191d25;
+  --slate-950: #101a26;
+  --steel-400: #85a2af;
 
-  --color-primary-rgb: 35, 41, 53;
-  --color-secondary-rgb: 133, 162, 175;
-  --color-tertiary-rgb: 151, 165, 171;
-  --color-quaternary-rgb: 50, 64, 73;
-  --color-red-rgb: 255, 84, 73;
-  --color-redVariant-rgb: 224, 83, 83;
-  --color-green-rgb: 46, 175, 46;
-  --color-dark-intermediary-rgb: 45, 58, 66;
-  --color-neutral-rgb: 43, 53, 62;
-  --color-neutralVariant-rgb: 182, 187, 193;
-  --color-light-button-pressed-rgb: 156, 167, 171;
+  /* Glass: the backdrop is blurred and darkened, then covered by the surface at its opacity.
+     The darker backdrop lets each opacity stay lower for the same contrast. */
+  --glass-brightness: 0.5;
+  --glass-filter: blur(8px) brightness(var(--glass-brightness));
+  --glass-bar: 76%;
+  --glass-window: 76%;
+  --glass-menu: 76%;
+  --glass-popover: 67%;
+  --glass-viewer-button: 37%;
+  --glass-modal: 65%;
 
-  /* Selection State Colors - Used across selection menus (Periodic Table, Compounds, Minerals, Rocks) */
-  --color-selection-default: #808080; /* Gray for default/selectable state */
-  --color-selection-default-rgb: 128, 128, 128;
+  /* Surfaces */
+  --surface-app: var(--slate-850);
+  --surface-raised: var(--slate-800);
+  --surface-logo: var(--slate-950);
+  --surface-tooltip: var(--slate-400);
+  --surface-bar: linear-gradient(to right,
+    color-mix(in srgb, var(--slate-850) var(--glass-bar), transparent),
+    color-mix(in srgb, var(--slate-800) var(--glass-bar), transparent));
+  --surface-window: linear-gradient(to right,
+    color-mix(in srgb, var(--slate-850) var(--glass-window), transparent),
+    color-mix(in srgb, var(--slate-800) var(--glass-window), transparent));
+  --surface-menu: linear-gradient(to right,
+    color-mix(in srgb, var(--slate-850) var(--glass-menu), transparent),
+    color-mix(in srgb, var(--slate-800) var(--glass-menu), transparent));
+  --surface-popover: color-mix(in srgb, var(--slate-850) var(--glass-popover), transparent);
+  --surface-viewer-button: color-mix(in srgb, var(--slate-850) var(--glass-viewer-button), transparent);
+  --surface-viewer-button-hover: color-mix(in srgb, var(--slate-700) var(--glass-viewer-button), transparent);
+  --surface-viewer-button-pressed: color-mix(in srgb, var(--slate-800) var(--glass-viewer-button), transparent);
+  --surface-modal: color-mix(in srgb, var(--slate-900) var(--glass-modal), transparent);
+  --surface-card: rgba(0, 0, 0, 0.22);
+  --surface-track: rgba(0, 0, 0, 0.4);
 
-  --color-selection-selected: #3b82f6; /* Blue for selected state */
-  --color-selection-selected-rgb: 59, 130, 246;
+  /* Text, lightest first */
+  --text-primary: var(--slate-100);
+  --text-body: var(--slate-300);
+  --text-secondary: var(--slate-350);
+  --text-accent: var(--steel-400);
+  --text-on-light: var(--slate-850);
 
-  --color-selection-hover: #808080; /* Gray for hover highlights */
-  --color-selection-hover-rgb: 128, 128, 128;
+  /* Accent: fills, accent borders and separators */
+  --accent: var(--steel-400);
 
-  --color-selection-unavailable: #1a1a1a; /* Dark gray for unavailable/disabled state */
-  --color-selection-unavailable-rgb: 26, 26, 26;
+  /* Borders */
+  --border-subtle: var(--slate-700);
+  --border-strong: var(--slate-400);
+  --border-bright: var(--slate-300);
+  --border-pane: color-mix(in srgb, var(--slate-850) 85%, transparent);
+  --border-glass: color-mix(in srgb, var(--slate-400) 30%, transparent);
+  --border-card: rgba(50, 64, 73, 0.55);
 
-  --color-selection-unavailable-bg: #191d25; /* Background for unavailable items */
-  --color-selection-unavailable-bg-rgb: 25, 29, 37;
+  /* Controls */
+  --control-bg: var(--slate-850);
+  --control-bg-hover: var(--slate-700);
+  --control-bg-pressed: var(--slate-800);
+  --control-bg-active: var(--slate-750);
+  --control-bg-selected: var(--slate-700);
+  --control-border: var(--slate-700);
+  --control-border-selected: var(--slate-400);
+  --control-icon: var(--slate-350);
+  --control-icon-selected: var(--steel-400);
+  --focus-ring: var(--steel-400);
 
-  /* Chemical Layer Variant Pill Colors - Violet theme, used in VariantSelector */
-  --chemical-border: rgba(147, 51, 234, 0.3);
-  --chemical-active-bg: rgba(147, 51, 234, 0.50);
-  --chemical-active-border: rgba(147, 51, 234, 0.85);
+  /* Status */
+  --status-success: #42bf42;
+  --status-danger: #e05353;
+  --status-error: #ff5449;
 
-  /* Muted accent colors, soft, non-flashy tones suitable for subtle UI indicators */
-  --color-muted-green: rgba(66, 191, 66, 0.5);
-  --color-muted-red: rgba(224, 83, 83, 0.5);
+  /* Selection states of the selection modals (periodic table, compounds, minerals, derived indices) */
+  --selection-neutral: #808080;
+  --selection-active: #3b82f6;
+  --selection-unavailable: #1a1a1a;
+  --selection-unavailable-bg: var(--slate-900);
 
-  /* Data Source Badge Colors. Used in DataSourceBadge and DataSourceLegend components */
-  --color-badge-global: rgba(34, 185, 67, 0.55); /* Green for map+ground data */
-  --color-badge-map: rgba(59, 130, 246, 0.55); /* Blue for map-only data */
-  --color-badge-local: rgba(240, 159, 17, 0.55); /* Orange for ground-only data */
+  /* Layer categories, shared by the layer list, the layers catalog, the scanner menu and the Inspector */
+  --category-basemap: rgb(128, 128, 128);
+  --category-geographical: rgb(34, 197, 94);
+  --category-chemical: rgb(147, 51, 234);
+  --category-compound: rgb(234, 179, 8);
+  --category-derived-index: rgb(249, 115, 22);
+  --category-rock: rgb(59, 212, 246);
+  --category-mineral: rgb(59, 130, 246);
+  /* The chemical violet in the Inspector, whose dark wells make the category violet too dark */
+  --category-chemical-on-dark: rgb(167, 139, 250);
+  /* Share of a category or element color in text and icons drawn in it, the rest white:
+     color-mix(in srgb, <color> var(--tinted-text), white) */
+  --tinted-text: 40%;
 
-  /* Layer Category Colors. Used in GridListLayerComponent (accent stripe/background) and LayersCatalog (category tag/filter chips) */
-  --color-category-basemap-rgb: 128, 128, 128; /* Gray */
-  --color-category-geographical-rgb: 34, 197, 94; /* Green */
-  --color-category-chemical-rgb: 147, 51, 234; /* Violet */
-  --color-category-compound-rgb: 234, 179, 8; /* Yellow */
-  --color-category-derived-index-rgb: 249, 115, 22; /* Orange */
-  --color-category-rock-rgb: 59, 212, 246; /* Cyan */
-  --color-category-mineral-rgb: 59, 130, 246; /* Blue */
+  /* Data source badges */
+  --badge-global: rgba(34, 185, 67, 0.55);
+  --badge-map: rgba(59, 130, 246, 0.55);
+  --badge-local: rgba(240, 159, 17, 0.55);
+
+  --data-coverage: rgba(240, 159, 17, 0.95);
 
   /* Font families. Roboto Mono is not shipped, so the monospace stack renders in Courier New. */
   --font-text: 'Roboto', sans-serif;
   --font-mono: 'Roboto Mono', 'Courier New', monospace;
-
-  /* Semantic tokens. The Inspector, the features panel and the comparison read their colors from these. */
-  --surface-window: linear-gradient(to right, rgba(35, 41, 53, 0.92), rgba(43, 53, 62, 0.92));
-  --surface-card: rgba(0, 0, 0, 0.22);
-  --border-card: rgba(50, 64, 73, 0.55);
-  --surface-track: rgba(0, 0, 0, 0.4);
-  --text-primary: #e0e0e0;
-  --text-secondary: #97a5ab;
-  --divider: #324049;
-  --control-bg: #232935;
-  --control-border: #324049;
-  --control-icon: #97a5ab;
-  --color-coverage: rgba(240, 159, 17, 0.95);
 }
 
-/* Light theme placeholders, which nothing applies. The values are not designed. */
-[data-theme="light"] {
-  --surface-window: linear-gradient(45deg, rgba(133, 162, 175, 0.75), rgba(182, 187, 193, 0.75));
-  --surface-card: rgba(35, 41, 53, 0.35);
-  --border-card: rgba(255, 255, 255, 0.18);
-  --surface-track: rgba(35, 41, 53, 0.5);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --divider: rgba(255, 255, 255, 0.3);
-  --control-bg: transparent;
-  --control-border: #232935;
-  --control-icon: #232935;
+/* Without backdrop-filter the backdrop shows at full brightness, which needs these opacities */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --glass-bar: 92%;
+    --glass-window: 92%;
+    --glass-menu: 92%;
+    --glass-popover: 88%;
+    --glass-viewer-button: 75%;
+    --glass-modal: 86%;
+  }
 }
-
-/*
-    Color code:
-  
-    #232935 , #2b353e (dark color)
-    #85a2af , #97a5ab , #b6bbc1 (light color) - darker to lighter
-*/
 
 @font-face {
   font-family: 'Material Symbols Outlined';
@@ -161,19 +184,19 @@ body {
   height: 100%;
   overflow: hidden;
 
-  scrollbar-color: var(--color-quaternary) var(--color-primary);
+  scrollbar-color: var(--border-subtle) var(--surface-app);
 }
 
 ::-webkit-scrollbar-track {
-  background-color: var(--color-quaternary);
+  background-color: var(--border-subtle);
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color-primary)
+  background-color: var(--surface-app);
 }
 
 .react-aria-DropIndicator[data-drop-target] {
-  outline: 2px solid var(--color-secondary);
+  outline: 2px solid var(--accent);
   z-index: 2; /* Z-index Should be higher than the ::after of GridListItems */
   position: relative;
 }

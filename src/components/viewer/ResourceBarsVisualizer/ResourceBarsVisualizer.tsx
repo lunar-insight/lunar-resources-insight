@@ -251,11 +251,11 @@ function renderBarsPanel(
     .attr('transform', `translate(${axisWidth}, 0)`)
     .call(yAxis)
     .selectAll('text')
-    .style('fill', '#e0e0e0')
+    .style('fill', 'var(--text-primary)')
     .style('font-size', '11px')
     .style('font-weight', 'bold');
 
-  g.selectAll('.y-axis line').style('stroke', '#e0e0e0');
+  g.selectAll('.y-axis line').style('stroke', 'var(--text-primary)');
 
   g.selectAll('.threshold-line')
     .data([0.25, 0.5, 0.75])
@@ -909,10 +909,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       prevNodataElementWt.current = nodataElementWtData;
       prevHasPickersElementWt.current = hasPickers;
       const marginBottom = hasPickers ? CHART_MARGIN_BOTTOM_WITH_PICKER : CHART_MARGIN_BOTTOM_DEFAULT;
-      elementWtScalesRef.current = renderBarsPanel(svgElementWtRef.current, elementWtData, nodataElementWtData, d => d.color, '#e0e0e0', marginBottom);
+      elementWtScalesRef.current = renderBarsPanel(svgElementWtRef.current, elementWtData, nodataElementWtData, d => d.color, 'var(--text-primary)', marginBottom);
       setElementWtPositions(computePickerPositions(elementWtPickers, elementWtScalesRef.current));
     } else {
-      updateBarsOnly(svgElementWtRef.current, elementWtData, '#e0e0e0');
+      updateBarsOnly(svgElementWtRef.current, elementWtData, 'var(--text-primary)');
     }
   }, [elementWtData, nodataElementWtData, elementWtPickers]);
 
@@ -928,10 +928,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       prevNodataElementPpm.current = nodataElementPpmData;
       prevHasPickersElementPpm.current = hasPickers;
       const marginBottom = hasPickers ? CHART_MARGIN_BOTTOM_WITH_PICKER : CHART_MARGIN_BOTTOM_DEFAULT;
-      elementPpmScalesRef.current = renderBarsPanel(svgElementPpmRef.current, elementPpmData, nodataElementPpmData, getColor, '#e0e0e0', marginBottom);
+      elementPpmScalesRef.current = renderBarsPanel(svgElementPpmRef.current, elementPpmData, nodataElementPpmData, getColor, 'var(--text-primary)', marginBottom);
       setElementPpmPositions(computePickerPositions(elementPpmPickers, elementPpmScalesRef.current));
     } else {
-      updateBarsOnly(svgElementPpmRef.current, elementPpmData, '#e0e0e0');
+      updateBarsOnly(svgElementPpmRef.current, elementPpmData, 'var(--text-primary)');
     }
   }, [elementPpmData, nodataElementPpmData, elementPpmPickers, ppmColorScale]);
 
@@ -947,10 +947,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       prevNodataCompound.current = nodataCompoundLayerData;
       prevHasPickersCompound.current = hasPickers;
       const marginBottom = hasPickers ? CHART_MARGIN_BOTTOM_WITH_PICKER : CHART_MARGIN_BOTTOM_DEFAULT;
-      compoundScalesRef.current = renderBarsPanel(svgCompoundRef.current, compoundResourceData, nodataCompoundLayerData, getColor, '#e0e0e0', marginBottom);
+      compoundScalesRef.current = renderBarsPanel(svgCompoundRef.current, compoundResourceData, nodataCompoundLayerData, getColor, 'var(--text-primary)', marginBottom);
       setCompoundPositions(computePickerPositions(compoundPickers, compoundScalesRef.current));
     } else {
-      updateBarsOnly(svgCompoundRef.current, compoundResourceData, '#e0e0e0');
+      updateBarsOnly(svgCompoundRef.current, compoundResourceData, 'var(--text-primary)');
     }
   }, [compoundResourceData, nodataCompoundLayerData, compoundPickers, compoundColorScale]);
 
@@ -966,10 +966,10 @@ export const ResourceBarsVisualizer: React.FC<ResourceBarsVisalizerProps> = ({
       prevNodataMineral.current = nodataMineralLayerData;
       prevHasPickersMineral.current = hasPickers;
       const marginBottom = hasPickers ? CHART_MARGIN_BOTTOM_WITH_PICKER : CHART_MARGIN_BOTTOM_DEFAULT;
-      mineralScalesRef.current = renderBarsPanel(svgMineralRef.current, mineralResourceData, nodataMineralLayerData, getColor, '#e0e0e0', marginBottom);
+      mineralScalesRef.current = renderBarsPanel(svgMineralRef.current, mineralResourceData, nodataMineralLayerData, getColor, 'var(--text-primary)', marginBottom);
       setMineralPositions(computePickerPositions(mineralPickers, mineralScalesRef.current));
     } else {
-      updateBarsOnly(svgMineralRef.current, mineralResourceData, '#e0e0e0');
+      updateBarsOnly(svgMineralRef.current, mineralResourceData, 'var(--text-primary)');
     }
   }, [mineralResourceData, nodataMineralLayerData, mineralPickers, mineralColorScale]);
 

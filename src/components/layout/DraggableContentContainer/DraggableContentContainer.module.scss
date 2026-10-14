@@ -15,12 +15,10 @@ $margin: 0.75rem;
   flex-direction: column;
   border-radius: $border-radius;
   box-shadow: 0px 0px 3px black;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: linear-gradient(to right, rgba(35, 41, 53, 0.75), rgba(43, 53, 62, 0.75));
-  //background: linear-gradient(to top right, rgba(133, 162, 175, 0.65), rgba(182, 187, 193, 0.65));
-  border: 1px solid rgba(35, 41, 53, 0.85);
-  //border: 1px solid rgba(151, 165, 171, 0.65);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  background: var(--surface-window);
+  border: 1px solid var(--border-pane);
 }
 
 .visible {
@@ -33,14 +31,14 @@ $margin: 0.75rem;
 }
 
 .moveArea {
-  color: var(--color-secondary);
+  color: var(--text-accent);
   display: flex;
   align-items: center;
   cursor: grab;
-  background: var(--color-primary);
+  background: var(--surface-app);
   height: 3rem;
   border-radius: $border-radius $border-radius 0 0;
-  border-bottom: 1px solid var(--color-tertiary);
+  border-bottom: 1px solid var(--border-strong);
 
   &:active {
     cursor: grabbing;
@@ -59,7 +57,7 @@ $margin: 0.75rem;
 }
 
 .contentArea {
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   padding: 1.25rem 1rem;
   overflow-x: auto;
   overflow-y: auto;

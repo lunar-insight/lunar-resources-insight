@@ -14,10 +14,10 @@ $margin: 0.75rem;
   flex-direction: column;
   border-radius: $border-radius;
   box-shadow: 0px 0px 3px black;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background: linear-gradient(45deg, rgba(133, 162, 175, 0.75), rgba(182, 187, 193, 0.75));
-  border: 1px solid rgba(133, 162, 175, 0.85);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  background: var(--surface-window);
+  border: 1px solid var(--border-pane);
   pointer-events: auto;
 }
 
@@ -36,10 +36,10 @@ $margin: 0.75rem;
   cursor: grab;
   height: 3rem;
   border-radius: $border-radius $border-radius 0 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: 1px solid var(--border-strong);
   padding: 0 $margin;
-  background: inherit;
-  color: white;
+  background: var(--surface-app);
+  color: var(--text-accent);
   pointer-events: auto;
 
   &:active {
@@ -51,10 +51,11 @@ $margin: 0.75rem;
   display: flex;
   justify-content: left;
   flex-grow: 1;
+  min-width: 0;
   margin: 0;
   font-size: 0.9rem;
-  font-weight: bold;
-  color: white;
+  font-weight: 500;
+  color: var(--text-accent);
   pointer-events: auto;
 }
 
@@ -75,22 +76,4 @@ $margin: 0.75rem;
   gap: 1rem;
   font-size: 0.85rem;
   pointer-events: auto;
-}
-
-// Dark glass, with the title bar on the primary color
-.dark {
-  background: var(--surface-window);
-  border: 1px solid rgba(35, 41, 53, 0.85);
-
-  .moveArea {
-    background: var(--color-primary);
-    border-bottom: 1px solid var(--color-tertiary);
-    color: var(--color-secondary);
-  }
-
-  .title {
-    color: var(--color-secondary);
-    font-weight: 500;
-    min-width: 0;
-  }
 }

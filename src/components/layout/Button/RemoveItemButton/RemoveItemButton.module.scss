@@ -3,32 +3,27 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background-color: var(--color-primary);
+  background-color: var(--control-bg);
   height: 1.75rem;
   width: 1.75rem;
   border-radius: 0.25rem;
-  border: 1px solid var(--color-quaternary);
+  border: 1px solid var(--control-border);
   box-shadow: inset 0 0 1px 1px black;
 
   &[data-hovered] {
-    background-color: var(--color-quaternary);
+    background-color: var(--control-bg-hover);
   }
 
   &[data-pressed] {
-    background-color: var(--color-neutral);
+    background-color: var(--control-bg-pressed);
   }
 }
 
 .icon {
   font-size: x-large;
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
 }
 
 .danger {
-  color: var(--color-muted-red);
-  transition: color 0.15s ease;
-}
-
-.button[data-hovered] .icon.danger {
-  color: var(--color-redVariant);
+  color: var(--status-danger);
 }

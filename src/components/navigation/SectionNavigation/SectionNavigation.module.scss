@@ -13,12 +13,12 @@ $dock-spacing: 1.5rem;
 
 @mixin dockGradient($opacity: 0.15) {
   background: linear-gradient(135deg,
-  rgba(var(--color-secondary-rgb), $opacity) 0%,
-  rgba(var(--color-primary-rgb), math.div($opacity, 1.5)) 100%);
+  color-mix(in srgb, var(--accent) #{math.percentage($opacity)}, transparent) 0%,
+  color-mix(in srgb, var(--surface-app) #{math.percentage(math.div($opacity, 1.5))}, transparent) 100%);
 }
 
 .navigation {
-  background: linear-gradient(to top right, var(--color-primary), var(--color-neutral));
+  background: linear-gradient(to top right, var(--surface-app), var(--surface-raised));
   border-right: 1px solid black;
   width: $navigation-width;
   display: flex;
@@ -31,7 +31,7 @@ $dock-spacing: 1.5rem;
 
 .logoContainer {
   width: 100%;
-  background-color: #101a26;
+  background-color: var(--surface-logo);
   @include centerFlex();
   padding: 0.25rem 0;
 }
@@ -60,18 +60,18 @@ $dock-spacing: 1.5rem;
   }
 
   &:hover {
-    background-color: var(--color-quaternary);
+    background-color: var(--control-bg-hover);
     box-shadow: inset 0 0 6px black;
     transition: none;
   }
 
   &[data-pressed] {
-    background-color: var(--color-dark-intermediary);
+    background-color: var(--control-bg-active);
     box-shadow: inset 0 0 9px black;
   }
 
   &.active {
-    background-color: var(--color-neutral);
+    background-color: var(--surface-raised);
     box-shadow: inset 0 0 12px black;
     transition: background-color 0.4s, box-shadow 0.4s;
 
@@ -83,27 +83,27 @@ $dock-spacing: 1.5rem;
   &.dock {
     margin-bottom: $dock-spacing;
     margin-top: 0;
-    border-top: 2px solid var(--color-secondary);
-    border-bottom: 2px solid var(--color-secondary);
+    border-top: 2px solid var(--accent);
+    border-bottom: 2px solid var(--accent);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     @include dockGradient;
 
     &:hover {
       @include dockGradient(0.25);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4),
-                  inset 0 0 8px rgba(var(--color-secondary-rgb), 0.2);
+                  inset 0 0 8px color-mix(in srgb, var(--accent) 20%, transparent);
     }
 
     &[data-pressed] {
       @include dockGradient(0.35);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5),
-                  inset 0 0 12px rgba(var(--color-secondary-rgb), 0.3);
+                  inset 0 0 12px color-mix(in srgb, var(--accent) 30%, transparent);
     }
   }
 }
 
 .icon {
-  color: var(--color-secondary);
+  color: var(--text-accent);
   font-size: x-large;
 
   .dock & {
@@ -112,11 +112,11 @@ $dock-spacing: 1.5rem;
 }
 
 .label {
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   font-size: 0.9375rem;
 
   .dock & {
-    color: var(--color-secondary);
+    color: var(--text-secondary);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
 }
@@ -126,7 +126,7 @@ $dock-spacing: 1.5rem;
   right: 2px;
   top: 2px;
   font-size: 1rem;
-  color: var(--color-secondary);
+  color: var(--text-secondary);
   opacity: 0.7;
   transition: opacity 0.3s, transform 0.3s;
 

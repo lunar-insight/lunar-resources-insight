@@ -14,12 +14,12 @@ const LABELS: Record<BarView['kind'], string> = {
  * A single fill up to the value. No data is a hatched track, since an empty
  * track is a value of 0; a missing scale or value is one dash in the center.
  */
-export const ValueBar: React.FC<{ view: BarView; categoryRgb: string }> = ({ view, categoryRgb }) => (
+export const ValueBar: React.FC<{ view: BarView; categoryColor: string }> = ({ view, categoryColor }) => (
   <StatPopover
     content={view.popover}
     label={LABELS[view.kind]}
     className={styles.bar}
-    style={{ '--cat': categoryRgb } as React.CSSProperties}
+    style={{ '--cat': categoryColor } as React.CSSProperties}
   >
     <span
       className={`${styles.track} ${view.kind === 'no-data' ? styles.noData : ''} ${view.kind === 'no-scale' || view.kind === 'failed' ? styles.dash : ''}`}

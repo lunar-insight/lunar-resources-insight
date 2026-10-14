@@ -28,7 +28,7 @@
   th,
   td {
     padding: 0.35rem 0.6rem;
-    border-bottom: 1px solid var(--divider);
+    border-bottom: 1px solid var(--border-subtle);
     text-align: left;
   }
 
@@ -40,7 +40,7 @@
     padding-top: 0.85rem;
     font-weight: 500;
     font-size: 0.8125rem;
-    color: var(--color-secondary);
+    color: var(--text-accent);
     background: transparent;
 
     &::before {
@@ -72,7 +72,7 @@
 
 .categoryRow td {
   padding-top: 0.75rem;
-  color: rgb(var(--cat));
+  color: color-mix(in srgb, var(--cat) var(--tinted-text), white);
   font: 600 0.63rem var(--font-text);
   text-transform: uppercase;
   letter-spacing: 0.09em;
@@ -92,14 +92,14 @@
 }
 
 .datasetRow:hover {
-  background: rgba(var(--color-secondary-rgb), 0.07);
+  background: color-mix(in srgb, var(--accent) 7%, transparent);
 }
 
 .datasetCell {
   width: 280px;
   padding-left: 1.2rem;
   font-size: 0.72rem;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
 }
 
 .variant {
@@ -140,7 +140,7 @@
 .noDataText {
   padding: 0;
   border: 0;
-  border-bottom: 1px dotted var(--divider);
+  border-bottom: 1px dotted var(--border-subtle);
   background: none;
   font: 400 0.72rem var(--font-text);
   color: inherit;
@@ -148,12 +148,12 @@
   outline: none;
 
   &[data-focus-visible] {
-    outline: 1px solid var(--color-tertiary);
+    outline: 1px solid var(--border-strong);
   }
 }
 
 .best {
-  background: rgba(var(--color-secondary-rgb), 0.1);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
 
   .value {
     color: #fff;
@@ -178,7 +178,7 @@
   display: flex;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  border-top: 1px solid var(--divider);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .textButton {
@@ -202,11 +202,11 @@
   }
 
   &[data-hovered] {
-    background-color: var(--color-quaternary);
+    background-color: var(--control-bg-hover);
   }
 
   &[data-focus-visible] {
-    outline: 2px solid var(--color-secondary);
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
 

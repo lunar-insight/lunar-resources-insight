@@ -2,7 +2,7 @@
  * Line colors of one unit chart. The order keeps neighboring slots
  * distinguishable for color blind readers; each clears 3:1 on the chart background.
  */
-export const SERIES_COLORS = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'];
+export const SERIES_COLORS = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008a00', '#9085e9', '#e66767'];
 
 /** Layers one unit chart holds. */
 export const MAX_CHART_LAYERS = SERIES_COLORS.length;

@@ -30,6 +30,11 @@
     border-color: $color-border-highlighted;
     background-color: $color-background-highlighted;
     box-shadow: 0 0 16px rgba(251, 146, 60, 0.5);
+
+    .rockName,
+    .rockType {
+      color: var(--text-primary);
+    }
   }
 
   // Combined state (selected AND highlighted)
@@ -41,13 +46,13 @@
 
   // Hover state - more visible
   &[data-hovered] {
-    box-shadow: 0 0 20px rgba(var(--color-selection-hover-rgb), 0.6);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--selection-neutral) 60%, transparent);
     transform: translateY(-2px);
   }
 
   // Focus visible (keyboard navigation)
   &[data-focus-visible] {
-    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline: 2px solid color-mix(in srgb, var(--selection-active) 50%, transparent);
     outline-offset: 2px;
   }
 
@@ -58,8 +63,8 @@
 
   // Disabled state
   &[data-disabled] {
-    border-color: var(--color-selection-unavailable);
-    background-color: rgba(var(--color-selection-unavailable-bg-rgb), 0.5);
+    border-color: var(--selection-unavailable);
+    background-color: color-mix(in srgb, var(--selection-unavailable-bg) 50%, transparent);
     cursor: default;
     opacity: 0.6;
 
@@ -106,7 +111,7 @@
 .rockName {
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   text-align: center;
   line-height: 1.2;
   margin-top: 0.25rem;
@@ -115,7 +120,7 @@
 // Rock location
 .rockType {
   font-size: 0.8rem;
-  color: rgba(156, 163, 175, 0.8);
+  color: var(--text-body);
   text-align: center;
   line-height: 1.1;
 }

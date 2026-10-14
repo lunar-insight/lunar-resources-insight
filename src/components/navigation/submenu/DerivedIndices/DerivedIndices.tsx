@@ -102,7 +102,7 @@ const DerivedIndices: React.FC = () => {
                 return (
                   <span
                     key={compoundId}
-                    className={`${styles.inputChip} ${loaded ? styles.loaded : styles.unloaded}`}
+                    className={`${styles.inputChip} ${loaded ? styles.loaded : ''}`}
                     title={loaded ? 'Layer loaded' : 'Layer not loaded'}
                   >
                     {compoundToFormula(compoundId)}

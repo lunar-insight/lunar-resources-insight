@@ -14,38 +14,38 @@
   padding: 0.75rem 1rem;
   font-size: 0.85rem;
   font-weight: 600;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   text-transform: uppercase;
   letter-spacing: 0.03em;
-  border-bottom: 1px solid rgba(var(--color-selection-default-rgb), 0.3);
+  border-bottom: 1px solid color-mix(in srgb, var(--selection-neutral) 30%, transparent);
 }
 
 .row {
   &:hover {
-    background-color: rgba(var(--color-selection-hover-rgb), 0.08);
+    background-color: color-mix(in srgb, var(--selection-neutral) 8%, transparent);
   }
 
   &:not(:last-child) .cell {
-    border-bottom: 1px solid rgba(var(--color-selection-default-rgb), 0.15);
+    border-bottom: 1px solid color-mix(in srgb, var(--selection-neutral) 15%, transparent);
   }
 }
 
 .cell {
   padding: 0.65rem 1rem;
   font-size: 0.9rem;
-  color: var(--color-secondary);
+  color: var(--text-secondary);
   white-space: nowrap;
 }
 
 // Category tag/chip colors, shared with GridListLayerComponent via CSS custom properties (global.css)
 @mixin category-colors {
-  &[data-category="basemap"] { --category-color-rgb: var(--color-category-basemap-rgb); }
-  &[data-category="geographical"] { --category-color-rgb: var(--color-category-geographical-rgb); }
-  &[data-category="chemical"] { --category-color-rgb: var(--color-category-chemical-rgb); }
-  &[data-category="compound"] { --category-color-rgb: var(--color-category-compound-rgb); }
-  &[data-category="derived-index"] { --category-color-rgb: var(--color-category-derived-index-rgb); }
-  &[data-category="rock"] { --category-color-rgb: var(--color-category-rock-rgb); }
-  &[data-category="mineral"] { --category-color-rgb: var(--color-category-mineral-rgb); }
+  &[data-category="basemap"] { --category-color: var(--category-basemap); }
+  &[data-category="geographical"] { --category-color: var(--category-geographical); }
+  &[data-category="chemical"] { --category-color: var(--category-chemical); }
+  &[data-category="compound"] { --category-color: var(--category-compound); }
+  &[data-category="derived-index"] { --category-color: var(--category-derived-index); }
+  &[data-category="rock"] { --category-color: var(--category-rock); }
+  &[data-category="mineral"] { --category-color: var(--category-mineral); }
 }
 
 .categoryTag {
@@ -56,9 +56,9 @@
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: capitalize;
-  border: 1px solid rgba(var(--category-color-rgb), 0.5);
-  background-color: rgba(var(--category-color-rgb), 0.15);
-  color: rgb(var(--category-color-rgb));
+  border: 1px solid color-mix(in srgb, var(--category-color) 50%, transparent);
+  background-color: color-mix(in srgb, var(--category-color) 15%, transparent);
+  color: color-mix(in srgb, var(--category-color) var(--tinted-text), white);
   white-space: nowrap;
 
   @include category-colors;
@@ -78,14 +78,14 @@
   input {
     padding: 0.4rem 0.75rem;
     border-radius: 0.3rem;
-    border: 1px solid rgba(var(--color-selection-default-rgb), 0.4);
-    background-color: var(--color-neutral);
-    color: var(--color-secondary);
+    border: 1px solid color-mix(in srgb, var(--selection-neutral) 40%, transparent);
+    background-color: var(--surface-raised);
+    color: var(--text-accent);
     font-size: 0.9rem;
     min-width: 14rem;
 
     &:focus {
-      outline: 2px solid var(--color-selection-selected);
+      outline: 2px solid var(--selection-active);
       outline-offset: 1px;
     }
   }
@@ -104,24 +104,23 @@
   font-weight: 500;
   text-transform: capitalize;
   cursor: pointer;
-  border: 1px solid rgba(var(--category-color-rgb), 0.5);
+  border: 1px solid color-mix(in srgb, var(--category-color) 50%, transparent);
   background-color: transparent;
-  color: rgba(var(--category-color-rgb), 0.85);
+  color: color-mix(in srgb, var(--category-color) var(--tinted-text), white);
   white-space: nowrap;
 
   @include category-colors;
 
   &[data-hovered] {
-    background-color: rgba(var(--category-color-rgb), 0.1);
+    background-color: color-mix(in srgb, var(--category-color) 10%, transparent);
   }
 
   &[data-selected] {
-    background-color: rgba(var(--category-color-rgb), 0.3);
-    color: rgb(var(--category-color-rgb));
+    background-color: color-mix(in srgb, var(--category-color) 30%, transparent);
   }
 
   &[data-focus-visible] {
-    outline: 2px solid var(--color-selection-selected);
+    outline: 2px solid var(--selection-active);
     outline-offset: 1px;
   }
 }
@@ -129,32 +128,30 @@
 .emptyState {
   display: block;
   padding: 1.5rem 1rem;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   font-size: 0.9rem;
   text-align: center;
 }
 
 .available {
-  color: var(--color-green);
+  color: var(--status-success);
 }
 
 .unavailable {
-  color: var(--color-red);
-  opacity: 0.6;
+  color: var(--status-error);
 }
 
 .stacLink {
-  color: var(--color-secondary);
+  color: var(--text-secondary);
   text-decoration: underline;
 
   &:hover {
-    color: var(--color-selection-hover, var(--color-secondary));
+    color: var(--text-primary);
   }
 }
 
 .variantBadge {
   margin-left: 0.5rem;
   font-size: 0.75rem;
-  color: var(--color-neutralVariant);
-  opacity: 0.7;
+  color: var(--text-body);
 }

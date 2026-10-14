@@ -9,11 +9,12 @@ import {
   type PopoverContent,
 } from 'services/inspector/inspectorStatistics';
 
-export const CATEGORY_RGB: Record<InspectorCategory, string> = {
-  chemical: 'var(--color-category-chemical-rgb)',
-  compound: 'var(--color-category-compound-rgb)',
-  mineral: 'var(--color-category-mineral-rgb)',
-  'derived-index': 'var(--color-category-derived-index-rgb)',
+/** Category colors in the Inspector. Chemical takes the lighter violet that reads on the dark wells. */
+export const CATEGORY_COLOR: Record<InspectorCategory, string> = {
+  chemical: 'var(--category-chemical-on-dark)',
+  compound: 'var(--category-compound)',
+  mineral: 'var(--category-mineral)',
+  'derived-index': 'var(--category-derived-index)',
 };
 
 export type BarView =

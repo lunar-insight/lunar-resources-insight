@@ -21,24 +21,24 @@
   background-size: 100% 100%;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--color-neutral);
+  background-color: var(--surface-raised);
   background-blend-mode: overlay;
   border-radius: 0.25rem;
   border-width: 0.0625rem;
-  border-color: var(--color-tertiary);
+  border-color: var(--border-strong);
   cursor: pointer;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   font-size: 1rem;
   transition: background-size 0.3s ease-out, box-shadow 0.3s ease-out, font-size 0.3s ease-out;
 
   &[data-hovered] {
-    background-color: var(--color-quaternary);
+    background-color: var(--control-bg-hover);
     background-size: 110% 110%;
-    box-shadow: inset 0 0 10px 1px var(--color-tertiary);
+    box-shadow: inset 0 0 10px 1px var(--border-strong);
   }
 
   &[data-pressed] {
-    background-color: var(--color-dark-intermediary);
+    background-color: var(--control-bg-active);
   }
 }
 
@@ -59,8 +59,7 @@
   min-width: 0;
   max-width: 10rem;
   font-size: 0.6875rem;
-  color: var(--color-neutralVariant);
-  opacity: 0.75;
+  color: var(--text-body);
   margin: 0;
   line-height: 1.4;
 }

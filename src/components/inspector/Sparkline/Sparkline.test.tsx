@@ -25,7 +25,7 @@ describe('seriesPath', () => {
 describe('Sparkline', () => {
   it('draws the profile at the sample positions', () => {
     const { container } = render(
-      <Sparkline profile={[1, null, 3]} fractions={[0, 0.5, 1]} scale="own" moon={moonStats} categoryRgb="1, 2, 3" />
+      <Sparkline profile={[1, null, 3]} fractions={[0, 0.5, 1]} scale="own" moon={moonStats} categoryColor="rgb(1, 2, 3)" />
     )
     const path = container.querySelector('path')!
     expect(path.getAttribute('d')).toBe('M0.00 15.00 M66.00 1.00')
@@ -34,7 +34,7 @@ describe('Sparkline', () => {
 
   it('keeps an empty well without values', () => {
     const { container } = render(
-      <Sparkline profile={[null]} fractions={[0]} scale="moon" moon={moonStats} categoryRgb="0, 0, 0" />
+      <Sparkline profile={[null]} fractions={[0]} scale="moon" moon={moonStats} categoryColor="rgb(0, 0, 0)" />
     )
     expect(container.querySelector('svg')).toBeNull()
     expect(container.firstChild).toBeInTheDocument()

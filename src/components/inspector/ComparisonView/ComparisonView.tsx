@@ -4,7 +4,7 @@ import ModalOverlayContainer from 'components/layout/ModalOverlayContainer/Modal
 import { ValueBar } from 'components/inspector/ValueBar/ValueBar';
 import { CoverageIcon, EmptySlot } from 'components/inspector/RowIcons/RowIcons';
 import { StatPopover } from 'components/inspector/StatPopover/StatPopover';
-import { barView, CATEGORY_RGB } from 'components/inspector/lineView';
+import { barView, CATEGORY_COLOR } from 'components/inspector/lineView';
 import type { Feature } from 'components/navigation/FeaturesSection/types';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useInspectorContext, useLayerStatsVersion } from 'utils/context/InspectorContext';
@@ -32,7 +32,7 @@ const Cell: React.FC<{ line: InspectorLine; column: Column; highlighted: boolean
   if (!result) return <td className={styles.pending}>Computing</td>;
 
   const view = barView(line, result, layerStatsService.getFileStats(result.file.filename));
-  const bar = <ValueBar view={view} categoryRgb={CATEGORY_RGB[line.category]} />;
+  const bar = <ValueBar view={view} categoryColor={CATEGORY_COLOR[line.category]} />;
 
   if (!hasValue(result)) {
     return (
@@ -121,7 +121,7 @@ export const ComparisonView: React.FC = () => {
                 {groups.map(group => (
                   <React.Fragment key={group.category}>
                     <tr className={styles.categoryRow}>
-                      <td colSpan={columns.length + 1} style={{ '--cat': CATEGORY_RGB[group.category] } as React.CSSProperties}>
+                      <td colSpan={columns.length + 1} style={{ '--cat': CATEGORY_COLOR[group.category] } as React.CSSProperties}>
                         {group.label}
                       </td>
                     </tr>

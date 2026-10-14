@@ -19,7 +19,7 @@
     opacity: 1;
 
     .icon {
-      color: var(--color-tertiary);
+      color: var(--text-secondary);
     }
   }
 
@@ -30,7 +30,7 @@
 
 .icon {
   font-size: 1.125rem;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   line-height: 1;
   display: flex;
   align-items: center;

@@ -14,7 +14,7 @@
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: var(--color-neutralVariant);
+  color: var(--text-body);
   cursor: pointer;
   outline: none;
 
@@ -26,7 +26,7 @@
 
   &[data-hovered],
   &[data-focus-visible] {
-    outline: 1px solid var(--color-tertiary);
+    outline: 1px solid var(--border-strong);
     outline-offset: 0;
   }
 }
@@ -36,9 +36,9 @@
 }
 
 .muted {
-  color: var(--color-tertiary);
+  color: var(--text-secondary);
 }
 
 .coverage {
-  color: var(--color-coverage);
+  color: var(--data-coverage);
 }

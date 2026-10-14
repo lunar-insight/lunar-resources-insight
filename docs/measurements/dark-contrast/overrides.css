@@ -1,0 +1,127 @@
+/* The proposed dark contrast values, as overrides on the app at commit 4dd51167, for the contrast audit.
+   It targets the token names and classes of that commit and does not apply to later versions.
+   The modal rule adds a second glass layer over the overlay's own, so the modals measure more opaque
+   than one layer at 0.82.
+   Load in the page:
+     document.head.append(Object.assign(document.createElement('link'), { rel: 'stylesheet', href: '/docs/measurements/dark-contrast/overrides.css' })) */
+
+/* Text and icons in the tertiary blue-gray take the lighter step. The global override also lightens
+   the borders that use the token; the implementation separates them through semantic tokens. */
+:root {
+  --color-tertiary: #aab6bb;
+  --color-tertiary-rgb: 170, 182, 187;
+  --text-secondary: #aab6bb;
+  --control-icon: #aab6bb;
+  --surface-window: linear-gradient(to right, rgba(35, 41, 53, 0.91), rgba(43, 53, 62, 0.91));
+}
+
+/* Glass on the gradient: bars, navigation dialogs, menus */
+[class*="TopBar-module__topBar"],
+[class*="BottomBar-module__bottomBar"],
+[class*="DraggableContentContainer-module__draggableContentContainer"],
+[class*="ScannerButton-module__popover"],
+[class*="FeatureColorButton-module__popover"] {
+  background: linear-gradient(to right, rgba(35, 41, 53, 0.91), rgba(43, 53, 62, 0.91)) !important;
+}
+
+/* Every floating window takes the dark glass, the scanners included */
+[class*="DraggableBoxContentContainer-module__draggableBoxContentContainer"] {
+  background: var(--surface-window) !important;
+  border: 1px solid rgba(35, 41, 53, 0.85) !important;
+}
+[class*="DraggableBoxContentContainer-module__moveArea"] {
+  background: var(--color-primary) !important;
+  border-bottom: 1px solid var(--color-tertiary) !important;
+  color: var(--color-secondary) !important;
+}
+[class*="DraggableBoxContentContainer-module__title"] { color: var(--color-secondary) !important; font-weight: 500 !important; }
+
+/* Flat glass */
+[class*="InfoPopover-module__infoPopover"],
+[class*="StatPopover-module__popover"],
+[class*="NomenclatureSearch-module__searchResultCallout--"],
+[class*="NomenclatureSearch-module__comboBox"] input {
+  background: rgba(35, 41, 53, 0.87) !important;
+}
+[class*="NomenclatureSearch-module__comboBox"] input::placeholder { color: #aab6bb !important; }
+[class*="ViewerIconButton-module__viewerIconButton"],
+[class*="CompassWidget-module__compassContainer"],
+[class*="NomenclatureSearch-module__closeButton"] {
+  background: rgba(35, 41, 53, 0.74) !important;
+}
+.modal-overlay-container__modal { background: rgba(25, 29, 37, 0.82) !important; }
+
+/* Text in the secondary blue-gray on tinted or translucent surfaces */
+[class*="SectionNavigation-module__dock"] [class*="SectionNavigation-module__label"],
+[class*="SectionNavigation-module__arrow"],
+[class*="LayersCatalog-module__cell"],
+[class*="LayersCatalog-module__stacLink"],
+[class*="PeriodicTable-module__symbol"] {
+  color: #aab6bb !important;
+}
+
+/* Gray formulas and groupings */
+[class*="MineralGrid-module__mineralFormula"],
+[class*="MineralGrid-module__mineralGrouping"],
+[class*="Compound-module__formula"] {
+  color: #b6bbc1 !important;
+  opacity: 1 !important;
+}
+
+/* Category and accent colors as text: 40% color, 60% white */
+[class*="InspectorWindow-module__group--"] {
+  color: color-mix(in srgb, rgb(var(--cat)) 40%, white) !important;
+}
+[class*="LayersCatalog-module__categoryTag"],
+[class*="LayersCatalog-module__categoryChip"] {
+  color: color-mix(in srgb, rgb(var(--category-color-rgb)) 40%, white) !important;
+}
+[class*="GridListLayerComponent-module__elBadge"] {
+  color: color-mix(in srgb, var(--el-accent-color) 40%, white) !important;
+  opacity: 1 !important;
+}
+
+/* Visibility state icons at full color: green when visible, red when hidden */
+:root { --color-muted-green: #42bf42; --color-muted-red: #e05353; }
+[class*="VisibilityToggleButton-module__icon"],
+[class*="FeatureVisibilityButton-module__hidden"],
+.layer-checkbox__box__icon { color: #e05353 !important; }
+[data-selected] > [class*="VisibilityToggleButton-module__icon"],
+[class*="VisibilityToggleButton-module__visibilityToggle"][data-selected] [class*="VisibilityToggleButton-module__icon"],
+[class*="FeatureVisibilityButton-module__visible"],
+.layer-checkbox[data-selected] .layer-checkbox__box__icon { color: #42bf42 !important; }
+
+/* The Scanner button label sits on the button's own tint over the bar */
+[class*="ScannerButton-module__label"] { color: #e0e0e0 !important; }
+
+/* The close button of the scanners takes the dark variant */
+.close-button--light { background-color: var(--color-primary) !important; border-color: var(--color-tertiary) !important; }
+.close-button--light .close-button__icon { color: var(--color-tertiary) !important; }
+
+/* Text faded with opacity reads darker than its color; it shows its color in full.
+   The unloaded input chip keeps its cross as the state cue. */
+[class*="ChemistrySection-module__buttonDescription"],
+[class*="DerivedIndices-module__name"],
+[class*="DerivedIndices-module__rowLabel"],
+[class*="DerivedIndices-module__purposeValue"],
+[class*="DerivedIndices-module__unloaded"],
+[class*="LayersCatalog-module__unavailable"],
+[class*="LayersCatalog-module__variantBadge"] { opacity: 1 !important; }
+
+/* Measurement label: secondary line */
+[class*="MeasurementDistanceLabel-module__updating"] { color: rgba(255, 255, 255, 0.75) !important; }
+
+/* Text on a selection tint: selected scanner menu rows, selected periodic table cells */
+[class*="ScannerButton-module__toggleRow"][data-selected] [class*="ScannerButton-module__rowLabel"],
+[class*="PeriodicTable-module__cell"][data-selected] [class*="PeriodicTable-module__atomicNumber"],
+[class*="PeriodicTable-module__cell"][data-selected] [class*="PeriodicTable-module__name"] { color: #e0e0e0 !important; }
+
+/* Scanner unit badges: a lighter tint behind their colored text */
+[class*="ResourceBarsVisualizer-module__unitBadge"] { background-color: color-mix(in srgb, currentColor 10%, transparent) !important; }
+
+/* Category titles in the selection modals at full opacity */
+[class*="MineralGrid-module__categoryTitle"],
+[class*="Compound-module__categoryTitle"] { opacity: 1 !important; }
+
+/* The check of a selected scanner menu row shows its state: 40% row color, 60% white */
+[class*="ScannerButton-module__checkmark"] { color: color-mix(in srgb, var(--row-accent-color) 40%, white) !important; }

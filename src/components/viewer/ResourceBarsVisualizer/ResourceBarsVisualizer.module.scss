@@ -18,7 +18,7 @@ $mineral-color:    #c4b5fd;
     width: 100%;
   }
 
-  // ── D3-managed classes — :global prevents CSS Modules from hashing these names
+  // ── D3-managed classes; :global prevents CSS Modules from hashing these names
   :global {
     svg {
       width: 100%;
@@ -161,25 +161,25 @@ $mineral-color:    #c4b5fd;
     &.wt {
       color: $wt-color;
       border-color: rgba(110, 231, 183, 0.75);
-      background: rgba(110, 231, 183, 0.15);
+      background: rgba(110, 231, 183, 0.1);
     }
 
     &.ppm {
       color: $ppm-color;
       border-color: rgba(147, 197, 253, 0.75);
-      background: rgba(147, 197, 253, 0.15);
+      background: rgba(147, 197, 253, 0.1);
     }
 
     &.countRate {
       color: $count-rate-color;
       border-color: rgba(252, 211, 77, 0.75);
-      background: rgba(252, 211, 77, 0.15);
+      background: rgba(252, 211, 77, 0.1);
     }
 
     &.mineral {
       color: $mineral-color;
       border-color: rgba(196, 181, 253, 0.75);
-      background: rgba(196, 181, 253, 0.15);
+      background: rgba(196, 181, 253, 0.1);
     }
   }
 
@@ -187,7 +187,7 @@ $mineral-color:    #c4b5fd;
     height: 1px;
     width: 100%;
     margin: 0.35rem 0;
-    background: var(--color-secondary);
+    background: var(--accent);
   }
 
   .countRateRows {

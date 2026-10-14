@@ -2,7 +2,7 @@ import React from 'react';
 import { lineCount, type InspectorGroup } from 'services/inspector/inspectorLayers';
 import type { FeatureResults } from 'services/inspector/InspectorStore';
 import type { SparkScale } from 'components/inspector/Sparkline/Sparkline';
-import { CATEGORY_RGB } from 'components/inspector/lineView';
+import { CATEGORY_COLOR } from 'components/inspector/lineView';
 import { DatasetLine, type ChartControl } from './DatasetLine';
 import styles from './InspectorWindow.module.scss';
 
@@ -26,7 +26,7 @@ export const LayerList: React.FC<LayerListProps> = ({ groups, results, sparkScal
     <>
       {groups.map(group => (
         <section key={group.category} aria-label={group.label}>
-          <div className={styles.group} style={{ '--cat': CATEGORY_RGB[group.category] } as React.CSSProperties}>
+          <div className={styles.group} style={{ '--cat': CATEGORY_COLOR[group.category] } as React.CSSProperties}>
             <span>{group.label}</span>
             <span className={styles.groupCount}>{lineCount(group)}</span>
             <span className={styles.rule} />

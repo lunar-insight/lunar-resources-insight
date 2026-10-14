@@ -82,8 +82,8 @@ $marker-size: 14px;
   height: $marker-size;
   border-radius: 50%;
   background: #fff;
-  border: 2px solid var(--color-secondary);
-  box-shadow: 0 0 4px rgba(133, 162, 175, 0.5);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--accent) 50%, transparent);
   pointer-events: none;
   transition: left 0.08s ease-out;
 }

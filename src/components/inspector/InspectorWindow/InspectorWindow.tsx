@@ -102,7 +102,6 @@ export const InspectorWindow: React.FC<InspectorWindowProps> = ({ feature, casca
 
   return (
     <DraggableBoxContentContainer
-      tone="dark"
       isOpen={feature.inspectorOpen}
       onClose={() => toggleFeatureInspector(feature.id)}
       title={(

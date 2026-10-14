@@ -3,39 +3,22 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background-color: var(--color-primary);
+  background-color: var(--control-bg);
   height: 1.75rem;
   width: 1.75rem;
   border-radius: 0.25rem;
-  border: 1px solid var(--color-tertiary);
+  border: 1px solid var(--border-strong);
 
   &[data-hovered] {
-    background-color: var(--color-quaternary);
+    background-color: var(--control-bg-hover);
   }
 
   &[data-pressed] {
-    background-color: var(--color-neutral);
+    background-color: var(--control-bg-pressed);
   }
 
   &__icon {
     font-size: x-large;
-    color: var(--color-tertiary)
-  }
-  
-  &--light {
-    background-color: var(--color-intermediary);
-    border: 1px solid var(--color-primary);
-
-    &[data-hovered] {
-      background-color: var(--color-neutralVariant);
-    }
-
-    &[data-pressed] {
-      background-color: var(--color-light-button-pressed);
-    }
-
-    .close-button__icon {
-      color: var(--color-primary);
-    }
+    color: var(--text-secondary);
   }
 }
