@@ -476,18 +476,6 @@ export const layersConfig: LayersConfig = {
       decimals: 1,
       stac: "lunar_prospector/grs/0.5deg/iron/ironhd.json"
     },
-    feo_clementine_cnn_qiu2025: {
-      filename: "compounds/feo/feo_clementine_cnn_qiu2025_COG.tif",
-      layerType: "raster",
-      category: "compound",
-      compound: "feo",
-      units: "wt%",
-      displayName: "FeO Abundance · Clementine CNN (Qiu 2025)",
-      datasetLabel: "Clementine CNN (Qiu 2025)",
-      datasetShort: "Clementine",
-      decimals: 1,
-      stac: "clementine/qiu2025/feo/feo_clementine_cnn_qiu2025.json"
-    },
     feo_lp_grs_prettyman2006: {
       filename: "compounds/feo/feo_2d_prettyman2006_COG.tif",
       layerType: "raster",
@@ -517,18 +505,6 @@ export const layersConfig: LayersConfig = {
         }
       ]
     },
-    tio2_clementine_cnn_qiu2025: {
-      filename: "compounds/tio2/tio2_clementine_cnn_qiu2025_COG.tif",
-      layerType: "raster",
-      category: "compound",
-      compound: "tio2",
-      units: "wt%",
-      displayName: "TiO₂ Abundance · Clementine CNN (Qiu 2025)",
-      datasetLabel: "Clementine CNN (Qiu 2025)",
-      datasetShort: "Clementine",
-      decimals: 1,
-      stac: "clementine/qiu2025/tio2/tio2_clementine_cnn_qiu2025.json"
-    },
     tio2_lp_grs_prettyman2006: {
       filename: "compounds/tio2/tio2_2d_prettyman2006_COG.tif",
       layerType: "raster",
@@ -557,18 +533,6 @@ export const layersConfig: LayersConfig = {
           stac: "lunar_prospector/prettyman2006/20deg/tio2/tio2_20d_prettyman2006.json"
         }
       ]
-    },
-    al2o3_clementine_cnn_qiu2025: {
-      filename: "compounds/al2o3/al2o3_clementine_cnn_qiu2025_COG.tif",
-      layerType: "raster",
-      category: "compound",
-      compound: "al2o3",
-      units: "wt%",
-      displayName: "Al₂O₃ Abundance · Clementine CNN (Qiu 2025)",
-      datasetLabel: "Clementine CNN (Qiu 2025)",
-      datasetShort: "Clementine",
-      decimals: 1,
-      stac: "clementine/qiu2025/al2o3/al2o3_clementine_cnn_qiu2025.json"
     },
     al2o3_lp_grs_prettyman2006: {
       filename: "compounds/al2o3/al2o3_2d_prettyman2006_COG.tif",
@@ -628,18 +592,6 @@ export const layersConfig: LayersConfig = {
         }
       ]
     },
-    mgo_clementine_cnn_qiu2025: {
-      filename: "compounds/mgo/mgo_clementine_cnn_qiu2025_COG.tif",
-      layerType: "raster",
-      category: "compound",
-      compound: "mgo",
-      units: "wt%",
-      displayName: "MgO Abundance · Clementine CNN (Qiu 2025)",
-      datasetLabel: "Clementine CNN (Qiu 2025)",
-      datasetShort: "Clementine",
-      decimals: 1,
-      stac: "clementine/qiu2025/mgo/mgo_clementine_cnn_qiu2025.json"
-    },
     mgo_lp_grs_prettyman2006: {
       filename: "compounds/mgo/mgo_2d_prettyman2006_COG.tif",
       layerType: "raster",
@@ -668,18 +620,6 @@ export const layersConfig: LayersConfig = {
           stac: "lunar_prospector/prettyman2006/20deg/mgo/mgo_20d_prettyman2006.json"
         }
       ]
-    },
-    cao_clementine_cnn_qiu2025: {
-      filename: "compounds/cao/cao_clementine_cnn_qiu2025_COG.tif",
-      layerType: "raster",
-      category: "compound",
-      compound: "cao",
-      units: "wt%",
-      displayName: "CaO Abundance · Clementine CNN (Qiu 2025)",
-      datasetLabel: "Clementine CNN (Qiu 2025)",
-      datasetShort: "Clementine",
-      decimals: 1,
-      stac: "clementine/qiu2025/cao/cao_clementine_cnn_qiu2025.json"
     },
     cao_lp_grs_prettyman2006: {
       filename: "compounds/cao/cao_2d_prettyman2006_COG.tif",
@@ -884,17 +824,5 @@ export const layersConfig: LayersConfig = {
       Derived index
       -------------
     */
-    mg_number: {
-      filename: "derived/mg_number/mg_number_clementine_cnn_qiu2025_COG.tif",
-      layerType: "raster",
-      category: "derived-index",
-      displayName: "Mg# Magnesium Number · Clementine CNN (Qiu 2025)",
-      datasetLabel: "Clementine CNN (Qiu 2025)",
-      datasetShort: "Clementine",
-      decimals: 0,
-      isDerivedIndex: true,
-      units: "Mg# (0 to 100)",
-      stac: "clementine/qiu2025/mg_number/mg_number_clementine_cnn_qiu2025.json"
-    }
   }
 } satisfies LayersConfig;
