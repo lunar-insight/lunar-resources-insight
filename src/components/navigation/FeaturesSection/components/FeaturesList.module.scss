@@ -1,4 +1,11 @@
+// Width of a row's progress bar while its statistics compute.
+$progress-width: 1.5rem;
+
+// As wide empty as with a row of a short name, so the Features window keeps
+// its width when the first feature arrives.
 .selectionFrame {
+  box-sizing: border-box;
+  min-width: 26.25rem;
   padding: 1rem;
   border: 1px solid var(--border-subtle);
   border-radius: 0.25rem;
@@ -88,6 +95,27 @@
   color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
+  font-variant-numeric: tabular-nums;
+}
+
+// The current status and, hidden in the same cell, its widest form: the
+// progress bar and its gap, then "N of N layers".
+.statusValue {
+  display: inline-grid;
+
+  &::before {
+    content: attr(data-reserve);
+    grid-area: 1 / 1;
+    visibility: hidden;
+    padding-left: calc(#{$progress-width} + 0.35rem);
+  }
+}
+
+.statusCurrent {
+  grid-area: 1 / 1;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .shapeLabel {
@@ -97,7 +125,7 @@
 .miniProgress {
   display: block;
   flex-shrink: 0;
-  width: 3rem;
+  width: $progress-width;
   height: 0.25rem;
   background: rgba(0, 0, 0, 0.35);
   border-radius: 2px;
@@ -163,4 +191,24 @@
   align-items: center;
   gap: 0.25rem;
   flex-shrink: 0;
+}
+
+// A point created from the globe menu: hidden while its dot flies here, then lit up once.
+.featureItem[data-arrival='pending'] {
+  visibility: hidden;
+}
+
+.featureItem[data-arrival='highlight'] {
+  animation: rowArrive 1400ms ease-out;
+}
+
+.featureItem[data-arrival='notice'] {
+  animation: rowArrive 900ms ease-out;
+}
+
+@keyframes rowArrive {
+  from {
+    background-color: rgba(0, 255, 255, 0.24);
+    border-color: rgba(0, 255, 255, 0.7);
+  }
 }

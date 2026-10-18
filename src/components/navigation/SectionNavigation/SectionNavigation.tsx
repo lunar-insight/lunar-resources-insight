@@ -6,9 +6,12 @@ import GeographicalLayersSection from '../GeographicalLayersSection/Geographical
 import MineralsSection from '../MineralsSection/MineralsSection';
 import ViewerOptionsSection from '../ViewerOptionsSection/ViewerOptionsSection';
 import FeaturesSection from '../FeaturesSection/FeaturesSection';
+import SettingsSection from '../SettingsSection/SettingsSection';
 import { useDialogContext } from 'utils/DialogWindowManagement';
 import { useSidebarContext } from 'utils/context/SidebarContext';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
+import { usePointDrop, type RailNotice } from 'utils/context/PointDropContext';
+import { FEATURES_DIALOG_ID } from 'components/viewer/PointDrop/pointDropTimeline';
 import logo from 'assets/images/logo/lunar-resources-insight-logo-100x100.jpg'
 
 interface Icon {
@@ -108,8 +111,8 @@ const dialogsData: Icon[] = [
     id: 'application-setting-dialog', 
     name: 'settings', 
     label: 'Settings',
-    dialogTitle: 'Application Settings', 
-    dialogContent: 'Settings dialog content goes here.'
+    dialogTitle: 'Application Settings',
+    dialogContent: <SettingsSection />
   }
 ];
 
@@ -126,12 +129,47 @@ interface IconButtonProps {
   id: string;
   isActive: boolean;
   type?: 'dock' | 'float';
+  onPress: () => void;
+  /** A point created from the globe menu reaching Features, on the Features entry only. */
+  notice?: RailNotice | null;
 }
+
+const IconButton = ({ icon, label, id, isActive, type = 'float', onPress, notice }: IconButtonProps) => {
+  const buttonClasses = [
+    styles.button,
+    isActive && styles.active,
+    type === 'dock' && styles.dock
+  ].filter(Boolean).join(' ');
+
+  return (
+    <Button onPress={onPress} className={buttonClasses} data-rail-id={id}>
+      {/* Keyed by the notice, so each notice restarts its animation. */}
+      {notice && <span key={notice.key} className={styles[notice.kind]} aria-hidden="true" />}
+      <i
+        key={notice?.kind === 'receive' ? notice.key : 'icon'}
+        className={`material-symbols-outlined ${styles.icon} ${notice?.kind === 'receive' ? styles.bump : ''}`}
+        data-fly-target
+      >
+        {icon}
+      </i>
+      <span className={styles.label}>{label}</span>
+      {notice?.kind === 'receive' && (
+        <span key={`plus-${notice.key}`} className={styles.plusOne} aria-hidden="true">+1</span>
+      )}
+      {type === 'dock' && (
+        <i className={`material-symbols-outlined ${styles.arrow}`}>
+          {isActive ? 'chevron_left' : 'chevron_right'}
+        </i>
+      )}
+    </Button>
+  );
+};
 
 const SectionNavigation = () => {
   const [isHovered, setIsHovered] = useState(false);
   const { openDialog, closeDialog, isDialogOpen } = useDialogContext();
   const { isSidebarOpen, toggleSidebar } = useSidebarContext();
+  const { railNotice } = usePointDrop();
 
   useMouseTrackingControl(isHovered, 'section-navigation');
 
@@ -158,36 +196,6 @@ const SectionNavigation = () => {
     return isDialogOpen(icon.id);
   };
 
-  const IconButton = ({ icon, label, id, isActive, type = 'float' }: IconButtonProps) => {
-    const buttonClasses = [
-      styles.button,
-      isActive && styles.active,
-      type === 'dock' && styles.dock
-    ].filter(Boolean).join(' ');
-
-    const getChevronIcon = () => {
-      if (type === 'dock' && id === 'layer-management-category') {
-        return isActive ? 'chevron_left' : 'chevron_right';
-      }
-      return 'chevron_right';
-    };
-
-    return (
-      <Button 
-        onPress={() => handleIconPress({ id, name: icon, label, dialogTitle: '', dialogContent: '', type })} 
-        className={buttonClasses}
-      >  
-        <i className={`material-symbols-outlined ${styles.icon}`}>{icon}</i>
-        <span className={styles.label}>{label}</span>
-        {type === 'dock' && (
-          <i className={`material-symbols-outlined ${styles.arrow}`}>
-            {getChevronIcon()}
-          </i>
-        )}
-      </Button>
-    );
-  };
-
   return (
     <div 
       className={styles.navigation}
@@ -206,6 +214,8 @@ const SectionNavigation = () => {
             id={icon.id}
             isActive={getIsActive(icon)}
             type={icon.type}
+            onPress={() => handleIconPress(icon)}
+            notice={icon.id === FEATURES_DIALOG_ID ? railNotice : null}
           />
         </Fragment>
       ))}

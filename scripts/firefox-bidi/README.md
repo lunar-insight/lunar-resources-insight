@@ -51,8 +51,10 @@ a wait times out.
 | `width`, `height` | Page size in pixels, 1400 × 900 by default. |
 | `waitFor` | JavaScript expression, checked every 200 ms until it is true. The run fails if it is still false after `waitForTimeout` milliseconds (60000 by default). |
 | `delay` | Milliseconds to wait after `waitFor`. In the app the buttons appear before the globe has loaded, so a click on the globe needs a delay. |
-| `steps` | Run one after another. A step can hold any of `click`, `js`, `wait` and `shot`, done in that order. |
+| `steps` | Run one after another. A step can hold any of `click`, `rightClick`, `move`, `js`, `wait` and `shot`, done in that order. |
 | `click` | A mouse click at `[x, y]`, in pixels from the top left of the page. It works on canvases such as the Cesium globe, which ignore `element.click()`. |
+| `rightClick` | The same with the right button, which opens the globe menu. |
+| `move` | Moves the mouse to `[x, y]` without a click, in a straight line over an optional third value in milliseconds. The step waits for the move to end. |
 | `js` | JavaScript run in the page. The script waits for a returned promise and prints the result. |
 | `wait` | Milliseconds to wait after the step's click and JavaScript, 700 by default. |
 | `shot` | Path of a screenshot, relative to the folder the script runs from. A `shot` on the page itself is taken after all its steps. |

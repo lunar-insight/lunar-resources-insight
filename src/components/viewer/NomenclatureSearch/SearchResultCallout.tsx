@@ -3,7 +3,7 @@ import * as Cesium from 'cesium';
 import { Button, TooltipTrigger } from 'react-aria-components';
 import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import { useTrackedScreenPosition } from 'hooks/useTrackedScreenPosition';
-import styles from './NomenclatureSearch.module.scss';
+import styles from 'components/viewer/Callout/Callout.module.scss';
 
 interface SearchResultCalloutProps {
   viewer: Cesium.Viewer;
@@ -38,27 +38,27 @@ const SearchResultCallout: React.FC<SearchResultCalloutProps> = ({
     //
     // Starts hidden, useTrackedScreenPosition sets display/transform directly
     // via the ref before the browser paints.
-    <div ref={elementRef} className={styles.searchResultCalloutAnchor} style={{ display: 'none' }}>
-      <div className={styles.searchResultCallout}>
-        <span className={styles.searchResultCalloutLabel}>{label}</span>
-        <div className={styles.searchResultCalloutActions}>
+    <div ref={elementRef} className={styles.anchor} style={{ display: 'none' }}>
+      <div className={styles.box}>
+        <span className={styles.label}>{label}</span>
+        <div className={styles.actions}>
           {alreadySaved ? (
-            <span className={styles.searchResultCalloutSaved}>
+            <span className={styles.status}>
               <span className="material-symbols-outlined" aria-hidden="true">check_circle</span>
               Saved
             </span>
           ) : (
-            <Button className={styles.searchResultCalloutSave} onPress={onSave}>
+            <Button className={styles.button} onPress={onSave}>
               Save
             </Button>
           )}
-          <Button className={styles.searchResultCalloutAnalyze} onPress={onAnalyze}>
+          <Button className={styles.primaryButton} onPress={onAnalyze}>
             Analyze
           </Button>
           <TooltipTrigger>
             <Button
               aria-label="Dismiss marker"
-              className={styles.searchResultCalloutDismiss}
+              className={styles.iconButton}
               onPress={onDismiss}
             >
               <span className="material-symbols-outlined" aria-hidden="true">close</span>
@@ -70,7 +70,7 @@ const SearchResultCallout: React.FC<SearchResultCalloutProps> = ({
       {/* Leader line ties the floating box back to the exact point it describes,
           useful once the camera tilts into a 3D view where the box could
           otherwise look disconnected from the pin below it. */}
-      <div className={styles.searchResultCalloutLeader} />
+      <div className={styles.leader} />
     </div>
   );
 };

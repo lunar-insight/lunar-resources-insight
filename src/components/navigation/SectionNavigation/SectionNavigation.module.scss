@@ -135,3 +135,82 @@ $dock-spacing: 1.5rem;
     transform: translateX(2px);
   }
 }
+// A point created from the globe menu reaching Features: the button pulses
+// and shows "+1", or only lights up with reduced motion.
+.receive,
+.notice {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.receive {
+  animation: railReceive 700ms ease-out forwards;
+}
+
+.notice {
+  animation: railNotice 900ms ease-out forwards;
+}
+
+.bump {
+  animation: iconBump 500ms ease-out;
+}
+
+.plusOne {
+  position: absolute;
+  left: calc(50% + 14px);
+  top: 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #00ffff;
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+  pointer-events: none;
+  animation: plusOneRise 900ms ease-out forwards;
+}
+
+@keyframes railReceive {
+  from {
+    background: rgba(0, 255, 255, 0.28);
+    box-shadow: 0 0 14px rgba(0, 255, 255, 0.45);
+  }
+  to {
+    background: transparent;
+    box-shadow: 0 0 0 rgba(0, 255, 255, 0);
+  }
+}
+
+@keyframes railNotice {
+  from {
+    background: rgba(0, 255, 255, 0.22);
+  }
+  to {
+    background: transparent;
+  }
+}
+
+@keyframes iconBump {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.28);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes plusOneRise {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  20% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-24px);
+    opacity: 0;
+  }
+}

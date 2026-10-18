@@ -317,8 +317,6 @@ export class FeatureDrawingService {
     if (Cesium.defined(pickedObject) && pickedObject.id instanceof Cesium.Entity) {
       const entity = pickedObject.id as Cesium.Entity;
 
-      if (entity.properties?.hasProperty('_isScanIndicator')) return;
-
       // Check for polygon entity
       if (entity.polygon && entity.polygon.hierarchy) {
         const hierarchy = entity.polygon.hierarchy.getValue(Cesium.JulianDate.now());
@@ -486,18 +484,16 @@ export class FeatureDrawingService {
     if (Cesium.defined(pickedObject) && pickedObject.id instanceof Cesium.Entity) {
       const entity = pickedObject.id as Cesium.Entity;
 
-      if (!entity.properties?.hasProperty('_isScanIndicator')) {
-        // Check for polygon hover
-        if (entity.polygon && entity.polygon.hierarchy) {
-          this.viewer.canvas.style.cursor = 'grab';
-          return;
-        }
+      // Check for polygon hover
+      if (entity.polygon && entity.polygon.hierarchy) {
+        this.viewer.canvas.style.cursor = 'grab';
+        return;
+      }
 
-        // Check for circle hover (ellipse)
-        if (entity.ellipse && entity.position) {
-          this.viewer.canvas.style.cursor = 'grab';
-          return;
-        }
+      // Check for circle hover (ellipse)
+      if (entity.ellipse && entity.position) {
+        this.viewer.canvas.style.cursor = 'grab';
+        return;
       }
     }
 

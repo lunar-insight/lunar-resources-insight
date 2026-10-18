@@ -7,6 +7,7 @@ import {
 } from '../geoConfigExporter';
 import * as Cesium from 'cesium';
 import { ScanIndicator } from '../components/viewer/ScanIndicator/ScanIndicator';
+import { pickGround } from '../utils/pickGround';
 import { tree } from 'd3';
 
 // A 404 names an asset the index does not hold. A retry returns the same.
@@ -35,7 +36,7 @@ export class PointValueService {
   // batch starts, so the fresh position is not queued behind stale requests.
   private inFlightAbort: AbortController | null = null;
   // Coordinates of the last batch that resolved with every layer answering.
-  // pickEllipsoid is deterministic for a given screen pixel and camera, so
+  // Picking is deterministic for a given screen pixel, camera and terrain, so
   // exact equality skips repeat requests for a point already sampled.
   private lastResolvedPosition: { lon: number; lat: number } | null = null;
   private readonly maxFetchAttempts: number = 2;
@@ -48,6 +49,10 @@ export class PointValueService {
   // be absent and every selected layer is requested.
   private indexAssetKeys: Set<string> | null = null;
   private indexAssetKeysRequest: Promise<void> | null = null;
+  // While set, the scanner reads this spot, not the cursor's, whether or
+  // not mouse tracking is enabled.
+  private heldPosition: { lon: number; lat: number } | null = null;
+  private holdToken: number = 0;
 
   constructor() {}
 
@@ -65,8 +70,65 @@ export class PointValueService {
 
     // Opening a window changes the selection while the cursor is stationary.
     // Nothing else dispatches until the next mouse event.
-    if (layers.length > 0 && this.isActive && this.isMouseTrackingEnabled && this.currentMousePosition) {
+    const hasPosition = this.heldPosition !== null || (this.isMouseTrackingEnabled && this.currentMousePosition !== null);
+    if (layers.length > 0 && this.isActive && hasPosition) {
       this.throttledFetchPointValues();
+    }
+  }
+
+  private canSample(): boolean {
+    return this.isMouseTrackingEnabled || this.heldPosition !== null;
+  }
+
+  /**
+   * Stops following the cursor and reads the given spot until releaseHold is
+   * called with the returned token. The values stay on display while mouse
+   * tracking is disabled, which happens when the cursor moves onto a menu.
+   */
+  holdAt(position: Cesium.Cartesian3): number {
+    this.holdToken += 1;
+    if (!this.viewer) return this.holdToken;
+
+    const cartographic = this.viewer.scene.globe.ellipsoid.cartesianToCartographic(position);
+    this.heldPosition = {
+      lon: Cesium.Math.toDegrees(cartographic.longitude),
+      lat: Cesium.Math.toDegrees(cartographic.latitude),
+    };
+    this.lastResolvedPosition = null;
+    this.clearPendingFetch();
+
+    if (this.isActive) {
+      this.scanIndicator.showAt(position);
+      this.executeFetch();
+    }
+    return this.holdToken;
+  }
+
+  /** Resumes following the cursor. A token from an earlier hold does nothing. */
+  releaseHold(token: number) {
+    if (token !== this.holdToken || !this.heldPosition) return;
+
+    this.heldPosition = null;
+    this.lastResolvedPosition = null;
+    this.abortInFlight();
+    this.clearPendingFetch();
+    if (!this.isActive) return;
+
+    if (!this.isMouseTrackingEnabled) {
+      this.scanIndicator.hide();
+      this.notifyValuesUpdate({}, true);
+    } else if (this.currentMousePosition) {
+      this.scanIndicator.updatePosition(this.currentMousePosition);
+      this.throttledFetchPointValues();
+    } else {
+      this.scanIndicator.hide();
+    }
+  }
+
+  private clearPendingFetch() {
+    if (this.pendingFetch) {
+      clearTimeout(this.pendingFetch);
+      this.pendingFetch = null;
     }
   }
 
@@ -121,6 +183,7 @@ export class PointValueService {
     this.mouseMoveHandler.setInputAction((event: Cesium.ScreenSpaceEventHandler.MotionEvent) => {
       if (this.isMouseTrackingEnabled && this.isActive && !this.isLeftButtonDown) {
         this.currentMousePosition = event.endPosition;
+        if (this.heldPosition) return;
         this.scanIndicator.updatePosition(event.endPosition);
 
         this.throttledFetchPointValues();
@@ -146,7 +209,7 @@ export class PointValueService {
       const delay = Math.max(this.fetchThrottleMs - timeSinceLastFetch, 10);
       this.pendingFetch = setTimeout(() => {
         this.pendingFetch = null;
-        if (this.isActive && this.isMouseTrackingEnabled) {
+        if (this.isActive && this.canSample()) {
           this.throttledFetchPointValues();
         }
       }, delay);
@@ -166,6 +229,8 @@ export class PointValueService {
   disableMouseTracking() {
     if (this.isMouseTrackingEnabled) {
       this.isMouseTrackingEnabled = false;
+      // A hold keeps the values of its spot.
+      if (this.heldPosition) return;
       this.scanIndicator.hide();
       this.notifyValuesUpdate({}, true);
       this.abortInFlight();
@@ -186,6 +251,7 @@ export class PointValueService {
 
   resume() {
     this.isMouseTrackingEnabled = true;
+    if (this.heldPosition) return;
     // Pausing cleared the displayed values, so the current point is resampled
     // even when the cursor never left it.
     this.lastResolvedPosition = null;
@@ -245,13 +311,12 @@ export class PointValueService {
   }
 
   private getCurrentPosition(): { lon: number; lat: number } | null {
+    if (this.heldPosition) return this.heldPosition;
     if (!this.viewer || !this.currentMousePosition || !this.isMouseTrackingEnabled) return null;
 
-    // Ellipsoid setup in CesiumComponent
     const ellipsoid = this.viewer.scene.globe.ellipsoid;
-
-    // Mouse position to world coordinates conversion using the moon ellipsoid
-    const cartesian = this.viewer.camera.pickEllipsoid(this.currentMousePosition, ellipsoid);
+    // The ground under the cursor, where the indicator is drawn.
+    const cartesian = pickGround(this.viewer, this.currentMousePosition);
 
     if (!cartesian) return null;
 
@@ -297,7 +362,7 @@ export class PointValueService {
   }
 
   private async fetchPointValues(): Promise<void> {
-    if (!this.isMouseTrackingEnabled) {
+    if (!this.canSample()) {
       this.scanIndicator.hide();
       this.notifyValuesUpdate({}, true);
       return;
@@ -316,7 +381,8 @@ export class PointValueService {
 
     // The tiler fails the whole request when one asset does not cover the
     // point, so a layer outside its raster is omitted.
-    const layersWithinBounds = this.selectedLayers.filter(layerId =>
+    const selection = this.selectedLayers;
+    const layersWithinBounds = selection.filter(layerId =>
       this.isPositionWithinLayerBounds(layerId, position.lon, position.lat)
     );
 
@@ -373,7 +439,7 @@ export class PointValueService {
 
       // Discards results for requests that outlive tracking being disabled,
       // so a stale response can't overwrite the paused notification.
-      if (!this.isMouseTrackingEnabled) return;
+      if (!this.canSample()) return;
 
       layersByAsset.forEach((layerIds, assetKey) => {
         const value = assetValues.get(assetKey);
@@ -382,7 +448,7 @@ export class PointValueService {
       });
     } catch (error) {
       if (controller.signal.aborted) return;
-      if (!this.isMouseTrackingEnabled) return;
+      if (!this.canSample()) return;
 
       console.error('Error fetching lunar point values:', error);
       // A failed request leaves every layer it named without a reading.
@@ -391,7 +457,9 @@ export class PointValueService {
 
     // Only a batch where every layer answered marks the point as sampled.
     // Leaving it unmarked after a failure lets the next mouse event retry it.
-    if (unavailableLayerIds.length === 0) {
+    // A batch for a selection that has since changed leaves it unmarked too,
+    // so the new selection is read at the same point.
+    if (unavailableLayerIds.length === 0 && this.selectedLayers === selection) {
       this.lastResolvedPosition = position;
     }
 

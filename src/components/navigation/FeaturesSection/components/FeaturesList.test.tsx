@@ -8,6 +8,9 @@ import type { Feature } from '../types'
 import { fakeStore, makeFeature, makeResults } from 'components/inspector/inspectorTestUtils'
 import { FeaturesList } from './FeaturesList'
 
+const dropState: { rowArrivals: Record<string, string> } = { rowArrivals: {} }
+vi.mock('utils/context/PointDropContext', () => ({ usePointDrop: () => dropState }))
+
 let inspector: ReturnType<typeof useInspectorContext>
 let features: ReturnType<typeof useFeaturesContext>
 
@@ -34,6 +37,24 @@ const circle = makeFeature({ id: 'c', name: 'Basin', type: 'two-point-circle', i
 const rowOf = (name: string) => screen.getByRole('row', { name })
 
 describe('FeaturesList', () => {
+  beforeEach(() => { dropState.rowArrivals = {} })
+
+  it('marks the row of a point arriving from the globe menu', () => {
+    dropState.rowArrivals = { p: 'pending' }
+    renderList([point, circle])
+    expect(rowOf('Apollo 15')).toHaveAttribute('data-arrival', 'pending')
+    expect(rowOf('Apollo 15')).toHaveAttribute('data-feature-row', 'p')
+    expect(rowOf('Basin')).not.toHaveAttribute('data-arrival')
+    expect(rowOf('Apollo 15').querySelector('[data-fly-target]')).toHaveTextContent('location_on')
+  })
+
+  it('reserves the width of the computing status, so the row keeps its width', () => {
+    const store = fakeStore({ p: makeResults('point') })
+    renderList([point, circle], store)
+    expect(rowOf('Apollo 15').querySelector('[data-reserve]')).toHaveAttribute('data-reserve', '40 of 40 layers')
+    expect(rowOf('Basin').querySelector('[data-reserve]')).toHaveAttribute('data-reserve', '40 of 40 layers')
+  })
+
   it('shows a placeholder without features', () => {
     renderList([])
     expect(screen.getByText('No features selected')).toBeInTheDocument()
@@ -45,8 +66,8 @@ describe('FeaturesList', () => {
       c: { ...makeResults('shape'), status: 'computing', done: 29 },
     })
     renderList([point, circle], store)
-    expect(rowOf('Apollo 15')).toHaveTextContent('point·46 layers ready')
-    expect(rowOf('Basin')).toHaveTextContent('circle·29 of 46 layers')
+    expect(rowOf('Apollo 15')).toHaveTextContent('point·40 layers ready')
+    expect(rowOf('Basin')).toHaveTextContent('circle·29 of 40 layers')
     expect(within(rowOf('Basin')).getByText('circle', { selector: '[title]' })).toBeInTheDocument()
 
     act(() => store.set('c', undefined))

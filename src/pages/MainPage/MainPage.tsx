@@ -6,6 +6,9 @@ import CompassWidget from 'components/viewer/CompassWidget/CompassWidget';
 import NomenclatureSearch from 'components/viewer/NomenclatureSearch/NomenclatureSearch';
 import FeaturePointsOverlay from 'components/navigation/FeaturesSection/components/FeaturePointsOverlay';
 import MeasurementOverlay from 'components/viewer/MeasurementOverlay/MeasurementOverlay';
+import GlobeContextMenu from 'components/viewer/GlobeMenu/GlobeContextMenu';
+import PointDropOverlay from 'components/viewer/PointDrop/PointDropOverlay';
+import ToastRegion from 'components/viewer/Toast/ToastRegion';
 import { BoundaryRefProvider } from 'components/reference/BoundaryRefProvider';
 import { DialogProvider, DialogRenderer } from 'utils/DialogWindowManagement';
 import { SidebarProvider, useSidebarContext } from 'utils/context/SidebarContext';
@@ -22,6 +25,10 @@ import BottomBar from 'components/layout/BottomBar/BottomBar';
 import TopBar from 'components/layout/TopBar/TopBar';
 import { ScannerProvider } from 'utils/context/ScannerContext';
 import { InspectorProvider } from 'utils/context/InspectorContext';
+import { AppSettingsProvider } from 'utils/context/AppSettingsContext';
+import { GlobePopupProvider } from 'utils/context/GlobePopupContext';
+import { PointDropProvider } from 'utils/context/PointDropContext';
+import { ToastProvider } from 'utils/context/ToastContext';
 import { InspectorWindows } from 'components/inspector/InspectorWindows';
 import { ComparisonView } from 'components/inspector/ComparisonView/ComparisonView';
 
@@ -34,30 +41,35 @@ const MainPageContent: React.FC = () => {
   return (
     <BoundaryRefProvider value={mainContentRef}>
       <DialogProvider dialogs={dialogs}>
-        <div className={styles.mainPage}>
-          <Sidebar width={sidebarWidth} />
-          <div className={styles.mainContent} ref={mainContentRef}>
-            <SectionNavigation />
-            <div
-              className={styles.viewerContainer}
-              style={{
-                marginLeft: isSidebarOpen ? `${sidebarWidth}px` : '0',
-                transition: 'margin-left 0.3s ease-in-out'
-              }}
-            >
-              <CesiumComponent className={styles.cesiumComponent} />
-              <CompassWidget />
-              <NomenclatureSearch />
-              <FeaturePointsOverlay />
-              <MeasurementOverlay />
+        <PointDropProvider>
+          <div className={styles.mainPage}>
+            <Sidebar width={sidebarWidth} />
+            <div className={styles.mainContent} ref={mainContentRef}>
+              <SectionNavigation />
+              <div
+                className={styles.viewerContainer}
+                style={{
+                  marginLeft: isSidebarOpen ? `${sidebarWidth}px` : '0',
+                  transition: 'margin-left 0.3s ease-in-out'
+                }}
+              >
+                <CesiumComponent className={styles.cesiumComponent} />
+                <CompassWidget />
+                <NomenclatureSearch />
+                <FeaturePointsOverlay />
+                <PointDropOverlay />
+                <MeasurementOverlay />
+                <GlobeContextMenu />
+                <ToastRegion />
+              </div>
             </div>
+            <DialogRenderer />
+            <InspectorWindows />
+            <ComparisonView />
+            <TopBar />
+            <BottomBar />
           </div>
-          <DialogRenderer />
-          <InspectorWindows />
-          <ComparisonView />
-          <TopBar />
-          <BottomBar />
-        </div>
+        </PointDropProvider>
       </DialogProvider>
     </BoundaryRefProvider>
   );
@@ -83,25 +95,31 @@ const MainPage = () => {
   }, []);
   
   return (
-    <ViewerProvider>
-      <MouseTrackingProvider>
-        <LayerProvider>
-          <FeaturesProvider>
-            <InspectorProvider>
-              <MeasurementProvider>
-                <ZIndexProvider>
-                  <SidebarProvider>
-                    <ScannerProvider>
-                      <MainPageContent />
-                    </ScannerProvider>
-                  </SidebarProvider>
-                </ZIndexProvider>
-              </MeasurementProvider>
-            </InspectorProvider>
-          </FeaturesProvider>
-        </LayerProvider>
-      </MouseTrackingProvider>
-    </ViewerProvider>
+    <AppSettingsProvider>
+      <ToastProvider>
+        <ViewerProvider>
+          <MouseTrackingProvider>
+            <LayerProvider>
+              <FeaturesProvider>
+                <InspectorProvider>
+                  <MeasurementProvider>
+                    <GlobePopupProvider>
+                      <ZIndexProvider>
+                        <SidebarProvider>
+                          <ScannerProvider>
+                            <MainPageContent />
+                          </ScannerProvider>
+                        </SidebarProvider>
+                      </ZIndexProvider>
+                    </GlobePopupProvider>
+                  </MeasurementProvider>
+                </InspectorProvider>
+              </FeaturesProvider>
+            </LayerProvider>
+          </MouseTrackingProvider>
+        </ViewerProvider>
+      </ToastProvider>
+    </AppSettingsProvider>
   );
 };
 

@@ -7,6 +7,20 @@ vi.mock('utils/context/FeaturesContext', () => ({
   useFeaturesContext: () => mockContextValue,
 }))
 
+const measurementState = { isActive: false }
+vi.mock('utils/context/MeasurementContext', () => ({ useMeasurementContext: () => measurementState }))
+
+const openFeatureBox = vi.fn()
+const closePopup = vi.fn()
+const popupState: { popup: unknown } = { popup: null }
+vi.mock('utils/context/GlobePopupContext', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('utils/context/GlobePopupContext')>()),
+  useGlobePopup: () => ({ ...popupState, openFeatureBox, closePopup }),
+}))
+
+const dropState: { markerArrivals: Record<string, string> } = { markerArrivals: {} }
+vi.mock('utils/context/PointDropContext', () => ({ usePointDrop: () => dropState }))
+
 import { render, screen, fireEvent } from '@testing-library/react'
 import { Feature } from '../types'
 import FeaturePointMarker from './FeaturePointMarker'
@@ -54,6 +68,11 @@ const makeFeature = (overrides: Partial<Feature> = {}): Feature => ({
 
 beforeEach(() => {
   updateFeaturePositionMock.mockClear()
+  openFeatureBox.mockClear()
+  closePopup.mockClear()
+  measurementState.isActive = false
+  popupState.popup = null
+  dropState.markerArrivals = {}
   mockContextValue = {
     activeDrawingTool: null,
     showFeatures: true,
@@ -110,7 +129,13 @@ describe('dragging', () => {
     const marker = container.firstChild as HTMLElement
 
     fireEvent.pointerDown(marker, { clientX: 50, clientY: 50 })
+    // The drag starts once the pointer moves past the click tolerance.
+    expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
+    fireEvent(window, new PointerEvent('pointermove', { clientX: 53, clientY: 53 }))
+    expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
+    fireEvent(window, new PointerEvent('pointermove', { clientX: 55, clientY: 55 }))
     expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(false)
+    expect(closePopup).toHaveBeenCalled()
     // Rendering must be continuous during the drag: requestRenderMode
     // otherwise only re-renders on camera changes, none of which a
     // stationary-camera drag triggers, leaving the picking/projection math
@@ -176,6 +201,7 @@ describe('dragging', () => {
     expect(removeListenerMock).not.toHaveBeenCalled()
 
     fireEvent.pointerDown(marker, { clientX: 50, clientY: 50 })
+    fireEvent(window, new PointerEvent('pointermove', { clientX: 60, clientY: 60 }))
 
     // Continuous rendering is on during the drag (see the other test), so
     // this listener must be unsubscribed here; otherwise the hook's own
@@ -200,4 +226,126 @@ describe('dragging', () => {
 
     expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
   })
+})
+
+describe('the box', () => {
+  const renderMarker = () => {
+    const viewer = makeViewer()
+    const { container } = render(<FeaturePointMarker viewer={viewer} feature={makeFeature()} />)
+    return { viewer, marker: container.firstChild as HTMLElement }
+  }
+
+  it('opens on a left click without movement', () => {
+    const { viewer, marker } = renderMarker()
+    expect(marker).toHaveAttribute('data-feature-marker', 'point-1')
+
+    fireEvent.pointerDown(marker, { clientX: 50, clientY: 50 })
+    fireEvent(window, new PointerEvent('pointermove', { clientX: 52, clientY: 53 }))
+    fireEvent(window, new PointerEvent('pointerup', { clientX: 52, clientY: 53 }))
+
+    expect(openFeatureBox).toHaveBeenCalledWith('point-1')
+    expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
+    expect(updateFeaturePositionMock).not.toHaveBeenCalled()
+  })
+
+  it('closes on a click on the marker while open, and shows the marker selected', () => {
+    popupState.popup = { kind: 'feature', featureId: 'point-1' }
+    const { marker } = renderMarker()
+    expect(marker).toHaveAttribute('data-selected', 'true')
+
+    fireEvent.pointerDown(marker, { clientX: 50, clientY: 50 })
+    fireEvent(window, new PointerEvent('pointerup', { clientX: 50, clientY: 50 }))
+
+    expect(closePopup).toHaveBeenCalled()
+    expect(openFeatureBox).not.toHaveBeenCalled()
+  })
+
+  it('is not selected while another box is open', () => {
+    popupState.popup = { kind: 'feature', featureId: 'point-2' }
+    expect(renderMarker().marker).not.toHaveAttribute('data-selected')
+  })
+
+  it('opens on a right click, without a drag or the browser menu', () => {
+    const { viewer, marker } = renderMarker()
+    fireEvent.pointerDown(marker, { button: 2, clientX: 50, clientY: 50 })
+    fireEvent(window, new PointerEvent('pointermove', { clientX: 90, clientY: 90 }))
+    expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
+
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true })
+    fireEvent(marker, event)
+    expect(event.defaultPrevented).toBe(true)
+    expect(openFeatureBox).toHaveBeenCalledWith('point-1')
+  })
+
+  it('opens nothing while measuring, and keeps the browser menu off', () => {
+    measurementState.isActive = true
+    const { viewer, marker } = renderMarker()
+    expect(marker.style.cursor).toBe('default')
+
+    fireEvent.pointerDown(marker, { clientX: 50, clientY: 50 })
+    fireEvent(window, new PointerEvent('pointermove', { clientX: 90, clientY: 90 }))
+    fireEvent(window, new PointerEvent('pointerup', { clientX: 90, clientY: 90 }))
+    const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true })
+    fireEvent(marker, event)
+
+    expect(event.defaultPrevented).toBe(true)
+    expect(openFeatureBox).not.toHaveBeenCalled()
+    expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
+  })
+})
+
+it('shows its arrival from the globe menu', () => {
+  dropState.markerArrivals = { 'point-1': 'pop' }
+  const { container } = render(<FeaturePointMarker viewer={makeViewer()} feature={makeFeature()} />)
+  expect(container.firstChild).toHaveAttribute('data-arrival', 'pop')
+})
+
+it('keeps the point when the drag never reaches the ground', () => {
+  const viewer = makeViewer()
+  const rayPlaneSpy = vi.spyOn(Cesium.IntersectionTests, 'rayPlane').mockReturnValue(undefined as unknown as Cesium.Cartesian3)
+  const { container } = render(<FeaturePointMarker viewer={viewer} feature={makeFeature()} />)
+  const marker = container.firstChild as HTMLElement
+
+  fireEvent.pointerDown(marker, { clientX: 50, clientY: 50 })
+  fireEvent(window, new PointerEvent('pointermove', { clientX: 70, clientY: 70 }))
+  vi.mocked(viewer.camera.getPickRay).mockReturnValueOnce(undefined)
+  fireEvent(window, new PointerEvent('pointermove', { clientX: 80, clientY: 80 }))
+  fireEvent(window, new PointerEvent('pointerup', { clientX: 80, clientY: 80 }))
+
+  expect(updateFeaturePositionMock).not.toHaveBeenCalled()
+  expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
+  expect(marker.style.cursor).toBe('grab')
+  rayPlaneSpy.mockRestore()
+})
+
+it('leaves the marker in place while the dragged spot does not project', () => {
+  const viewer = makeViewer()
+  const rayPlaneSpy = vi.spyOn(Cesium.IntersectionTests, 'rayPlane').mockReturnValue(Cesium.Cartesian3.fromDegrees(15, 25, 0))
+  const { container } = render(<FeaturePointMarker viewer={viewer} feature={makeFeature()} />)
+  const marker = container.firstChild as HTMLElement
+  const before = marker.style.transform
+
+  fireEvent.pointerDown(marker, { clientX: 50, clientY: 50 })
+  vi.mocked(viewer.scene.cartesianToCanvasCoordinates).mockReturnValueOnce(undefined as unknown as Cesium.Cartesian2)
+  fireEvent(window, new PointerEvent('pointermove', { clientX: 70, clientY: 70 }))
+  expect(marker.style.transform).toBe(before)
+
+  fireEvent(window, new PointerEvent('pointerup', { clientX: 70, clientY: 70 }))
+  expect(updateFeaturePositionMock).toHaveBeenCalledTimes(1)
+  rayPlaneSpy.mockRestore()
+})
+
+it('ends a drag cleanly when the marker goes away mid-drag', () => {
+  const viewer = makeViewer()
+  const rayPlaneSpy = vi.spyOn(Cesium.IntersectionTests, 'rayPlane').mockReturnValue(Cesium.Cartesian3.fromDegrees(15, 25, 0))
+  const { container, unmount } = render(<FeaturePointMarker viewer={viewer} feature={makeFeature()} />)
+
+  fireEvent.pointerDown(container.firstChild as HTMLElement, { clientX: 50, clientY: 50 })
+  unmount()
+  fireEvent(window, new PointerEvent('pointermove', { clientX: 70, clientY: 70 }))
+  fireEvent(window, new PointerEvent('pointerup', { clientX: 70, clientY: 70 }))
+
+  expect(viewer.scene.screenSpaceCameraController.enableInputs).toBe(true)
+  expect(viewer.scene.requestRenderMode).toBe(true)
+  rayPlaneSpy.mockRestore()
 })

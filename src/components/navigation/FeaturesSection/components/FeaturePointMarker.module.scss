@@ -39,3 +39,67 @@
   white-space: nowrap;
   pointer-events: none;
 }
+
+// While its box is open. The box covers the label.
+.featurePointMarker[data-selected] {
+  .dot {
+    box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.35), 0 0 10px rgba(0, 255, 255, 0.6);
+  }
+
+  .label {
+    visibility: hidden;
+  }
+}
+
+// A point from the globe menu stays hidden until its probe lands, then pops
+// in with its label, or fades in with reduced motion.
+.featurePointMarker[data-arrival='hidden'] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.featurePointMarker[data-arrival='pop'] {
+  .dot {
+    animation: markerPop 320ms ease-out;
+  }
+
+  .label {
+    animation: labelRise 260ms ease-out 120ms backwards;
+  }
+}
+
+.featurePointMarker[data-arrival='fade'] {
+  animation: markerFade 300ms ease-out;
+}
+
+@keyframes markerPop {
+  0% {
+    transform: scale(0);
+  }
+  55% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes labelRise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 5px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes markerFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

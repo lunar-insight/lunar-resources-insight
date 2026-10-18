@@ -2,6 +2,9 @@ import React, { useCallback, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
 import { useTrackedScreenPosition } from 'hooks/useTrackedScreenPosition';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
+import { useMeasurementContext } from 'utils/context/MeasurementContext';
+import { FEATURE_MARKER_ATTRIBUTE, useGlobePopup } from 'utils/context/GlobePopupContext';
+import { usePointDrop } from 'utils/context/PointDropContext';
 import { DrawingUtils } from 'services/drawing/DrawingUtils';
 import { Feature } from '../types';
 import styles from './FeaturePointMarker.module.scss';
@@ -11,16 +14,28 @@ interface FeaturePointMarkerProps {
   feature: Feature;
 }
 
+// Movement in pixels between press and release under which a press is a
+// click, the tolerance Cesium uses for its own clicks. A drag starts past it.
+export const CLICK_TOLERANCE_PX = 5;
+
 // Rendered as a DOM overlay rather than a Cesium point entity, since
 // CLAMP_TO_GROUND entities are unreliable to render and pick on complex
 // terrain (visual flicker, a "grab" hover cursor that fails to register).
 // Dragging is implemented with native pointer events instead of
 // scene.pick() for the same reason.
+//
+// A left click or a right click opens the point's box; a left drag moves the
+// point. Both are ignored while a drawing or measurement tool is active.
 const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature }) => {
   const { activeDrawingTool, showFeatures, showLabels, updateFeaturePosition } = useFeaturesContext();
+  const { isActive: isMeasuring } = useMeasurementContext();
+  const { popup, openFeatureBox, closePopup } = useGlobePopup();
+  const { markerArrivals } = usePointDrop();
   const elementRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const position = feature.metadata.position ?? null;
+  const isToolActive = !!activeDrawingTool || isMeasuring;
+  const isSelected = popup?.kind === 'feature' && popup.featureId === feature.id;
 
   const lon = position ? Cesium.Math.toDegrees(position.longitude) : 0;
   const lat = position ? Cesium.Math.toDegrees(position.latitude) : 0;
@@ -29,18 +44,13 @@ const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature
   // every rendered frame.
   useTrackedScreenPosition(viewer, lon, lat, elementRef, 'translate(-50%, -50%)', !isDragging, position?.height);
 
-  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
-    // Don't steal the point out from under an in-progress drawing operation.
-    if (activeDrawingTool || !position) return;
-
-    event.stopPropagation();
-    event.preventDefault();
+  const startDrag = useCallback((startPosition: Cesium.Cartographic) => {
+    closePopup();
     setIsDragging(true);
 
-    const startCartesian = Cesium.Cartesian3.fromRadians(position.longitude, position.latitude, position.height);
+    const startCartesian = Cesium.Cartesian3.fromRadians(startPosition.longitude, startPosition.latitude, startPosition.height);
     const normal = viewer.scene.globe.ellipsoid.geodeticSurfaceNormal(startCartesian, new Cesium.Cartesian3());
     const plane = Cesium.Plane.fromPointNormal(startCartesian, normal);
-
     const element = elementRef.current;
     let lastWorldPosition: Cesium.Cartesian3 | null = null;
 
@@ -55,7 +65,7 @@ const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature
     const previousRequestRenderMode = viewer.scene.requestRenderMode;
     viewer.scene.requestRenderMode = false;
 
-    const handlePointerMove = (moveEvent: PointerEvent) => {
+    const move = (moveEvent: PointerEvent) => {
       const rect = viewer.canvas.getBoundingClientRect();
       const screenPosition = new Cesium.Cartesian2(moveEvent.clientX - rect.left, moveEvent.clientY - rect.top);
       const ray = viewer.camera.getPickRay(screenPosition);
@@ -76,9 +86,7 @@ const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature
       }
     };
 
-    const handlePointerUp = (upEvent: PointerEvent) => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
+    const drop = (upEvent: PointerEvent) => {
       viewer.scene.screenSpaceCameraController.enableInputs = true;
       viewer.scene.requestRenderMode = previousRequestRenderMode;
       if (element) element.style.cursor = 'grab';
@@ -99,9 +107,45 @@ const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature
       updateFeaturePosition(feature.id, ellipsoid.cartesianToCartographic(dropCartesian));
     };
 
+    return { move, drop };
+  }, [viewer, feature.id, updateFeaturePosition, closePopup]);
+
+  const handlePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    // A right press opens the box through contextmenu. Don't steal the point
+    // out from under an in-progress drawing or measurement.
+    if (event.button !== 0 || isToolActive || !position) return;
+
+    event.stopPropagation();
+    event.preventDefault();
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    let drag: ReturnType<typeof startDrag> | null = null;
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      if (!drag) {
+        if (Math.hypot(moveEvent.clientX - startX, moveEvent.clientY - startY) < CLICK_TOLERANCE_PX) return;
+        drag = startDrag(position);
+      }
+      drag.move(moveEvent);
+    };
+
+    const handlePointerUp = (upEvent: PointerEvent) => {
+      window.removeEventListener('pointermove', handlePointerMove);
+      window.removeEventListener('pointerup', handlePointerUp);
+      if (drag) drag.drop(upEvent);
+      else if (isSelected) closePopup();
+      else openFeatureBox(feature.id);
+    };
+
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
-  }, [activeDrawingTool, position, viewer, feature.id, updateFeaturePosition]);
+  }, [isToolActive, position, startDrag, isSelected, closePopup, openFeatureBox, feature.id]);
+
+  const handleContextMenu = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    if (!isToolActive) openFeatureBox(feature.id);
+  }, [isToolActive, openFeatureBox, feature.id]);
 
   if (!position) return null;
 
@@ -111,8 +155,12 @@ const FeaturePointMarker: React.FC<FeaturePointMarkerProps> = ({ viewer, feature
     <div
       ref={elementRef}
       className={styles.featurePointMarker}
-      style={{ display: 'none', cursor: activeDrawingTool ? 'default' : 'grab' }}
+      style={{ display: 'none', cursor: isToolActive ? 'default' : 'grab' }}
       onPointerDown={handlePointerDown}
+      onContextMenu={handleContextMenu}
+      data-selected={isSelected || undefined}
+      data-arrival={markerArrivals[feature.id]}
+      {...{ [FEATURE_MARKER_ATTRIBUTE]: feature.id }}
     >
       <span
         className={styles.dot}

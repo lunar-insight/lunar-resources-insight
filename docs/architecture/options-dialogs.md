@@ -31,7 +31,7 @@ The rail labels match the dialog titles, so a user finds the same name in both p
 
 **`ViewerOptionsSection`** renders the Map View dialog's content: one section per group of options, each option a `CheckboxWithInfo` with an explanation in its info popover.
 
-**Settings** has no content component; its entry in `SectionNavigation` holds placeholder text.
+**`SettingsSection`** renders the Settings dialog's content, in the same form. Its options are held by `AppSettingsContext`, which keeps a choice in browser storage. "Reduce motion" follows the system's reduced motion setting until the user chooses.
 
 ## Configuration reference
 
@@ -39,3 +39,5 @@ The rail labels match the dialog titles, so a user finds the same name in both p
 |---|---|
 | Rail entries, labels, dialog titles | `src/components/navigation/SectionNavigation/SectionNavigation.tsx` |
 | Map View options | `src/components/navigation/ViewerOptionsSection/ViewerOptionsSection.tsx` |
+| Settings options | `src/components/navigation/SettingsSection/SettingsSection.tsx` |
+| Settings state and storage | `src/utils/context/AppSettingsContext.tsx` |

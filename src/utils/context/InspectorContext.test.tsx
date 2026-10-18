@@ -70,7 +70,7 @@ describe('InspectorProvider', () => {
     const { result } = setup()
     act(() => result.current.inspector.retryMissingStatistics())
     expect(stats.retryMissing).toHaveBeenCalledWith(expect.arrayContaining(['chemical_elements/thorium/thoriumhd_COG.tif']))
-    expect(stats.retryMissing.mock.calls[0][0]).toHaveLength(50)
+    expect(stats.retryMissing.mock.calls[0][0]).toHaveLength(44)
   })
 
   it('pauses area requests while the camera moves', () => {

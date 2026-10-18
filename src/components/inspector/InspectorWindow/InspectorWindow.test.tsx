@@ -87,7 +87,7 @@ describe('shape window', () => {
     expect(screen.getByRole('region', { name: 'Minerals' })).toBeInTheDocument()
     expect(lineOf('thorium_grs')).toHaveTextContent('LP GRS0.5° low-alt')
     expect(lineOf('thorium_grs')).toHaveTextContent('avg 11.0 ppm')
-    expect(lineOf('feo_clementine_cnn_qiu2025')).toHaveTextContent(/avg [\d.]+ wt%/)
+    expect(lineOf('feo_lp_grs')).toHaveTextContent(/avg [\d.]+ wt%/)
   })
 
   it('shows the spread icon, low resolution and partial coverage', async () => {
@@ -138,7 +138,7 @@ describe('shape window', () => {
 
   it('shows one computing state with the count', async () => {
     await renderWindow(polygon, { ...makeResults('shape'), status: 'computing', done: 12 })
-    expect(screen.getByRole('status')).toHaveTextContent('Computing12 of 46 layers')
+    expect(screen.getByRole('status')).toHaveTextContent('Computing12 of 40 layers')
     expect(screen.queryByRole('region', { name: 'Chemical Elements' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Export CSV' })).toBeDisabled()
     expect(screen.getByRole('textbox', { name: 'Filter layers' })).toBeDisabled()
@@ -181,7 +181,7 @@ describe('line window', () => {
     expect(screen.getByTitle('Mean along the line. Lowest -2,640 m, highest -1,720 m')).toBeInTheDocument()
     expect(screen.getByRole('radio', { name: 'wt%' })).toBeChecked()
     expect(screen.getByText('Pick a wt% layer with the chart button on its row.')).toBeInTheDocument()
-    expect(lineOf('feo_clementine_cnn_qiu2025').querySelector('svg path')).not.toBeNull()
+    expect(lineOf('feo_lp_grs').querySelector('svg path')).not.toBeNull()
     expect(within(lineOf('thorium_grs')).getByRole('button', { name: 'Th · LP GRS on the chart' })).toBeInTheDocument()
   })
 
@@ -205,8 +205,8 @@ describe('line window', () => {
 
   it('switches unit charts and sparkline scales', async () => {
     await renderWindow(line, makeResults('line'))
-    await userEvent.click(screen.getByRole('radio', { name: 'index' }))
-    expect(screen.getByRole('radio', { name: 'index' })).toBeChecked()
+    await userEvent.click(screen.getByRole('radio', { name: 'ppm' }))
+    expect(screen.getByRole('radio', { name: 'ppm' })).toBeChecked()
     await userEvent.click(screen.getByRole('radio', { name: 'Own range' }))
     expect(screen.getByRole('radio', { name: 'Own range' })).toBeChecked()
   })

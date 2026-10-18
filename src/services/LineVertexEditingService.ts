@@ -1017,21 +1017,22 @@ export class LineVertexEditingService {
     return false;
   }
 
+  /** Whether a pick result is a line vertex marker, which a right click deletes. */
+  static isVertexMarker(pickedObject: unknown): pickedObject is { id: Cesium.Entity } {
+    if (!Cesium.defined(pickedObject)) return false;
+    const entity = (pickedObject as { id?: unknown }).id;
+    if (!(entity instanceof Cesium.Entity) || !entity.properties?.hasProperty('_isVertexMarker')) return false;
+    return entity.properties.getValue(Cesium.JulianDate.now())._isVertexMarker === true;
+  }
+
   handleRightClick(position: Cesium.Cartesian2): boolean {
     if (!this.viewer) return false;
 
     const pickedObject = this.viewer.scene.pick(position);
-    if (!Cesium.defined(pickedObject) || !(pickedObject.id instanceof Cesium.Entity)) return false;
+    if (!LineVertexEditingService.isVertexMarker(pickedObject)) return false;
 
-    const entity = pickedObject.id as Cesium.Entity;
-
-    // Check if it's a vertex marker
-    if (!entity.properties || !entity.properties.hasProperty('_isVertexMarker')) return false;
-
-    const isVertexMarker = entity.properties.getValue(Cesium.JulianDate.now())._isVertexMarker;
-    if (!isVertexMarker) return false;
-
-    const vertexInfo = entity.properties.getValue(Cesium.JulianDate.now())._vertexInfo;
+    const entity = pickedObject.id;
+    const vertexInfo = entity.properties!.getValue(Cesium.JulianDate.now())._vertexInfo;
     this.deleteVertex(vertexInfo.lineId, vertexInfo.vertexIndex);
     return true;
   }

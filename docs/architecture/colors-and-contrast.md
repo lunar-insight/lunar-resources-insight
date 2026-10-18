@@ -97,8 +97,8 @@ to the value it needs without the filter.
 |---|---|---|---|
 | `--surface-bar` | `--glass-bar` | `TopBar`, `BottomBar` | `--text-secondary` labels |
 | `--surface-window` | `--glass-window` | navigation dialogs (`DraggableContentContainer`), floating windows (`DraggableBoxContentContainer`: the Inspector, the scanners) | `--text-secondary` labels |
-| `--surface-menu` | `--glass-menu` | the scanner menu, the color picker | `--text-secondary` labels |
-| `--surface-popover` | `--glass-popover` | info and stat popovers, Inspector menus, the search field and result callout | `--text-secondary` on a flat background |
+| `--surface-menu` | `--glass-menu` | the scanner menu, the globe menu, the color picker | `--text-secondary` labels |
+| `--surface-popover` | `--glass-popover` | info and stat popovers, Inspector menus, the search field and result callout, a saved point's box, the toast | `--text-secondary` on a flat background |
 | `--surface-viewer-button` | `--glass-viewer-button` | viewer buttons, the compass, the search close button | icons only, at 3:1 |
 | `--surface-modal` | `--glass-modal` | `ModalOverlayContainer`: periodic table, compounds, derived indices, minerals, layers catalog | text on tints inside the modal |
 
@@ -112,7 +112,7 @@ Hover and pressed states of a glass surface keep its opacity
 fail the text on hover.
 
 Hover and selection tints inside a pane follow the text rule above: the
-scanner menu's hovered rows, the Inspector's pills, chart tabs and menu items,
+scanner menu's hovered rows, the globe menu's items, the Inspector's pills, chart tabs and menu items,
 and the dataset picker's options draw their text in `--text-primary` while
 tinted.
 
@@ -184,8 +184,9 @@ colors are local to `_colors.scss`.
   clears 3:1 on the chart background (see `feature-inspector.md`).
 
 Colors that belong to a single component's data stay literal in that component:
-the scanner unit colors, the measurement cyan, the search marker orange, black
-and white overlays and shadows.
+the scanner unit colors, the measurement cyan, the search marker orange, the
+point drop's teal probe, flash and rings and its cyan flying dot, black and
+white overlays and shadows.
 
 ### Checking contrast
 

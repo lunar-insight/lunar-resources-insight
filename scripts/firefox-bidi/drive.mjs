@@ -98,7 +98,8 @@ try {
     console.log(`  saved ${file}`);
   };
 
-  const click = ([x, y]) => send('input.performActions', {
+  // Button 0 is the left button, 2 the right.
+  const click = ([x, y], button = 0) => send('input.performActions', {
     context,
     actions: [{
       type: 'pointer',
@@ -107,10 +108,21 @@ try {
       actions: [
         { type: 'pointerMove', x, y },
         { type: 'pause', duration: 100 },
-        { type: 'pointerDown', button: 0 },
+        { type: 'pointerDown', button },
         { type: 'pause', duration: 80 },
-        { type: 'pointerUp', button: 0 },
+        { type: 'pointerUp', button },
       ],
+    }],
+  });
+
+  // Moves the mouse to [x, y] without a click, over the given milliseconds.
+  const move = ([x, y, duration = 0]) => send('input.performActions', {
+    context,
+    actions: [{
+      type: 'pointer',
+      id: 'mouse',
+      parameters: { pointerType: 'mouse' },
+      actions: [{ type: 'pointerMove', x, y, duration }],
     }],
   });
 
@@ -140,6 +152,8 @@ try {
 
     for (const step of page.steps ?? []) {
       if (step.click) await click(step.click);
+      if (step.rightClick) await click(step.rightClick, 2);
+      if (step.move) await move(step.move);
       if (step.js) {
         const result = await evaluate(step.js);
         console.log(`  js: ${JSON.stringify(result.value ?? null)}`);

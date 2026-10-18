@@ -3,6 +3,7 @@ import { Button, GridList, GridListItem } from 'react-aria-components';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
 import { useViewer } from 'utils/context/ViewerContext';
 import { useFeatureResults, useInspectorContext } from 'utils/context/InspectorContext';
+import { usePointDrop } from 'utils/context/PointDropContext';
 import RemoveItemButton from 'components/layout/Button/RemoveItemButton/RemoveItemButton';
 import { Checkbox } from 'components/layout/Checkbox/Checkbox/Checkbox';
 import { FeatureColorButton } from './FeatureColorButton';
@@ -12,6 +13,7 @@ import { FeatureJumpButton } from './FeatureJumpButton';
 import { FeatureNameEditor } from './FeatureNameEditor';
 import { flyToFeature } from 'utils/featureUtils';
 import { shapeWord } from 'services/inspector/featureGeometry';
+import { inspectorLines } from 'services/inspector/inspectorLayers';
 import type { Feature } from '../types';
 import styles from './FeaturesList.module.scss';
 
@@ -26,21 +28,28 @@ const SHAPE_ICONS: Record<string, string> = {
 const FeatureStatus: React.FC<{ feature: Feature }> = ({ feature }) => {
   const results = useFeatureResults(feature.id);
   const computing = !results || results.status === 'computing';
+  const total = results?.total ?? inspectorLines.length;
 
   return (
     <span className={styles.featureStatus}>
       <span className={styles.shapeLabel}>{shapeWord(feature.type)}</span>
       <span aria-hidden="true">·</span>
-      {computing ? (
-        <>
-          <span className={styles.miniProgress} aria-hidden="true">
-            <span style={{ width: `${results ? (results.done / results.total) * 100 : 0}%` }} />
-          </span>
-          <span>{results ? `${results.done} of ${results.total} layers` : 'Computing'}</span>
-        </>
-      ) : (
-        <span>{results.total} layers ready</span>
-      )}
+      {/* Reserves the width of the widest form, so the row and the Features
+          window keep their width while the computation progresses. */}
+      <span className={styles.statusValue} data-reserve={`${total} of ${total} layers`}>
+        <span className={styles.statusCurrent}>
+          {computing ? (
+            <>
+              <span className={styles.miniProgress} aria-hidden="true">
+                <span style={{ width: `${results ? (results.done / results.total) * 100 : 0}%` }} />
+              </span>
+              <span>{results ? `${results.done} of ${results.total} layers` : 'Computing'}</span>
+            </>
+          ) : (
+            <span>{results.total} layers ready</span>
+          )}
+        </span>
+      </span>
     </span>
   );
 };
@@ -49,6 +58,7 @@ export const FeaturesList: React.FC = () => {
   const { features, removeFeature, toggleFeatureInspector, toggleFeatureVisible, renameFeature } = useFeaturesContext();
   const { comparedIds, toggleCompared, setComparisonOpen } = useInspectorContext();
   const { viewer } = useViewer();
+  const { rowArrivals } = usePointDrop();
   const [editingFeatureId, setEditingFeatureId] = useState<string | null>(null);
 
   const handleStartEdit = (featureId: string, e: React.MouseEvent) => {
@@ -83,7 +93,7 @@ export const FeaturesList: React.FC = () => {
         selectionMode="none"
         className={styles.featuresList}
         aria-label="Features list"
-        dependencies={[editingFeatureId, comparedIds]}
+        dependencies={[editingFeatureId, comparedIds, rowArrivals]}
       >
         {(feature) => {
           const isEditing = editingFeatureId === feature.id;
@@ -94,6 +104,8 @@ export const FeaturesList: React.FC = () => {
             key={feature.id}
             textValue={feature.name}
             className={styles.featureItem}
+            data-feature-row={feature.id}
+            data-arrival={rowArrivals[feature.id]}
           >
             <div className={styles.featureItemHeader}>
               {isEditing ? (
@@ -116,7 +128,7 @@ export const FeaturesList: React.FC = () => {
                     currentColor={feature.color}
                   />
 
-                  <span className={`material-symbols-outlined ${styles.shapeIcon}`} title={word} aria-hidden="true">
+                  <span className={`material-symbols-outlined ${styles.shapeIcon}`} title={word} aria-hidden="true" data-fly-target>
                     {SHAPE_ICONS[word]}
                   </span>
 

@@ -19,6 +19,7 @@ import negativeZ from 'assets/images/skybox/nz.jpg';
 import { useMouseTrackingControl } from 'hooks/useMouseTrackingControl';
 import useLoadingScreen from 'hooks/useLoadingScreen';
 import { useFeaturesContext } from 'utils/context/FeaturesContext';
+import { applyLunarTerrainBounds } from 'utils/lunarTerrainBounds';
 
 interface CesiumComponentProps {
   className?: string;
@@ -47,6 +48,7 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
     if (cesiumContainerRef.current) {
       Cesium.Ion.defaultAccessToken = ''; // No Cesium Key (to remove the message)
       Cesium.Ellipsoid.default = Cesium.Ellipsoid.MOON
+      applyLunarTerrainBounds();
 
       const mapProjection = new Cesium.GeographicProjection(Cesium.Ellipsoid.default);
       const globe = new Cesium.Globe(Cesium.Ellipsoid.default);
