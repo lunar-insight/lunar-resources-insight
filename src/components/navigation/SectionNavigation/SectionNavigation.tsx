@@ -100,8 +100,8 @@ const dialogsData: Icon[] = [
   {
     id: 'viewer-option-dialog',
     name: 'tune',
-    label: 'Viewer',
-    dialogTitle: 'Viewer Options',
+    label: 'Map View',
+    dialogTitle: 'Map View',
     dialogContent: <ViewerOptionsSection />
   },
   { 
