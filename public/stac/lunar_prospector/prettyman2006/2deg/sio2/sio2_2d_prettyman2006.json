@@ -107,6 +107,12 @@
       "href": "../../../grs/5deg/silicon/silicon5d.json",
       "type": "application/json",
       "title": "LP GRS Silicon 5 deg - elemental Si abundance (reduced_special/Lawrence source)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../../kaguya/mi/oxide_map/sio2/sio2_kaguya_mi_shi2026.json",
+      "type": "application/json",
+      "title": "SiO2 Abundance - Kaguya MI 65N-65S (Shi et al. 2026), alternate SiO2 product"
     }
   ]
 }

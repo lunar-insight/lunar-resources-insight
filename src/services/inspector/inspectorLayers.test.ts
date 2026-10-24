@@ -113,13 +113,13 @@ describe('displayUnit', () => {
 })
 
 describe('the app layer list', () => {
-  it('gives 40 lines in 24 cards', () => {
-    expect(inspectorLines).toHaveLength(40)
-    expect(inspectorGroups.flatMap(group => group.cards)).toHaveLength(24)
+  it('gives 47 lines in 25 cards', () => {
+    expect(inspectorLines).toHaveLength(47)
+    expect(inspectorGroups.flatMap(group => group.cards)).toHaveLength(25)
   })
 
-  it('reads 44 files', () => {
-    expect(allLineFiles(inspectorLines)).toHaveLength(44)
+  it('reads 51 files', () => {
+    expect(allLineFiles(inspectorLines)).toHaveLength(51)
   })
 
   it('scales Si, Al, O and Na by percentile, every other line by a reference range', () => {

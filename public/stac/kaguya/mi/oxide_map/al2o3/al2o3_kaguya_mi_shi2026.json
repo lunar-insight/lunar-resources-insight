@@ -1,0 +1,174 @@
+{
+  "type": "Feature",
+  "stac_version": "1.0.0",
+  "stac_extensions": [
+    "https://stac-extensions.github.io/processing/v1.1.0/schema.json"
+  ],
+  "id": "kaguya-mi-al2o3-shi2026",
+  "collection": "kaguya-mi-oxide-map",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -180,
+          -65
+        ],
+        [
+          180,
+          -65
+        ],
+        [
+          180,
+          65
+        ],
+        [
+          -180,
+          65
+        ],
+        [
+          -180,
+          -65
+        ]
+      ]
+    ]
+  },
+  "bbox": [
+    -180,
+    -65,
+    180,
+    65
+  ],
+  "properties": {
+    "datetime": "2026-02-11T00:00:00Z",
+    "title": "Al2O3 Abundance · Kaguya MI 65N-65S (Shi et al. 2026)",
+    "lri:role": "Modeled",
+    "mission": "Kaguya (SELENE)",
+    "instruments": [
+      "Multiband Imager (MI)"
+    ],
+    "platform": "kaguya",
+    "target": "Moon",
+    "compound": "Al2O3",
+    "units": "wt%",
+    "doi": "10.1038/s44460-025-00021-z",
+    "authors": "Shi X., Chen J., Wang J., Liu S., Tong X., Li J., Yan Z., Wen S., Xie H., He Z., Chu J., Hu W., Wang F.",
+    "publication_date": "2026-02-11",
+    "producer_institution_name": "Tongji University; Shanghai Institute of Technical Physics, Chinese Academy of Sciences",
+    "spatial_resolution_m": 59.225,
+    "gsd": 59.225,
+    "raster_samples": 184320,
+    "raster_lines": 66560,
+    "sample_bits": 32,
+    "sample_type": "Float32",
+    "bands": 1,
+    "map_projection": "SimpleCylindrical",
+    "map_scale_m_per_px": 59.225293797166955,
+    "map_resolution_px_per_deg": 512,
+    "lri:resolution_km": 0.059,
+    "crs": "Source: 9 GeoTIFFs of 20480 x 66560 px, geographic GCS_Moon_2000 in degrees on the 1737400 m sphere. COG: the 9 joined, IAU:30100, same sphere and grid.",
+    "coordinate_system": "Planetocentric",
+    "longitude_direction": "PositiveEast",
+    "lunar_radius_m": 1737400.0,
+    "source_nodata": 3.3999999521443642e+38,
+    "nodata": -9999,
+    "source_value_range": [
+      5,
+      33
+    ],
+    "source_nodata_pixel_pct": 1.53,
+    "mean_wt_pct": 22.73,
+    "pixels_at_range_min_pct": 0.477,
+    "pixels_at_range_max_pct": 0.152,
+    "rmse_wt_pct": 0.6,
+    "processing:level": "L4",
+    "processing:lineage": "Kaguya Multiband Imager level 5 reflectance after terrain shadow correction (8 bands, 415 to 1550 nm) and the spectral angles θTi and θFe, inverted with a residual 1D CNN (Res-CNN). Leave-one-out training on 56 samples from Apollo, Luna, Chang'E-5, and Chang'e-6 sites gives 56 models whose weights are averaged. Distributed as 9 Float32 GeoTIFFs of 40° longitude, 65N to 65S, 512 ppd, values in wt%, clipped to the product range. COG: gdalbuildvrt joins the 9 files (one grid, no resampling); gdal_calc.py maps the source NoData (3.4e38) to -9999; gdal_translate assigns IAU:30100 and writes a COG with DEFLATE/PREDICTOR=3 compression.",
+    "processing:software": {
+      "GDAL": "3.12.2"
+    },
+    "lri:data_use": "quantitative-abundance spatial-prospecting",
+    "lri:data_use_note": "Higher Al2O3 indicates anorthositic highland crust, the primary aluminium resource on the Moon. 59 m/pixel between 65N and 65S.",
+    "lri:quality_note_short": "Res-CNN Al2O3 from Kaguya MI, calibrated with Chang'e-6 samples, 59 m/pixel, 65N-65S. RMSE 0.6 wt% at the training sites. Orbit stripes in places; NoData along orbit gaps.",
+    "lri:quality_note": "RMSE 0.6 wt% between map and measured values at the 56 training sites; R² 0.98 and RMSE 1.99 wt% over the six oxides at held-out test sites (Supplementary Table 4). Pixel mean 22.73 wt%, equal to the article's global mean (22.73 wt%). Values are clipped to 5 to 33 wt% (0.477% of valid pixels at 5, 0.152% at 33). Pixels at 5 wt% lie mostly along orbit tracks next to NoData gaps. NoData covers 1.53% of pixels, mostly in gaps along orbit tracks, and up to 21% of each column within 0.2° west and 0.4° east of 180°. North-south stripes about 1.06° apart, the longitude step between successive Kaguya orbits, appear at 20 to 35°E and 55 to 100°E and more weakly at 110 to 135°W and near 165°E; column means deviate from their 1° running median by up to 2.7 wt%. The source is 9 files of 40° longitude. At 180° the two sides do not match pixel for pixel (mean step below 0.01 wt%); at 60°E the mean step is -0.08 wt%; the other boundaries are continuous. Registered to the LRO frame: at 10 of 12 landing sites the offset to Speyerer et al. (2023) FeO, registered to the LROC WAC mosaic, is within 0.3 km."
+  },
+  "assets": {
+    "data": {
+      "href": "al2o3_kaguya_mi_shi2026_COG.tif",
+      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+      "title": "Al2O3 wt% COG · IAU:30100",
+      "roles": [
+        "data"
+      ]
+    },
+    "figshare_record": {
+      "href": "https://doi.org/10.6084/m9.figshare.30022171",
+      "type": "text/html",
+      "title": "Figshare record: source GeoTIFFs, 9 batches per product",
+      "roles": [
+        "source"
+      ]
+    },
+    "processing_script": {
+      "href": "./process.sh",
+      "type": "application/x-sh",
+      "title": "COG conversion script",
+      "roles": [
+        "metadata",
+        "reproducibility"
+      ]
+    }
+  },
+  "links": [
+    {
+      "rel": "self",
+      "href": "./al2o3_kaguya_mi_shi2026.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "collection",
+      "href": "../collection.json"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1038/s44460-025-00021-z",
+      "title": "Shi et al. 2026, Refined lunar global chemistry mapping using farside ground truth information gathered by Chang'e-6, Nature Sensors 1, 232-240"
+    },
+    {
+      "rel": "describedby",
+      "href": "https://static-content.springer.com/esm/art%3A10.1038%2Fs44460-025-00021-z/MediaObjects/44460_2025_21_MOESM1_ESM.pdf",
+      "type": "application/pdf",
+      "title": "Shi et al. 2026, Supplementary Information"
+    },
+    {
+      "rel": "derived_from",
+      "href": "https://doi.org/10.6084/m9.figshare.30022171",
+      "type": "text/html",
+      "title": "Figshare: Refined lunar global chemistry mapping with the first farside ground truth from Chang'E-6 (doi:10.6084/m9.figshare.30022171)"
+    },
+    {
+      "rel": "related",
+      "href": "../../../../lunar_prospector/prettyman2006/2deg/al2o3/al2o3_2d_prettyman2006.json",
+      "type": "application/json",
+      "title": "Al2O3 Abundance, LP GRS 2 deg (Prettyman et al. 2006), alternate Al2O3 product"
+    },
+    {
+      "rel": "related",
+      "href": "https://github.com/zyyan-cc/RLCM-DL",
+      "type": "text/html",
+      "title": "RLCM-DL: training data and Res-CNN code (no trained weights)"
+    },
+    {
+      "rel": "license",
+      "href": "https://opensource.org/license/mit",
+      "type": "text/html",
+      "title": "MIT License (Figshare records)"
+    }
+  ]
+}

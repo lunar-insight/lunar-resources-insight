@@ -110,9 +110,9 @@
     },
     {
       "rel": "related",
-      "href": "../../../../clementine/qiu2025/cao/cao_clementine_cnn_qiu2025.json",
+      "href": "../../../../kaguya/mi/oxide_map/cao/cao_kaguya_mi_shi2026.json",
       "type": "application/json",
-      "title": "CaO Abundance - Clementine CNN (Qiu 2025), alternate CaO product"
+      "title": "CaO Abundance - Kaguya MI 65N-65S (Shi et al. 2026), alternate CaO product"
     }
   ]
 }

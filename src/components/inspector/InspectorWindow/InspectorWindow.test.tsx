@@ -138,7 +138,7 @@ describe('shape window', () => {
 
   it('shows one computing state with the count', async () => {
     await renderWindow(polygon, { ...makeResults('shape'), status: 'computing', done: 12 })
-    expect(screen.getByRole('status')).toHaveTextContent('Computing12 of 40 layers')
+    expect(screen.getByRole('status')).toHaveTextContent('Computing12 of 47 layers')
     expect(screen.queryByRole('region', { name: 'Chemical Elements' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Export CSV' })).toBeDisabled()
     expect(screen.getByRole('textbox', { name: 'Filter layers' })).toBeDisabled()

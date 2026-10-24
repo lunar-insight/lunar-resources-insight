@@ -51,8 +51,8 @@ describe('FeaturesList', () => {
   it('reserves the width of the computing status, so the row keeps its width', () => {
     const store = fakeStore({ p: makeResults('point') })
     renderList([point, circle], store)
-    expect(rowOf('Apollo 15').querySelector('[data-reserve]')).toHaveAttribute('data-reserve', '40 of 40 layers')
-    expect(rowOf('Basin').querySelector('[data-reserve]')).toHaveAttribute('data-reserve', '40 of 40 layers')
+    expect(rowOf('Apollo 15').querySelector('[data-reserve]')).toHaveAttribute('data-reserve', '47 of 47 layers')
+    expect(rowOf('Basin').querySelector('[data-reserve]')).toHaveAttribute('data-reserve', '47 of 47 layers')
   })
 
   it('shows a placeholder without features', () => {
@@ -66,8 +66,8 @@ describe('FeaturesList', () => {
       c: { ...makeResults('shape'), status: 'computing', done: 29 },
     })
     renderList([point, circle], store)
-    expect(rowOf('Apollo 15')).toHaveTextContent('point·40 layers ready')
-    expect(rowOf('Basin')).toHaveTextContent('circle·29 of 40 layers')
+    expect(rowOf('Apollo 15')).toHaveTextContent('point·47 layers ready')
+    expect(rowOf('Basin')).toHaveTextContent('circle·29 of 47 layers')
     expect(within(rowOf('Basin')).getByText('circle', { selector: '[title]' })).toBeInTheDocument()
 
     act(() => store.set('c', undefined))

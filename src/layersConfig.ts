@@ -505,6 +505,18 @@ export const layersConfig: LayersConfig = {
         }
       ]
     },
+    feo_kaguya_mi_shi2026: {
+      filename: "compounds/feo/feo_kaguya_mi_shi2026_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "feo",
+      units: "wt%",
+      displayName: "FeO Abundance · Kaguya Multiband Imager, 65°N-65°S (Shi 2026)",
+      datasetLabel: "Kaguya Multiband Imager (Shi 2026)",
+      datasetShort: "Kaguya MI",
+      decimals: 1,
+      stac: "kaguya/mi/oxide_map/feo/feo_kaguya_mi_shi2026.json"
+    },
     tio2_lp_grs_prettyman2006: {
       filename: "compounds/tio2/tio2_2d_prettyman2006_COG.tif",
       layerType: "raster",
@@ -533,6 +545,18 @@ export const layersConfig: LayersConfig = {
           stac: "lunar_prospector/prettyman2006/20deg/tio2/tio2_20d_prettyman2006.json"
         }
       ]
+    },
+    tio2_kaguya_mi_shi2026: {
+      filename: "compounds/tio2/tio2_kaguya_mi_shi2026_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "tio2",
+      units: "wt%",
+      displayName: "TiO₂ Abundance · Kaguya Multiband Imager, 65°N-65°S (Shi 2026)",
+      datasetLabel: "Kaguya Multiband Imager (Shi 2026)",
+      datasetShort: "Kaguya MI",
+      decimals: 1,
+      stac: "kaguya/mi/oxide_map/tio2/tio2_kaguya_mi_shi2026.json"
     },
     al2o3_lp_grs_prettyman2006: {
       filename: "compounds/al2o3/al2o3_2d_prettyman2006_COG.tif",
@@ -563,6 +587,18 @@ export const layersConfig: LayersConfig = {
         }
       ]
     },
+    al2o3_kaguya_mi_shi2026: {
+      filename: "compounds/al2o3/al2o3_kaguya_mi_shi2026_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "al2o3",
+      units: "wt%",
+      displayName: "Al₂O₃ Abundance · Kaguya Multiband Imager, 65°N-65°S (Shi 2026)",
+      datasetLabel: "Kaguya Multiband Imager (Shi 2026)",
+      datasetShort: "Kaguya MI",
+      decimals: 1,
+      stac: "kaguya/mi/oxide_map/al2o3/al2o3_kaguya_mi_shi2026.json"
+    },
     sio2_lp_grs_prettyman2006: {
       filename: "compounds/sio2/sio2_2d_prettyman2006_COG.tif",
       layerType: "raster",
@@ -591,6 +627,18 @@ export const layersConfig: LayersConfig = {
           stac: "lunar_prospector/prettyman2006/20deg/sio2/sio2_20d_prettyman2006.json"
         }
       ]
+    },
+    sio2_kaguya_mi_shi2026: {
+      filename: "compounds/sio2/sio2_kaguya_mi_shi2026_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "sio2",
+      units: "wt%",
+      displayName: "SiO₂ Abundance · Kaguya Multiband Imager, 65°N-65°S (Shi 2026)",
+      datasetLabel: "Kaguya Multiband Imager (Shi 2026)",
+      datasetShort: "Kaguya MI",
+      decimals: 1,
+      stac: "kaguya/mi/oxide_map/sio2/sio2_kaguya_mi_shi2026.json"
     },
     mgo_lp_grs_prettyman2006: {
       filename: "compounds/mgo/mgo_2d_prettyman2006_COG.tif",
@@ -621,6 +669,18 @@ export const layersConfig: LayersConfig = {
         }
       ]
     },
+    mgo_kaguya_mi_shi2026: {
+      filename: "compounds/mgo/mgo_kaguya_mi_shi2026_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "mgo",
+      units: "wt%",
+      displayName: "MgO Abundance · Kaguya Multiband Imager, 65°N-65°S (Shi 2026)",
+      datasetLabel: "Kaguya Multiband Imager (Shi 2026)",
+      datasetShort: "Kaguya MI",
+      decimals: 1,
+      stac: "kaguya/mi/oxide_map/mgo/mgo_kaguya_mi_shi2026.json"
+    },
     cao_lp_grs_prettyman2006: {
       filename: "compounds/cao/cao_2d_prettyman2006_COG.tif",
       layerType: "raster",
@@ -649,6 +709,18 @@ export const layersConfig: LayersConfig = {
           stac: "lunar_prospector/prettyman2006/20deg/cao/cao_20d_prettyman2006.json"
         }
       ]
+    },
+    cao_kaguya_mi_shi2026: {
+      filename: "compounds/cao/cao_kaguya_mi_shi2026_COG.tif",
+      layerType: "raster",
+      category: "compound",
+      compound: "cao",
+      units: "wt%",
+      displayName: "CaO Abundance · Kaguya Multiband Imager, 65°N-65°S (Shi 2026)",
+      datasetLabel: "Kaguya Multiband Imager (Shi 2026)",
+      datasetShort: "Kaguya MI",
+      decimals: 1,
+      stac: "kaguya/mi/oxide_map/cao/cao_kaguya_mi_shi2026.json"
     },
     cao_kaguya_grs: {
       filename: "compounds/cao/calcium_nmap_COG.tif",
@@ -824,5 +896,17 @@ export const layersConfig: LayersConfig = {
       Derived index
       -------------
     */
+    mg_number: {
+      filename: "derived/mg_number/mg_number_kaguya_mi_shi2026_COG.tif",
+      layerType: "raster",
+      category: "derived-index",
+      displayName: "Mg# Magnesium Number · Kaguya Multiband Imager, 65°N-65°S (Shi 2026)",
+      datasetLabel: "Kaguya Multiband Imager (Shi 2026)",
+      datasetShort: "Kaguya MI",
+      decimals: 0,
+      isDerivedIndex: true,
+      units: "Mg# (0 to 100)",
+      stac: "kaguya/mi/oxide_map/mg_number/mg_number_kaguya_mi_shi2026.json"
+    }
   }
 } satisfies LayersConfig;

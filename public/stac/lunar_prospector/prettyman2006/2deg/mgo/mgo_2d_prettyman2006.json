@@ -110,9 +110,9 @@
     },
     {
       "rel": "related",
-      "href": "../../../../clementine/qiu2025/mgo/mgo_clementine_cnn_qiu2025.json",
+      "href": "../../../../kaguya/mi/oxide_map/mgo/mgo_kaguya_mi_shi2026.json",
       "type": "application/json",
-      "title": "MgO Abundance - Clementine CNN (Qiu 2025), alternate MgO product"
+      "title": "MgO Abundance - Kaguya MI 65N-65S (Shi et al. 2026), alternate MgO product"
     }
   ]
 }

@@ -1,0 +1,116 @@
+{
+  "type": "Collection",
+  "id": "kaguya-mi-oxide-map",
+  "stac_version": "1.0.0",
+  "title": "Kaguya MI Oxide Maps 65N-65S (Shi et al. 2026)",
+  "description": "Abundance maps of FeO, TiO2, Al2O3, CaO, MgO and SiO2 (wt%) and Mg# between 65N and 65S, inverted from Kaguya Multiband Imager reflectance with a residual 1D CNN trained on Apollo, Luna, and Chang'E samples including Chang'e-6 (Shi et al. 2026). 512 ppd (59 m/pixel), Simple Cylindrical, registered to the LRO frame. Distributed as 9 GeoTIFFs per product; each COG joins them in IAU:30100.",
+  "license": "MIT",
+  "extent": {
+    "spatial": {
+      "bbox": [
+        [
+          -180,
+          -65,
+          180,
+          65
+        ]
+      ]
+    },
+    "temporal": {
+      "interval": [
+        [
+          "2007-09-14T00:00:00Z",
+          "2009-06-11T00:00:00Z"
+        ]
+      ]
+    }
+  },
+  "providers": [
+    {
+      "name": "Japan Aerospace Exploration Agency (JAXA)",
+      "roles": [
+        "producer"
+      ],
+      "url": "https://www.kaguya.jaxa.jp"
+    },
+    {
+      "name": "Tongji University and Shanghai Institute of Technical Physics, CAS (Shi et al.)",
+      "roles": [
+        "processor"
+      ]
+    },
+    {
+      "name": "Figshare",
+      "roles": [
+        "host"
+      ],
+      "url": "https://figshare.com"
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "href": "./collection.json"
+    },
+    {
+      "rel": "root",
+      "href": "../../../catalog.json"
+    },
+    {
+      "rel": "parent",
+      "href": "../catalog.json"
+    },
+    {
+      "rel": "cite-as",
+      "href": "https://doi.org/10.1038/s44460-025-00021-z",
+      "title": "Shi et al. 2026, Refined lunar global chemistry mapping using farside ground truth information gathered by Chang'e-6, Nature Sensors 1, 232-240"
+    },
+    {
+      "rel": "describedby",
+      "href": "https://static-content.springer.com/esm/art%3A10.1038%2Fs44460-025-00021-z/MediaObjects/44460_2025_21_MOESM1_ESM.pdf",
+      "type": "application/pdf",
+      "title": "Shi et al. 2026, Supplementary Information"
+    },
+    {
+      "rel": "license",
+      "href": "https://opensource.org/license/mit",
+      "type": "text/html",
+      "title": "MIT License (Figshare records)"
+    },
+    {
+      "rel": "item",
+      "href": "./feo/feo_kaguya_mi_shi2026.json",
+      "title": "FeO Abundance · Kaguya MI 65N-65S"
+    },
+    {
+      "rel": "item",
+      "href": "./tio2/tio2_kaguya_mi_shi2026.json",
+      "title": "TiO2 Abundance · Kaguya MI 65N-65S"
+    },
+    {
+      "rel": "item",
+      "href": "./al2o3/al2o3_kaguya_mi_shi2026.json",
+      "title": "Al2O3 Abundance · Kaguya MI 65N-65S"
+    },
+    {
+      "rel": "item",
+      "href": "./mgo/mgo_kaguya_mi_shi2026.json",
+      "title": "MgO Abundance · Kaguya MI 65N-65S"
+    },
+    {
+      "rel": "item",
+      "href": "./cao/cao_kaguya_mi_shi2026.json",
+      "title": "CaO Abundance · Kaguya MI 65N-65S"
+    },
+    {
+      "rel": "item",
+      "href": "./sio2/sio2_kaguya_mi_shi2026.json",
+      "title": "SiO2 Abundance · Kaguya MI 65N-65S"
+    },
+    {
+      "rel": "item",
+      "href": "./mg_number/mg_number_kaguya_mi_shi2026.json",
+      "title": "Mg# Magnesium Number · Kaguya MI 65N-65S"
+    }
+  ]
+}

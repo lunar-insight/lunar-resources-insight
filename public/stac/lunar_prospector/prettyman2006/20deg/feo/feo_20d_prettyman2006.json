@@ -12,7 +12,7 @@
     "datetime": "2012-06-15T00:00:00Z",
     "title": "FeO Abundance · LP GRS 20° (Prettyman et al. 2006)",
     "lri:role": "Measured",
-    "lri:data_use_note": "Higher FeO indicates mare basalt regions; ilmenite-associated FeO is a target for oxygen extraction. Alternate FeO products are available from Lawrence et al. 2002 iron data (0.5 deg) and from Clementine CNN inversion (100 m).",
+    "lri:data_use_note": "Higher FeO indicates mare basalt regions; ilmenite-associated FeO is a target for oxygen extraction. Alternate FeO products are available from Lawrence et al. 2002 iron data (0.5 deg) and from Kaguya MI CNN inversion between 65N and 65S (59 m, Shi et al. 2026).",
     "mission": "Lunar Prospector",
     "instruments": ["Gamma Ray Spectrometer", "Neutron Spectrometer"],
     "platform": "lunar-prospector",
@@ -110,9 +110,9 @@
     },
     {
       "rel": "related",
-      "href": "../../../../clementine/qiu2025/feo/feo_clementine_cnn_qiu2025.json",
+      "href": "../../../../kaguya/mi/oxide_map/feo/feo_kaguya_mi_shi2026.json",
       "type": "application/json",
-      "title": "FeO Abundance - Clementine CNN (Qiu 2025), alternate FeO product"
+      "title": "FeO Abundance - Kaguya MI 65N-65S (Shi et al. 2026), alternate FeO product"
     }
   ]
 }

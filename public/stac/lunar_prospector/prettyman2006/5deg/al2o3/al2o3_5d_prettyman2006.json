@@ -110,9 +110,9 @@
     },
     {
       "rel": "related",
-      "href": "../../../../clementine/qiu2025/al2o3/al2o3_clementine_cnn_qiu2025.json",
+      "href": "../../../../kaguya/mi/oxide_map/al2o3/al2o3_kaguya_mi_shi2026.json",
       "type": "application/json",
-      "title": "Al2O3 Abundance - Clementine CNN (Qiu 2025), alternate Al2O3 product"
+      "title": "Al2O3 Abundance - Kaguya MI 65N-65S (Shi et al. 2026), alternate Al2O3 product"
     }
   ]
 }

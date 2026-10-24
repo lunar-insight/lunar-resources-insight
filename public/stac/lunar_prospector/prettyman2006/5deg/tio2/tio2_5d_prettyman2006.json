@@ -110,9 +110,9 @@
     },
     {
       "rel": "related",
-      "href": "../../../../clementine/qiu2025/tio2/tio2_clementine_cnn_qiu2025.json",
+      "href": "../../../../kaguya/mi/oxide_map/tio2/tio2_kaguya_mi_shi2026.json",
       "type": "application/json",
-      "title": "TiO2 Abundance - Clementine CNN (Qiu 2025), alternate TiO2 product"
+      "title": "TiO2 Abundance - Kaguya MI 65N-65S (Shi et al. 2026), alternate TiO2 product"
     }
   ]
 }
