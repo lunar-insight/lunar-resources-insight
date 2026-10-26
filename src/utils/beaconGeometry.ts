@@ -12,7 +12,7 @@ const BEACON_MAX_METERS = 50000;
 // normal, scaled so it projects to roughly BEACON_TARGET_PIXELS on screen at
 // the current camera distance.
 export const computeBeaconTopPosition = (
-  viewer: Cesium.Viewer,
+  viewer: Cesium.CesiumWidget,
   groundCartesian: Cesium.Cartesian3
 ): Cesium.Cartesian3 => {
   const ellipsoid = viewer.scene.globe.ellipsoid;

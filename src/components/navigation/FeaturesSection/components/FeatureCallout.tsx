@@ -12,7 +12,7 @@ import { Feature } from '../types';
 import styles from 'components/viewer/Callout/Callout.module.scss';
 
 interface FeatureCalloutProps {
-  viewer: Cesium.Viewer;
+  viewer: Cesium.CesiumWidget;
   feature: Feature;
   /** Where the leader line points. */
   position: Cesium.Cartographic;

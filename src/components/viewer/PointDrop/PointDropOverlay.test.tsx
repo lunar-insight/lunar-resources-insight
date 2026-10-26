@@ -209,7 +209,7 @@ describe('the overlay', () => {
 
 describe('probeStartOffset', () => {
   it('falls 30 px when the spot does not project', () => {
-    const start = probeStartOffset(fakeViewer(false) as unknown as Cesium.Viewer, position)
+    const start = probeStartOffset(fakeViewer(false) as unknown as Cesium.CesiumWidget, position)
     expect(start.x).toBeCloseTo(-10.5)
     expect(start.y).toBe(-30)
   })
@@ -225,7 +225,7 @@ describe('pathKeyframes', () => {
 })
 
 describe('flyCurve', () => {
-  const viewer = () => viewerState.viewer as Cesium.Viewer
+  const viewer = () => viewerState.viewer as Cesium.CesiumWidget
 
   it('curves from the spot to the new row, scrolled into view', () => {
     const row = target({ 'data-feature-row': 'point-1' }, { left: 400, top: 300, width: 20, height: 20 })
@@ -249,6 +249,6 @@ describe('flyCurve', () => {
 
   it('gives nothing while the spot is out of view', () => {
     railTarget()
-    expect(flyCurve(fakeViewer(false) as unknown as Cesium.Viewer, makeDrop({ flyTarget: 'rail' }))).toBeNull()
+    expect(flyCurve(fakeViewer(false) as unknown as Cesium.CesiumWidget, makeDrop({ flyTarget: 'rail' }))).toBeNull()
   })
 })

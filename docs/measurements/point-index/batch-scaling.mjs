@@ -2,7 +2,7 @@
 // names, against the point index the generator writes.
 //
 // Requires the dev stack running and <data>/index/point-index.json present
-// (npm run point-index). Asset keys are read from the generated asset list.
+// (scripts/generate-point-index.mjs). Asset keys are read from the generated asset list.
 //
 //   node docs/measurements/point-index/batch-scaling.mjs
 

@@ -63,7 +63,7 @@ const makeViewer = () => ({
   camera: {
     pickEllipsoid: vi.fn(() => undefined),
   },
-}) as unknown as Cesium.Viewer
+}) as unknown as Cesium.CesiumWidget
 
 const click = (position: Cesium.Cartesian2 = new Cesium.Cartesian2(0, 0)) => {
   handlerState.handlers[LEFT_CLICK]?.({ position })
@@ -302,7 +302,7 @@ describe('cancel (Escape / right-click)', () => {
 })
 
 describe('distance mode', () => {
-  const placeTwoPoints = (service: InstanceType<typeof MeasurementLineService>, viewer: Cesium.Viewer) => {
+  const placeTwoPoints = (service: InstanceType<typeof MeasurementLineService>, viewer: Cesium.CesiumWidget) => {
     viewer.scene.pickPosition = vi.fn(() => pointA)
     click()
     viewer.scene.pickPosition = vi.fn(() => pointB)
@@ -397,7 +397,7 @@ describe('distance mode', () => {
 })
 
 describe('dragging an endpoint', () => {
-  const placeTwoPoints = (viewer: Cesium.Viewer) => {
+  const placeTwoPoints = (viewer: Cesium.CesiumWidget) => {
     viewer.scene.pickPosition = vi.fn(() => pointA)
     click()
     viewer.scene.pickPosition = vi.fn(() => pointB)

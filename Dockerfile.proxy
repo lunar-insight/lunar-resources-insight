@@ -1,4 +1,4 @@
-FROM openresty/openresty:alpine
+FROM openresty/openresty:1.31.1.1-4-alpine@sha256:52ff9a6e337bd0138745c73cdfeb5aaa0e783e29eeec0695eec6971c1231f3bd
 
 # gettext provides envsubst for template processing at startup
 RUN apk add --no-cache gettext
@@ -7,4 +7,5 @@ COPY proxy-entrypoint.sh /proxy-entrypoint.sh
 RUN chmod +x /proxy-entrypoint.sh
 
 ENTRYPOINT ["/proxy-entrypoint.sh"]
-CMD ["/usr/local/openresty/bin/openresty", "-g", "daemon off;"]
+# The pid file goes to a writable mount; the root filesystem is read-only.
+CMD ["/usr/local/openresty/bin/openresty", "-g", "pid /var/run/openresty/nginx.pid; daemon off;"]

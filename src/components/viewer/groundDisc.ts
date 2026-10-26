@@ -6,7 +6,7 @@ import * as Cesium from 'cesium';
  * it shows on the frame it is needed.
  */
 export function createGroundDisc(
-  viewer: Cesium.Viewer,
+  viewer: Cesium.CesiumWidget,
   center: Cesium.Cartesian3,
   radius: number,
   material: Cesium.Material
@@ -28,7 +28,7 @@ export function createGroundDisc(
 
 // The most renders the discs get to be built and drawn.
 const MAX_PREPARE_RENDERS = 120;
-const prepared = new WeakMap<Cesium.Viewer, Set<string>>();
+const prepared = new WeakMap<Cesium.CesiumWidget, Set<string>>();
 
 /**
  * Keeps a material's shaders compiled. Cesium compiles a shader on its first
@@ -39,7 +39,7 @@ const prepared = new WeakMap<Cesium.Viewer, Set<string>>();
  * primitives take a different shader above a size. They then stay in the
  * scene, hidden. `key` names the material, which is prepared once per viewer.
  */
-export function keepShadersCompiled(viewer: Cesium.Viewer, key: string, createMaterial: () => Cesium.Material): void {
+export function keepShadersCompiled(viewer: Cesium.CesiumWidget, key: string, createMaterial: () => Cesium.Material): void {
   const keys = prepared.get(viewer) ?? new Set<string>();
   if (keys.has(key)) return;
   const canvas = viewer.scene.canvas;

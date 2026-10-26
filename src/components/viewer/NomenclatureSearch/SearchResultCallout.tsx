@@ -6,7 +6,7 @@ import { useTrackedScreenPosition } from 'hooks/useTrackedScreenPosition';
 import styles from 'components/viewer/Callout/Callout.module.scss';
 
 interface SearchResultCalloutProps {
-  viewer: Cesium.Viewer;
+  viewer: Cesium.CesiumWidget;
   lon: number;
   lat: number;
   label: string;

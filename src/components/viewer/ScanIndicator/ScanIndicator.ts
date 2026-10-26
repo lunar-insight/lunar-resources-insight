@@ -90,7 +90,7 @@ export function indicatorShape(elapsed: number, metersPerPixel: number): { radii
  * indicator's size a lot, so the ground geometry is rarely rebuilt.
  */
 export class ScanIndicator {
-  private viewer: Cesium.Viewer | null = null;
+  private viewer: Cesium.CesiumWidget | null = null;
   private disc: Cesium.GroundPrimitive | null = null;
   private material: Cesium.Material | null = null;
   private discCenter: Cesium.Cartesian3 | null = null;
@@ -102,11 +102,11 @@ export class ScanIndicator {
   private removePreRender: Cesium.Event.RemoveCallback | null = null;
   private cancelPrepare: (() => void) | null = null;
 
-  constructor(viewer: Cesium.Viewer | null = null) {
+  constructor(viewer: Cesium.CesiumWidget | null = null) {
     this.setViewer(viewer);
   }
 
-  setViewer(viewer: Cesium.Viewer | null) {
+  setViewer(viewer: Cesium.CesiumWidget | null) {
     if (viewer === this.viewer) return;
     this.destroy();
     this.viewer = viewer;

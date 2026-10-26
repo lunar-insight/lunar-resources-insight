@@ -4,13 +4,14 @@
 //
 //   node scripts/firefox-bidi/drive.mjs <plan.json>
 //
-// Firefox starts from FIREFOX_PATH, or from its default install location.
-// Needs Node 22 or later, which has WebSocket built in.
+// Firefox starts from FIREFOX_PATH, or from its default install location, with
+// the prefs in locked.user.js. Needs Node 22 or later, which has WebSocket built in.
 
 import { spawn } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const DEFAULT_FIREFOX = process.platform === 'win32'
   ? 'C:/Program Files/Mozilla Firefox/firefox.exe'
@@ -30,17 +31,28 @@ if (!planPath) {
 }
 const plan = JSON.parse(readFileSync(planPath, 'utf8'));
 
-// A random port and a new profile, so an open Firefox or a profile left by a
-// crashed run does not get in the way.
-const port = 9300 + Math.floor(Math.random() * 500);
+// A new profile, so an open Firefox or a profile left by a crashed run does not
+// get in the way. Port 0 lets Firefox pick a free port, which it writes to
+// WebDriverBiDiServer.json in the profile; Windows reserves port ranges that
+// change between reboots.
 const profile = mkdtempSync(path.join(tmpdir(), 'firefox-bidi-'));
+copyFileSync(fileURLToPath(new URL('locked.user.js', import.meta.url)), path.join(profile, 'user.js'));
 const firefox = spawn(
   process.env.FIREFOX_PATH ?? DEFAULT_FIREFOX,
-  ['--headless', '--no-remote', '--profile', profile, '--remote-debugging-port', String(port)],
+  ['--headless', '--no-remote', '--profile', profile, '--remote-debugging-port', '0'],
   { stdio: 'ignore' },
 );
+const firefoxExited = new Promise(resolve => firefox.once('exit', resolve));
 
-function connect() {
+function readPort() {
+  try {
+    return JSON.parse(readFileSync(path.join(profile, 'WebDriverBiDiServer.json'), 'utf8')).ws_port;
+  } catch {
+    return undefined;
+  }
+}
+
+function connect(port) {
   return new Promise((resolve, reject) => {
     const socket = new WebSocket(`ws://127.0.0.1:${port}/session`);
     socket.onopen = () => resolve(socket);
@@ -51,7 +63,8 @@ function connect() {
 let socket;
 for (let attempt = 0; attempt < CONNECT_ATTEMPTS && !socket; attempt++) {
   await sleep(CONNECT_INTERVAL_MS);
-  socket = await connect().catch(() => undefined);
+  const port = readPort();
+  if (port) socket = await connect(port).catch(() => undefined);
 }
 
 let commandId = 0;
@@ -67,10 +80,15 @@ function send(method, params = {}) {
 
 let failed = false;
 try {
-  if (!socket) throw new Error(`No BiDi connection on port ${port}`);
+  if (!socket) throw new Error('No BiDi connection to Firefox');
 
   socket.onmessage = event => {
     const message = JSON.parse(event.data);
+    // Errors the page logs or throws, printed as they arrive.
+    if (message.method === 'log.entryAdded' && message.params.level === 'error') {
+      console.log(`  page error: ${message.params.text}`);
+      return;
+    }
     const request = pending.get(message.id);
     if (!request) return;
     pending.delete(message.id);
@@ -79,6 +97,7 @@ try {
   };
 
   await send('session.new', { capabilities: {} });
+  await send('session.subscribe', { events: ['log.entryAdded'] });
   // Pages open in a new tab. The session's first tab is the browser's own
   // interface, which scripts cannot reach.
   const { context } = await send('browsingContext.create', { type: 'tab' });
@@ -164,16 +183,18 @@ try {
     if (page.shot) await screenshot(page.shot);
   }
 
-  await send('session.end', {}).catch(() => {});
 } catch (error) {
   failed = true;
   console.error(error.message);
 } finally {
+  // browser.close ends every Firefox process. The spawned process is only the
+  // launcher on Windows, so kill() is the fallback when there is no session.
+  if (socket) await Promise.race([send('browser.close', {}).catch(() => {}), sleep(3000)]);
   socket?.close();
-  firefox.kill();
+  const exited = await Promise.race([firefoxExited.then(() => true), sleep(10000).then(() => false)]);
+  if (!exited) firefox.kill();
   // Firefox locks the profile until it has exited.
-  await sleep(500);
-  rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
 }
 
 process.exit(failed ? 1 : 0);

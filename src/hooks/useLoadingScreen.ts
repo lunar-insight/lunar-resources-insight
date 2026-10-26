@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import * as Cesium from 'cesium';
 
-const useLoadingScreen = (viewer: Cesium.Viewer | null): void => {
+const useLoadingScreen = (viewer: Cesium.CesiumWidget | null): void => {
   useEffect(() => {
     if (!viewer) return;
 

@@ -21,7 +21,7 @@ import { DistanceMode } from 'utils/context/MeasurementContext';
 // GroundPolylinePrimitive once the position settles, if that's the active
 // mode.
 export class MeasurementLineService {
-  private viewer: Cesium.Viewer | null = null;
+  private viewer: Cesium.CesiumWidget | null = null;
   private handler: Cesium.ScreenSpaceEventHandler | null = null;
   private keyHandler: ((e: KeyboardEvent) => void) | null = null;
   private previousCursor: string | null = null;
@@ -36,7 +36,7 @@ export class MeasurementLineService {
   private onLiveDistance: ((meters: number) => void) | null = null;
   private onHoverPosition: ((cartesian: Cesium.Cartesian3 | null) => void) | null = null;
 
-  setViewer(viewer: Cesium.Viewer | null): void {
+  setViewer(viewer: Cesium.CesiumWidget | null): void {
     this.viewer = viewer;
   }
 

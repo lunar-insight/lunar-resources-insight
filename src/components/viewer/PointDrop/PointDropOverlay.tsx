@@ -74,7 +74,7 @@ const AnimatedSpan: React.FC<{ className: string; keyframes: Keyframe[]; options
 };
 
 /** Start of the fall relative to the spot, from its screen height when the drop starts. */
-export function probeStartOffset(viewer: Cesium.Viewer, position: Cesium.Cartesian3): Point {
+export function probeStartOffset(viewer: Cesium.CesiumWidget, position: Cesium.Cartesian3): Point {
   const screen = viewer.scene.cartesianToCanvasCoordinates(position);
   const fall = (screen?.y ?? 0) + PROBE_START_ABOVE;
   return { x: Math.round(-fall * PROBE_SLANT * 10) / 10, y: -fall };
@@ -86,7 +86,7 @@ export function probeStartOffset(viewer: Cesium.Viewer, position: Cesium.Cartesi
  * otherwise the Features button's icon. Null when neither is found or the spot
  * is out of view.
  */
-export function flyCurve(viewer: Cesium.Viewer, drop: PointDrop): Point[] | null {
+export function flyCurve(viewer: Cesium.CesiumWidget, drop: PointDrop): Point[] | null {
   const target = (drop.flyTarget === 'row' ? document.querySelector(rowTargetSelector(drop.featureId)) : null)
     ?? document.querySelector(RAIL_TARGET_SELECTOR);
   const screen = viewer.scene.cartesianToCanvasCoordinates(drop.position);
@@ -110,7 +110,7 @@ export function flyCurve(viewer: Cesium.Viewer, drop: PointDrop): Point[] | null
 }
 
 /** The parts of a drop at the spot: the probe, the flash and, through ProbeImpact, the ground effects. */
-const DropSpot: React.FC<{ viewer: Cesium.Viewer; drop: PointDrop }> = ({ viewer, drop }) => {
+const DropSpot: React.FC<{ viewer: Cesium.CesiumWidget; drop: PointDrop }> = ({ viewer, drop }) => {
   const elementRef = useRef<HTMLDivElement>(null);
   const cartographic = useMemo(() => Cesium.Cartographic.fromCartesian(drop.position, Cesium.Ellipsoid.MOON), [drop.position]);
   useTrackedScreenPosition(
@@ -153,7 +153,7 @@ const DropSpot: React.FC<{ viewer: Cesium.Viewer; drop: PointDrop }> = ({ viewer
 };
 
 /** The dot flying from the spot into the interface, above everything. */
-const FlyingDot: React.FC<{ viewer: Cesium.Viewer; drop: PointDrop }> = ({ viewer, drop }) => {
+const FlyingDot: React.FC<{ viewer: Cesium.CesiumWidget; drop: PointDrop }> = ({ viewer, drop }) => {
   const [curve, setCurve] = useState<Point[] | null>(null);
 
   // Measured after the row is laid out, before the browser paints.

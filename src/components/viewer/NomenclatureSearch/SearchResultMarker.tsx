@@ -4,7 +4,7 @@ import { useTrackedScreenPosition } from 'hooks/useTrackedScreenPosition';
 import styles from './NomenclatureSearch.module.scss';
 
 interface SearchResultMarkerProps {
-  viewer: Cesium.Viewer;
+  viewer: Cesium.CesiumWidget;
   lon: number;
   lat: number;
 }

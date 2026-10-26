@@ -5,7 +5,7 @@ import { formatDistance } from 'utils/formatDistance';
 import styles from './MeasurementDistanceLabel.module.scss';
 
 interface MeasurementDistanceLabelProps {
-  viewer: Cesium.Viewer;
+  viewer: Cesium.CesiumWidget;
   cartographic: Cesium.Cartographic;
   distanceMeters: number | null;
   isLoading: boolean;

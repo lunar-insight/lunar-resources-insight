@@ -18,7 +18,7 @@ describe('LineVertexEditingService.isVertexMarker', () => {
 })
 
 describe('LineVertexEditingService.handleRightClick', () => {
-  const viewerPicking = (result: unknown) => ({ scene: { pick: vi.fn(() => result) } }) as unknown as Cesium.Viewer
+  const viewerPicking = (result: unknown) => ({ scene: { pick: vi.fn(() => result) } }) as unknown as Cesium.CesiumWidget
 
   it('leaves a click off a vertex to others', () => {
     const service = new LineVertexEditingService()

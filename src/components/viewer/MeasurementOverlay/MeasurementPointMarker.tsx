@@ -6,7 +6,7 @@ import { DrawingUtils } from 'services/drawing/DrawingUtils';
 import styles from './MeasurementPointMarker.module.scss';
 
 interface MeasurementPointMarkerProps {
-  viewer: Cesium.Viewer;
+  viewer: Cesium.CesiumWidget;
   cartographic: Cesium.Cartographic;
   onDragMove: (liveCartesian: Cesium.Cartesian3) => void;
   onDragEnd: (finalCartesian: Cesium.Cartesian3) => void;

@@ -16,7 +16,7 @@ import { generateFeatureName } from 'utils/context/FeaturesContext';
  * complex terrain (flicker, a "grab" hover cursor that fails to register).
  */
 export function createPointFeature(
-  viewer: Cesium.Viewer,
+  viewer: Cesium.CesiumWidget,
   cartesian: Cesium.Cartesian3,
   name: string,
   sourceId?: string

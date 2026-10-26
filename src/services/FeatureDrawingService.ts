@@ -9,7 +9,7 @@ import { PolygonDrawingService } from './drawing/PolygonDrawingService';
 import { CircleDrawingService } from './drawing/CircleDrawingService';
 
 export class FeatureDrawingService {
-  private viewer: Cesium.Viewer | null = null;
+  private viewer: Cesium.CesiumWidget | null = null;
   private handler: Cesium.ScreenSpaceEventHandler | null = null;
   private keyHandler: ((e: KeyboardEvent) => void) | null = null;
   private currentTool: string | null = null;
@@ -51,7 +51,7 @@ export class FeatureDrawingService {
     this.lineVertexEditingService = new LineVertexEditingService();
   }
 
-  setViewer(viewer: Cesium.Viewer | null) {
+  setViewer(viewer: Cesium.CesiumWidget | null) {
     const viewerChanged = this.viewer !== viewer;
     this.viewer = viewer;
 

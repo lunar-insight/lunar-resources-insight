@@ -7,7 +7,7 @@ import * as Cesium from 'cesium';
 // are unreliable to render and pick on complex terrain (flicker, missed
 // picks), whereas screen-space math plus native browser hit-testing is not.
 export const useTrackedScreenPosition = (
-  viewer: Cesium.Viewer,
+  viewer: Cesium.CesiumWidget,
   lon: number,
   lat: number,
   elementRef: React.RefObject<HTMLElement>,

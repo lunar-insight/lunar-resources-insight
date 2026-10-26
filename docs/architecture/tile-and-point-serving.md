@@ -150,7 +150,7 @@ truth for values and are expected to diverge from any figure quoted here.
 | concern | file |
 |---|---|
 | routing, header allowlist, tile caching | `nginx.dev.conf.template`, `nginx.conf` |
-| proxy and development services, exposed ports, point index mount | `docker-compose.yml` |
+| proxy and development services, exposed ports, point index mount, tile cache volume | `docker-compose.yml` |
 | point index generation and the config cross-check | `scripts/generate-point-index.mjs` |
 | layer to filename and variant mapping | `src/layersConfig.ts` |
 | tiler instances, worker counts | planetcantile repository, `docker-compose.override.yml` |

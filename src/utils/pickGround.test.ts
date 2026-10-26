@@ -15,18 +15,18 @@ function fakeViewer(terrain: Cesium.Cartesian3 | undefined, hasRay = true) {
 
 it('picks the terrain under the cursor', () => {
   const viewer = fakeViewer(onTerrain)
-  expect(pickGround(viewer as unknown as Cesium.Viewer, screen)).toBe(onTerrain)
+  expect(pickGround(viewer as unknown as Cesium.CesiumWidget, screen)).toBe(onTerrain)
   expect(viewer.scene.globe.pick).toHaveBeenCalledWith(ray, viewer.scene)
 })
 
 it('falls back to the ellipsoid where no terrain answers', () => {
   const viewer = fakeViewer(undefined)
-  expect(pickGround(viewer as unknown as Cesium.Viewer, screen)).toBe(onEllipsoid)
+  expect(pickGround(viewer as unknown as Cesium.CesiumWidget, screen)).toBe(onEllipsoid)
   expect(viewer.camera.pickEllipsoid).toHaveBeenCalledWith(screen, Cesium.Ellipsoid.MOON)
 })
 
 it('falls back to the ellipsoid without a pick ray', () => {
   const viewer = fakeViewer(onTerrain, false)
-  expect(pickGround(viewer as unknown as Cesium.Viewer, screen)).toBe(onEllipsoid)
+  expect(pickGround(viewer as unknown as Cesium.CesiumWidget, screen)).toBe(onEllipsoid)
   expect(viewer.scene.globe.pick).not.toHaveBeenCalled()
 })

@@ -1,11 +1,12 @@
-FROM node:24-alpine
+FROM node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f
 WORKDIR /app
 RUN chown node:node /app
 
 COPY --chown=node:node package*.json .npmrc ./
 USER node
 RUN npm ci
-RUN npm audit --audit-level=high || true
+RUN npm audit signatures
+RUN npm audit --audit-level=high
 
 # Source code mounted at runtime via docker-compose volume
 # User, caps, and network isolation enforced by docker-compose

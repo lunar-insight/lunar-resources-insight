@@ -93,6 +93,17 @@ export default defineConfig(({ mode }) => ({
   test: {
     environment: 'jsdom',
     globals: true,
+    // App tests only; scripts/tests runs with node --test.
+    include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
     setupFiles: ['./src/setupTests.ts'],
+    // The Inspector window tests take about 2 s alone and over 5 s (the default)
+    // in a full parallel run on a loaded machine; the prod build runs the suite.
+    testTimeout: 20000,
+    // Test values, independent of .env.
+    env: {
+      VITE_SERVER_URL: '',
+      VITE_WORKSPACE_PATH: '/data',
+      VITE_TERRAIN_URL: 'http://localhost:3001',
+    },
   },
 }))

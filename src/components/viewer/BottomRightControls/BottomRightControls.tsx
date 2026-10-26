@@ -7,7 +7,7 @@ import FullscreenButton from '../FullscreenButton/FullscreenButton';
 import styles from './BottomRightControls.module.scss';
 
 interface BottomRightControlsProps {
-  viewer: Cesium.Viewer | null;
+  viewer: Cesium.CesiumWidget | null;
 }
 
 const BottomRightControls: React.FC<BottomRightControlsProps> = ({ viewer }) => {

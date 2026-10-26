@@ -182,7 +182,7 @@ const getFeatureBounds = (feature: Feature): Cesium.Rectangle | null => {
  */
 const calculateCameraDistance = (
   bounds: Cesium.Rectangle,
-  viewer: Cesium.Viewer
+  viewer: Cesium.CesiumWidget
 ): number => {
   // Calculate the diagonal distance of the bounding rectangle
   const southWest = Cesium.Cartesian3.fromRadians(bounds.west, bounds.south);
@@ -209,7 +209,7 @@ const calculateCameraDistance = (
  * Flies the camera to a feature with adaptive zoom and top-down view
  */
 export const flyToFeature = (
-  viewer: Cesium.Viewer | null,
+  viewer: Cesium.CesiumWidget | null,
   feature: Feature,
   duration: number = 1.0
 ): void => {

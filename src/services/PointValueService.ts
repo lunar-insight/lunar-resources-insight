@@ -22,7 +22,7 @@ export interface PointValueCallbackData {
 }
 
 export class PointValueService {
-  private viewer: Cesium.Viewer | null = null;
+  private viewer: Cesium.CesiumWidget | null = null;
   private isActive: boolean = false;
   private selectedLayers: string[] = [];
   private currentMousePosition: Cesium.Cartesian2 | null = null;
@@ -56,7 +56,7 @@ export class PointValueService {
 
   constructor() {}
 
-  setViewer(viewer: Cesium.Viewer | null) {
+  setViewer(viewer: Cesium.CesiumWidget | null) {
     this.viewer = viewer;
     this.scanIndicator.setViewer(viewer);
     this.setupMouseTracking();

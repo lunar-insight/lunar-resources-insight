@@ -22,7 +22,7 @@ function fakeViewer() {
 }
 
 type Viewer = ReturnType<typeof fakeViewer>
-const asViewer = (viewer: Viewer) => viewer as unknown as Cesium.Viewer
+const asViewer = (viewer: Viewer) => viewer as unknown as Cesium.CesiumWidget
 const added = (viewer: Viewer) => viewer.scene.groundPrimitives.add.mock.calls.map(([primitive]) => primitive as Cesium.GroundPrimitive)
 const radius = (primitive: Cesium.GroundPrimitive) =>
   ((primitive.geometryInstances as Cesium.GeometryInstance).geometry as unknown as { _semiMajorAxis: number })._semiMajorAxis

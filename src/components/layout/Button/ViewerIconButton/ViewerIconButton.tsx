@@ -8,7 +8,8 @@ interface ViewerIconButtonProps {
   label?: string;
   ariaLabel: string;
   tooltipText: string;
-  onPress: () => void;
+  // Optional inside a DialogTrigger, which handles the press.
+  onPress?: () => void;
   tooltipPlacement?: 'top' | 'bottom' | 'left' | 'right';
   className?: string;
 }

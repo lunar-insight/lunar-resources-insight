@@ -113,7 +113,7 @@ export class ProbeImpact {
   private destroyed = false;
 
   constructor(
-    private readonly viewer: Cesium.Viewer,
+    private readonly viewer: Cesium.CesiumWidget,
     private readonly position: Cesium.Cartesian3,
     reduceMotion: boolean
   ) {
@@ -181,7 +181,7 @@ export class ProbeImpact {
   }
 
   /** Keeps the impact's shaders compiled, so no impact stalls on compiling them. */
-  static keepShadersCompiled(viewer: Cesium.Viewer): void {
+  static keepShadersCompiled(viewer: Cesium.CesiumWidget): void {
     keepShadersCompiled(viewer, 'probe-impact', () => new Cesium.Material({
       fabric: { uniforms: { ...INVISIBLE_UNIFORMS() }, source: SHADER },
       translucent: true,

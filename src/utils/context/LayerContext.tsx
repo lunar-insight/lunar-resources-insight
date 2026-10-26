@@ -57,7 +57,7 @@ class CesiumLayerManager {
   private insertQueue: Promise<void> = Promise.resolve();
 
   constructor(
-    private viewer: Cesium.Viewer | null,
+    private viewer: Cesium.CesiumWidget | null,
     hasDisableRequestsFn?: () => boolean
   ) {
     this.layerMap = new Map();

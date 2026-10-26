@@ -58,7 +58,7 @@ const makeViewer = () =>
     scene: {
       cartesianToCanvasCoordinates: vi.fn(() => new Cesium.Cartesian2(10, 20)),
     },
-  }) as unknown as Cesium.Viewer
+  }) as unknown as Cesium.CesiumWidget
 
 function makeMeasurementContext(overrides: Record<string, unknown> = {}) {
   return {

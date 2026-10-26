@@ -18,8 +18,11 @@ node scripts/firefox-bidi/drive.mjs <plan.json>
 The script starts Firefox from `FIREFOX_PATH` when it is set, otherwise from
 `C:/Program Files/Mozilla Firefox/firefox.exe` on Windows and `firefox` on other
 systems. Each run uses a new temporary profile and deletes it at the end, so an
-open Firefox is not affected. The script exits with code 1 when a step fails or
-a wait times out.
+open Firefox is not affected. The profile gets the prefs in `locked.user.js`:
+pages cannot reach any address other than localhost, and navigating elsewhere
+fails. Errors the page logs or throws, including CSP violations, are printed as
+`page error:` lines. The script exits with code 1 when a step fails or a wait
+times out.
 
 ## Plan
 
@@ -71,8 +74,8 @@ icon adds its name to the button's text: the Features button reads
 
 ## Checking a component with fixed data
 
-Add a temporary `.html` page and `.tsx` module at the repository root. The
-development server serves the repository, so the page opens at
-`http://localhost:5173/<name>.html`. Have the page set a global flag once it has
-rendered, such as `window.ready = true`, and use it as `waitFor`. Delete both
-files after the check.
+Add a temporary `.html` page and `.tsx` module in `src/scratch/`, which git
+ignores. The development server serves `src`, so the page opens at
+`http://localhost:5173/src/scratch/<name>.html`. Have the page set a global flag
+once it has rendered, such as `window.ready = true`, and use it as `waitFor`.
+Delete both files after the check.

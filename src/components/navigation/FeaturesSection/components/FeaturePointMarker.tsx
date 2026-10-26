@@ -10,7 +10,7 @@ import { Feature } from '../types';
 import styles from './FeaturePointMarker.module.scss';
 
 interface FeaturePointMarkerProps {
-  viewer: Cesium.Viewer;
+  viewer: Cesium.CesiumWidget;
   feature: Feature;
 }
 

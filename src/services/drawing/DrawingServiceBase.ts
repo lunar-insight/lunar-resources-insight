@@ -8,7 +8,7 @@ import { DrawingUtils } from './DrawingUtils';
  * and utility methods shared across all drawing tools.
  */
 export abstract class DrawingServiceBase {
-  protected viewer: Cesium.Viewer | null = null;
+  protected viewer: Cesium.CesiumWidget | null = null;
   protected showFeatures: boolean = true;
   protected showLabels: boolean = true;
   protected onFeatureCreated: ((feature: Feature) => void) | null = null;
@@ -18,7 +18,7 @@ export abstract class DrawingServiceBase {
    * Sets the Cesium viewer instance for this service.
    * @param viewer - The Cesium viewer to use, or null to clear
    */
-  setViewer(viewer: Cesium.Viewer | null): void {
+  setViewer(viewer: Cesium.CesiumWidget | null): void {
     this.viewer = viewer;
   }
 

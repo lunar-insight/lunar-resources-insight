@@ -2,14 +2,14 @@ import React, { createContext, useContext } from 'react';
 import * as Cesium from 'cesium';
 
 interface ViewerContextType {
-  viewer: Cesium.Viewer | null;
-  setViewer: (viewer: Cesium.Viewer) => void;
+  viewer: Cesium.CesiumWidget | null;
+  setViewer: (viewer: Cesium.CesiumWidget) => void;
 }
 
 const ViewerContext = createContext<ViewerContextType | undefined>(undefined);
 
 export const ViewerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [viewer, setViewer] = React.useState<Cesium.Viewer | null>(null);
+  const [viewer, setViewer] = React.useState<Cesium.CesiumWidget | null>(null);
   const value = React.useMemo(() => ({ viewer, setViewer }), [viewer]);
 
   return (

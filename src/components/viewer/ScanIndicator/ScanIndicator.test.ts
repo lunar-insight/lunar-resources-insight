@@ -39,7 +39,7 @@ function fakeViewer() {
 }
 
 type Viewer = ReturnType<typeof fakeViewer>
-const asViewer = (viewer: Viewer) => viewer as unknown as Cesium.Viewer
+const asViewer = (viewer: Viewer) => viewer as unknown as Cesium.CesiumWidget
 type Disc = { center: Cesium.Cartesian3; radius: number; show: boolean }
 const discs = (viewer: Viewer) => viewer.scene.groundPrimitives.add.mock.calls.map(([disc]) => disc as unknown as Disc)
 const uniforms = () => (groundDisc.createGroundDisc.mock.calls.at(-1)![3] as unknown as Cesium.Material).uniforms

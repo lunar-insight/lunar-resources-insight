@@ -8,21 +8,89 @@ networks:
     external: true
     name: planetcantile_app-net
 
+volumes:
+  tiler-cache:
+
+# Settings shared by the services that run npm package code (dev, test).
+x-node-app: &node-app
+  image: lunar-resources-insight-dev:latest
+  build:
+    context: .
+    dockerfile: Dockerfile.dev
+  user: "node"
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+  read_only: true
+  tmpfs: [/tmp]
+  pids_limit: 512
+
 services:
-  dev:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
+  # Checks the lockfile for new advisories and known malicious packages before dev or
+  # test starts; a finding stops the launch. Logs: docker compose logs launch-check
+  launch-check:
+    <<: *node-app
+    working_dir: /check
     volumes:
-      - .:/app:ro              # source files, read-only
-      - /app/node_modules     # anonymous volume
-    user: "node"
-    cap_drop: [ALL]
-    security_opt: [no-new-privileges:true]
+      - ./package.json:/check/package.json:ro
+      - ./package-lock.json:/check/package-lock.json:ro
+      - ./.npmrc:/check/.npmrc:ro
+      - ./scripts/check-dependencies.cjs:/check/check-dependencies.cjs:ro
+    environment:
+      - npm_config_cache=/tmp/npm-cache
+    mem_limit: 1g
+    networks: [proxy-out]           # npm registry and api.osv.dev
+    entrypoint: ["node", "/check/check-dependencies.cjs"]
+
+  dev:
+    <<: *node-app
+    depends_on:
+      launch-check:
+        condition: service_completed_successfully
+    # Read-only mounts of the files the dev server reads. Temporary check pages go in
+    # src/scratch/ (git-ignored), served at /src/scratch/<name>.html.
+    volumes:
+      - ./src:/app/src:ro
+      - ./public:/app/public:ro
+      - ./index.html:/app/index.html:ro
+      - ./vite.config.ts:/app/vite.config.ts:ro
+      - ./tsconfig.json:/app/tsconfig.json:ro
+      - ./package.json:/app/package.json:ro
+      - type: bind
+        source: ./.env
+        target: /app/.env
+        read_only: true
+        bind:
+          create_host_path: false  # startup fails when .env is missing
+      - /app/node_modules          # anonymous volume; holds Vite's cache
+    mem_limit: 2g
     networks: [frontend]
 
+  # Vitest. Not started by `docker compose up`:
+  #   docker compose run --rm test               full suite
+  #   docker compose run --rm test run <file>    one file
+  #   docker compose run --rm test watch [file]  reruns on save
+  test:
+    <<: *node-app
+    profiles: [tools]
+    depends_on:
+      launch-check:
+        condition: service_completed_successfully
+    volumes:
+      - ./src:/app/src:ro
+      - ./public:/app/public:ro
+      - ./vite.config.ts:/app/vite.config.ts:ro
+      - ./tsconfig.json:/app/tsconfig.json:ro
+      - ./package.json:/app/package.json:ro
+    tmpfs:
+      - /tmp
+      - /app/node_modules/.vite:uid=1000,gid=1000  # Vitest's cache
+    mem_limit: 4g
+    network_mode: none
+    entrypoint: ["./node_modules/.bin/vitest"]
+    command: ["run"]
+
   terrain:
-    image: node:24-alpine
+    image: node:24.22.0-alpine@sha256:44fce696f38ba8c987c4db89954051000bbd05ffd8d8659ba15ed4a8602e937f
     working_dir: /app
     volumes:
       - ./terrain-server.js:/app/terrain-server.js:ro
@@ -34,6 +102,10 @@ services:
     user: "node"
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs: [/tmp]
+    pids_limit: 128
+    mem_limit: 512m
     networks: [terrain-net]
     command: node terrain-server.js
 
@@ -45,12 +117,23 @@ services:
       - ./nginx.dev.conf.template:/etc/nginx/templates/default.conf.template:ro
       # Point index output directory. Only assets.json is served from it.
       - ${DATA_PATH}/index:/srv/point-index:ro
+      - tiler-cache:/var/cache/nginx
+    # Writable paths: the generated config, the pid file and temp files.
+    tmpfs: [/tmp, /etc/nginx/conf.d, /var/run/openresty]
+    read_only: true
+    pids_limit: 128
+    mem_limit: 512m
     environment:
       - TERRAIN_PORT=${TERRAIN_PORT}
+    # Bound to localhost: other machines on the network cannot reach the dev app,
+    # the terrain server or, through the proxy, the tiler.
     ports:
-      - "5173:5173"
-      - "${TERRAIN_PORT}:${TERRAIN_PORT}"
+      - "127.0.0.1:5173:5173"
+      - "127.0.0.1:${TERRAIN_PORT}:${TERRAIN_PORT}"
     networks: [frontend, terrain-net, proxy-out, planetcantile-net]
+    # nginx exits when a tiler host does not resolve yet, as when both projects start
+    # together; Docker retries until the tiler is up.
+    restart: on-failure
     cap_drop: [ALL]
     cap_add: [CHOWN, SETUID, SETGID]
     security_opt: [no-new-privileges:true]

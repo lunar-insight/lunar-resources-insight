@@ -49,7 +49,7 @@ const makeViewer = () => ({
   },
   canvas: { getBoundingClientRect: () => CANVAS_RECT },
   terrainProvider: undefined as unknown as Cesium.TerrainProvider,
-}) as unknown as Cesium.Viewer
+}) as unknown as Cesium.CesiumWidget
 
 const makeFeature = (overrides: Partial<Feature> = {}): Feature => ({
   id: 'point-1',

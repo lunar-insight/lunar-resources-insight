@@ -37,7 +37,7 @@ to back; figures from different sections are not comparable.
 
 ## Reproducing
 
-The dev stack must be running and `npm run point-index` must have been run.
+The dev stack must be running and `scripts/generate-point-index.mjs` must have been run.
 `DATA_PATH` is the host raster directory, the same value the tiler's compose
 file uses.
 

@@ -7,3 +7,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+// Path of Cesium's static assets, set by `define` in vite.config.ts.
+declare const CESIUM_BASE_URL: string;

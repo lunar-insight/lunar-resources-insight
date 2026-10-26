@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
-import 'cesium/Source/Widgets/widgets.css';
-import './CesiumComponent.module.scss';
+import 'cesium/Source/Widgets/CesiumWidget/CesiumWidget.css';
 import { useViewer } from 'utils/context/ViewerContext';
 import { pointValueService } from 'services/PointValueService';
 import BottomRightControls from '../BottomRightControls/BottomRightControls';
@@ -28,7 +27,7 @@ interface CesiumComponentProps {
 const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
   const [isCameraMoving, setIsCameraMoving] = useState(false);
   const [isMouseOffCanvas, setIsMouseOffCanvas] = useState(false);
-  const [localViewer, setLocalViewer] = useState<Cesium.Viewer | null>(null);
+  const [localViewer, setLocalViewer] = useState<Cesium.CesiumWidget | null>(null);
   const [terrainLoaded, setTerrainLoaded] = useState(false);
 
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
@@ -53,28 +52,16 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       const mapProjection = new Cesium.GeographicProjection(Cesium.Ellipsoid.default);
       const globe = new Cesium.Globe(Cesium.Ellipsoid.default);
 
-      // Viewer creation
-      const viewer = new Cesium.Viewer(cesiumContainerRef.current, {
+      // A CesiumWidget keeps Cesium's Viewer widgets out of the bundle. They include
+      // Knockout, which calls eval on load, and the production CSP blocks eval.
+      const viewer = new Cesium.CesiumWidget(cesiumContainerRef.current, {
         globe: globe,
         mapProjection: mapProjection,
         baseLayer: false,            // Disable default Ion imagery (empty token)
-        timeline: false,
-        animation: false,
-        baseLayerPicker: false,
-        infoBox: false,
-        selectionIndicator: false,
-        fullscreenButton: false,
         requestRenderMode: true,
-        sceneModePicker: false,
-        geocoder: false,
-        homeButton: false,
-        navigationHelpButton: true,   // Enabled for API access (UI hidden by CSS)
+        // Credits go to an element that is never attached, so none is shown.
+        creditContainer: document.createElement('div'),
       });
-
-      // Disable automatic display of navigation help on startup
-      if (viewer.navigationHelpButton && viewer.navigationHelpButton.viewModel) {
-        viewer.navigationHelpButton.viewModel.showInstructions = false;
-      }
 
       /*
           More Cesium option
@@ -86,13 +73,8 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       globe.showWaterEffect = false;
 
       // Remove the default double click of Cesium that can conflict with custom selection tools
-      viewer.cesiumWidget.screenSpaceEventHandler.removeInputAction(
+      viewer.screenSpaceEventHandler.removeInputAction(
         Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK
-      );
-
-      // Remove Ion credit
-      viewer.cesiumWidget.creditContainer.parentNode?.removeChild(
-        viewer.cesiumWidget.creditContainer
       );
 
       viewer.scene.skyBox = new Cesium.SkyBox({
@@ -123,8 +105,8 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
       viewer.imageryLayers.add(baseLayer);
 
       // Grab cursor style management
-      const canvas = viewer.cesiumWidget.canvas;
-      const handler = viewer.cesiumWidget.screenSpaceEventHandler;
+      const canvas = viewer.canvas;
+      const handler = viewer.screenSpaceEventHandler;
 
       const startMovement = () => {
         setIsCameraMoving(true);
@@ -254,8 +236,8 @@ const CesiumComponent: React.FC<CesiumComponentProps> = ({ className }) => {
     // Update ref so event handlers can access current value
     activeDrawingToolRef.current = activeDrawingTool;
 
-    const canvas = localViewer.cesiumWidget.canvas;
-    const handler = localViewer.cesiumWidget.screenSpaceEventHandler;
+    const canvas = localViewer.canvas;
+    const handler = localViewer.screenSpaceEventHandler;
 
     if (activeDrawingTool) {
       // In selection mode, use crosshair cursor

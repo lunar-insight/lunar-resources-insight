@@ -15,7 +15,7 @@ export class DrawingUtils {
    * @returns The picked 3D position, or null if picking failed
    */
   static pickGlobePosition(
-    viewer: Cesium.Viewer,
+    viewer: Cesium.CesiumWidget,
     screenPosition: Cesium.Cartesian2
   ): Cesium.Cartesian3 | null {
     // Try to pick the actual rendered surface first (includes terrain)

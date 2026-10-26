@@ -26,7 +26,7 @@ const viewer = {
     postRender: { addEventListener: vi.fn(), removeEventListener: vi.fn() },
   },
   terrainProvider: undefined,
-} as unknown as Cesium.Viewer
+} as unknown as Cesium.CesiumWidget
 
 const makeFeature = (overrides: Partial<Feature> = {}): Feature => ({
   id: 'point-1',

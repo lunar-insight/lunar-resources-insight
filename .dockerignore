@@ -4,6 +4,9 @@ dist
 .env.*
 .git
 .vscode
+.claude
+CLAUDE.md
 docs
 mockups
 nginx.dev.conf.template
+!.env.production

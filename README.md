@@ -14,15 +14,19 @@ Lunar Resources Insight use different technologies to work properly:
 
 - [Node.js](https://nodejs.org/) - Javascript runtime environment.
 - [Vite](https://vitejs.dev/) - Frontend build tool and dev server.
+- [CesiumJS](https://cesium.com/platform/cesiumjs/) - 3D globe.
+- [Docker](https://www.docker.com/) - Runs the dev server, the tests, npm and the production image.
 - [Planetcantile](https://github.com/AndrewAnnex/planetcantile)
+
+`docs/architecture/build-and-dependency-security.md` explains where npm package code runs and what the builds check.
 
 ### Configuration
 
-Create the env files listed below in the project root. They are not committed. Add them to `.gitignore`.
+Create `.env` in the project root; it holds local paths and is not committed. `.env.production` holds no secrets and is committed.
 
 ### ENV Files
 
-Two env files are used, one per environment. Vite loads `.env` always and `.env.production` automatically when running `npm run build`, with `.env.production` taking priority.
+Two env files are used, one per environment. The dev server reads `.env`; the production image build reads `.env.production`.
 
 **`.env`** (development only, not committed):
 
@@ -44,14 +48,14 @@ VITE_TERRAIN_URL=http://localhost:3001
 TERRAIN_PORT=3001
 
 # Host path to the Cesium terrain tiles directory, mounted read-only into the terrain container.
-TERRAIN_PATH=D:/Terrain/cesium-terrain
+TERRAIN_PATH=<path to the terrain directory>
 
 # Host path to the raster directory, the same value as DATA_PATH in planetcantile's .env.
 # Read by the point index generator and mounted read-only into the proxy.
-DATA_PATH=D:/Data/titiler_custom/map
+DATA_PATH=<path to the raster directory>
 ```
 
-**`.env.production`** (production only, not committed):
+**`.env.production`** (production only):
 
 ```
 NODE_ENV=production
@@ -59,9 +63,15 @@ NODE_ENV=production
 # Empty string: tile API calls use relative paths (/cog/, /stac/, /colorMaps/)
 # so they route through the production nginx on the same origin.
 VITE_SERVER_URL=
+
+# Container-internal base path for COG requests sent to planetcantile. Always /data.
+VITE_WORKSPACE_PATH=/data
+
+# Terrain served by the production nginx on the same origin.
+VITE_TERRAIN_URL=/terrain
 ```
 
-> `VITE_SERVER_URL` must not be removed entirely. An empty string is intentional and routes requests through nginx. Removing the variable causes the app to throw on startup.
+> `VITE_SERVER_URL` must not be removed entirely. An empty string is intentional and routes requests through nginx. Without `VITE_SERVER_URL` or `VITE_WORKSPACE_PATH`, the app throws on startup.
 
 
 ### Terrain
@@ -94,7 +104,7 @@ The scanner reads every selected layer in one request, against a STAC item that
 lists the rasters as assets. The item is generated from the raster directory:
 
 ```sh
-npm run point-index
+node --env-file=.env --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/generate-point-index.mjs
 ```
 
 It writes `<DATA_PATH>/index/point-index.json` and `<DATA_PATH>/index/assets.json`,
@@ -102,21 +112,14 @@ restarts the point tiler instance, and compares the raster directory with
 `src/layersConfig.ts`. Run it after adding, removing or renaming a raster.
 Neither file is committed.
 
-### Launch
+## Development
 
-2. Open the project in your code editor and do `npm install`
-3. Start the project with `npm start`
+npm package code runs only in containers, never on the host. Requires Docker and the planetcantile containers.
 
----
-
-## Docker
-
-### Development
-
-Starts the Vite dev server and the terrain server. Source files are mounted from the host.
+Each start of the dev server or the tests first runs `launch-check`: npm audit and the OSV database check the lockfile, and a high or critical advisory or a known malicious package stops the launch (`docker compose logs launch-check` shows why). Without internet it warns and continues. To start despite an advisory that has no fix yet: `docker compose up -d --no-deps dev terrain proxy`.
 
 ```sh
-docker compose up --build
+docker compose up -d --build -V
 ```
 
 | Service | URL |
@@ -124,32 +127,75 @@ docker compose up --build
 | App | http://localhost:5173 |
 | Terrain | http://localhost:3001 |
 
-To stop: `docker compose down`.
+| Situation | Command |
+|-----------|---------|
+| First start, or after a change to the dependencies or `Dockerfile.dev` | `docker compose up -d --build -V` (`-V` renews the `node_modules` volume) |
+| Restart | `docker compose up -d` |
+| Code changes | None, the page reloads |
+| Stop | `docker compose down` |
 
-#### Workflow
+`scripts/open-app.sh` opens the app in a separate Firefox profile whose pages can reach only localhost.
 
-| Situation | Command | Note |
-|-----------|---------|------|
-| First start or after changing `package.json`, `package-lock.json` / `Dockerfile.dev` | `docker compose up --build` | Rebuilds the image |
-| Restart without dependency changes | `docker compose up` | Reuses cached image and `node_modules` |
-| Code changes | None | Vite picks them up instantly via hot module replacement |
-| Full reset (wipe volumes) | `docker compose down -v` then `--build` | Forces Vite dependency re-bundle on next start |
+`scripts/sync-node-modules.sh` copies `node_modules` from the dev image to the host for editor types. Run it after `docker compose build dev`. Nothing in that copy runs on the host.
 
-### Production
-
-Builds the application and serves it with OpenResty (nginx + Lua). Vite bakes environment variables at build time, so `.env.production` must exist before building.
+### Tests
 
 ```sh
-docker build -t lunar-resources-insight .
-docker run -p 8080:80 lunar-resources-insight
+docker compose run --rm test               # full suite
+docker compose run --rm test run <file>    # one file
+docker compose run --rm test watch [file]  # rerun on save
 ```
 
-Open `http://localhost:8080`.
+The test container has no network and reads the source read-only.
 
-The production image proxies `/cog/` and `/colorMaps/` to a `planetcantile` upstream and `/stac/point` to a `planetcantile-point` upstream. For these to resolve, the container must be on the same Docker network as both running instances. `/point-index/assets.json` is served from a read-only mount of the point index directory:
+### Dependencies
+
+npm runs through `scripts/deps.sh`, in a container that cannot reach the host files. `.npmrc` refuses versions published less than 7 days ago and saves exact versions.
 
 ```sh
-docker run -p 8080:80 --network planetcantile_app-net \
-  -v D:/Data/titiler_custom/map/index:/srv/point-index:ro \
-  lunar-resources-insight
+scripts/deps.sh install --package-lock-only <package>@<version>
+scripts/deps.sh uninstall --package-lock-only <package>
+scripts/deps.sh audit fix --package-lock-only    # repeat until the lockfile stops changing
+scripts/deps.sh outdated
 ```
+
+After a change:
+
+1. Review the lockfile: `git show HEAD:package-lock.json > /tmp/old.json`, then `node scripts/lockdiff.cjs /tmp/old.json package-lock.json`. It lists the changed packages and flags any not served by registry.npmjs.org or without an integrity hash.
+2. `docker compose build dev` (fails on a high advisory or an invalid signature), `docker compose up -d -V`, run the tests, `scripts/sync-node-modules.sh`.
+3. `scripts/osv-scan.sh` checks the lockfile against the OSV database, which also lists known malicious packages.
+
+New advisories appear after a dependency is installed. `launch-check` catches them at the next start, without a rebuild.
+
+A security fix younger than 7 days needs an exception:
+
+1. Check that the advisory applies: the package reaches production (`scripts/deps.sh ls <package>`) and the vulnerable code is used.
+2. Review the change: `scripts/deps.sh diff --min-release-age=0 --diff=<package>@<old> --diff=<package>@<new>`.
+3. Install it alone: `scripts/deps.sh install --package-lock-only --min-release-age-exclude=<package> <package>@<new>`.
+4. Record the package, version, date and reason in the commit message.
+
+Base images (`node`, `openresty`, OSV-Scanner) are pinned by digest in the Dockerfiles, `docker-compose.yml` and `scripts/osv-scan.sh`. Update them on purpose, to a build published at least 7 days earlier, and keep the version tag next to the digest.
+
+## Production
+
+Vite bakes environment variables at build time, so `.env.production` must exist before building.
+
+```sh
+docker build --no-cache -t lunar-resources-insight .
+```
+
+`--no-cache` makes the audit and the signature check run again; a cached build reuses their earlier result. The build fails on a high advisory, a known malicious package, an invalid signature, a missing or loosened security setting (`scripts/check-hardening.cjs`), a failing test, or a host in the bundle that is missing from `scripts/bundle-hosts.txt`.
+
+After editing `.npmrc`, a Dockerfile, `docker-compose.yml` or an nginx config, run `node scripts/check-hardening.cjs`. On the host it also checks the dev nginx template, which the build does not see. `node --test "scripts/tests/*.test.cjs"` tests the checks themselves (the build runs it too); run it after changing a check script.
+
+The image proxies `/cog/` and `/colorMaps/` to `planetcantile` and `/stac/point` to `planetcantile-point`, so the container joins their network. That network is internal, so the port is published on the default network first. Terrain tiles are served at `/terrain/` from a read-only mount of the terrain directory:
+
+```sh
+docker create --name lunar-resources-insight -p 8080:80 \
+  -v <DATA_PATH>/index:/srv/point-index:ro \
+  -v <TERRAIN_PATH>:/srv/static/terrain:ro lunar-resources-insight
+docker network connect planetcantile_app-net lunar-resources-insight
+docker start lunar-resources-insight
+```
+
+`<DATA_PATH>` and `<TERRAIN_PATH>` are the same directories as in `.env`. Open `http://localhost:8080`.

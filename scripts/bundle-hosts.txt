@@ -1,0 +1,64 @@
+# Hosts written in the production bundle's code, checked by check-bundle-hosts.cjs:
+# Cesium imagery and terrain provider defaults, links in error messages and license
+# headers, and XML namespaces. The prod CSP (connect-src 'self') blocks requests to
+# all of them. A host that appears after a dependency change is reviewed before it is
+# added.
+29a.ch
+agupubs.onlinelibrary.wiley.com
+api.cesium.com
+aras-p.info
+archive.org
+assets.ion.cesium.com
+atlas.microsoft.com
+bruop.github.io
+bugs.chromium.org
+casual-effects.blogspot.com
+cbk0.google.com
+cesium.com
+content.gpwiki.org
+curator.jsc.nasa.gov
+developer.download.nvidia.com
+developer.nvidia.com
+developers.arcgis.com
+doi.org
+get.webgl.org
+github.com
+google.github.io
+graphics.stanford.edu
+help.agi.com
+ibasemaps-api.arcgis.com
+iopscience.iop.org
+jcgt.org
+knarkowicz.wordpress.com
+lolengine.net
+maps.google.com
+maps.googleapis.com
+medialize.github.io
+mths.be
+ntrs.nasa.gov
+pmc.ncbi.nlm.nih.gov
+react.dev
+rolldown.rs
+stackoverflow.com
+tile.googleapis.com
+ui.adsabs.harvard.edu
+www.apache.org
+www.cg.tuwien.ac.at
+www.chilliant.com
+www.cs.utah.edu
+www.esri.com
+www.fundza.com
+www.gdcvault.com
+www.google.com
+www.jcgt.org
+www.khronos.org
+www.lpi.usra.edu
+www.mapbox.com
+www.mapinfo.com
+www.microsoft.com
+www.opengis.net
+www.opensource.org
+www.openstreetmap.org
+www.ppsloan.org
+www.sciencedirect.com
+www.w3.org

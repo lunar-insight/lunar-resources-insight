@@ -13,7 +13,7 @@ export class LineVertexEditingService {
   private readonly VERTEX_SNAP_THRESHOLD = 5; // Distance to snap to existing vertices
   private readonly LINE_SEGMENT_THRESHOLD = 10; // Distance to detect line segments for insertion
 
-  private viewer: Cesium.Viewer | null = null;
+  private viewer: Cesium.CesiumWidget | null = null;
   private showFeatures: boolean = true;
 
   // Line vertex editing state
@@ -27,7 +27,7 @@ export class LineVertexEditingService {
   private vertexDragPreviewLine: Cesium.Polyline | null = null;
   private originalLineVisibility: boolean = true;
 
-  setViewer(viewer: Cesium.Viewer | null) {
+  setViewer(viewer: Cesium.CesiumWidget | null) {
     this.viewer = viewer;
   }
 

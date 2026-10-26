@@ -12,7 +12,7 @@ const makeViewer = (metersPerPixel: number) => ({
   camera: {
     getPixelSize: vi.fn(() => metersPerPixel),
   },
-}) as unknown as Cesium.Viewer
+}) as unknown as Cesium.CesiumWidget
 
 describe('computeBeaconTopPosition', () => {
   it('offsets the ground point along the local surface normal', () => {

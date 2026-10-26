@@ -8,7 +8,7 @@ import { computeBeaconTopPosition, applyBeaconProjection } from 'utils/beaconGeo
 // are real 3D points projected independently each frame, so the line tilts
 // and foreshortens with camera angle.
 export const useTrackedBeaconLine = (
-  viewer: Cesium.Viewer,
+  viewer: Cesium.CesiumWidget,
   cartographic: Cesium.Cartographic,
   wrapperRef: React.RefObject<HTMLElement>,
   lineRef: React.RefObject<SVGLineElement>,

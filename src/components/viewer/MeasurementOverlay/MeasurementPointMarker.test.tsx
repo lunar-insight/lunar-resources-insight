@@ -25,7 +25,7 @@ const makeViewer = () => ({
   },
   canvas: { getBoundingClientRect: () => CANVAS_RECT },
   terrainProvider: undefined as unknown as Cesium.TerrainProvider,
-}) as unknown as Cesium.Viewer
+}) as unknown as Cesium.CesiumWidget
 
 const cartographic = Cesium.Cartographic.fromDegrees(10, 20, 0)
 

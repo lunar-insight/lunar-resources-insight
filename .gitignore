@@ -2,9 +2,11 @@ node_modules/
 .env
 .env.production
 dist
-.vscode
+.vscode/*
+!.vscode/settings.json
 .claude
 claude.md
 settings.local.json
 mockups
 docs/local-only
+src/scratch/

@@ -4,7 +4,7 @@
 //   <data>/index/assets.json       the asset keys that item holds
 //
 //   DATA_PATH=<host raster directory> node scripts/generate-point-index.mjs
-//   npm run point-index            (reads DATA_PATH from .env)
+//   node --env-file=.env scripts/generate-point-index.mjs   (reads DATA_PATH from .env)
 //
 // The data directory is the only input, so an href always names a file that
 // exists. layersConfig.ts is a cross-check, reported at the end.

@@ -1,0 +1,6 @@
+{
+  // Type packages come only from node_modules, never downloaded by the editor.
+  "typescript.disableAutomaticTypeAcquisition": true,
+  // npm scripts run in containers, not from the editor.
+  "npm.autoDetect": "off"
+}
