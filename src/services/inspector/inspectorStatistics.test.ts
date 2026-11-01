@@ -5,6 +5,7 @@ import {
   barPopover,
   barPosition,
   barScale,
+  binText,
   cellCount,
   coveragePopover,
   coverageText,
@@ -12,14 +13,20 @@ import {
   formatPolarExtent,
   formatValue,
   highlightedCells,
+  histogramBins,
   isRanked,
+  limitPopover,
+  limitState,
   noDataPopover,
   showsCoverage,
+  skewRatio,
+  spreadLabel,
   spreadPopover,
   spreadRatio,
   spreadState,
   spreadWord,
   statisticsOfSamples,
+  type ClippedRange,
   type FeatureStatistics,
 } from './inspectorStatistics'
 
@@ -55,7 +62,7 @@ describe('spread', () => {
 
   it('reads the spread when the shape holds enough native cells', () => {
     const state = spreadState(shape(), moon, 41_200, 45)
-    expect(state).toMatchObject({ kind: 'spread', word: 'Uniform', p15: 18, p85: 22, lowest: 12, highest: 28, pulled: null })
+    expect(state).toMatchObject({ kind: 'spread', word: 'Uniform', median: 20, p15: 18, p85: 22, lowest: 12, highest: 28, skew: null })
   })
 
   it('reads low resolution below 10 cells', () => {
@@ -67,25 +74,65 @@ describe('spread', () => {
     expect(spreadState(shape(), notLoaded, 41_200, 150)).toBeNull()
   })
 
-  it('reads the spread when the resolution is unknown', () => {
+  it('reads the spread when the resolution or the area is unknown', () => {
     expect(spreadState(shape(), moon, 1, undefined)?.kind).toBe('spread')
+    expect(spreadState(shape(), moon, undefined, 150)?.kind).toBe('spread')
   })
 
-  it('says which way an average outside Most is pulled', () => {
-    expect(spreadState(shape({ mean: 17 }), moon, 1e6, 1)).toMatchObject({ pulled: 'down' })
-    expect(spreadState(shape({ mean: 23 }), moon, 1e6, 1)).toMatchObject({ pulled: 'up' })
+  it('divides the gap between mean and median by the whole Moon width', () => {
+    expect(skewRatio({ mean: 23, median: 20 }, moon)).toBeCloseTo(0.15)
+    expect(skewRatio({ mean: 17, median: 20 }, moon)).toBeCloseTo(-0.15)
+    expect(skewRatio({ mean: 23, median: 20 }, notLoaded)).toBeNull()
+  })
+
+  it('marks a skewed shape from 0.15 of the whole Moon width', () => {
+    // Moon p15 to p85 is 20 wide, so the mark starts at a gap of 3
+    expect(spreadState(shape({ mean: 23 }), moon, 1e6, 1)).toMatchObject({ skew: 'below' })
+    expect(spreadState(shape({ mean: 22.99 }), moon, 1e6, 1)).toMatchObject({ skew: null })
+    expect(spreadState(shape({ mean: 17 }), moon, 1e6, 1)).toMatchObject({ skew: 'above' })
+    expect(spreadState(shape({ mean: 17.01 }), moon, 1e6, 1)).toMatchObject({ skew: null })
+  })
+
+  it('marks a skewed shape with the average inside Most', () => {
+    expect(spreadState(shape({ mean: 21.5, median: 18, p15: 16, p85: 25 }), moon, 1e6, 1)).toMatchObject({ skew: 'below' })
+  })
+
+  it('has no skew mark without whole Moon statistics or at low resolution', () => {
+    expect(spreadState(shape({ mean: 26 }), notLoaded, 1e6, 1)).toBeNull()
+    expect(spreadState(shape({ mean: 26 }), moon, 41_200, 150)).toMatchObject({ kind: 'low-resolution' })
+  })
+
+  it('names the skew in the icon label', () => {
+    expect(spreadLabel(spreadState(shape({ mean: 23, p85: 30 }), moon, 1e6, 1)!)).toBe('Variable, more than half below the average')
+    expect(spreadLabel(spreadState(shape({ mean: 17 }), moon, 1e6, 1)!)).toBe('Uniform, more than half above the average')
+    expect(spreadLabel(spreadState(shape(), moon, 1e6, 1)!)).toBe('Uniform')
+    expect(spreadLabel({ kind: 'low-resolution', cellSizeKm: 150, cells: 2 })).toBe('Low resolution')
   })
 
   it('writes the spread popover', () => {
-    const state = spreadState(shape({ mean: 17, p85: 30 }), moon, 1e6, 1)!
+    const state = spreadState(shape({ mean: 23, median: 19.5, p85: 30 }), moon, 1e6, 1)!
     expect(spreadPopover(state, line)).toEqual({
       title: 'Variable',
-      lines: [['Most', '18.0 to 30.0 wt%'], ['Lowest', '12.0'], ['Highest', '28.0']],
-      sentence: 'Pulled down by a few low values.',
+      lines: [['Median', '19.5 wt%'], ['Most', '18.0 to 30.0 wt%'], ['Lowest', '12.0'], ['Highest', '28.0']],
+      sentence: 'More than half the shape is below the average.',
     })
-    const up = spreadState(shape({ mean: 23 }), moon, 1e6, 1)!
-    expect(spreadPopover(up, { decimals: 0 }).sentence).toBe('Pulled up by a few high values.')
+    const above = spreadState(shape({ mean: 17 }), moon, 1e6, 1)!
+    expect(spreadPopover(above, { decimals: 0 }).sentence).toBe('More than half the shape is above the average.')
+    expect(spreadPopover(above, { decimals: 0 }).lines[0]).toEqual(['Median', '20'])
     expect(spreadPopover(spreadState(shape(), moon, 1e6, 1)!, line).sentence).toBeUndefined()
+  })
+
+  it('keeps the histogram of a shape holding more than one value', () => {
+    const histogram = { counts: [1, 3], edges: [12, 20, 28] }
+    expect(spreadState(shape({ histogram }), moon, 1e6, 1)).toMatchObject({ mean: 20, histogram })
+    const flat = { counts: [4], edges: [19.5, 20.5] }
+    expect(spreadState(shape({ min: 20, max: 20, histogram: flat }), moon, 1e6, 1)).not.toHaveProperty('histogram')
+    expect(spreadState(shape(), moon, 1e6, 1)).not.toHaveProperty('histogram')
+  })
+
+  it('moves Lowest and Highest to the histogram axis', () => {
+    const state = spreadState(shape({ histogram: { counts: [1, 3], edges: [12, 20, 28] } }), moon, 1e6, 1)!
+    expect(spreadPopover(state, line).lines).toEqual([['Median', '20.0 wt%'], ['Most', '18.0 to 22.0 wt%']])
   })
 
   it('writes the low resolution popover', () => {
@@ -94,6 +141,23 @@ describe('spread', () => {
       lines: [['Cell size', '~60 km'], ['Cells here', '3']],
     })
     expect(spreadPopover({ kind: 'low-resolution', cellSizeKm: 600, cells: 0.2 }, line).lines[1]).toEqual(['Cells here', 'less than 1'])
+  })
+})
+
+describe('histogram', () => {
+  it('gives each bin its range and share of pixels', () => {
+    expect(histogramBins({ counts: [1, 0, 3], edges: [0, 8, 16, 24] })).toEqual([
+      { from: 0, to: 8, share: 25 },
+      { from: 8, to: 16, share: 0 },
+      { from: 16, to: 24, share: 75 },
+    ])
+    expect(histogramBins({ counts: [0, 0], edges: [0, 1, 2] }).map(bin => bin.share)).toEqual([0, 0])
+  })
+
+  it('writes the hover text of a bar', () => {
+    expect(binText({ from: 0, to: 2, share: 36.4 }, line)).toBe('0.0 to 2.0 wt%: 36% of pixels')
+    expect(binText({ from: 22, to: 24, share: 0.3 }, line)).toBe('22.0 to 24.0 wt%: less than 1% of pixels')
+    expect(binText({ from: 2, to: 4, share: 0 }, { decimals: 0 })).toBe('2 to 4: 0% of pixels')
   })
 })
 
@@ -119,6 +183,42 @@ describe('coverage', () => {
     })
     expect(coveragePopover(42, true).sentence).toBe('The average uses that part only, so it is not ranked.')
     expect(coveragePopover(71, true).sentence).toBe('The average uses that part only.')
+  })
+})
+
+describe('limit', () => {
+  const feo: ClippedRange = {
+    range: [0, 24],
+    longitudes: [-180, 60],
+    notes: { high: 'Most pixels at 24 wt% lie along orbit gaps and are artifacts.' },
+  }
+
+  it('marks a point value equal to either end', () => {
+    expect(limitState(24, feo, 30)).toEqual({ end: 'high', limit: 24, note: 'Most pixels at 24 wt% lie along orbit gaps and are artifacts.' })
+    expect(limitState(0, feo, -120)).toEqual({ end: 'low', limit: 0, note: undefined })
+    expect(limitState(23.99, feo, 30)).toBeNull()
+    expect(limitState(0.01, feo, 30)).toBeNull()
+  })
+
+  it('marks only inside the clipped longitudes', () => {
+    expect(limitState(24, feo, 60)).not.toBeNull()
+    expect(limitState(24, feo, -180)).not.toBeNull()
+    expect(limitState(24, feo, 60.5)).toBeNull()
+    expect(limitState(24, { range: [0, 24] }, 120)).toMatchObject({ end: 'high' })
+  })
+
+  it('has no mark for a map not clipped', () => {
+    expect(limitState(24, undefined, 30)).toBeNull()
+  })
+
+  it('writes the limit popover', () => {
+    expect(limitPopover(limitState(24, feo, 30)!, line)).toEqual({
+      title: "At the map's limit",
+      lines: [['Limit', '24.0 wt%']],
+      sentence: 'Values beyond the limit are set to it.',
+      note: 'Most pixels at 24 wt% lie along orbit gaps and are artifacts.',
+    })
+    expect(limitPopover(limitState(0, feo, 30)!, line).note).toBeUndefined()
   })
 })
 

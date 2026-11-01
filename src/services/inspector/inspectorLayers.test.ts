@@ -88,6 +88,31 @@ describe('groupInspectorLines', () => {
   })
 })
 
+describe('config without matching data', () => {
+  const lines = buildInspectorLines({
+    layers: {
+      new_index: { filename: 'ni.tif', category: 'derived-index', units: 'index' },
+      oxide: { filename: 'ox.tif', category: 'compound', units: 'wt%' },
+      ol_a: { filename: 'ol_a.tif', category: 'mineral', mineral: 'olivine', units: 'wt%', inspectorPair: 'ol' },
+      ol_b: { filename: 'ol_b.tif', category: 'mineral', mineral: 'olivine', units: 'wt%', inspectorPair: 'ol' },
+    },
+  })
+  const byId = (id: string) => lines.find(line => line.id === id)!
+
+  it('scales by percentile a derived index the Derived Indices data does not list', () => {
+    expect(byId('new_index')).toMatchObject({ referenceRange: undefined, scaleLabels: undefined })
+  })
+
+  it('scales by percentile a layer that names no compound, mineral or element', () => {
+    expect(byId('oxide').referenceRange).toBeUndefined()
+  })
+
+  it('reads the first file of a pair whose ids name no side', () => {
+    expect(byId('ol').files.map(file => file.side)).toEqual([undefined, undefined])
+    expect(fileForLatitude(byId('ol'), -80).layerId).toBe('ol_a')
+  })
+})
+
 describe('fileForLatitude', () => {
   const pair = buildInspectorLines(config).find(line => line.id === 'pl_sp')!
 
@@ -113,6 +138,10 @@ describe('displayUnit', () => {
 })
 
 describe('the app layer list', () => {
+  it('gives every line a unit, which its value and chart show', () => {
+    expect(inspectorLines.filter(line => !line.unit).map(line => line.id)).toEqual([])
+  })
+
   it('gives 47 lines in 25 cards', () => {
     expect(inspectorLines).toHaveLength(47)
     expect(inspectorGroups.flatMap(group => group.cards)).toHaveLength(25)

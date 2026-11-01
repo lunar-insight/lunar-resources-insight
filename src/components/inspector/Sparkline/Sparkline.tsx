@@ -1,5 +1,6 @@
 import React from 'react';
 import type { LayerStats } from 'services/LayerStatsService';
+import { moonWidth } from 'services/inspector/inspectorStatistics';
 import styles from './Sparkline.module.scss';
 
 export type SparkScale = 'moon' | 'own';
@@ -14,8 +15,8 @@ const HEIGHT = 16;
  * line to its lowest and highest value.
  */
 export function sparkRange(values: number[], scale: SparkScale, moon: LayerStats): [number, number] {
-  const width = moon.loaded ? (moon.percentile_85 ?? NaN) - (moon.percentile_15 ?? NaN) : NaN;
-  if (scale === 'moon' && Number.isFinite(width) && width > 0) {
+  const width = moonWidth(moon);
+  if (scale === 'moon' && width !== null) {
     const average = values.reduce((sum, v) => sum + v, 0) / values.length;
     return [average - width, average + width];
   }
@@ -57,7 +58,7 @@ export const Sparkline: React.FC<SparklineProps> = ({ profile, fractions, scale,
 
   const [lo, hi] = sparkRange(values, scale, moon);
   const span = hi - lo || 1;
-  const x = (index: number) => (fractions[index] ?? 0) * WIDTH;
+  const x = (index: number) => fractions[index] * WIDTH;
   const y = (value: number) => HEIGHT - 1 - Math.min(1, Math.max(0, (value - lo) / span)) * (HEIGHT - 2);
 
   return (

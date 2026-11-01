@@ -144,9 +144,11 @@ docker compose up -d --build -V
 docker compose run --rm test               # full suite
 docker compose run --rm test run <file>    # one file
 docker compose run --rm test watch [file]  # rerun on save
+docker compose run --rm test run --coverage           # full suite with coverage
+docker compose run --rm test run --coverage <file>    # coverage of one test file's run
 ```
 
-The test container has no network and reads the source read-only.
+The test container has no network and reads the source read-only. Coverage (V8, configured in `vite.config.ts`) prints its report to the terminal, since the container cannot write to the repository.
 
 ### Dependencies
 

@@ -4,6 +4,7 @@ import {
   MAX_CHART_LAYERS,
   SERIES_COLORS,
   colorOf,
+  defaultChartUnit,
   isPicked,
   isUnitFull,
   picksIn,
@@ -40,5 +41,12 @@ describe('togglePick', () => {
     expect(togglePick(full, 'extra', 'wt%')).toBe(full)
     expect(isUnitFull(full, 'ppm')).toBe(false)
     expect(picksIn(togglePick(full, 'th', 'ppm'), 'ppm')).toHaveLength(1)
+  })
+})
+
+describe('defaultChartUnit', () => {
+  it('opens on wt% when a layer uses it, else on the first unit', () => {
+    expect(defaultChartUnit(['ppm', 'wt%', 'index'])).toBe('wt%')
+    expect(defaultChartUnit(['ppm', 'index'])).toBe('ppm')
   })
 })

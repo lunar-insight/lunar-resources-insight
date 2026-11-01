@@ -96,6 +96,15 @@ export default defineConfig(({ mode }) => ({
     // App tests only; scripts/tests runs with node --test.
     include: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
     setupFiles: ['./src/setupTests.ts'],
+    // Runs with --coverage. The test container is read-only apart from /tmp, so
+    // the report prints to the terminal.
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: '/tmp/coverage',
+      reporter: ['text'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)', 'src/**/*TestUtils.tsx', 'src/setupTests.ts', 'src/scratch/**', 'src/**/*.d.ts'],
+    },
     // The Inspector window tests take about 2 s alone and over 5 s (the default)
     // in a full parallel run on a loaded machine; the prod build runs the suite.
     testTimeout: 20000,

@@ -20,10 +20,12 @@ import {
   formatExtent,
   formatPolarExtent,
   statisticsOfSamples,
+  type ClippedRange,
   type FeatureStatistics,
   type NoDataReason,
 } from './inspectorStatistics';
 import {
+  fetchClippedRange,
   fetchFileBounds,
   fetchPointValues,
   fetchResolutionKm,
@@ -44,6 +46,8 @@ export interface LineResult {
   /** The request for this line failed after its retry. */
   failed?: boolean;
   resolutionKm?: number;
+  /** Clipping of the file, read for points. */
+  clip?: ClippedRange;
   /** Values at each sample of a line feature, null where the dataset has no data. */
   profile?: (number | null)[];
 }
@@ -70,6 +74,7 @@ export interface InspectorDependencies {
   lines: InspectorLine[];
   fetchBounds: (filename: string, stac?: string) => Promise<number[]>;
   fetchResolution: (stac?: string) => Promise<number | undefined>;
+  fetchClip: (stac?: string) => Promise<ClippedRange | undefined>;
   fetchPointValues: (filenames: string[], position: LonLat, signal?: AbortSignal) => Promise<Map<string, number | null>>;
   fetchShapeStatistics: (filename: string, geojson: object, signal?: AbortSignal) => Promise<FeatureStatistics | null>;
   sampleElevation: (positions: LonLat[]) => Promise<Elevation | null>;
@@ -87,6 +92,7 @@ export const defaultDependencies = (): InspectorDependencies => ({
   lines: inspectorLines,
   fetchBounds: fetchFileBounds,
   fetchResolution: fetchResolutionKm,
+  fetchClip: fetchClippedRange,
   fetchPointValues,
   fetchShapeStatistics,
   sampleElevation,
@@ -194,8 +200,8 @@ export class InspectorStore {
     clearTimeout(this.editTimers.get(featureId));
     this.editTimers.set(featureId, setTimeout(() => {
       this.editTimers.delete(featureId);
-      const feature = this.latestFeatures.get(featureId);
-      if (feature) this.start(feature);
+      // drop() clears this timer, so the feature is still held when it fires
+      this.start(this.latestFeatures.get(featureId));
     }, this.deps.editSettleMs));
   }
 
@@ -275,11 +281,16 @@ export class InspectorStore {
     });
 
     let failedRequests = 0;
+    // Catalog items load alongside the values, so the clipping adds no wait
+    const clips = Promise.all(inside.map(t => this.deps.fetchClip(t.file.stac).catch((): undefined => undefined)));
     try {
       const values = await this.deps.fetchPointValues(inside.map(t => t.file.filename), center);
-      inside.forEach(t => {
+      const clipOf = await clips;
+      inside.forEach((t, index) => {
         const value = values.get(t.file.filename);
-        lines[t.line.id] = typeof value === 'number' ? { file: t.file, value } : { file: t.file, noData: 'inside' };
+        lines[t.line.id] = typeof value === 'number'
+          ? { file: t.file, value, clip: clipOf[index] }
+          : { file: t.file, noData: 'inside' };
       });
     } catch (error) {
       console.error('Inspector point request failed:', error);
@@ -296,7 +307,7 @@ export class InspectorStore {
     const center = featureCenter(feature);
     if (!ring || !center) return;
 
-    const areaKm2 = featureAreaKm2(feature) ?? 0;
+    const areaKm2 = featureAreaKm2(feature);
     update(() => ({ center, areaKm2 }));
     const elevation = this.elevation(gridInsideRing(ring), update);
 

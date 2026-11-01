@@ -1,0 +1,61 @@
+.histogram {
+  margin: 0 0 0.55rem;
+
+  > svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+}
+
+.most {
+  fill: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.hit {
+  fill: transparent;
+}
+
+.bar {
+  fill: color-mix(in srgb, var(--cat) 80%, transparent);
+}
+
+.axis {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.mark {
+  stroke: var(--text-primary);
+  stroke-width: 1.5;
+}
+
+.ends,
+.key {
+  display: flex;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+.ends {
+  justify-content: space-between;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.key {
+  gap: 0.8rem;
+  margin-top: 3px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  svg {
+    width: 10px;
+    height: 10px;
+  }
+}

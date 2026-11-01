@@ -11,6 +11,13 @@ describe('sparkRange', () => {
     expect(sparkRange([10, 12, 14], 'own', moonStats)).toEqual([10, 14])
   })
 
+  it('draws a constant profile flat along the bottom of the well', () => {
+    const { container } = render(
+      <Sparkline profile={[4, 4]} fractions={[0, 1]} scale="own" moon={moonStats} categoryColor="rgb(0, 0, 0)" />
+    )
+    expect(container.querySelector('path')!.getAttribute('d')).toBe('M0.00 15.00 L66.00 15.00')
+  })
+
   it('uses the own range when the statistics did not load', () => {
     expect(sparkRange([10, 14], 'moon', { min: 0, max: 100, loaded: false })).toEqual([10, 14])
   })

@@ -31,6 +31,27 @@ describe('StatPopover', () => {
     expect(screen.getByRole('dialog').querySelector('dl')).toBeNull()
   })
 
+  it('adds the note as a second paragraph', async () => {
+    render(
+      <StatPopover label="Limit" content={{ title: 'At the limit', lines: [], sentence: 'First.', note: 'Second.' }}>
+        icon
+      </StatPopover>
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Limit' }))
+    expect([...screen.getByRole('dialog').querySelectorAll('p')].map(p => p.textContent)).toEqual(['First.', 'Second.'])
+  })
+
+  it('places a chart below the title, before the lines', async () => {
+    render(
+      <StatPopover label="Variable" chart={<svg data-testid="chart" />} content={{ title: 'Variable', lines: [['Median', '6']] }}>
+        icon
+      </StatPopover>
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Variable' }))
+    const dialog = screen.getByRole('dialog')
+    expect([...dialog.children].map(el => el.tagName)).toEqual(['H2', 'svg', 'DL'])
+  })
+
   it('closes on Escape', async () => {
     render(<StatPopover label="Bar scale" content={{ title: 'Percentile', lines: [] }}>bar</StatPopover>)
     await userEvent.click(screen.getByRole('button', { name: 'Bar scale' }))

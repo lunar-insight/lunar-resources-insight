@@ -49,7 +49,9 @@ size, the spread band, the thresholds and the coverage cutoffs is in
 
 `services/inspector/inspectorLayers.ts` builds one line per dataset reporting
 an element, compound, mineral or derived index, grouped into one card per
-symbol and ordered as in `layersConfig.ts`. Count rate layers have no line. The
+symbol and ordered as in `layersConfig.ts`. Count rate layers have no line.
+Every line has a unit, which its value and the line charts show;
+`inspectorLayers.test.ts` enforces it. The
 north and south files of a Kaguya SP mineral share an `inspectorPair` id and
 form one line, which reads the file on the side of the feature's center
 latitude.
@@ -68,11 +70,13 @@ Deleting a feature cancels its requests and drops its results.
 
 - **Point.** One batched point request reads every line's file. Files whose
   bounds do not hold the point are left out of the request, since one file not
-  covering the point fails the whole batch.
+  covering the point fails the whole batch. The files' catalog items load
+  alongside it, for their `lri:clipped_*` fields.
 - **Polygon and circle.** One `POST /cog/statistics` per line, with the shape
   as a GeoJSON Feature in the Moon's coordinate system, read from an overview
-  capped in size. A circle is converted to a polygon. Lines whose dataset
-  bounds do not reach the shape need no request.
+  capped in size. The response holds the histogram as well. A circle is
+  converted to a polygon. Lines whose dataset bounds do not reach the shape
+  need no request.
 - **Line.** A fixed number of samples spread evenly by distance along the whole
   line, plus each vertex, interpolated along the geodesic. Each sample is one
   batched point request. Statistics for a line are computed over its samples.
@@ -86,16 +90,20 @@ pauses on demand, and cancels by feature.
 |---|---|
 | Value | The value at a point; the mean ("avg") over a shape or along a line, the value that scales with the amount present. |
 | Spread word | The shape's p15 to p85 width divided by the layer's whole Moon p15 to p85 width: Uniform below 0.35, Variable from 0.35 to 0.75, Highly variable from 0.75. Dividing by the layer's own width lets one set of thresholds serve wt%, ppm and index layers. The ratio measures width, not pattern. |
-| Most | p15 to p85 of the shape, which holds 70% of its pixels whatever the distribution. When the average falls outside it, a few values pull it down or up, and the explanation says which. |
-| Lowest, Highest | The shape's minimum and maximum, read from the capped overview, so slightly inward of single pixel extremes. |
+| Median | The shape's median, first line of the spread explanation. The value stays the mean, since the mean scales with the amount present and ranks the comparison. |
+| Skew mark | An amber dot on the spread icon when \|mean − median\| is at least 0.15 of the layer's whole Moon p15 to p85 width. The explanation then ends with "More than half the shape is below the average." (mean above the median) or "above" (mean below it), which holds for any shape where the mark shows. Shapes over the read cap are read from averaged overviews, which narrow the gap, so they get fewer marks, never false ones. No mark at low resolution or without whole Moon statistics. |
+| Most | p15 to p85 of the shape, which holds 70% of its pixels whatever the distribution. |
+| Histogram | First in the spread explanation: 12 bins from the shape's lowest to highest value, with the Most range shaded, the median as a solid line and the average as a dashed one. The axis ends give the lowest and highest value, read from the capped overview, so slightly inward of single pixel extremes. It tells one peak with a tail from two terrains, which give the same skew mark. Every pixel the outline touches counts fully, while the other statistics weight pixels by their share inside the shape, so on a small shape the median line can sit slightly off the bars' middle. A clipped layer's pile at its limit shows as a bar at the axis end. Not drawn for a shape holding a single value. |
+| Lowest, Highest | Lines of the spread explanation when there is no histogram. |
 | Low resolution | Shown instead of the spread word when the shape holds fewer than 10 native cells: its area over the square of the dataset's `lri:resolution_km`. Below that, p15 and p85 are set by the few cells the shape hits. |
 | Coverage | The share of the shape holding data (`valid_percent`). Shown below 95%. The average covers that share only; in the comparison, a cell under 50% is muted and never takes the row highlight. |
 | Bar | Hybrid scale: a reference range when one exists, so the same position means the same value across datasets; otherwise the percentile within the dataset's whole Moon statistics. Without either, the bar shows a center dash. Elements, compounds and minerals take their range from `constants/elementReferenceRanges.ts`; a derived index takes its range, and what its low and high values mean, from the Derived Indices data. |
+| Limit mark | A point value equal to either end of its file's `lri:clipped_range`, inside `lri:clipped_longitudes` when the item sets them: an amber arrow against a ceiling or a floor, right of the bar. Every line of the window keeps the slot once any line has the mark. The explanation gives the limit, says values beyond it are set to it, then the item's `lri:clipped_notes` sentence for that end. The match is exact: point values are the float32 pixels, and the range ends are exact in float32. |
 | No data | A hatched track. Outside the dataset's bounds, the explanation gives its extent; inside them, the dataset has no measurements at that location. |
 
 Whole Moon statistics are not displayed; they set the percentile scale and the
-spread word's reference width. A point has one value, so spread and coverage do
-not apply to it. A line shows a sparkline instead of the bar, and a chart per
+reference width of the spread word and the skew mark. A point has one value, so
+spread and coverage do not apply to it. A line shows a sparkline instead of the bar, and a chart per
 unit.
 
 ### Whole Moon statistics
@@ -121,10 +129,11 @@ one row per sample. The comparison exports every compared feature.
 |---|---|
 | Dataset label, short name, decimals, polar pair | `src/layersConfig.ts` |
 | Native resolution of a file | `lri:resolution_km` in its catalog item under `public/stac/` |
+| Clipped range of a file | `lri:clipped_range` (`[low, high]`), `lri:clipped_longitudes` (`[west, east]`, optional, everywhere when absent), `lri:clipped_notes` (`{low?, high?}`, optional) in its catalog item |
 | Reference ranges, card names | `src/constants/elementReferenceRanges.ts`, `src/constants/periodicTableData.ts`, `src/components/navigation/submenu/DerivedIndices/data.ts` |
-| Spread thresholds, cell minimum, coverage cutoffs | `src/services/inspector/inspectorStatistics.ts` |
+| Spread and skew thresholds, cell minimum, coverage cutoffs | `src/services/inspector/inspectorStatistics.ts` |
 | Sample count, circle vertices | `src/services/inspector/featureGeometry.ts` |
-| Read size of shape statistics | `src/services/inspector/inspectorRequests.ts` |
+| Read size and histogram bins of shape statistics | `src/services/inspector/inspectorRequests.ts` |
 | Request concurrency, edit settle time | `src/services/inspector/InspectorStore.ts` |
 | Line chart colors | `src/services/inspector/chartSelection.ts` |
 | Statistics cache | `nginx.dev.conf.template` |

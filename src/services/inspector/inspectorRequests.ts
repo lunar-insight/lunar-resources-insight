@@ -9,7 +9,7 @@ import {
 } from 'geoConfigExporter';
 import { stacService } from 'services/StacService';
 import { TerrainService } from 'services/TerrainService';
-import type { FeatureStatistics } from './inspectorStatistics';
+import type { ClippedRange, FeatureStatistics, Histogram } from './inspectorStatistics';
 import type { LonLat } from './featureGeometry';
 
 const RETRY_DELAY_MS = 300;
@@ -48,6 +48,31 @@ export async function fetchResolutionKm(stac?: string): Promise<number | undefin
   const item = await stacService.fetchStacItem(stac);
   const value = item?.properties['lri:resolution_km'];
   return typeof value === 'number' ? value : undefined;
+}
+
+const isPair = (value: unknown): value is [number, number] =>
+  Array.isArray(value) && value.length === 2 && value.every(v => typeof v === 'number');
+
+const sentence = (value: unknown) => (typeof value === 'string' ? value : undefined);
+
+/**
+ * Clipping of a file's catalog item: `lri:clipped_range`, with the optional
+ * `lri:clipped_longitudes` and `lri:clipped_notes`. Undefined for a map not
+ * clipped.
+ */
+export async function fetchClippedRange(stac?: string): Promise<ClippedRange | undefined> {
+  if (!stac) return undefined;
+  const properties = (await stacService.fetchStacItem(stac))?.properties;
+  const range = properties?.['lri:clipped_range'];
+  if (!isPair(range)) return undefined;
+
+  const longitudes = properties?.['lri:clipped_longitudes'];
+  const notes = properties?.['lri:clipped_notes'] as Record<string, unknown> | undefined;
+  return {
+    range,
+    ...(isPair(longitudes) ? { longitudes } : {}),
+    ...(notes && typeof notes === 'object' ? { notes: { low: sentence(notes.low), high: sentence(notes.high) } } : {}),
+  };
 }
 
 let assetKeysRequest: Promise<Set<string> | null> | null = null;
@@ -114,6 +139,19 @@ export async function fetchPointValues(
 
 /** Shape statistics are read capped at this many pixels on the longer side. */
 export const SHAPE_MAX_SIZE = 1024;
+/** Bins of a shape's histogram, from its lowest to highest value. */
+export const HISTOGRAM_BINS = 12;
+
+const isNumbers = (value: unknown): value is number[] =>
+  Array.isArray(value) && value.every(v => typeof v === 'number' && Number.isFinite(v));
+
+/** The tiler's `[counts, edges]`, or undefined when it is not one. */
+function readHistogram(value: unknown): Histogram | undefined {
+  if (!Array.isArray(value) || value.length !== 2) return undefined;
+  const [counts, edges] = value;
+  if (!isNumbers(counts) || !isNumbers(edges) || counts.length === 0 || edges.length !== counts.length + 1) return undefined;
+  return { counts, edges };
+}
 
 /**
  * Statistics over the pixels inside a shape, given as a GeoJSON Feature in
@@ -129,6 +167,7 @@ export async function fetchShapeStatistics(
     bidx: '1',
     coord_crs: 'IAU_2015:30100',
     max_size: String(SHAPE_MAX_SIZE),
+    histogram_bins: String(HISTOGRAM_BINS),
   });
   params.append('p', '15');
   params.append('p', '85');
@@ -147,6 +186,7 @@ export async function fetchShapeStatistics(
   const b1 = data?.properties?.statistics?.b1;
   if (!b1 || !b1.count || !Number.isFinite(b1.mean)) return null;
 
+  const histogram = readHistogram(b1.histogram);
   return {
     mean: b1.mean,
     median: b1.median,
@@ -157,6 +197,7 @@ export async function fetchShapeStatistics(
     p85: b1.percentile_85,
     count: b1.count,
     coverage: b1.valid_percent,
+    ...(histogram ? { histogram } : {}),
   };
 }
 

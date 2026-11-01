@@ -40,7 +40,7 @@ export const ProfileChart: React.FC<ProfileChartProps> = ({
 
   // Samples sit at their distance along the line; vertices break the even spacing.
   const samples = results.samples ?? [];
-  const x = (index: number) => (lengthKm > 0 ? ((samples[index]?.distanceKm ?? 0) / lengthKm) * WIDTH : 0);
+  const x = (index: number) => (lengthKm > 0 ? (samples[index].distanceKm / lengthKm) * WIDTH : 0);
   const y = (value: number) => PAD + (1 - (value - lo) / (hi - lo)) * (HEIGHT - 2 * PAD);
   const decimals = series[0]?.line.decimals ?? 1;
 
@@ -53,10 +53,7 @@ export const ProfileChart: React.FC<ProfileChartProps> = ({
           selectionMode="single"
           disallowEmptySelection
           selectedKeys={[unit]}
-          onSelectionChange={keys => {
-            const [next] = [...keys];
-            if (next !== undefined) onSelectUnit(String(next));
-          }}
+          onSelectionChange={keys => onSelectUnit(String([...keys][0]))}
           className={styles.tabs}
         >
           {units.map(u => {

@@ -5,6 +5,8 @@ import type { InspectorLine } from './inspectorLayers';
 export const UNIFORM_BELOW = 0.35;
 /** Spread ratio from which a layer reads Highly variable. */
 export const HIGHLY_VARIABLE_FROM = 0.75;
+/** |mean − median| over the whole Moon p15 to p85 width from which a shape is marked skewed. */
+export const SKEW_FROM = 0.15;
 /** Below this many native cells, p15 and p85 are set by the few cells a shape hits. */
 export const MIN_CELLS = 10;
 /** The coverage pie shows below this share of the shape. */
@@ -13,6 +15,16 @@ export const COVERAGE_SHOWN_BELOW = 95;
 export const RANKED_FROM_COVERAGE = 50;
 
 export type SpreadWord = 'Uniform' | 'Variable' | 'Highly variable';
+
+/**
+ * Pixel counts in equal bins from the shape's lowest to highest value, with
+ * one more edge than counts. Every pixel the outline touches counts fully,
+ * while the other statistics weight pixels by their share inside the shape.
+ */
+export interface Histogram {
+  counts: number[];
+  edges: number[];
+}
 
 /** Statistics over the pixels inside a feature, or over a line's samples. */
 export interface FeatureStatistics {
@@ -27,12 +39,16 @@ export interface FeatureStatistics {
   count: number;
   /** Share of the feature holding data, 0 to 100. */
   coverage: number;
+  /** Shapes only. */
+  histogram?: Histogram;
 }
 
 export interface PopoverContent {
   title: string;
   lines: [string, string][];
   sentence?: string;
+  /** A second paragraph after the sentence. */
+  note?: string;
 }
 
 export function formatValue(value: number, decimals: number): string {
@@ -41,7 +57,8 @@ export function formatValue(value: number, decimals: number): string {
 
 const withUnit = (text: string, unit?: string) => (unit ? `${text} ${unit}` : text);
 
-const moonWidth = (moon: LayerStats): number | null => {
+/** The layer's whole Moon p15 to p85 width, or null without statistics. */
+export const moonWidth = (moon: LayerStats): number | null => {
   if (!moon.loaded || !Number.isFinite(moon.percentile_15) || !Number.isFinite(moon.percentile_85)) return null;
   const width = moon.percentile_85 - moon.percentile_15;
   return width > 0 ? width : null;
@@ -51,6 +68,12 @@ const moonWidth = (moon: LayerStats): number | null => {
 export function spreadRatio(shape: Pick<FeatureStatistics, 'p15' | 'p85'>, moon: LayerStats): number | null {
   const width = moonWidth(moon);
   return width === null ? null : (shape.p85 - shape.p15) / width;
+}
+
+/** The shape's mean minus its median, over the layer's whole Moon p15 to p85 width. */
+export function skewRatio(shape: Pick<FeatureStatistics, 'mean' | 'median'>, moon: LayerStats): number | null {
+  const width = moonWidth(moon);
+  return width === null ? null : (shape.mean - shape.median) / width;
 }
 
 export function spreadWord(ratio: number): SpreadWord {
@@ -63,32 +86,45 @@ export function cellCount(areaKm2: number, resolutionKm: number): number {
   return areaKm2 / (resolutionKm * resolutionKm);
 }
 
+/**
+ * Where more than half of a skewed shape lies against its average: below when
+ * the mean is above the median, above when it is below.
+ */
+export type SkewSide = 'below' | 'above';
+
 export type SpreadState =
   | {
     kind: 'spread';
     word: SpreadWord;
+    mean: number;
+    median: number;
     p15: number;
     p85: number;
     lowest: number;
     highest: number;
-    pulled: 'down' | 'up' | null;
+    skew: SkewSide | null;
+    /** Absent when the shape holds a single value or the response has none. */
+    histogram?: Histogram;
   }
   | { kind: 'low-resolution'; cellSizeKm: number; cells: number };
 
 /**
  * What the spread slot of a shape's line shows. Empty (null) while the whole
  * Moon statistics are missing, since both states compare against the layer.
+ * Without the area or the resolution the cells cannot be counted, so the
+ * spread is shown.
  */
 export function spreadState(
   shape: FeatureStatistics,
   moon: LayerStats,
-  areaKm2: number,
+  areaKm2: number | undefined,
   resolutionKm?: number,
 ): SpreadState | null {
   const ratio = spreadRatio(shape, moon);
-  if (ratio === null) return null;
+  const skew = skewRatio(shape, moon);
+  if (ratio === null || skew === null) return null;
 
-  if (resolutionKm && resolutionKm > 0) {
+  if (areaKm2 !== undefined && resolutionKm && resolutionKm > 0) {
     const cells = cellCount(areaKm2, resolutionKm);
     if (cells < MIN_CELLS) return { kind: 'low-resolution', cellSizeKm: resolutionKm, cells };
   }
@@ -96,12 +132,22 @@ export function spreadState(
   return {
     kind: 'spread',
     word: spreadWord(ratio),
+    mean: shape.mean,
+    median: shape.median,
     p15: shape.p15,
     p85: shape.p85,
     lowest: shape.min,
     highest: shape.max,
-    pulled: shape.mean < shape.p15 ? 'down' : shape.mean > shape.p85 ? 'up' : null,
+    skew: Math.abs(skew) >= SKEW_FROM ? (skew > 0 ? 'below' : 'above') : null,
+    // One value has no distribution to draw, and its bins would span a made-up range around it
+    ...(shape.histogram && shape.min < shape.max ? { histogram: shape.histogram } : {}),
   };
+}
+
+/** Accessible name and hover text of the spread icon. */
+export function spreadLabel(state: SpreadState): string {
+  if (state.kind === 'low-resolution') return 'Low resolution';
+  return state.skew ? `${state.word}, more than half ${state.skew} the average` : state.word;
 }
 
 export function spreadPopover(state: SpreadState, line: Pick<InspectorLine, 'decimals' | 'unit'>): PopoverContent {
@@ -113,16 +159,40 @@ export function spreadPopover(state: SpreadState, line: Pick<InspectorLine, 'dec
     };
   }
   const fmt = (v: number) => formatValue(v, line.decimals);
+  // With a histogram, the lowest and highest values label the ends of its axis
+  const ends: [string, string][] = state.histogram ? [] : [['Lowest', fmt(state.lowest)], ['Highest', fmt(state.highest)]];
   return {
     title: state.word,
     lines: [
+      ['Median', withUnit(fmt(state.median), line.unit)],
       ['Most', withUnit(`${fmt(state.p15)} to ${fmt(state.p85)}`, line.unit)],
-      ['Lowest', fmt(state.lowest)],
-      ['Highest', fmt(state.highest)],
+      ...ends,
     ],
-    sentence: state.pulled === 'down' ? 'Pulled down by a few low values.'
-      : state.pulled === 'up' ? 'Pulled up by a few high values.' : undefined,
+    sentence: state.skew ? `More than half the shape is ${state.skew} the average.` : undefined,
   };
+}
+
+export interface HistogramBin {
+  from: number;
+  to: number;
+  /** Share of the counted pixels, 0 to 100. */
+  share: number;
+}
+
+export function histogramBins(histogram: Histogram): HistogramBin[] {
+  const total = histogram.counts.reduce((sum, count) => sum + count, 0);
+  return histogram.counts.map((count, i) => ({
+    from: histogram.edges[i],
+    to: histogram.edges[i + 1],
+    share: total > 0 ? (count / total) * 100 : 0,
+  }));
+}
+
+/** Hover text of a histogram bar. */
+export function binText(bin: HistogramBin, line: Pick<InspectorLine, 'decimals' | 'unit'>): string {
+  const share = bin.share === 0 ? '0%' : bin.share < 1 ? 'less than 1%' : `${Math.round(bin.share)}%`;
+  const range = withUnit(`${formatValue(bin.from, line.decimals)} to ${formatValue(bin.to, line.decimals)}`, line.unit);
+  return `${range}: ${share} of pixels`;
 }
 
 export const showsCoverage = (coverage: number | undefined): coverage is number =>
@@ -140,6 +210,47 @@ export function coveragePopover(coverage: number, inComparison = false): Popover
     sentence: inComparison && !isRanked(coverage)
       ? 'The average uses that part only, so it is not ranked.'
       : 'The average uses that part only.',
+  };
+}
+
+/** A map's clipping, from the `lri:clipped_*` fields of its catalog item. */
+export interface ClippedRange {
+  /** Values beyond these are set to them. */
+  range: [number, number];
+  /** Where the clip applies, [west, east] in degrees. Everywhere when absent. */
+  longitudes?: [number, number];
+  /** One sentence per end, shown after the generic sentence. */
+  notes?: { low?: string; high?: string };
+}
+
+export interface LimitState {
+  end: 'low' | 'high';
+  limit: number;
+  note?: string;
+}
+
+export const LIMIT_LABEL = "At the map's limit";
+
+/**
+ * The end of the clipped range a point value sits at, or null. Point values
+ * are the float32 pixels and every range end is exact in float32, so the
+ * match is exact.
+ */
+export function limitState(value: number, clip: ClippedRange | undefined, lon: number): LimitState | null {
+  if (!clip) return null;
+  if (clip.longitudes && (lon < clip.longitudes[0] || lon > clip.longitudes[1])) return null;
+  const [low, high] = clip.range;
+  const end = value === low ? 'low' : value === high ? 'high' : null;
+  if (!end) return null;
+  return { end, limit: value, note: clip.notes?.[end] };
+}
+
+export function limitPopover(state: LimitState, line: Pick<InspectorLine, 'decimals' | 'unit'>): PopoverContent {
+  return {
+    title: LIMIT_LABEL,
+    lines: [['Limit', withUnit(formatValue(state.limit, line.decimals), line.unit)]],
+    sentence: 'Values beyond the limit are set to it.',
+    note: state.note,
   };
 }
 

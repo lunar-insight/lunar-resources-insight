@@ -17,6 +17,7 @@ const stac = vi.hoisted(() => ({ fetchStacItem: vi.fn() }))
 vi.mock('services/StacService', () => ({ stacService: stac }))
 
 import {
+  fetchClippedRange,
   fetchFileBounds,
   fetchPointValues,
   fetchResolutionKm,
@@ -62,6 +63,11 @@ describe('fetchPointValues', () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
+  it('fails every file when the asset list names no assets', async () => {
+    fetchMock.mockResolvedValue(json({}))
+    await expect(fetchPointValues(['a/iron5d_COG.tif'], { lon: 0, lat: 0 })).rejects.toThrow('does not hold a/iron5d_COG.tif')
+  })
+
   it('fails on a file the index does not hold', async () => {
     fetchMock.mockResolvedValue(json({ assets: ['iron5d'] }))
     await expect(fetchPointValues(['x/other.tif'], { lon: 0, lat: 0 })).rejects.toBeInstanceOf(PointRequestError)
@@ -82,6 +88,12 @@ describe('fetchPointValues', () => {
     fetchMock.mockImplementation(async url => (url.includes('assets.json') ? json({ assets: ['iron5d'] }) : json({}, 502)))
     await expect(fetchPointValues(['iron5d.tif'], { lon: 0, lat: 0 })).rejects.toThrow('HTTP 502')
   })
+
+  it('reads no data for every file when the response names no bands', async () => {
+    fetchMock.mockImplementation(async url => (url.includes('assets.json') ? json({ assets: ['iron5d', 'feo'] }) : json({})))
+    expect(await fetchPointValues(['iron5d.tif', 'feo.tif'], { lon: 0, lat: 0 }))
+      .toEqual(new Map([['iron5d.tif', null], ['feo.tif', null]]))
+  })
 })
 
 describe('fetchShapeStatistics', () => {
@@ -92,12 +104,16 @@ describe('fetchShapeStatistics', () => {
       properties: { statistics: { b1: {
         mean: 4.75, median: 4.8, std: 0.44, min: 3.6, max: 7.2, count: 576,
         valid_percent: 100, percentile_15: 4.4, percentile_85: 5,
+        histogram: [[400, 176], [3.6, 5.4, 7.2]],
       } } },
     }))
 
     const stats = await fetchShapeStatistics('chemical_elements/th.tif', geojson)
 
-    expect(stats).toEqual({ mean: 4.75, median: 4.8, std: 0.44, min: 3.6, max: 7.2, p15: 4.4, p85: 5, count: 576, coverage: 100 })
+    expect(stats).toEqual({
+      mean: 4.75, median: 4.8, std: 0.44, min: 3.6, max: 7.2, p15: 4.4, p85: 5, count: 576, coverage: 100,
+      histogram: { counts: [400, 176], edges: [3.6, 5.4, 7.2] },
+    })
     const [url, init] = fetchMock.mock.calls[0]
     expect(init?.method).toBe('POST')
     expect(JSON.parse(init?.body as string)).toEqual(geojson)
@@ -105,12 +121,37 @@ describe('fetchShapeStatistics', () => {
     expect(params.get('coord_crs')).toBe('IAU_2015:30100')
     expect(params.get('max_size')).toBe('1024')
     expect(params.getAll('p')).toEqual(['15', '85'])
+    expect(params.get('histogram_bins')).toBe('12')
     expect(params.get('url')).toMatch(/chemical_elements\/th\.tif$/)
+  })
+
+  it('drops a histogram that is not counts and one more edge', async () => {
+    const b1 = { mean: 5, median: 5, std: 1, min: 3, max: 7, count: 10, valid_percent: 100, percentile_15: 4, percentile_85: 6 }
+    for (const histogram of [[[1, 2], [3, 7]], [[1, 'x'], [3, 5, 7]], [[], [3]], 'none', [[1, 2]]]) {
+      fetchMock.mockResolvedValueOnce(json({ properties: { statistics: { b1: { ...b1, histogram } } } }))
+      expect(await fetchShapeStatistics('f.tif', geojson)).not.toHaveProperty('histogram')
+    }
   })
 
   it('returns null for a shape holding no data', async () => {
     fetchMock.mockResolvedValue(json({ properties: { statistics: { b1: { mean: null, count: 0, valid_percent: 0 } } } }))
     expect(await fetchShapeStatistics('f.tif', geojson)).toBeNull()
+  })
+
+  it('retries a failed request once', async () => {
+    fetchMock
+      .mockResolvedValueOnce(json({}, 502))
+      .mockResolvedValueOnce(json({ properties: { statistics: { b1: {
+        mean: 5, median: 5, std: 1, min: 3, max: 7, count: 10, valid_percent: 100, percentile_15: 4, percentile_85: 6,
+      } } } }))
+    expect(await fetchShapeStatistics('f.tif', geojson)).toMatchObject({ mean: 5, coverage: 100 })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('fails after the retry fails too', async () => {
+    fetchMock.mockResolvedValue(json({}, 502))
+    await expect(fetchShapeStatistics('f.tif', geojson)).rejects.toThrow('HTTP 502')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
   it('does not retry an aborted request', async () => {
@@ -147,6 +188,51 @@ describe('fetchResolutionKm', () => {
     stac.fetchStacItem.mockResolvedValueOnce(null)
     expect(await fetchResolutionKm('missing.json')).toBeUndefined()
     expect(await fetchResolutionKm(undefined)).toBeUndefined()
+  })
+})
+
+describe('fetchClippedRange', () => {
+  it('reads the clipped range, longitudes and notes from the catalog item', async () => {
+    stac.fetchStacItem.mockResolvedValueOnce({ properties: {
+      'lri:clipped_range': [0, 24],
+      'lri:clipped_longitudes': [-180, 60],
+      'lri:clipped_notes': { high: 'Artifacts.' },
+    } })
+    expect(await fetchClippedRange('feo.json')).toEqual({ range: [0, 24], longitudes: [-180, 60], notes: { high: 'Artifacts.' } })
+  })
+
+  it('reads a range alone', async () => {
+    stac.fetchStacItem.mockResolvedValueOnce({ properties: { 'lri:clipped_range': [5, 33] } })
+    expect(await fetchClippedRange('al2o3.json')).toEqual({ range: [5, 33] })
+  })
+
+  it('drops malformed longitudes and notes but keeps the range', async () => {
+    stac.fetchStacItem.mockResolvedValueOnce({ properties: {
+      'lri:clipped_range': [0, 24],
+      'lri:clipped_longitudes': [-180, '60'],
+      'lri:clipped_notes': 'Artifacts.',
+    } })
+    expect(await fetchClippedRange('a.json')).toEqual({ range: [0, 24] })
+
+    stac.fetchStacItem.mockResolvedValueOnce({ properties: {
+      'lri:clipped_range': [0, 24],
+      'lri:clipped_longitudes': [-180, 0, 60],
+      'lri:clipped_notes': { low: 3, high: 'Artifacts.' },
+    } })
+    expect(await fetchClippedRange('b.json')).toEqual({ range: [0, 24], notes: { low: undefined, high: 'Artifacts.' } })
+
+    stac.fetchStacItem.mockResolvedValueOnce({ properties: { 'lri:clipped_range': [0, 24], 'lri:clipped_notes': null } })
+    expect(await fetchClippedRange('c.json')).toEqual({ range: [0, 24] })
+  })
+
+  it('has no clipping without a valid range', async () => {
+    stac.fetchStacItem.mockResolvedValueOnce({ properties: { 'lri:clipped_range': [0] } })
+    expect(await fetchClippedRange('bad.json')).toBeUndefined()
+    stac.fetchStacItem.mockResolvedValueOnce({ properties: {} })
+    expect(await fetchClippedRange('plain.json')).toBeUndefined()
+    stac.fetchStacItem.mockResolvedValueOnce(null)
+    expect(await fetchClippedRange('missing.json')).toBeUndefined()
+    expect(await fetchClippedRange(undefined)).toBeUndefined()
   })
 })
 

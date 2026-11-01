@@ -19,6 +19,9 @@ export interface ChartSelection {
   unit: string;
 }
 
+/** The chart a line window opens on: wt%, which most layers use, when present. */
+export const defaultChartUnit = (units: string[]) => (units.includes('wt%') ? 'wt%' : units[0]);
+
 export const picksIn = (selection: ChartSelection, unit: string) =>
   selection.picks.filter(pick => pick.unit === unit);
 

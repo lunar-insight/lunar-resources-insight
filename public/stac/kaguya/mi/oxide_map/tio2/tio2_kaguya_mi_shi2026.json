@@ -76,6 +76,14 @@
       0,
       12
     ],
+    "lri:clipped_range": [
+      0,
+      12
+    ],
+    "lri:clipped_notes": {
+      "low": "TiO₂ here is below what the model resolves. Most highlands are at this limit.",
+      "high": "High-titanium mare reaches 12 wt%. Bands at 12 wt% along some orbit gaps are artifacts."
+    },
     "source_nodata_pixel_pct": 1.53,
     "mean_wt_pct": 0.94,
     "pixels_at_range_min_pct": 15.66,

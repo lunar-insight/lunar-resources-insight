@@ -128,6 +128,16 @@ describe('sampleLine', () => {
     expect(samples.map(s => s.lon)).toEqual([0, 1, 1, 2, 3].map(v => expect.closeTo(v, 6)))
   })
 
+  it('reads one sample per vertex and the ends with a count of 1', () => {
+    expect(sampleLine(line, 1).map(s => s.lon)).toEqual([0, 1, 3].map(v => expect.closeTo(v, 6)))
+  })
+
+  it('samples a line whose first vertex is repeated', () => {
+    const samples = sampleLine([deg(0, 0), deg(0, 0), deg(2, 0)], 3)
+    expect(samples.map(s => s.lon)).toEqual([0, 1, 2].map(v => expect.closeTo(v, 6)))
+    expect(samples.map(s => s.lat)).toEqual([0, 0, 0].map(v => expect.closeTo(v, 6)))
+  })
+
   it('handles lines with one point or none', () => {
     expect(sampleLine([])).toEqual([])
     expect(sampleLine([deg(2, 3)])).toEqual([{ lon: expect.closeTo(2), lat: expect.closeTo(3), distanceKm: 0 }])
@@ -147,6 +157,39 @@ describe('geometryKey', () => {
     expect(geometryKey(moved)).not.toBe(geometryKey(a))
     expect(geometryKey(feature('point', { position: deg(1, 1) }))).toMatch(/^point:/)
     expect(geometryKey(feature('circle', { center: deg(1, 1), radius: 5 }))).toMatch(/:5$/)
+  })
+})
+
+describe('features without their geometry', () => {
+  it('have no center, ring or area', () => {
+    for (const f of [feature('point', {}), feature('line', {}), feature('polygon', {}), feature('circle', {})]) {
+      expect(featureCenter(f)).toBeNull()
+    }
+    expect(shapeRing(feature('polygon', {}))).toBeNull()
+    expect(featureAreaKm2(feature('polygon', { positions: [deg(0, 0), deg(1, 0)] }))).toBeNull()
+  })
+
+  it('keep a geometry key', () => {
+    expect(geometryKey(feature('point', {}))).toBe('point:')
+    expect(geometryKey(feature('line', {}))).toBe('line:')
+    expect(geometryKey(feature('circle', {}))).toBe('circle::')
+  })
+
+  it('have no facts beyond those they hold', () => {
+    expect(featureFacts(feature('line', {}))).toEqual([])
+    expect(featureFacts(feature('circle', {}))).toEqual([])
+  })
+})
+
+describe('circle centers', () => {
+  it('reads a moved center-radius circle from center, other circles from centerPosition', () => {
+    expect(featureCenter(feature('circle', { center: deg(5, 5), centerPosition: deg(1, 1) }))!.lon).toBeCloseTo(5)
+    expect(featureCenter(feature('three-point-circle', { center: deg(5, 5), centerPosition: deg(1, 1) }))!.lon).toBeCloseTo(1)
+  })
+
+  it('falls back on the other field when one is missing', () => {
+    expect(featureCenter(feature('circle', { centerPosition: deg(1, 1) }))!.lon).toBeCloseTo(1)
+    expect(featureCenter(feature('two-point-circle', { center: deg(5, 5) }))!.lon).toBeCloseTo(5)
   })
 })
 

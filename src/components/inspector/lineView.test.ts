@@ -1,8 +1,8 @@
 // @vitest-environment node
 import { describe, it, expect } from 'vitest'
-import { barView, fullLineName } from './lineView'
+import { barView, fullLineName, pointLimit } from './lineView'
 import { inspectorLines } from 'services/inspector/inspectorLayers'
-import { moonStats } from './inspectorTestUtils'
+import { makeResults, moonStats } from './inspectorTestUtils'
 
 const withRange = inspectorLines.find(line => line.referenceRange)!
 const withoutRange = inspectorLines.find(line => !line.referenceRange)!
@@ -32,6 +32,26 @@ describe('barView', () => {
   it('reads a failed or missing value as not computed', () => {
     expect(barView(withRange, { file, failed: true }, moonStats).kind).toBe('failed')
     expect(barView(withRange, { file }, moonStats).kind).toBe('failed')
+  })
+})
+
+describe('pointLimit', () => {
+  const clip = { range: [0, 24] as [number, number] }
+  const point = makeResults('point', {}, { center: { lon: 30, lat: 10 } })
+
+  it('marks a point value at a limit', () => {
+    expect(pointLimit({ file, value: 24, clip }, point)).toMatchObject({ end: 'high', limit: 24 })
+  })
+
+  it('has no mark without a value', () => {
+    expect(pointLimit({ file, noData: 'inside', clip }, point)).toBeNull()
+    expect(pointLimit({ file, noData: 'outside', extent: '50°N to 50°S', clip }, point)).toBeNull()
+    expect(pointLimit({ file, failed: true, clip }, point)).toBeNull()
+  })
+
+  it('has no mark without a center or outside a point', () => {
+    expect(pointLimit({ file, value: 24, clip }, { ...point, center: undefined })).toBeNull()
+    expect(pointLimit({ file, value: 24, clip }, makeResults('shape', {}, { center: { lon: 30, lat: 10 } }))).toBeNull()
   })
 })
 

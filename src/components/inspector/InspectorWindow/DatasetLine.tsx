@@ -2,10 +2,10 @@ import React from 'react';
 import { ToggleButton, TooltipTrigger } from 'react-aria-components';
 import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import { ValueBar } from 'components/inspector/ValueBar/ValueBar';
-import { CoverageIcon, EmptySlot, SpreadIcon } from 'components/inspector/RowIcons/RowIcons';
+import { CoverageIcon, EmptySlot, LimitIcon, SpreadIcon } from 'components/inspector/RowIcons/RowIcons';
 import { Sparkline, type SparkScale } from 'components/inspector/Sparkline/Sparkline';
 import { StatPopover } from 'components/inspector/StatPopover/StatPopover';
-import { barView, CATEGORY_COLOR, fullLineName } from 'components/inspector/lineView';
+import { barView, CATEGORY_COLOR, fullLineName, pointLimit } from 'components/inspector/lineView';
 import { layerStatsService } from 'services/LayerStatsService';
 import type { InspectorLine } from 'services/inspector/inspectorLayers';
 import type { FeatureResults, LineResult } from 'services/inspector/InspectorStore';
@@ -25,8 +25,10 @@ interface DatasetLineProps {
   results: FeatureResults;
   sparkScale: SparkScale;
   sparkFractions: number[];
-  /** Chart button of a line feature's row, absent for a layer without a unit. */
+  /** Chart button of a line feature's row. */
   chart?: ChartControl;
+  /** A point's lines keep a slot right of the bar once any of them is at its map's limit. */
+  limitSlot?: boolean;
 }
 
 const ChartButton: React.FC<{ line: InspectorLine; chart: ChartControl }> = ({ line, chart }) => {
@@ -60,7 +62,9 @@ export const DatasetName: React.FC<{ line: InspectorLine }> = ({ line }) => (
   </span>
 );
 
-export const DatasetLine: React.FC<DatasetLineProps> = ({ line, result, results, sparkScale, sparkFractions, chart }) => {
+export const DatasetLine: React.FC<DatasetLineProps> = ({
+  line, result, results, sparkScale, sparkFractions, chart, limitSlot = false,
+}) => {
   const moon = layerStatsService.getFileStats(result.file.filename);
   const categoryColor = CATEGORY_COLOR[line.category];
   const bar = barView(line, result, moon);
@@ -73,14 +77,22 @@ export const DatasetLine: React.FC<DatasetLineProps> = ({ line, result, results,
     graphic = <Sparkline profile={result.profile} fractions={sparkFractions} scale={sparkScale} moon={moon} categoryColor={categoryColor} />;
   } else if (isShape) {
     const spread = hasValue && result.stats
-      ? spreadState(result.stats, moon, results.areaKm2 ?? 0, result.resolutionKm)
+      ? spreadState(result.stats, moon, results.areaKm2, result.resolutionKm)
       : null;
     const coverage = hasValue ? result.stats?.coverage : undefined;
     graphic = (
       <span className={styles.barSet}>
-        {spread ? <SpreadIcon state={spread} line={line} /> : <EmptySlot />}
+        {spread ? <SpreadIcon state={spread} line={line} categoryColor={categoryColor} /> : <EmptySlot />}
         {graphic}
         {showsCoverage(coverage) ? <CoverageIcon coverage={coverage} /> : <EmptySlot />}
+      </span>
+    );
+  } else if (limitSlot) {
+    const limit = pointLimit(result, results);
+    graphic = (
+      <span className={styles.barSet}>
+        {graphic}
+        {limit ? <LimitIcon state={limit} line={line} /> : <EmptySlot />}
       </span>
     );
   }

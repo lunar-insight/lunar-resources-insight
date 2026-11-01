@@ -172,12 +172,13 @@ export function sampleLine(positions: Cesium.Cartographic[], count = LINE_SAMPLE
   const total = start;
 
   const distances = new Set<number>();
-  for (let i = 0; i < count; i++) distances.add(count === 1 ? 0 : (total * i) / (count - 1));
+  // Capped at the total, so every distance falls within a segment despite rounding
+  for (let i = 0; i < count; i++) distances.add(count === 1 ? 0 : Math.min(total, (total * i) / (count - 1)));
   segments.forEach(segment => distances.add(segment.start));
   distances.add(total);
 
   return [...distances].sort((a, b) => a - b).map(distance => {
-    const segment = segments.find(s => distance <= s.start + s.length) ?? segments[segments.length - 1];
+    const segment = segments.find(s => distance <= s.start + s.length);
     const along = Math.min(Math.max(distance - segment.start, 0), segment.length);
     const point = segment.length === 0
       ? segment.geodesic.start

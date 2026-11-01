@@ -4,7 +4,16 @@ import * as Cesium from 'cesium'
 import type { Feature } from 'components/navigation/FeaturesSection/types'
 import type { LayersConfig } from 'types/layers'
 import { buildInspectorLines } from './inspectorLayers'
-import { InspectorStore, type InspectorDependencies } from './InspectorStore'
+import { defaultDependencies, InspectorStore, type InspectorDependencies } from './InspectorStore'
+import {
+  fetchClippedRange,
+  fetchFileBounds,
+  fetchPointValues,
+  fetchResolutionKm,
+  fetchShapeStatistics,
+  sampleElevation,
+} from './inspectorRequests'
+import { inspectorLines } from './inspectorLayers'
 import { RequestQueue } from './RequestQueue'
 import type { FeatureStatistics } from './inspectorStatistics'
 import { LINE_SAMPLE_COUNT } from './featureGeometry'
@@ -48,6 +57,7 @@ function setup(overrides: Partial<InspectorDependencies> = {}) {
     lines,
     fetchBounds: vi.fn(async (filename: string) => BOUNDS[filename]),
     fetchResolution: vi.fn(async (stac?: string) => (stac === 'global.json' ? 150 : undefined)),
+    fetchClip: vi.fn(async (stac?: string) => (stac === 'global.json' ? { range: [0, 24] as [number, number] } : undefined)),
     fetchPointValues: vi.fn(async (filenames: string[]) =>
       new Map(filenames.map(f => [f, f === 'band.tif' ? null : 7] as [string, number | null]))),
     fetchShapeStatistics: vi.fn(async (filename: string) => (filename === 'band.tif' ? null : shapeStats(5))),
@@ -63,6 +73,22 @@ function setup(overrides: Partial<InspectorDependencies> = {}) {
 const settle = async () => {
   for (let i = 0; i < 20; i++) await new Promise(resolve => setTimeout(resolve, 0))
 }
+
+describe('defaultDependencies', () => {
+  it('wires the requests, the Inspector lines and two separate queues', () => {
+    const deps = defaultDependencies()
+    expect(deps).toMatchObject({
+      lines: inspectorLines,
+      fetchBounds: fetchFileBounds,
+      fetchResolution: fetchResolutionKm,
+      fetchClip: fetchClippedRange,
+      fetchPointValues,
+      fetchShapeStatistics,
+      sampleElevation,
+    })
+    expect(deps.areaQueue).not.toBe(deps.sampleQueue)
+  })
+})
 
 describe('InspectorStore, points', () => {
   it('reads every line in one request and sorts out no data', async () => {
@@ -80,6 +106,22 @@ describe('InspectorStore, points', () => {
     expect(result.lines.band).toMatchObject({ noData: 'outside', extent: '50°N to 50°S' })
     expect(result.lines.pole).toMatchObject({ value: 7, file: { filename: 'north.tif' } })
     expect(result.elevation).toEqual({ value: -100, lowest: -200, highest: 0 })
+  })
+
+  it('keeps the clipping of each file read', async () => {
+    const { store } = setup()
+    store.sync([point(10, 60)])
+    await settle()
+    const result = store.get('p')!
+    expect(result.lines.global.clip).toEqual({ range: [0, 24] })
+    expect(result.lines.pole.clip).toBeUndefined()
+  })
+
+  it('keeps the values when a catalog item fails', async () => {
+    const { store } = setup({ fetchClip: vi.fn(async () => { throw new Error('no item') }) })
+    store.sync([point(10, 60)])
+    await settle()
+    expect(store.get('p')!.lines.global).toMatchObject({ value: 7, clip: undefined })
   })
 
   it('reads no data inside a dataset as such', async () => {
@@ -100,6 +142,33 @@ describe('InspectorStore, points', () => {
     expect(result.failedRequests).toBe(1)
     expect(result.lines.global).toMatchObject({ failed: true })
     expect(result.lines.pole).toMatchObject({ noData: 'outside' })
+  })
+
+  it('finishes without elevation when terrain sampling fails', async () => {
+    const { store } = setup({ sampleElevation: vi.fn(async () => { throw new Error('no tiles') }) })
+    store.sync([point(10, 60)])
+    await settle()
+    const result = store.get('p')!
+    expect(result.status).toBe('ready')
+    expect(result.elevation).toBeNull()
+    expect(result.lines.global).toMatchObject({ value: 7 })
+  })
+
+  it('finishes a point without a position at once', async () => {
+    const { store, deps } = setup()
+    store.sync([feature('x', 'point', {})])
+    await settle()
+    expect(store.get('x')).toMatchObject({ status: 'ready', lines: {} })
+    expect(deps.fetchPointValues).not.toHaveBeenCalled()
+  })
+
+  it('finishes when a computation fails unexpectedly', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const { store } = setup({ fetchBounds: vi.fn(async () => undefined as unknown as number[]) })
+    store.sync([point(10, 0)])
+    await settle()
+    expect(store.get('p')!.status).toBe('ready')
+    expect(error).toHaveBeenCalledWith('Inspector computation failed for p:', expect.any(TypeError))
   })
 
   it('treats unknown bounds as global', async () => {
@@ -166,6 +235,13 @@ describe('InspectorStore, shapes', () => {
     expect(store.get('c')!.kind).toBe('shape')
   })
 
+  it('keeps the value when the catalog item fails', async () => {
+    const { store } = setup({ fetchResolution: vi.fn(async () => { throw new Error('no item') }) })
+    store.sync([square(10, -70)])
+    await settle()
+    expect(store.get('s')!.lines.global).toMatchObject({ value: 5, resolutionKm: undefined })
+  })
+
   it('finishes a shape without a ring at once', async () => {
     const { store } = setup()
     store.sync([feature('x', 'polygon', { positions: [deg(0, 0)] })])
@@ -196,6 +272,23 @@ describe('InspectorStore, lines', () => {
     expect(result.lines.band.stats!.coverage).toBeLessThan(60)
     expect(result.lines.pole).toMatchObject({ file: { filename: 'north.tif' } })
     expect(result.done).toBe(result.total)
+  })
+
+  it('finishes a line under two vertices at once', async () => {
+    const { store, deps } = setup()
+    store.sync([feature('a', 'line', { positions: [deg(0, 0)] }), feature('b', 'line', {})])
+    await settle()
+    expect(store.get('a')).toMatchObject({ status: 'ready', lines: {} })
+    expect(store.get('b')).toMatchObject({ status: 'ready', lines: {} })
+    expect(deps.fetchPointValues).not.toHaveBeenCalled()
+  })
+
+  it('sends no request for samples outside every dataset', async () => {
+    const { store, deps } = setup({ lines: lines.filter(line => line.id === 'band') })
+    store.sync([feature('l', 'line', { positions: [deg(0, 60), deg(0, 70)] })])
+    await settle()
+    expect(deps.fetchPointValues).not.toHaveBeenCalled()
+    expect(store.get('l')!.lines.band).toMatchObject({ noData: 'outside', extent: '50°N to 50°S' })
   })
 
   it('reads no data along a line outside a dataset', async () => {
@@ -278,6 +371,27 @@ describe('InspectorStore, lifecycle', () => {
     store.resumeAreas()
     await flush()
     expect(deps.fetchShapeStatistics).not.toHaveBeenCalled()
+  })
+
+  it('drops a line deleted while its samples are read, without an error', async () => {
+    // Earlier tests leave their console.error calls on the shared spy
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    error.mockClear()
+    let release!: () => void
+    const gate = new Promise<void>(resolve => { release = resolve })
+    const { store } = setup({
+      fetchPointValues: vi.fn(async (filenames: string[]) => {
+        await gate
+        return new Map(filenames.map(f => [f, 1] as [string, number | null]))
+      }),
+    })
+    store.sync([feature('l', 'line', { positions: [deg(0, 40), deg(0, 60)] })])
+    await flush()
+    store.sync([])
+    release()
+    await flush()
+    expect(store.get('l')).toBeUndefined()
+    expect(error).not.toHaveBeenCalled()
   })
 
   it('drops a pending edit with its feature', async () => {

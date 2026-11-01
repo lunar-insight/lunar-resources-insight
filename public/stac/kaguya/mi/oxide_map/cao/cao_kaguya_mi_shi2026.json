@@ -76,6 +76,13 @@
       8,
       18
     ],
+    "lri:clipped_range": [
+      8,
+      18
+    ],
+    "lri:clipped_notes": {
+      "high": "A pixel at 18 wt% stands for 18 wt% or more."
+    },
     "source_nodata_pixel_pct": 1.53,
     "mean_wt_pct": 14.11,
     "pixels_at_range_min_pct": 0.206,

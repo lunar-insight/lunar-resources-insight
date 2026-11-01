@@ -169,6 +169,26 @@ describe('point window', () => {
     expect(within(lineOf('thorium_grs')).queryByRole('button', { name: 'Uniform' })).not.toBeInTheDocument()
   })
 
+  it("marks a value at its map's limit and keeps the slot on every line", async () => {
+    await renderWindow(point, makeResults('point', {
+      feo_kaguya_mi_shi2026: { value: 24, clip: { range: [0, 24], longitudes: [-180, 60], notes: { high: 'Artifacts.' } } },
+      tio2_kaguya_mi_shi2026: { value: 5, clip: { range: [0, 12] } },
+    }, { center: { lon: 3.634, lat: 26.132 } }))
+    await userEvent.click(within(lineOf('feo_kaguya_mi_shi2026')).getByRole('button', { name: "At the map's limit" }))
+    expect(screen.getByRole('dialog')).toHaveTextContent('Limit24.0 wt%')
+    expect(screen.getByRole('dialog')).toHaveTextContent('Artifacts.')
+    expect(within(lineOf('tio2_kaguya_mi_shi2026')).queryByRole('button', { name: "At the map's limit" })).toBeNull()
+    expect(lineOf('thorium_grs').querySelector('span[aria-hidden="true"]')).not.toBeNull()
+  })
+
+  it('has no limit slot when no value is at a limit', async () => {
+    await renderWindow(point, makeResults('point', {
+      feo_kaguya_mi_shi2026: { value: 24, clip: { range: [0, 24], longitudes: [-180, 60] } },
+    }, { center: { lon: 120, lat: 0 } }))
+    expect(within(lineOf('feo_kaguya_mi_shi2026')).queryByRole('button', { name: "At the map's limit" })).toBeNull()
+    expect(lineOf('thorium_grs').querySelector('span[aria-hidden="true"]')).toBeNull()
+  })
+
   it('shows Computing before any results', async () => {
     await renderWindow(point, undefined)
     expect(screen.getByRole('status')).toHaveTextContent(/^Computing$/)
@@ -193,6 +213,27 @@ describe('line window', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Remove Th · Kaguya from the chart' }))
     expect(screen.getByRole('radio', { name: 'ppm' })).toBeChecked()
     expect(screen.getByText('Pick a ppm layer with the chart button on its row.')).toBeInTheDocument()
+  })
+
+  it('has no chart button on a row without data along the line', async () => {
+    await renderWindow(line, makeResults('line', {
+      thorium_grs: { value: undefined, stats: undefined, noData: 'outside', extent: '50°N to 50°S', profile: [null, null, null, null] },
+    }))
+    expect(within(lineOf('thorium_grs')).queryByRole('button', { name: /on the chart/ })).toBeNull()
+    expect(within(lineOf('thorium_kaguya_grs')).getByRole('button', { name: /on the chart/ })).toBeInTheDocument()
+  })
+
+  it('lists only the rows holding a result', async () => {
+    const results = makeResults('line')
+    delete results.lines.thorium_grs
+    await renderWindow(line, results)
+    expect(lineOf('thorium_grs')).toBeNull()
+    expect(lineOf('thorium_kaguya_grs')).not.toBeNull()
+  })
+
+  it('draws the sparklines of a line of zero length', async () => {
+    await renderWindow(line, makeResults('line', {}, { samples: [0, 0, 0, 0].map(distanceKm => ({ distanceKm, lon: 0, lat: 0 })) }))
+    expect(lineOf('feo_lp_grs').querySelector('svg path')!.getAttribute('d')).toMatch(/^M0\.00 /)
   })
 
   it('disables the filter and the sparkline switch while computing', async () => {

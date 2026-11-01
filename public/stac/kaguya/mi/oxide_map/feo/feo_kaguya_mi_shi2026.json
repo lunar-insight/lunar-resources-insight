@@ -76,6 +76,18 @@
       0,
       24
     ],
+    "lri:clipped_range": [
+      0,
+      24
+    ],
+    "lri:clipped_longitudes": [
+      -180,
+      60
+    ],
+    "lri:clipped_notes": {
+      "low": "Most pixels at 0 wt% lie on slopes poleward of 55° and are artifacts. Near-pure anorthosite can also reach it.",
+      "high": "Most pixels at 24 wt% lie along orbit gaps and are artifacts. High-iron mare can also reach it."
+    },
     "source_nodata_pixel_pct": 1.69,
     "mean_wt_pct": 8.32,
     "pixels_at_range_min_pct": 0.014,

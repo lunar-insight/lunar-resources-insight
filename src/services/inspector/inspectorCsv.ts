@@ -33,7 +33,7 @@ function status(result?: LineResult): string {
 function readAt(kind: FeatureResults['kind'], result?: LineResult): string {
   if (!result || result.value === undefined) return '';
   if (kind === 'point') return 'full resolution';
-  if (kind === 'line') return `${result.profile?.length ?? 0} point samples`;
+  if (kind === 'line') return `${result.profile.length} point samples`;
   return `overview capped at ${SHAPE_MAX_SIZE} px`;
 }
 

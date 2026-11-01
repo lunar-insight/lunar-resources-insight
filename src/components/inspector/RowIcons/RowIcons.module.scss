@@ -39,6 +39,14 @@
   color: var(--text-secondary);
 }
 
-.coverage {
+.coverage,
+.caveat {
   color: var(--data-coverage);
+}
+
+// Ringed in the window color, so the dot reads over a bar
+.skewMark {
+  fill: var(--data-coverage);
+  stroke: var(--surface-app);
+  stroke-width: 1;
 }

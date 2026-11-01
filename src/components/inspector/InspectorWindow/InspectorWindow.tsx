@@ -22,7 +22,7 @@ import { useFeatureResults, useInspectorContext, useLayerStatsVersion } from 'ut
 import { featureFacts, shapeWord } from 'services/inspector/featureGeometry';
 import { filterGroups, inspectorGroups, inspectorLines, type InspectorLine } from 'services/inspector/inspectorLayers';
 import type { FeatureResults } from 'services/inspector/InspectorStore';
-import { colorOf, isUnitFull, togglePick, type ChartSelection } from 'services/inspector/chartSelection';
+import { colorOf, defaultChartUnit, isUnitFull, togglePick, type ChartSelection } from 'services/inspector/chartSelection';
 import { csvFileName, downloadCsv, profileCsv, statisticsCsv } from 'services/inspector/inspectorCsv';
 import { LayerList } from './LayerList';
 import styles from './InspectorWindow.module.scss';
@@ -30,7 +30,7 @@ import styles from './InspectorWindow.module.scss';
 export const INSPECTOR_WIDTH = 440;
 
 // Units with a chart, in the order lines first use them
-const CHART_UNITS = [...new Set(inspectorLines.map(line => line.unit).filter((u): u is string => !!u))];
+const CHART_UNITS = [...new Set(inspectorLines.map(line => line.unit))];
 
 const formatMeters = (meters: number) => `${Math.round(meters).toLocaleString('en-US')} m`;
 
@@ -68,7 +68,7 @@ export const InspectorWindow: React.FC<InspectorWindowProps> = ({ feature, casca
 
   const [query, setQuery] = useState('');
   const [sparkScale, setSparkScale] = useState<SparkScale>('moon');
-  const [chart, setChart] = useState<ChartSelection>({ picks: [], unit: CHART_UNITS.includes('wt%') ? 'wt%' : CHART_UNITS[0] });
+  const [chart, setChart] = useState<ChartSelection>({ picks: [], unit: defaultChartUnit(CHART_UNITS) });
 
   // Opening the Inspector retries the whole Moon statistics still missing.
   useEffect(() => {
@@ -80,22 +80,17 @@ export const InspectorWindow: React.FC<InspectorWindowProps> = ({ feature, casca
   const elevation = elevationFact(results);
   const lengthKm = results?.samples?.[results.samples.length - 1]?.distanceKm ?? 0;
 
-  const exportStatistics = () => {
-    if (results) downloadCsv(csvFileName(feature.name, 'statistics'), statisticsCsv(inspectorLines, results));
-  };
-  const exportProfile = () => {
-    if (results) downloadCsv(csvFileName(feature.name, 'profile'), profileCsv(inspectorLines, results));
-  };
+  // The export buttons are disabled until results exist
+  const exportStatistics = () => downloadCsv(csvFileName(feature.name, 'statistics'), statisticsCsv(inspectorLines, results));
+  const exportProfile = () => downloadCsv(csvFileName(feature.name, 'profile'), profileCsv(inspectorLines, results));
 
-  const togglePickedLine = (line: InspectorLine) => {
-    if (line.unit) setChart(current => togglePick(current, line.id, line.unit!));
-  };
+  const togglePickedLine = (line: InspectorLine) => setChart(current => togglePick(current, line.id, line.unit));
   const chartControl = isLine
-    ? (lineId: string, unit?: string) => {
-      if (!unit) return undefined;
-      const line = inspectorLines.find(l => l.id === lineId)!;
-      return { color: colorOf(chart, lineId), isFull: isUnitFull(chart, unit), onToggle: () => togglePickedLine(line) };
-    }
+    ? (lineId: string, unit: string) => ({
+      color: colorOf(chart, lineId),
+      isFull: isUnitFull(chart, unit),
+      onToggle: () => setChart(current => togglePick(current, lineId, unit)),
+    })
     : undefined;
 
   const computing = !results || results.status === 'computing';
@@ -184,10 +179,7 @@ export const InspectorWindow: React.FC<InspectorWindowProps> = ({ feature, casca
             selectionMode="single"
             disallowEmptySelection
             selectedKeys={[sparkScale]}
-            onSelectionChange={keys => {
-              const [next] = [...keys];
-              if (next) setSparkScale(next as SparkScale);
-            }}
+            onSelectionChange={keys => setSparkScale([...keys][0] as SparkScale)}
             className={styles.pills}
           >
             <ToggleButton id="moon" className={styles.pill}>Moon scale</ToggleButton>

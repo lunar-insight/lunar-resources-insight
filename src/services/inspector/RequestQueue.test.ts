@@ -12,6 +12,20 @@ function deferred<T = void>() {
 const flush = () => new Promise(resolve => setTimeout(resolve, 0))
 
 describe('RequestQueue', () => {
+  it('cancels the requests of one group and lets the others finish', async () => {
+    const queue = new RequestQueue(2)
+    const gates = [deferred<number>(), deferred<number>()]
+    const canceled = queue.run('a', () => gates[0].promise)
+    const kept = queue.run('b', () => gates[1].promise)
+    await flush()
+
+    queue.cancelGroup('a')
+    gates[0].resolve(1)
+    gates[1].resolve(2)
+    await expect(canceled).rejects.toBeInstanceOf(CanceledError)
+    await expect(kept).resolves.toBe(2)
+  })
+
   it('runs at most the concurrency at once, in order', async () => {
     const queue = new RequestQueue(2)
     const gates = [deferred(), deferred(), deferred()]
