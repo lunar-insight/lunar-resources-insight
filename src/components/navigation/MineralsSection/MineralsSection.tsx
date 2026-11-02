@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import styles from './MineralsSection.module.scss';
-import { Button, Selection } from 'react-aria-components';
+import { Button, Key, Selection } from 'react-aria-components';
 import ModalOverlayContainer from 'components/layout/ModalOverlayContainer/ModalOverlayContainer';
 import { DataSourceLegend } from 'components/ui/DataSourceLegend/DataSourceLegend';
 import { useZIndex } from 'utils/ZIndexProvider';
@@ -27,21 +27,28 @@ const DISABLED_ROCK_KEYS = new Set(
 const MineralsSection: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { registerModal, unregisterModal } = useZIndex();
-  const { addLayer, removeLayer } = useLayerContext();
+  const { selectedLayers, addLayer, removeLayer } = useLayerContext();
 
   // Hover state for bidirectional highlighting
   const [hoveredRockId, setHoveredRockId] = useState<string | null>(null);
   const [hoveredMineralId, setHoveredMineralId] = useState<string | null>(null);
 
-  // Selection state
-  const [selectedRocks, setSelectedRocks] = useState<Selection>(new Set());
-  const [selectedMinerals, setSelectedMinerals] = useState<Selection>(new Set());
+  // Derived from the context, so a layer added or removed anywhere in the app shows here
+  const selectedRocks = useMemo(
+    () => new Set<Key>(ROCKS.filter(rock => selectedLayers.includes(rock.id)).map(rock => rock.id)),
+    [selectedLayers]
+  );
+  const selectedMinerals = useMemo(
+    () => new Set<Key>(
+      MINERALS.filter(mineral => mapLayerIds(mineral.id).some(id => selectedLayers.includes(id))).map(mineral => mineral.id)
+    ),
+    [selectedLayers]
+  );
 
   // Compute minerals to highlight when rock is hovered
   const highlightedMineralsFromRock = useMemo(() => {
     if (!hoveredRockId) return new Set<string>();
-    const rock = ROCKS.find((r) => r.id === hoveredRockId);
-    return new Set(rock?.composition || []);
+    return new Set(ROCKS.filter((rock) => rock.id === hoveredRockId).flatMap((rock) => rock.composition));
   }, [hoveredRockId]);
 
   // Compute rocks to highlight when mineral is hovered
@@ -72,72 +79,28 @@ const MineralsSection: React.FC = () => {
     setHoveredMineralId(mineralId);
   };
 
+  // Select all gives 'all' for one list of several, which names no entries, so it changes nothing
   const handleRockSelection = useCallback((keys: Selection) => {
-    setSelectedRocks(prevSelectedRocks => {
-      const oldRocks = new Set(prevSelectedRocks);
-      const newRocks = new Set(keys);
-
-      // Add newly selected rocks with metadata
-      newRocks.forEach(rockId => {
-        if (!oldRocks.has(rockId)) {
-          const rock = ROCKS.find(r => r.id === rockId);
-          if (rock) {
-            addLayer(rockId as string, {
-              displayName: rock.name,
-              category: 'rock'
-            });
-          }
-        }
-      });
-
-      // Remove deselected rocks
-      oldRocks.forEach(rockId => {
-        if (!newRocks.has(rockId)) {
-          removeLayer(rockId as string);
-        }
-      });
-
-      return keys;
+    if (keys === 'all') return;
+    ROCKS.forEach(rock => {
+      if (keys.has(rock.id) && !selectedRocks.has(rock.id)) {
+        addLayer(rock.id, { displayName: rock.name, category: 'rock' });
+      } else if (!keys.has(rock.id) && selectedRocks.has(rock.id)) {
+        removeLayer(rock.id);
+      }
     });
-  }, [addLayer, removeLayer]);
+  }, [selectedRocks, addLayer, removeLayer]);
 
   const handleMineralSelection = useCallback((keys: Selection) => {
-    setSelectedMinerals(prevSelectedMinerals => {
-      const oldMinerals = new Set(prevSelectedMinerals);
-      const newMinerals = new Set(keys);
-
-      // A mineral with map layers loads those; one without is a ground-data-only entry
-      newMinerals.forEach(mineralId => {
-        if (!oldMinerals.has(mineralId)) {
-          const mineral = MINERALS.find(m => m.id === mineralId);
-          if (mineral) {
-            const layerIds = mapLayerIds(mineral.id);
-            if (layerIds.length > 0) {
-              layerIds.forEach(layerId => addLayer(layerId));
-            } else {
-              addLayer(mineralId as string, {
-                displayName: mineral.name,
-                category: 'mineral'
-              });
-            }
-          }
-        }
-      });
-
-      oldMinerals.forEach(mineralId => {
-        if (!newMinerals.has(mineralId)) {
-          const layerIds = mapLayerIds(mineralId as string);
-          if (layerIds.length > 0) {
-            layerIds.forEach(layerId => removeLayer(layerId));
-          } else {
-            removeLayer(mineralId as string);
-          }
-        }
-      });
-
-      return keys;
+    if (keys === 'all') return;
+    MINERALS.forEach(mineral => {
+      if (keys.has(mineral.id) && !selectedMinerals.has(mineral.id)) {
+        mapLayerIds(mineral.id).forEach(layerId => addLayer(layerId));
+      } else if (!keys.has(mineral.id) && selectedMinerals.has(mineral.id)) {
+        mapLayerIds(mineral.id).forEach(layerId => removeLayer(layerId));
+      }
     });
-  }, [addLayer, removeLayer]);
+  }, [selectedMinerals, addLayer, removeLayer]);
 
   return (
     <>
