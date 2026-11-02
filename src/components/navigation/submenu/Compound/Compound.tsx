@@ -21,6 +21,8 @@ const DISABLED_COMPOUND_KEYS = new Set(
     .map(c => c.id)
 );
 
+const MAPPED_COMPOUNDS = COMPOUNDS.filter(c => !DISABLED_COMPOUND_KEYS.has(c.id));
+
 const CompoundComponent: React.FC<CompoundProps> = () => {
   const { selectedLayers, addLayer, removeLayer } = useLayerContext();
 
@@ -39,40 +41,21 @@ const CompoundComponent: React.FC<CompoundProps> = () => {
   );
 
   // Derive selected state from context so it persists across modal open/close
-  const selectedCompounds = useMemo((): Selection => {
-    const selected = new Set<Key>();
-    COMPOUNDS.forEach(compound => {
-      const layerInfo = COMPOUND_LAYER_MAP[compound.id];
-      if (layerInfo) {
-        const resolvedIds = getLayersByCompound(layerInfo.id);
-        if (resolvedIds.length > 0 && resolvedIds.some(id => selectedLayers.includes(id))) {
-          selected.add(compound.id);
-        }
-      }
-    });
-    return selected;
-  }, [selectedLayers]);
+  const selectedCompounds = useMemo(() => new Set<Key>(
+    MAPPED_COMPOUNDS
+      .filter(c => getLayersByCompound(COMPOUND_LAYER_MAP[c.id].id).some(id => selectedLayers.includes(id)))
+      .map(c => c.id)
+  ), [selectedLayers]);
 
-  // Selection handler
+  // Select all gives 'all' for one list of several, which names no entries, so it changes nothing
   const handleCompoundSelection = useCallback((keys: Selection) => {
-    const newCompounds = keys === 'all' ? new Set<string>() : new Set(keys as Set<string>);
-    const currentCompounds = selectedCompounds === 'all'
-      ? new Set<string>()
-      : new Set(selectedCompounds as Set<string>);
-
-    newCompounds.forEach(compoundId => {
-      if (!currentCompounds.has(compoundId as string)) {
-        const layerInfo = COMPOUND_LAYER_MAP[compoundId as string];
-        if (layerInfo) {
-          addLayer(layerInfo.id, { displayName: layerInfo.displayName, category: 'compound' });
-        }
-      }
-    });
-
-    currentCompounds.forEach(compoundId => {
-      if (!newCompounds.has(compoundId)) {
-        const layerInfo = COMPOUND_LAYER_MAP[compoundId];
-        if (layerInfo) removeLayer(layerInfo.id);
+    if (keys === 'all') return;
+    MAPPED_COMPOUNDS.forEach(({ id }) => {
+      const layerInfo = COMPOUND_LAYER_MAP[id];
+      if (keys.has(id) && !selectedCompounds.has(id)) {
+        addLayer(layerInfo.id, { displayName: layerInfo.displayName, category: 'compound' });
+      } else if (!keys.has(id) && selectedCompounds.has(id)) {
+        removeLayer(layerInfo.id);
       }
     });
   }, [selectedCompounds, addLayer, removeLayer]);
