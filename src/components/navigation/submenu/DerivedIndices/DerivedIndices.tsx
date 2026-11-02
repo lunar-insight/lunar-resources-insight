@@ -16,39 +16,26 @@ const DerivedIndices: React.FC = () => {
 
   const selectedLayerSet = useMemo(() => new Set(selectedLayers), [selectedLayers]);
 
-  const selectedKeys = useMemo((): Selection => {
-    const selected = new Set<Key>();
-    DERIVED_INDICES.forEach(index => {
-      if (index.layerId && selectedLayerSet.has(index.layerId)) {
-        selected.add(index.id);
-      }
-    });
-    return selected;
-  }, [selectedLayerSet]);
+  const selectedKeys = useMemo(() => new Set<Key>(
+    DERIVED_INDICES
+      .filter(index => index.layerId && selectedLayerSet.has(index.layerId))
+      .map(index => index.id)
+  ), [selectedLayerSet]);
 
   const isInputLoaded = (compoundId: string): boolean => {
     const layerIds = getLayersByCompound(compoundId);
     return layerIds.some(id => selectedLayerSet.has(id));
   };
 
+  // Select all would load every index at once, so it changes nothing
   const handleSelectionChange = useCallback((keys: Selection) => {
-    const newKeys = keys === 'all' ? new Set<string>() : new Set(keys as Set<string>);
-    const currentKeys = selectedKeys === 'all' ? new Set<string>() : new Set(selectedKeys as Set<string>);
-
-    newKeys.forEach(id => {
-      if (!currentKeys.has(id as string)) {
-        const index = DERIVED_INDICES.find(i => i.id === id);
-        const layerInfo = DERIVED_INDEX_LAYER_MAP[id as string];
-        if (index?.layerId && layerInfo) {
-          addLayer(index.layerId, { displayName: layerInfo.displayName, category: 'derived-index' });
-        }
-      }
-    });
-
-    currentKeys.forEach(id => {
-      if (!newKeys.has(id)) {
-        const index = DERIVED_INDICES.find(i => i.id === id);
-        if (index?.layerId) removeLayer(index.layerId);
+    if (keys === 'all') return;
+    DERIVED_INDICES.forEach(({ id, layerId }) => {
+      if (!layerId) return;
+      if (keys.has(id) && !selectedKeys.has(id)) {
+        addLayer(layerId, { displayName: DERIVED_INDEX_LAYER_MAP[id].displayName, category: 'derived-index' });
+      } else if (!keys.has(id) && selectedKeys.has(id)) {
+        removeLayer(layerId);
       }
     });
   }, [selectedKeys, addLayer, removeLayer]);

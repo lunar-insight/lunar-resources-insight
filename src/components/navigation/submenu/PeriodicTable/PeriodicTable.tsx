@@ -107,12 +107,13 @@ const PeriodicTable: React.FC<PeriodicTableProps> = ({ onElementSelect, selected
     [selectedElements]
   );
 
+  // Select all would load the layers of every element at once, so it changes nothing
   const handleSelectionChange = useCallback((keys: Selection) => {
-    const newKeys = new Set(keys);
+    if (keys === 'all') return;
     ALL_ELEMENTS.forEach(element => {
       const elementKey = `${element.row}-${element.column}`;
 
-      if (newKeys.has(elementKey) !== selectedKeys.has(elementKey)) {
+      if (keys.has(elementKey) !== selectedKeys.has(elementKey)) {
         onElementSelect(element);
       }
     });
