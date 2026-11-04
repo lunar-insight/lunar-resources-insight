@@ -1,8 +1,26 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { Feature } from 'components/navigation/FeaturesSection/types'
+import { layerStatsService } from 'services/LayerStatsService'
+import type { InspectorLine } from 'services/inspector/inspectorLayers'
+import { spreadLabel, type SpreadState } from 'services/inspector/inspectorStatistics'
+import histogramStyles from 'components/inspector/ShapeHistogram/ShapeHistogram.module.scss'
 import {
   CoverageIcon, CoveragePie, EmptySlot, LimitGlyph, LimitIcon, LowResolutionGlyph, SpreadGlyph, SpreadIcon,
 } from './RowIcons'
+
+const viewer = vi.hoisted(() => ({ props: [] as Record<string, unknown>[] }))
+
+vi.mock('components/inspector/MiniViewer/MiniViewer', () => ({
+  MiniViewer: (props: Record<string, unknown>) => {
+    viewer.props.push(props)
+    return <figure data-testid="viewer" />
+  },
+}))
+
+vi.mock('components/inspector/ShowOnMap/PopoverFooter', () => ({
+  PopoverFooter: () => <div data-testid="footer" />,
+}))
 
 const heights = (container: HTMLElement) =>
   [...container.querySelectorAll('rect')].map(rect => Number(rect.getAttribute('height')))
@@ -96,6 +114,111 @@ describe('LimitIcon', () => {
     expect(dialog).toHaveTextContent('Limit18.0 wt%')
     expect([...dialog.querySelectorAll('p')].map(p => p.textContent))
       .toEqual(['Values beyond the limit are set to it.', 'A pixel at 18 wt% stands for 18 wt% or more.'])
+  })
+})
+
+describe('with a picture', () => {
+  const feature = { id: 'f', name: 'F', type: 'polygon', color: '#fff', metadata: {} } as unknown as Feature
+  const file = { layerId: 'feo', filename: 'feo.tif' }
+  const fullLine = { decimals: 1, unit: 'wt%', category: 'compound', cardName: 'Iron oxide', datasetLabel: 'MI' } as InspectorLine
+  const picture = { feature, line: fullLine, file }
+  const spread = {
+    kind: 'spread' as const, word: 'Variable' as const, mean: 6.5, median: 6, p15: 5, p85: 9, lowest: 0, highest: 24, skew: null as null,
+    histogram: { counts: [3, 1], edges: [0, 12, 24] },
+  }
+
+  beforeEach(() => {
+    viewer.props = []
+    vi.spyOn(layerStatsService, 'getFileStats').mockReturnValue({ min: 0, max: 24, loaded: true })
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const open = async (state: SpreadState = spread) => {
+    render(<SpreadIcon line={fullLine} categoryColor="red" state={state} picture={picture} />)
+    await userEvent.click(screen.getByRole('button', { name: spreadLabel(state) }))
+    return screen.getByRole('dialog')
+  }
+  const lastHighlight = () => viewer.props.at(-1)!.highlight
+  const barsOf = (dialog: HTMLElement) => [...dialog.querySelectorAll('[data-bin] path')]
+
+  it('places the picture above the histogram, and the footer last', async () => {
+    const dialog = await open()
+    expect(within(dialog).getByTestId('viewer')).toBeInTheDocument()
+    const order = [...dialog.children].map(el => el.getAttribute('data-testid') ?? el.tagName)
+    expect(order.indexOf('viewer')).toBeLessThan(order.findIndex(tag => tag === 'DIV'))
+    expect(order.at(-1)).toBe('footer')
+    expect(viewer.props[0]).toMatchObject({ feature, file, line: fullLine })
+  })
+
+  it('gives low resolution the picture too', async () => {
+    const dialog = await open({ kind: 'low-resolution', cellSizeKm: 150, cells: 2.4 })
+    expect(within(dialog).getByTestId('viewer')).toBeInTheDocument()
+    expect(within(dialog).getByTestId('footer')).toBeInTheDocument()
+  })
+
+  it('lights a bar on hover, on the picture and the histogram, and clears on leaving', async () => {
+    const dialog = await open()
+    const bin = dialog.querySelectorAll('[data-bin]')[1]
+    fireEvent.mouseEnter(bin)
+    expect(lastHighlight()).toEqual({ range: [12, 24], text: '12.0 to 24.0 wt%: 25% of the shape' })
+    expect(barsOf(dialog)[1].classList.contains(histogramStyles.hot)).toBe(true)
+    expect(barsOf(dialog)[0].classList.contains(histogramStyles.cold)).toBe(true)
+    fireEvent.mouseLeave(bin)
+    expect(lastHighlight()).toBeNull()
+    expect(barsOf(dialog)[1].classList.contains(histogramStyles.hot)).toBe(false)
+  })
+
+  it('lights Most on hover, with its fixed share, and no other line', async () => {
+    const dialog = await open()
+    await userEvent.hover(within(dialog).getByText('Most'))
+    expect(lastHighlight()).toEqual({ range: [5, 9], text: '5.0 to 9.0 wt%: 70% of the shape' })
+    await userEvent.hover(within(dialog.querySelector('dl')!).getByText('Median'))
+    expect(lastHighlight()).toBeNull()
+  })
+
+  it('lights nothing on a bin narrower than 2 gray levels, and keeps its tooltip', async () => {
+    vi.spyOn(layerStatsService, 'getFileStats').mockReturnValue({ min: 0, max: 24000, loaded: true })
+    const dialog = await open()
+    const bin = dialog.querySelectorAll('[data-bin]')[1]
+    fireEvent.mouseEnter(bin)
+    expect(lastHighlight()).toBeNull()
+    expect(barsOf(dialog)[1].classList.contains(histogramStyles.hot)).toBe(false)
+    expect(bin.querySelector('title')).toHaveTextContent('12.0 to 24.0 wt%')
+  })
+
+  it('clears the highlight on close', async () => {
+    const dialog = await open()
+    fireEvent.mouseEnter(dialog.querySelectorAll('[data-bin]')[1])
+    expect(lastHighlight()).not.toBeNull()
+    await userEvent.keyboard('{Escape}')
+    await userEvent.click(screen.getByRole('button', { name: 'Variable' }))
+    expect(lastHighlight()).toBeNull()
+  })
+
+  it('lights nothing without a picture', async () => {
+    render(<SpreadIcon line={fullLine} categoryColor="red" state={spread} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Variable' }))
+    const dialog = screen.getByRole('dialog')
+    fireEvent.mouseEnter(dialog.querySelectorAll('[data-bin]')[1])
+    expect(barsOf(dialog)[1].classList.contains(histogramStyles.hot)).toBe(false)
+    expect(within(dialog).queryByTestId('viewer')).toBeNull()
+  })
+
+  it('gives the limit popover the picture, with the limit and its longitudes', async () => {
+    render(<LimitIcon line={fullLine} picture={picture} longitudes={[-180, 60]} state={{ end: 'high', limit: 18 }} />)
+    await userEvent.click(screen.getByRole('button', { name: "At the map's limit" }))
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByTestId('footer')).toBeInTheDocument()
+    expect(viewer.props[0].limit).toEqual({ value: 18, longitudes: [-180, 60] })
+  })
+
+  it('leaves the limit popover plain without a picture', async () => {
+    render(<LimitIcon line={fullLine} state={{ end: 'high', limit: 18 }} />)
+    await userEvent.click(screen.getByRole('button', { name: "At the map's limit" }))
+    expect(within(screen.getByRole('dialog')).queryByTestId('viewer')).toBeNull()
   })
 })
 

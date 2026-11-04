@@ -209,7 +209,7 @@ export const InspectorWindow: React.FC<InspectorWindowProps> = ({ feature, casca
             )}
           </div>
         ) : feature.inspectorOpen && (
-          <LayerList groups={groups} results={results} sparkScale={sparkScale} chartControl={chartControl} />
+          <LayerList feature={feature} groups={groups} results={results} sparkScale={sparkScale} chartControl={chartControl} />
         )}
       </div>
     </DraggableBoxContentContainer>

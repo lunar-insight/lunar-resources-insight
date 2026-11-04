@@ -21,6 +21,14 @@
   fill: color-mix(in srgb, var(--cat) 80%, transparent);
 }
 
+.hot {
+  fill: var(--cat);
+}
+
+.cold {
+  fill: color-mix(in srgb, var(--cat) 35%, transparent);
+}
+
 .axis {
   stroke: var(--border-strong);
   stroke-width: 1;

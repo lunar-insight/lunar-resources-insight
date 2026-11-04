@@ -5,6 +5,8 @@ import { InspectorStore, type FeatureResults } from 'services/inspector/Inspecto
 import { allLineFiles, inspectorLines } from 'services/inspector/inspectorLayers';
 import { layerStatsService } from 'services/LayerStatsService';
 
+export type PictureColor = 'gray' | 'viridis';
+
 interface InspectorContextType {
   store: InspectorStore;
   comparedIds: Set<string>;
@@ -14,6 +16,9 @@ interface InspectorContextType {
   setComparisonOpen: (open: boolean) => void;
   /** Fetches the whole Moon statistics still missing, as opening an Inspector does. */
   retryMissingStatistics: () => void;
+  /** Colors of the popover pictures, held for the session across rows and popovers. */
+  pictureColor: PictureColor;
+  setPictureColor: (color: PictureColor) => void;
 }
 
 const InspectorContext = createContext<InspectorContextType | undefined>(undefined);
@@ -27,6 +32,7 @@ export const InspectorProvider: React.FC<{ children: React.ReactNode; store?: In
   const [store] = useState(() => givenStore ?? new InspectorStore());
   const [comparedIds, setComparedIds] = useState<Set<string>>(new Set());
   const [isComparisonOpen, setComparisonOpen] = useState(false);
+  const [pictureColor, setPictureColor] = useState<PictureColor>('gray');
 
   useEffect(() => {
     store.sync(features);
@@ -77,7 +83,9 @@ export const InspectorProvider: React.FC<{ children: React.ReactNode; store?: In
     isComparisonOpen,
     setComparisonOpen,
     retryMissingStatistics,
-  }), [store, comparedIds, toggleCompared, addCompared, isComparisonOpen, retryMissingStatistics]);
+    pictureColor,
+    setPictureColor,
+  }), [store, comparedIds, toggleCompared, addCompared, isComparisonOpen, retryMissingStatistics, pictureColor]);
 
   return <InspectorContext.Provider value={value}>{children}</InspectorContext.Provider>;
 };

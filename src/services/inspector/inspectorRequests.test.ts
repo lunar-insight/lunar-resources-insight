@@ -19,6 +19,8 @@ vi.mock('services/StacService', () => ({ stacService: stac }))
 import {
   fetchClippedRange,
   fetchFileBounds,
+  fetchFilePixelKm,
+  fetchPicture,
   fetchPointValues,
   fetchResolutionKm,
   fetchShapeStatistics,
@@ -26,6 +28,7 @@ import {
   sampleElevation,
   PointRequestError,
 } from './inspectorRequests'
+import { localCrs } from './pictureGeometry'
 
 const json = (body: unknown, status = 200) =>
   ({ ok: status < 400, status, statusText: String(status), json: async () => body }) as Response
@@ -40,6 +43,143 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals()
+})
+
+describe('fetchFilePixelKm', () => {
+  const KM_PER_DEGREE = (Math.PI * 1737400) / 180 / 1000
+
+  it('converts degrees on a geographic file, once per file', async () => {
+    fetchMock.mockResolvedValue(json({ bounds: [-180, -65, 180, 65], width: 184320, crs: 'GEOGCS["Moon"]' }))
+    await expect(fetchFilePixelKm('a.tif')).resolves.toBeCloseTo((360 / 184320) * KM_PER_DEGREE, 8)
+    await fetchFilePixelKm('a.tif')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('converts meters on a projected file', async () => {
+    fetchMock.mockResolvedValue(json({ bounds: [-1267472, -1267472, 1267472, 1267472], width: 2529, crs: 'PROJCS["Moon"]' }))
+    await expect(fetchFilePixelKm('polar.tif')).resolves.toBeCloseTo(1.0024, 3)
+  })
+
+  it('asks again after a failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    fetchMock.mockResolvedValueOnce(json({}, 500))
+    await expect(fetchFilePixelKm('a.tif')).rejects.toThrow()
+    fetchMock.mockResolvedValueOnce(json({ bounds: [0, 0, 1, 1], width: 1, crs: 'GEOGCS["Moon"]' }))
+    await expect(fetchFilePixelKm('a.tif')).resolves.toBeCloseTo(KM_PER_DEGREE, 6)
+  })
+})
+
+describe('fetchPicture', () => {
+  const part = (x0: number, x1: number, width: number) => ({ x0, y0: -10, x1, y1: 10, width, height: 300 })
+  const center = { lon: 50.27, lat: -64.25 }
+  const whole = { center, x0: -20, y0: -10, x1: 20, y1: 10, parts: [part(-20, 20, 422)] }
+  const split = {
+    center: { lon: 180, lat: 2 },
+    x0: -100, y0: -10, x1: 100, y1: 10,
+    parts: [part(-100, -5, 200), part(5, 100, 222)],
+  }
+
+  // Each decoded image is filled with its width as gray, and half its width as alpha
+  beforeEach(() => {
+    vi.stubGlobal('createImageBitmap', vi.fn(async () => ({ close: vi.fn() })))
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function (this: HTMLCanvasElement) {
+      const { width, height } = this
+      return {
+        drawImage: vi.fn(),
+        getImageData: () => {
+          const data = new Uint8ClampedArray(width * height * 4)
+          for (let i = 0; i < width * height; i++) {
+            data[i * 4] = width % 256
+            data[i * 4 + 3] = (width / 2) % 256
+          }
+          return { data }
+        },
+      } as unknown as CanvasRenderingContext2D
+    } as unknown as typeof HTMLCanvasElement.prototype.getContext)
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const png = () => ({ ok: true, status: 200, blob: async () => new Blob() }) as Response
+
+  it('asks for the box in a local projection, with the rescale', async () => {
+    fetchMock.mockResolvedValue(png())
+    await fetchPicture('compounds/feo.tif', whole, [0, 24])
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const url = fetchMock.mock.calls[0][0]
+    expect(url).toContain('/cog/bbox/-20,-10,20,10/422x300.png?')
+    const params = new URL(url, 'http://x').searchParams
+    expect(params.get('url')).toBe('/data/compounds/feo.tif')
+    expect(params.get('bidx')).toBe('1')
+    expect(params.get('rescale')).toBe('0,24')
+    expect(params.get('coord_crs')).toBe(localCrs(center))
+    expect(params.get('dst_crs')).toBe(localCrs(center))
+    // The + of the projection text reaches the tiler as a plus, not as a space
+    expect(url).toContain('coord_crs=%2Bproj%3Dlaea')
+  })
+
+  it('decodes with no color conversion and no premultiplied alpha', async () => {
+    fetchMock.mockResolvedValue(png())
+    await fetchPicture('a.tif', whole, [0, 24])
+    expect(createImageBitmap).toHaveBeenCalledWith(expect.any(Blob), { colorSpaceConversion: 'none', premultiplyAlpha: 'none' })
+  })
+
+  it('sends no rescale without a range', async () => {
+    fetchMock.mockResolvedValue(png())
+    await fetchPicture('a.tif', whole, null)
+    expect(fetchMock.mock.calls[0][0]).not.toContain('rescale')
+  })
+
+  it('gives one part as 422 × 300 gray and alpha', async () => {
+    fetchMock.mockResolvedValue(png())
+    const { gray, alpha } = await fetchPicture('a.tif', whole, [0, 24])
+    expect(gray).toHaveLength(422 * 300)
+    expect(gray.every(value => value === 422 % 256)).toBe(true)
+    expect(alpha.every(value => value === 211)).toBe(true)
+  })
+
+  it('composes two parts side by side, with their own widths', async () => {
+    fetchMock.mockResolvedValue(png())
+    const { gray, alpha } = await fetchPicture('a.tif', split, [0, 24])
+
+    expect(fetchMock.mock.calls.map(call => call[0].split('?')[0])).toEqual([
+      '/cog/bbox/-100,-10,-5,10/200x300.png',
+      '/cog/bbox/5,-10,100,10/222x300.png',
+    ])
+    for (const row of [0, 150, 299]) {
+      expect(gray[row * 422]).toBe(200)
+      expect(gray[row * 422 + 199]).toBe(200)
+      expect(gray[row * 422 + 200]).toBe(222)
+      expect(gray[row * 422 + 421]).toBe(222)
+      expect(alpha[row * 422 + 199]).toBe(100)
+      expect(alpha[row * 422 + 200]).toBe(111)
+    }
+  })
+
+  it('retries a failed request once', async () => {
+    fetchMock.mockResolvedValueOnce(json({}, 500)).mockResolvedValueOnce(png())
+    await fetchPicture('a.tif', whole, [0, 24])
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('fails after its retry', async () => {
+    fetchMock.mockResolvedValue(json({}, 500))
+    await expect(fetchPicture('a.tif', whole, [0, 24])).rejects.toThrow('HTTP 500')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('does not retry once aborted', async () => {
+    const controller = new AbortController()
+    fetchMock.mockImplementation(async () => {
+      controller.abort()
+      throw new Error('aborted')
+    })
+    await expect(fetchPicture('a.tif', whole, [0, 24], controller.signal)).rejects.toThrow('aborted')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('fetchPointValues', () => {

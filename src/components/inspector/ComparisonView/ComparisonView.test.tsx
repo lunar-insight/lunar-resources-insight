@@ -56,6 +56,16 @@ beforeEach(() => {
 })
 
 describe('ComparisonView', () => {
+  it('shows no picture or map button in a bar popover', async () => {
+    const dialog = await renderComparison([b], { b: makeResults('point') })
+    await userEvent.click(within(dialog).getAllByRole('button', { name: 'Bar scale' })[0])
+    const popover = screen.getAllByRole('dialog').at(-1)!
+    expect(popover).not.toBe(dialog)
+    expect(popover.querySelector('figure')).toBeNull()
+    expect(within(popover).queryByRole('button', { name: 'Go to the feature' })).toBeNull()
+    expect(within(popover).queryByRole('button', { name: 'Show on the map' })).toBeNull()
+  })
+
   it('asks for features when none is ticked', async () => {
     const dialog = await renderComparison([a], { a: makeResults('shape') }, [])
     expect(dialog).toHaveTextContent('Tick features in the Features panel to compare them.')

@@ -27,6 +27,12 @@ describe('ValueBar', () => {
     expect(track(failed)).toHaveClass(styles.dash)
   })
 
+  it('holds a chart and a footer in its popover', async () => {
+    render(<ValueBar view={{ kind: 'value', position: 0.5, popover }} categoryColor="rgb(0, 0, 0)" chart={<svg data-testid="chart" />} footer={<footer />} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Bar scale' }))
+    expect([...screen.getByRole('dialog').children].map(el => el.tagName)).toEqual(['H2', 'svg', 'FOOTER'])
+  })
+
   it('opens its popover on press', async () => {
     render(<ValueBar view={{ kind: 'no-scale', popover: { title: 'Scale unavailable', lines: [], sentence: 'Retry.' } }} categoryColor="rgb(0, 0, 0)" />)
     await userEvent.click(screen.getByRole('button', { name: 'Scale unavailable' }))

@@ -353,7 +353,7 @@ div.windowContent {
   gap: 0.5rem;
   min-height: 1.25rem;
   margin: 0 -0.25rem;
-  padding: 0.2rem 0.25rem 0.2rem 0.85rem;
+  padding: 0.2rem 0.25rem;
   border-radius: 0.2rem;
 
   & + & {
@@ -362,6 +362,21 @@ div.windowContent {
 
   &:hover {
     background: color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+}
+
+// Shown on hover and focus, kept while pressed. Opacity, so it stays focusable.
+.mapToggle {
+  opacity: 0;
+
+  .datasetLine:hover &,
+  .datasetLine:focus-within &,
+  &[data-selected] {
+    opacity: 1;
+  }
+
+  @media (hover: none) {
+    opacity: 1;
   }
 }
 

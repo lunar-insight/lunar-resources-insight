@@ -1,5 +1,6 @@
-import { render } from '@testing-library/react'
+import { fireEvent, render } from '@testing-library/react'
 import { barPath, ShapeHistogram } from './ShapeHistogram'
+import styles from './ShapeHistogram.module.scss'
 
 const histogram = { counts: [4, 11, 36, 0, 7, 2], edges: [0, 4, 8, 12, 16, 20, 24] }
 
@@ -36,6 +37,33 @@ describe('ShapeHistogram', () => {
 
   it('labels the axis ends with the lowest and highest value', () => {
     expect(draw().textContent).toMatch(/of pixels0\.024\.0MedianAverage$/)
+  })
+
+  it('reports the bin under the pointer', () => {
+    const onBinHover = vi.fn()
+    const bins = draw({ onBinHover }).querySelectorAll('[data-bin]')
+    fireEvent.mouseEnter(bins[2])
+    expect(onBinHover).toHaveBeenLastCalledWith({ from: 8, to: 12, share: expect.closeTo(60, 0) })
+    fireEvent.mouseLeave(bins[2])
+    expect(onBinHover).toHaveBeenLastCalledWith(null)
+  })
+
+  it('tolerates a pointer with nobody listening', () => {
+    const bin = draw().querySelector('[data-bin]')!
+    fireEvent.mouseEnter(bin)
+    fireEvent.mouseLeave(bin)
+    expect(bin).toBeInTheDocument()
+  })
+
+  it('stands out the bars inside the highlight and recedes the others', () => {
+    const bars = [...draw({ highlight: [4, 12] }).querySelectorAll('[data-bin] path')]
+    expect(bars.map(bar => bar.classList.contains(styles.hot))).toEqual([false, true, true, false, false])
+    expect(bars.map(bar => bar.classList.contains(styles.cold))).toEqual([true, false, false, true, true])
+  })
+
+  it('marks no bar without a highlight', () => {
+    const bars = [...draw({ highlight: null }).querySelectorAll('[data-bin] path')]
+    expect(bars.some(bar => bar.classList.contains(styles.hot) || bar.classList.contains(styles.cold))).toBe(false)
   })
 
   it('rounds only the top corners, never past a short bar', () => {

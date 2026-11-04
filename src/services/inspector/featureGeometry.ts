@@ -80,23 +80,79 @@ export function shapeRing(feature: Feature): LonLat[] | null {
   return circleRing(toLonLat(center), radius);
 }
 
-/** GeoJSON Feature for a shape, in degrees, closed. */
+const wrapLon = (lon: number) => (lon > 180 ? lon - 360 : lon < -180 ? lon + 360 : lon);
+
+/**
+ * The ring with continuous longitudes, adding 360° at a jump over 180°. A ring
+ * around a pole has no continuous form and stays as given.
+ */
+export function unwrapRing(ring: LonLat[]): LonLat[] {
+  let offset = 0;
+  const offsetAfter = (from: LonLat, to: LonLat) => {
+    const step = to.lon - from.lon;
+    if (step > 180) offset -= 360;
+    else if (step < -180) offset += 360;
+  };
+  const unwrapped = ring.map((p, i) => {
+    if (i > 0) offsetAfter(ring[i - 1], p);
+    return { lon: p.lon + offset, lat: p.lat };
+  });
+  offsetAfter(ring[ring.length - 1], ring[0]);
+  return offset === 0 ? unwrapped : ring;
+}
+
+/** The part of a continuous ring on one side of a meridian: `side` 1 keeps east of it, -1 west. */
+function clipAtMeridian(ring: LonLat[], meridian: number, side: 1 | -1): LonLat[] {
+  const isKept = (p: LonLat) => (p.lon - meridian) * side >= 0;
+  const clipped: LonLat[] = [];
+  ring.forEach((a, i) => {
+    const b = ring[(i + 1) % ring.length];
+    if (isKept(a)) clipped.push(a);
+    if (isKept(a) !== isKept(b)) {
+      const share = (meridian - a.lon) / (b.lon - a.lon);
+      clipped.push({ lon: meridian, lat: a.lat + share * (b.lat - a.lat) });
+    }
+  });
+  return clipped;
+}
+
+/** The ring in ±180° longitudes: itself, or its two parts split at 180°. */
+export function ringParts(ring: LonLat[]): LonLat[][] {
+  const unwrapped = unwrapRing(ring);
+  const lons = unwrapped.map(p => p.lon);
+  const meridian = Math.max(...lons) > 180 ? 180 : Math.min(...lons) < -180 ? -180 : null;
+  if (meridian === null) return [unwrapped];
+
+  // A side holding only vertices on the meridian has no area. The part beyond
+  // ±180° comes back by 360°, and its edge on the meridian with it.
+  const part = (side: 1 | -1, by: number) => {
+    const clipped = clipAtMeridian(unwrapped, meridian, side);
+    return clipped.some(p => p.lon !== meridian) ? [clipped.map(p => ({ lon: p.lon + by, lat: p.lat }))] : [];
+  };
+  return [...part(-1, meridian < 0 ? 360 : 0), ...part(1, meridian > 0 ? -360 : 0)];
+}
+
+const closedRing = (ring: LonLat[]) => [...ring, ring[0]].map(p => [p.lon, p.lat]);
+
+/** GeoJSON Feature for a shape, in degrees, closed. A ring across 180° is split into a MultiPolygon. */
 export function ringToGeoJson(ring: LonLat[]) {
-  const coordinates = ring.map(p => [p.lon, p.lat]);
-  coordinates.push([ring[0].lon, ring[0].lat]);
+  const parts = ringParts(ring);
   return {
     type: 'Feature' as const,
     properties: {},
-    geometry: { type: 'Polygon' as const, coordinates: [coordinates] },
+    geometry: parts.length > 1
+      ? { type: 'MultiPolygon' as const, coordinates: parts.map(part => [closedRing(part)]) }
+      : { type: 'Polygon' as const, coordinates: [closedRing(parts[0])] },
   };
 }
 
 /** Area of a ring on the Moon's sphere, in km². */
 export function ringAreaKm2(ring: LonLat[]): number {
+  const unwrapped = unwrapRing(ring);
   let sum = 0;
-  for (let i = 0; i < ring.length; i++) {
-    const a = ring[i];
-    const b = ring[(i + 1) % ring.length];
+  for (let i = 0; i < unwrapped.length; i++) {
+    const a = unwrapped[i];
+    const b = unwrapped[(i + 1) % unwrapped.length];
     sum += Cesium.Math.toRadians(b.lon - a.lon)
       * (2 + Math.sin(Cesium.Math.toRadians(a.lat)) + Math.sin(Cesium.Math.toRadians(b.lat)));
   }
@@ -203,8 +259,9 @@ export function isInsideRing(point: LonLat, ring: LonLat[]): boolean {
 
 /** About `target` points on a regular grid inside a ring, plus its vertices. */
 export function gridInsideRing(ring: LonLat[], target = 144): LonLat[] {
-  const lons = ring.map(p => p.lon);
-  const lats = ring.map(p => p.lat);
+  const unwrapped = unwrapRing(ring);
+  const lons = unwrapped.map(p => p.lon);
+  const lats = unwrapped.map(p => p.lat);
   const west = Math.min(...lons), east = Math.max(...lons);
   const south = Math.min(...lats), north = Math.max(...lats);
   const steps = Math.max(2, Math.round(Math.sqrt(target)));
@@ -216,17 +273,21 @@ export function gridInsideRing(ring: LonLat[], target = 144): LonLat[] {
         lon: west + ((east - west) * (i + 0.5)) / steps,
         lat: south + ((north - south) * (j + 0.5)) / steps,
       };
-      if (isInsideRing(p, ring)) points.push(p);
+      if (isInsideRing(p, unwrapped)) points.push({ lon: wrapLon(p.lon), lat: p.lat });
     }
   }
   return [...points, ...ring];
 }
 
-/** Bounding box [west, south, east, north] in degrees. */
+/**
+ * Bounding box [west, south, east, north] in degrees. West exceeds east for a
+ * ring across 180°, so compare against the bounds of its `ringParts`.
+ */
 export function ringBounds(ring: LonLat[]): number[] {
-  const lons = ring.map(p => p.lon);
-  const lats = ring.map(p => p.lat);
-  return [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)];
+  const unwrapped = unwrapRing(ring);
+  const lons = unwrapped.map(p => p.lon);
+  const lats = unwrapped.map(p => p.lat);
+  return [wrapLon(Math.min(...lons)), Math.min(...lats), wrapLon(Math.max(...lons)), Math.max(...lats)];
 }
 
 export function boundsIntersect(a: number[], b: number[]): boolean {

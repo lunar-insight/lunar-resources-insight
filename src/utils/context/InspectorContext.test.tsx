@@ -35,6 +35,13 @@ beforeEach(() => {
 })
 
 describe('InspectorProvider', () => {
+  it('holds the picture colors, gray until changed', () => {
+    const { result } = setup()
+    expect(result.current.inspector.pictureColor).toBe('gray')
+    act(() => result.current.inspector.setPictureColor('viridis'))
+    expect(result.current.inspector.pictureColor).toBe('viridis')
+  })
+
   it('syncs the store with the features', () => {
     const { store, result } = setup()
     const feature = makeFeature({ id: 'a', type: 'point' })

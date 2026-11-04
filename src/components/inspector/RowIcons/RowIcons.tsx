@@ -1,18 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { MiniViewer, type PictureHighlight } from 'components/inspector/MiniViewer/MiniViewer';
 import { ShapeHistogram } from 'components/inspector/ShapeHistogram/ShapeHistogram';
+import { PopoverFooter } from 'components/inspector/ShowOnMap/PopoverFooter';
 import { StatPopover } from 'components/inspector/StatPopover/StatPopover';
+import type { Feature } from 'components/navigation/FeaturesSection/types';
+import { layerStatsService } from 'services/LayerStatsService';
 import {
   coveragePopover,
   coverageText,
+  highlightText,
   LIMIT_LABEL,
   limitPopover,
   spreadLabel,
   spreadPopover,
+  type HistogramBin,
   type LimitState,
   type SpreadState,
   type SpreadWord,
 } from 'services/inspector/inspectorStatistics';
-import type { InspectorLine } from 'services/inspector/inspectorLayers';
+import type { InspectorLine, LineFile } from 'services/inspector/inspectorLayers';
+import { canHighlight } from 'services/inspector/pictureValues';
 import styles from './RowIcons.module.scss';
 
 // Bar heights on a common baseline: level, uneven, very uneven.
@@ -75,15 +82,37 @@ export const LimitGlyph: React.FC<{ end: LimitState['end'] }> = ({ end }) => (
 /** Keeps the width of an icon slot, so bars align on every line. */
 export const EmptySlot: React.FC = () => <span className={styles.emptySlot} aria-hidden="true" />;
 
+/** What a popover's picture shows: the feature, the line and the file it reads. */
+export interface PictureTarget {
+  feature: Feature;
+  line: InspectorLine;
+  file: LineFile;
+}
+
 interface SpreadIconProps {
   state: SpreadState;
   line: Pick<InspectorLine, 'decimals' | 'unit'>;
   categoryColor: string;
+  /** Adds the picture and the footer to the popover. */
+  picture?: PictureTarget;
 }
 
-export const SpreadIcon: React.FC<SpreadIconProps> = ({ state, line, categoryColor }) => {
+const MOST_TERM = 'Most';
+/** Share of a shape's pixels between its p15 and p85. */
+const MOST_SHARE = 70;
+
+export const SpreadIcon: React.FC<SpreadIconProps> = ({ state, line, categoryColor, picture }) => {
+  const [highlight, setHighlight] = useState<PictureHighlight | null>(null);
   const label = spreadLabel(state);
-  const chart = state.kind === 'spread' && state.histogram ? (
+
+  const light = (bin: HistogramBin | null) => {
+    const moon = picture && layerStatsService.getFileStats(picture.file.filename);
+    setHighlight(bin && moon && canHighlight([moon.min, moon.max], bin.to - bin.from)
+      ? { range: [bin.from, bin.to], text: highlightText(bin, line) }
+      : null);
+  };
+
+  const histogram = state.kind === 'spread' && state.histogram ? (
     <ShapeHistogram
       histogram={state.histogram}
       median={state.median}
@@ -92,14 +121,24 @@ export const SpreadIcon: React.FC<SpreadIconProps> = ({ state, line, categoryCol
       p85={state.p85}
       line={line}
       categoryColor={categoryColor}
+      onBinHover={light}
+      highlight={highlight?.range}
     />
   ) : undefined;
+
+  const lightLine = (term: string | null) => {
+    light(state.kind === 'spread' && term === MOST_TERM ? { from: state.p15, to: state.p85, share: MOST_SHARE } : null);
+  };
+
   return (
     <StatPopover
       content={spreadPopover(state, line)}
       label={label}
       tooltip={label}
-      chart={chart}
+      chart={picture ? <><MiniViewer {...picture} highlight={highlight} />{histogram}</> : histogram}
+      footer={picture && <PopoverFooter feature={picture.feature} file={picture.file} />}
+      onLineHover={lightLine}
+      onOpenChange={isOpen => { if (!isOpen) setHighlight(null); }}
       className={`${styles.icon} ${state.kind === 'low-resolution' ? styles.muted : ''}`}
     >
       {state.kind === 'spread' ? <SpreadGlyph word={state.word} skewed={state.skew !== null} /> : <LowResolutionGlyph />}
@@ -107,11 +146,22 @@ export const SpreadIcon: React.FC<SpreadIconProps> = ({ state, line, categoryCol
   );
 };
 
-export const LimitIcon: React.FC<{ state: LimitState; line: Pick<InspectorLine, 'decimals' | 'unit'> }> = ({ state, line }) => (
+interface LimitIconProps {
+  state: LimitState;
+  line: Pick<InspectorLine, 'decimals' | 'unit'>;
+  /** Adds the picture, tinted at the limit, and the footer to the popover. */
+  picture?: PictureTarget;
+  /** Where the clip applies, [west, east] in degrees. */
+  longitudes?: [number, number];
+}
+
+export const LimitIcon: React.FC<LimitIconProps> = ({ state, line, picture, longitudes }) => (
   <StatPopover
     content={limitPopover(state, line)}
     label={LIMIT_LABEL}
     tooltip={LIMIT_LABEL}
+    chart={picture && <MiniViewer {...picture} limit={{ value: state.limit, longitudes }} />}
+    footer={picture && <PopoverFooter feature={picture.feature} file={picture.file} />}
     className={`${styles.icon} ${styles.caveat}`}
   >
     <LimitGlyph end={state.end} />

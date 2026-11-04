@@ -6,6 +6,7 @@ import {
   barPosition,
   barScale,
   binText,
+  highlightText,
   cellCount,
   coveragePopover,
   coverageText,
@@ -158,6 +159,9 @@ describe('histogram', () => {
     expect(binText({ from: 0, to: 2, share: 36.4 }, line)).toBe('0.0 to 2.0 wt%: 36% of pixels')
     expect(binText({ from: 22, to: 24, share: 0.3 }, line)).toBe('22.0 to 24.0 wt%: less than 1% of pixels')
     expect(binText({ from: 2, to: 4, share: 0 }, { decimals: 0 })).toBe('2 to 4: 0% of pixels')
+    expect(highlightText({ from: 22.8, to: 24, share: 13.2 }, line)).toBe('22.8 to 24.0 wt%: 13% of the shape')
+    expect(highlightText({ from: 22, to: 24, share: 0.3 }, line)).toBe('22.0 to 24.0 wt%: <1% of the shape')
+    expect(highlightText({ from: 2, to: 4, share: 0 }, { decimals: 0 })).toBe('2 to 4: <1% of the shape')
   })
 })
 

@@ -22,10 +22,12 @@ import {
   ringBounds,
   lineLengthM,
   ringAreaKm2,
+  ringParts,
   ringToGeoJson,
   sampleLine,
   shapeRing,
   shapeWord,
+  unwrapRing,
 } from './featureGeometry'
 
 const deg = (lon: number, lat: number) => Cesium.Cartographic.fromDegrees(lon, lat)
@@ -241,6 +243,102 @@ describe('rings and bounds', () => {
     expect(boundsIntersect([0, 0, 10, 10], [-180, 49.8, 180, 90])).toBe(false)
     expect(isInsideBounds({ lon: 0, lat: 50 }, [-180, -50, 180, 50])).toBe(true)
     expect(isInsideBounds({ lon: 0, lat: 50.1 }, [-180, -50, 180, 50])).toBe(false)
+  })
+})
+
+describe('rings across the 180° meridian', () => {
+  // The 1° × 2° box of the statistics measured on LP GRS FeO, centered on 180°
+  const crossing = [{ lon: 179.5, lat: -1 }, { lon: -179.5, lat: -1 }, { lon: -179.5, lat: 1 }, { lon: 179.5, lat: 1 }]
+  const elsewhere = [{ lon: 9.5, lat: -1 }, { lon: 10.5, lat: -1 }, { lon: 10.5, lat: 1 }, { lon: 9.5, lat: 1 }]
+  // Around the south pole, every longitude once
+  const aroundPole = [0, 90, 180, -90].map(lon => ({ lon, lat: -85 }))
+
+  it('unwraps to continuous longitudes, whichever side the ring starts on', () => {
+    expect(unwrapRing(crossing).map(p => p.lon)).toEqual([179.5, 180.5, 180.5, 179.5])
+    const fromWest = [crossing[1], crossing[2], crossing[3], crossing[0]]
+    expect(unwrapRing(fromWest).map(p => p.lon)).toEqual([-179.5, -179.5, -180.5, -180.5])
+    expect(unwrapRing(elsewhere)).toEqual(elsewhere)
+  })
+
+  it('leaves a ring around a pole as given, as it has no continuous form', () => {
+    expect(unwrapRing(aroundPole)).toBe(aroundPole)
+    expect(ringParts(aroundPole)).toEqual([aroundPole])
+  })
+
+  it('sends a crossing ring as a MultiPolygon split at 180°', () => {
+    expect(ringToGeoJson(crossing).geometry).toEqual({
+      type: 'MultiPolygon',
+      coordinates: [
+        [[[179.5, -1], [180, -1], [180, 1], [179.5, 1], [179.5, -1]]],
+        [[[-180, -1], [-179.5, -1], [-179.5, 1], [-180, 1], [-180, -1]]],
+      ],
+    })
+  })
+
+  it('splits a ring first listed west of the meridian the same way', () => {
+    const fromWest = [crossing[1], crossing[2], crossing[3], crossing[0]]
+    const parts = ringParts(fromWest).map(ringBounds)
+    expect(parts).toEqual(expect.arrayContaining([[179.5, -1, 180, 1], [-180, -1, -179.5, 1]]))
+    expect(parts).toHaveLength(2)
+  })
+
+  it('inserts the crossing vertices at the interpolated latitude', () => {
+    const slanted = [{ lon: 179, lat: 0 }, { lon: -179, lat: 2 }, { lon: 179, lat: 4 }]
+    const [west, east] = ringParts(slanted)
+    expect(west).toEqual([{ lon: 179, lat: 0 }, { lon: 180, lat: 1 }, { lon: 180, lat: 3 }, { lon: 179, lat: 4 }])
+    expect(east).toEqual([{ lon: -180, lat: 1 }, { lon: -179, lat: 2 }, { lon: -180, lat: 3 }])
+  })
+
+  it('keeps a ring not crossing as a Polygon, byte for byte', () => {
+    expect(JSON.stringify(ringToGeoJson(elsewhere))).toBe(JSON.stringify({
+      type: 'Feature',
+      properties: {},
+      geometry: { type: 'Polygon', coordinates: [[[9.5, -1], [10.5, -1], [10.5, 1], [9.5, 1], [9.5, -1]]] },
+    }))
+  })
+
+  it('gives a ring touching 180° one Polygon on the side it lies', () => {
+    const touching = [{ lon: 179, lat: 0 }, { lon: -180, lat: 0 }, { lon: -180, lat: 1 }, { lon: 179, lat: 1 }]
+    expect(ringToGeoJson(touching).geometry).toEqual({
+      type: 'Polygon',
+      coordinates: [[[179, 0], [180, 0], [180, 1], [179, 1], [179, 0]]],
+    })
+  })
+
+  it('drops a part holding only vertices on the meridian', () => {
+    const fromMeridian = [{ lon: -180, lat: 0 }, { lon: 179, lat: 0 }, { lon: 179, lat: 1 }, { lon: -180, lat: 1 }]
+    expect(ringParts(fromMeridian)).toEqual([
+      [{ lon: 180, lat: 0 }, { lon: 179, lat: 0 }, { lon: 179, lat: 1 }, { lon: 180, lat: 1 }],
+    ])
+  })
+
+  it('measures the same area as the same box elsewhere at that latitude', () => {
+    expect(ringAreaKm2(crossing)).toBeCloseTo(ringAreaKm2(elsewhere), 6)
+  })
+
+  it('gives bounds normalized to ±180°, west of the meridian first', () => {
+    expect(ringBounds(crossing)).toEqual([179.5, -1, -179.5, 1])
+    expect(ringBounds(elsewhere)).toEqual([9.5, -1, 10.5, 1])
+  })
+
+  it('gives each part its bounds', () => {
+    expect(ringParts(crossing).map(ringBounds)).toEqual([[179.5, -1, 180, 1], [-180, -1, -179.5, 1]])
+  })
+
+  it('samples a grid inside the ring, normalized to ±180°', () => {
+    const grid = gridInsideRing(crossing, 16)
+    expect(grid).toHaveLength(16 + 4)
+    grid.forEach(p => {
+      expect(Math.abs(p.lon)).toBeGreaterThanOrEqual(179.5)
+      expect(Math.abs(p.lon)).toBeLessThanOrEqual(180)
+    })
+    expect(grid.some(p => p.lon > 0)).toBe(true)
+    expect(grid.some(p => p.lon < 0)).toBe(true)
+  })
+
+  it('normalizes a grid starting west of the meridian', () => {
+    const fromWest = [crossing[1], crossing[2], crossing[3], crossing[0]]
+    gridInsideRing(fromWest, 16).forEach(p => expect(Math.abs(p.lon)).toBeLessThanOrEqual(180))
   })
 })
 

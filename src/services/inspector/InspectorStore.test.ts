@@ -52,6 +52,10 @@ const square = (lon: number, lat: number, size = 2, id = 's') => feature(id, 'po
   positions: [deg(lon, lat), deg(lon + size, lat), deg(lon + size, lat + size), deg(lon, lat + size)],
 })
 
+const acrossMeridian = (id = 's') => feature(id, 'polygon', {
+  positions: [deg(179.5, -1), deg(-179.5, -1), deg(-179.5, 1), deg(179.5, 1)],
+})
+
 function setup(overrides: Partial<InspectorDependencies> = {}) {
   const deps: InspectorDependencies = {
     lines,
@@ -224,6 +228,33 @@ describe('InspectorStore, shapes', () => {
     store.resumeAreas()
     await settle()
     expect(store.get('s')!.status).toBe('ready')
+  })
+
+  it('sends a shape across 180° as a MultiPolygon, with the area of the same box elsewhere', async () => {
+    const { store, deps } = setup()
+    store.sync([acrossMeridian()])
+    await settle()
+    const geojson = vi.mocked(deps.fetchShapeStatistics).mock.calls[0][1] as { geometry: { type: string } }
+    expect(geojson.geometry.type).toBe('MultiPolygon')
+    expect(store.get('s')!.areaKm2).toBeGreaterThan(0)
+    expect(store.get('s')!.areaKm2).toBeLessThan(1e4)
+  })
+
+  it('reads a dataset reaching only one side of a shape across 180°', async () => {
+    const regional: Record<string, number[]> = { ...BOUNDS, 'global.tif': [-180, -60, -170, 60], 'band.tif': [170, -60, 180, 60] }
+    const { store, deps } = setup({ fetchBounds: vi.fn(async (filename: string) => regional[filename]) })
+    store.sync([acrossMeridian()])
+    await settle()
+    expect(vi.mocked(deps.fetchShapeStatistics).mock.calls.map(c => c[0])).toEqual(['global.tif', 'band.tif'])
+  })
+
+  it('reads no data for a dataset far from a shape across 180°, whichever way its longitudes run', async () => {
+    const regional: Record<string, number[]> = { ...BOUNDS, 'global.tif': [-10, -60, 10, 60], 'band.tif': [-10, -60, 10, 60] }
+    const { store, deps } = setup({ fetchBounds: vi.fn(async (filename: string) => regional[filename]) })
+    store.sync([acrossMeridian()])
+    await settle()
+    expect(deps.fetchShapeStatistics).not.toHaveBeenCalled()
+    expect(store.get('s')!.lines.global).toMatchObject({ noData: 'outside' })
   })
 
   it('converts a circle to a polygon', async () => {

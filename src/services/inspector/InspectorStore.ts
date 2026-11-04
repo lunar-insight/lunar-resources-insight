@@ -8,6 +8,7 @@ import {
   gridInsideRing,
   isInsideBounds,
   ringBounds,
+  ringParts,
   ringToGeoJson,
   sampleLine,
   shapeRing,
@@ -33,6 +34,7 @@ import {
   sampleElevation,
   type Elevation,
 } from './inspectorRequests';
+import { PictureStore } from './PictureStore';
 import { CanceledError, RequestQueue } from './RequestQueue';
 
 export interface LineResult {
@@ -124,8 +126,12 @@ export class InspectorStore {
   private runCounter = 0;
   private listeners = new Set<() => void>();
   private version = 0;
+  /** The popover pictures. They share the area queue, as both read the tile instance. */
+  readonly pictures: PictureStore;
 
-  constructor(private readonly deps: InspectorDependencies = defaultDependencies()) {}
+  constructor(private readonly deps: InspectorDependencies = defaultDependencies()) {
+    this.pictures = new PictureStore(deps.areaQueue);
+  }
 
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
@@ -182,6 +188,7 @@ export class InspectorStore {
 
   private drop(featureId: string): void {
     this.cancel(featureId);
+    this.pictures.dropFeature(featureId);
     this.results.delete(featureId);
     this.computedKeys.delete(featureId);
     this.latestFeatures.delete(featureId);
@@ -207,6 +214,7 @@ export class InspectorStore {
 
   private start(feature: Feature): void {
     this.cancel(feature.id);
+    this.pictures.dropFeature(feature.id);
     const run = ++this.runCounter;
     this.runs.set(feature.id, run);
 
@@ -312,7 +320,7 @@ export class InspectorStore {
     const elevation = this.elevation(gridInsideRing(ring), update);
 
     const geojson = ringToGeoJson(ring);
-    const shapeBounds = ringBounds(ring);
+    const partBounds = ringParts(ring).map(ringBounds);
     const setLine = (lineId: string, result: LineResult, failed = false) => update(current => ({
       lines: { ...current.lines, [lineId]: result },
       done: current.done + 1,
@@ -321,7 +329,7 @@ export class InspectorStore {
 
     const targets = await this.targets(center.lat);
     await Promise.all(targets.map(async ({ line, file, bounds, extent }) => {
-      if (!boundsIntersect(shapeBounds, bounds)) {
+      if (!partBounds.some(part => boundsIntersect(part, bounds))) {
         setLine(line.id, { file, noData: 'outside', extent });
         return;
       }

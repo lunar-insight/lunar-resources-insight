@@ -1,7 +1,9 @@
 import * as Cesium from 'cesium';
 import {
+  fetchCogInfo,
   fetchLayerBounds,
   getBatchedPointValueUrl,
+  isProjectedCrs,
   pointIndexAssetKey,
   pointIndexAssetsUrl,
   tilerEndpoints,
@@ -10,7 +12,9 @@ import {
 import { stacService } from 'services/StacService';
 import { TerrainService } from 'services/TerrainService';
 import type { ClippedRange, FeatureStatistics, Histogram } from './inspectorStatistics';
-import type { LonLat } from './featureGeometry';
+import { MOON_RADIUS_M, type LonLat } from './featureGeometry';
+import { PICTURE_HEIGHT, PICTURE_WIDTH, localCrs, type View, type ViewPart } from './pictureGeometry';
+import { decodeRgba, type ValueRange } from './pictureValues';
 
 const RETRY_DELAY_MS = 300;
 
@@ -226,8 +230,87 @@ export async function sampleElevation(positions: LonLat[]): Promise<Elevation | 
   };
 }
 
-/** Test hook: forgets the stored bounds and asset list. */
+const KM_PER_DEGREE = (Math.PI * MOON_RADIUS_M) / 180 / 1000;
+
+const pixelKmByFile = new Map<string, Promise<number>>();
+
+/** Width of a file's pixel in km, read once per file. A projected file gives its bounds in meters. */
+export function fetchFilePixelKm(filename: string): Promise<number> {
+  let request = pixelKmByFile.get(filename);
+  if (!request) {
+    request = fetchCogInfo(filename)
+      .then(({ bounds, crs, width }) => {
+        const pixel = (bounds[2] - bounds[0]) / width;
+        return isProjectedCrs(crs) ? pixel / 1000 : pixel * KM_PER_DEGREE;
+      })
+      .catch(error => {
+        pixelKmByFile.delete(filename);
+        throw error;
+      });
+    pixelKmByFile.set(filename, request);
+  }
+  return request;
+}
+
+/** Gray and alpha of a picture, row by row from the top. */
+export interface PicturePixels {
+  gray: Uint8Array;
+  alpha: Uint8Array;
+}
+
+async function decodePng(blob: Blob, width: number, height: number): Promise<PicturePixels> {
+  const bitmap = await createImageBitmap(blob, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' });
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d', { willReadFrequently: true })!;
+  context.drawImage(bitmap, 0, 0);
+  bitmap.close();
+  return decodeRgba(context.getImageData(0, 0, width, height).data, width, height);
+}
+
+function pictureUrl(filename: string, view: View, part: ViewPart, range: ValueRange | null): string {
+  const crs = localCrs(view.center);
+  const params = new URLSearchParams({ url: `${workspacePath}/${filename}`, bidx: '1', coord_crs: crs, dst_crs: crs });
+  if (range) params.set('rescale', `${range[0]},${range[1]}`);
+  return `${tilerEndpoints.bbox}/${part.x0},${part.y0},${part.x1},${part.y1}/${part.width}x${part.height}.png?${params}`;
+}
+
+/**
+ * A picture of a file over a view, one request per part, composed side by side.
+ * A null range sends no rescale, for a byte file. The nearest neighbor default of
+ * the tiler keeps pixels real values.
+ */
+export async function fetchPicture(
+  filename: string,
+  view: View,
+  range: ValueRange | null,
+  signal?: AbortSignal,
+): Promise<PicturePixels> {
+  const pieces = await Promise.all(view.parts.map(part => withRetry(async () => {
+    const response = await fetch(pictureUrl(filename, view, part, range), { signal });
+    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    return decodePng(await response.blob(), part.width, part.height);
+  }, signal)));
+
+  const gray = new Uint8Array(PICTURE_WIDTH * PICTURE_HEIGHT);
+  const alpha = new Uint8Array(PICTURE_WIDTH * PICTURE_HEIGHT);
+  let column = 0;
+  view.parts.forEach(({ width }, index) => {
+    for (let row = 0; row < PICTURE_HEIGHT; row++) {
+      const from = row * width;
+      const at = row * PICTURE_WIDTH + column;
+      gray.set(pieces[index].gray.subarray(from, from + width), at);
+      alpha.set(pieces[index].alpha.subarray(from, from + width), at);
+    }
+    column += width;
+  });
+  return { gray, alpha };
+}
+
+/** Test hook: forgets the stored bounds, file pixels and asset list. */
 export function resetInspectorRequestCaches(): void {
   boundsByFile.clear();
+  pixelKmByFile.clear();
   assetKeysRequest = null;
 }

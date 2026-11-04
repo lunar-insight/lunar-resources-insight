@@ -1,8 +1,22 @@
 import { colormapCategories, fetchColormapData, buildGradientPreviewUrl } from "../geoConfigExporter";
 import * as Cesium from 'cesium';
 
+const TABLE_ENTRIES = 256;
+
+/** The tiler's colormap as 256 RGBA entries, or undefined when it is not one. */
+function toColorTable(colormapData: Record<string, number[]>): Uint8Array | undefined {
+  const table = new Uint8Array(TABLE_ENTRIES * 4);
+  for (let i = 0; i < TABLE_ENTRIES; i++) {
+    const rgba = colormapData[String(i)];
+    if (!Array.isArray(rgba) || rgba.length !== 4) return undefined;
+    table.set(rgba, i * 4);
+  }
+  return table;
+}
+
 class ColormapService {
   private colormapFirstColors: Map<string, Cesium.Color>;
+  private colormapTables = new Map<string, Uint8Array>();
   private preloadedGradients: Map<string, string>;
   private initPromise: Promise<void> | null;
   private initialized: boolean;
@@ -50,6 +64,8 @@ class ColormapService {
   private async fetchAndStoreColormapFirstColor(colormapName: string): Promise<void> {
     try {
       const colormapData = await fetchColormapData(colormapName);
+      const table = toColorTable(colormapData);
+      if (table) this.colormapTables.set(colormapName, table);
       const rgba = colormapData['0'];
 
       if (!rgba || rgba.length !== 4) {
@@ -101,6 +117,11 @@ class ColormapService {
 
   getColormapFirstColor(colormapName: string): Cesium.Color {
     return this.colormapFirstColors.get(colormapName) || new Cesium.Color(0, 0, 0, 1);
+  }
+
+  /** 256 RGBA entries, or undefined when the colormap did not load. */
+  getColormapTable(colormapName: string): Uint8Array | undefined {
+    return this.colormapTables.get(colormapName);
   }
 
   getGradientUrl(colormapName: string): string {

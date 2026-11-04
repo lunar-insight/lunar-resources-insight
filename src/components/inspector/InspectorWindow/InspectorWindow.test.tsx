@@ -18,6 +18,16 @@ vi.mock('components/reference/BoundaryRefProvider', () => ({
   useBoundaryRef: (): { current: null } => ({ current: null }),
 }))
 
+vi.mock('utils/context/LayerContext', () => ({
+  useLayerContext: () => ({
+    selectedLayers: [] as string[],
+    visibleLayers: new Set(),
+    activeVariants: new Map(),
+    isInspectorLayer: () => false,
+    getMapDisplay: (): undefined => undefined,
+  }),
+}))
+
 const csv = vi.hoisted(() => ({ downloadCsv: vi.fn() }))
 vi.mock('services/inspector/inspectorCsv', async importOriginal => ({
   ...(await importOriginal<typeof import('services/inspector/inspectorCsv')>()),
@@ -29,9 +39,10 @@ import { FeaturesProvider, useFeaturesContext } from 'utils/context/FeaturesCont
 import { InspectorProvider, useInspectorContext } from 'utils/context/InspectorContext'
 import { layerStatsService } from 'services/LayerStatsService'
 import type { Feature } from 'components/navigation/FeaturesSection/types'
-import type { FeatureResults } from 'services/inspector/InspectorStore'
+import type { FeatureResults, LineResult } from 'services/inspector/InspectorStore'
 import { deg, fakeStore, makeFeature, makeResults, moonStats, shapeStats } from '../inspectorTestUtils'
 import { InspectorWindows } from '../InspectorWindows'
+import styles from './InspectorWindow.module.scss'
 
 let inspector: ReturnType<typeof useInspectorContext>
 let features: ReturnType<typeof useFeaturesContext>
@@ -68,6 +79,71 @@ beforeEach(() => {
   csv.downloadCsv.mockClear()
   vi.spyOn(layerStatsService, 'getFileStats').mockReturnValue(moonStats)
   vi.spyOn(layerStatsService, 'retryMissing').mockResolvedValue()
+})
+
+describe('show on the map slot', () => {
+  const noValue: Record<string, Partial<LineResult>> = {
+    thorium_kaguya_grs: { value: undefined, noData: 'outside', stats: undefined, profile: undefined },
+  }
+  const toggle = (lineId: string) => lineOf(lineId).querySelector(`.${styles.mapToggle}`)
+
+  it.each([
+    ['point', point],
+    ['line', line],
+    ['shape', polygon],
+  ] as const)('holds the button on a %s row with a value, and an empty slot without one', async (kind, feature) => {
+    await renderWindow(feature, makeResults(kind, noValue))
+    expect(within(lineOf('thorium_grs')).getByRole('button', { name: /on the map$/ })).toBe(toggle('thorium_grs'))
+    expect(toggle('thorium_kaguya_grs')).toBeNull()
+    expect(lineOf('thorium_kaguya_grs').querySelector('span[aria-hidden="true"]')).not.toBeNull()
+  })
+})
+
+describe('pictures in the popovers', () => {
+  const pictureRegion = () => within(screen.getByRole('dialog')).queryByText('Loading the picture')
+  const footerButton = () => within(screen.getByRole('dialog')).queryByRole('button', { name: 'Go to the feature' })
+
+  it('shows on a point bar with a value, requesting its picture', async () => {
+    const store = await renderWindow(point, makeResults('point'))
+    await userEvent.click(within(lineOf('thorium_grs')).getByRole('button', { name: 'Bar scale' }))
+    expect(pictureRegion()).toBeInTheDocument()
+    expect(footerButton()).toBeInTheDocument()
+    expect(store.pictures.request).toHaveBeenCalledWith(expect.objectContaining({ id: 'apollo' }), expect.objectContaining({ layerId: 'thorium_grs' }), 'data')
+  })
+
+  it('does not show on a point bar with no data', async () => {
+    await renderWindow(point, makeResults('point', { thorium_grs: { value: undefined, noData: 'outside', extent: '50°N to 50°S' } }))
+    await userEvent.click(within(lineOf('thorium_grs')).getAllByRole('button', { name: 'No data' })[0])
+    expect(pictureRegion()).toBeNull()
+    expect(footerButton()).toBeNull()
+  })
+
+  it('shows in the limit popover of a point', async () => {
+    await renderWindow(point, makeResults('point', {
+      feo_kaguya_mi_shi2026: { value: 24, clip: { range: [0, 24], longitudes: [-180, 60] } },
+    }, { center: { lon: 3.634, lat: 26.132 } }))
+    await userEvent.click(within(lineOf('feo_kaguya_mi_shi2026')).getByRole('button', { name: "At the map's limit" }))
+    expect(pictureRegion()).toBeInTheDocument()
+    expect(footerButton()).toBeInTheDocument()
+  })
+
+  it('shows in the spread popover of a shape, not on its bar', async () => {
+    await renderWindow(polygon, makeResults('shape'))
+    await userEvent.click(within(lineOf('thorium_grs')).getByRole('button', { name: 'Bar scale' }))
+    expect(pictureRegion()).toBeNull()
+    expect(footerButton()).toBeNull()
+    await userEvent.keyboard('{Escape}')
+    await userEvent.click(within(lineOf('thorium_grs')).getByRole('button', { name: 'Uniform' }))
+    expect(pictureRegion()).toBeInTheDocument()
+    expect(footerButton()).toBeInTheDocument()
+  })
+
+  it('does not show on the bar of a line with no profile', async () => {
+    await renderWindow(line, makeResults('line', { thorium_grs: { profile: undefined } }))
+    await userEvent.click(within(lineOf('thorium_grs')).getByRole('button', { name: 'Bar scale' }))
+    expect(pictureRegion()).toBeNull()
+    expect(footerButton()).toBeNull()
+  })
 })
 
 describe('shape window', () => {
@@ -186,7 +262,7 @@ describe('point window', () => {
       feo_kaguya_mi_shi2026: { value: 24, clip: { range: [0, 24], longitudes: [-180, 60] } },
     }, { center: { lon: 120, lat: 0 } }))
     expect(within(lineOf('feo_kaguya_mi_shi2026')).queryByRole('button', { name: "At the map's limit" })).toBeNull()
-    expect(lineOf('thorium_grs').querySelector('span[aria-hidden="true"]')).toBeNull()
+    expect(lineOf('thorium_grs').querySelector(`.${styles.barSet}`)).toBeNull()
   })
 
   it('shows Computing before any results', async () => {

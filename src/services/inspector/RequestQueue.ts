@@ -25,15 +25,18 @@ export class RequestQueue {
 
   constructor(private readonly concurrency: number) {}
 
-  run<T>(group: string, task: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  /** `front` puts the task ahead of those already queued. */
+  run<T>(group: string, task: (signal: AbortSignal) => Promise<T>, { front = false }: { front?: boolean } = {}): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      this.queue.push({
+      const queued: QueuedTask = {
         group,
         run: task,
         resolve: resolve as (value: unknown) => void,
         reject,
         controller: new AbortController(),
-      });
+      };
+      if (front) this.queue.unshift(queued);
+      else this.queue.push(queued);
       this.next();
     });
   }

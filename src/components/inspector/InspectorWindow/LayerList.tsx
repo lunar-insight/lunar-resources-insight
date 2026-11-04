@@ -2,11 +2,13 @@ import React from 'react';
 import { lineCount, type InspectorGroup } from 'services/inspector/inspectorLayers';
 import type { FeatureResults } from 'services/inspector/InspectorStore';
 import type { SparkScale } from 'components/inspector/Sparkline/Sparkline';
+import type { Feature } from 'components/navigation/FeaturesSection/types';
 import { CATEGORY_COLOR, pointLimit } from 'components/inspector/lineView';
 import { DatasetLine, type ChartControl } from './DatasetLine';
 import styles from './InspectorWindow.module.scss';
 
 interface LayerListProps {
+  feature: Feature;
   groups: InspectorGroup[];
   results: FeatureResults;
   sparkScale: SparkScale;
@@ -14,7 +16,7 @@ interface LayerListProps {
 }
 
 /** Cards by category, one per symbol, one line per dataset reporting it. */
-export const LayerList: React.FC<LayerListProps> = ({ groups, results, sparkScale, chartControl }) => {
+export const LayerList: React.FC<LayerListProps> = ({ feature, groups, results, sparkScale, chartControl }) => {
   const lengthKm = results.samples?.[results.samples.length - 1]?.distanceKm ?? 0;
   const fractions = (results.samples ?? []).map(s => (lengthKm > 0 ? s.distanceKm / lengthKm : 0));
   // Taken over every line, not the filtered ones, so filtering never moves the bars
@@ -46,6 +48,7 @@ export const LayerList: React.FC<LayerListProps> = ({ groups, results, sparkScal
                 return (
                   <DatasetLine
                     key={line.id}
+                    feature={feature}
                     line={line}
                     result={result}
                     results={results}

@@ -10,14 +10,25 @@ const LABELS: Record<BarView['kind'], string> = {
   failed: 'Not computed',
 };
 
+interface ValueBarProps {
+  view: BarView;
+  categoryColor: string;
+  /** Shown in the popover, below its title. */
+  chart?: React.ReactNode;
+  /** Shown last in the popover. */
+  footer?: React.ReactNode;
+}
+
 /**
  * A single fill up to the value. No data is a hatched track, since an empty
  * track is a value of 0; a missing scale or value is one dash in the center.
  */
-export const ValueBar: React.FC<{ view: BarView; categoryColor: string }> = ({ view, categoryColor }) => (
+export const ValueBar: React.FC<ValueBarProps> = ({ view, categoryColor, chart, footer }) => (
   <StatPopover
     content={view.popover}
     label={LABELS[view.kind]}
+    chart={chart}
+    footer={footer}
     className={styles.bar}
     style={{ '--cat': categoryColor } as React.CSSProperties}
   >

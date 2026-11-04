@@ -1,0 +1,194 @@
+// Every row has a fixed height, so no state changes the popover's size
+.viewer {
+  margin: 0 0 0.6rem;
+}
+
+.frame {
+  position: relative;
+  width: 211px;
+  height: 150px;
+  overflow: hidden;
+  background: var(--surface-track);
+  border-radius: 0.25rem;
+  // Over the picture, so the canvas takes the whole box
+  outline: 1px solid var(--border-card);
+  outline-offset: -1px;
+}
+
+.canvas {
+  display: block;
+  width: 211px;
+  height: 150px;
+  cursor: crosshair;
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 0 1rem;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.progress {
+  display: block;
+  width: 4rem;
+  height: 0.25rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 2px;
+  overflow: hidden;
+
+  span {
+    display: block;
+    width: 35%;
+    height: 100%;
+    background: var(--accent);
+  }
+}
+
+.retry {
+  padding: 0.15rem 0.5rem;
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+  border-radius: 0.25rem;
+  font: 500 0.72rem var(--font-text);
+  color: var(--control-icon);
+  cursor: pointer;
+  outline: none;
+
+  &[data-hovered] {
+    background: var(--control-bg-hover);
+  }
+
+  &[data-focus-visible] {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+  }
+}
+
+.scale {
+  position: absolute;
+  left: 5px;
+  bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  font-size: 0.6rem;
+  color: #fff;
+  text-shadow: 0 0 2px #000, 0 0 2px #000;
+  pointer-events: none;
+
+  i {
+    display: block;
+    height: 3px;
+    border: 1px solid #fff;
+    border-top: 0;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.7);
+  }
+}
+
+.tool {
+  position: absolute;
+  top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: rgba(13, 18, 22, 0.7);
+  border: 1px solid var(--control-border);
+  border-radius: 4px;
+  color: var(--text-body);
+  cursor: pointer;
+  outline: none;
+
+  :global(.material-symbols-outlined) {
+    font-size: 0.9rem;
+  }
+
+  &[data-hovered] {
+    outline: 1px solid var(--border-strong);
+  }
+
+  &[data-focus-visible] {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 1px;
+  }
+
+  &[data-selected] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0d1216;
+  }
+}
+
+.colorTool {
+  left: 4px;
+}
+
+.terrainTool {
+  right: 4px;
+}
+
+.swatch {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+.ramp,
+.info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ramp {
+  height: calc(1.1rem + 2px);
+  box-sizing: border-box;
+  padding-top: 2px;
+}
+
+.rampBar {
+  flex: 1;
+  min-width: 1rem;
+  height: 5px;
+  border-radius: 2px;
+}
+
+.info {
+  height: 1rem;
+
+  b {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+}
+
+.infoSwatch {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.infoText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

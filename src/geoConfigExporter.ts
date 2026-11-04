@@ -7,6 +7,7 @@ export const tilerEndpoints = {
   stacPoint: `${mapServerUrl}/stac/point/{lon},{lat}`,
   info: `${mapServerUrl}/cog/info`,
   statistics: `${mapServerUrl}/cog/statistics`,
+  bbox: `${mapServerUrl}/cog/bbox`,
   preview: `${mapServerUrl}/cog/preview`,
   colorMap: `${mapServerUrl}/colorMaps/{colormap}`
 };
@@ -131,6 +132,7 @@ export function buildCogTileUrl(filename: string, options: {
 export async function fetchCogInfo(filename: string): Promise<{
   bounds: number[];
   crs?: string;
+  width: number;
 }> {
   const fileUrl = `${workspacePath}/${filename}`;
   const encodedFileUrl = safeEncodeURI(fileUrl);
@@ -145,13 +147,17 @@ export async function fetchCogInfo(filename: string): Promise<{
 
     return {
       bounds: data.bounds || [-180.0, -90, 180.0, 90.0],
-      crs: data.crs
+      crs: data.crs,
+      width: data.width
     };
   } catch (error) {
     console.error("Failed to fetch COG info:", error);
     throw error;
   }
 }
+
+/** Whether the tiler's `crs` text names a projected system, whose bounds are in meters. */
+export const isProjectedCrs = (crs?: string): boolean => !!crs && /^PROJ(CS|CRS)\[/.test(crs);
 
 /**
  * Layer bounds in degrees, [west, south, east, north]. The tiler reports bounds
@@ -160,7 +166,7 @@ export async function fetchCogInfo(filename: string): Promise<{
  */
 export async function fetchLayerBounds(filename: string, stacPath?: string): Promise<number[]> {
   const { bounds, crs } = await fetchCogInfo(filename);
-  if (!crs || !/^PROJ(CS|CRS)\[/.test(crs)) return bounds;
+  if (!isProjectedCrs(crs)) return bounds;
 
   const item = stacPath ? await stacService.fetchStacItem(stacPath) : null;
   const bbox = item?.bbox;

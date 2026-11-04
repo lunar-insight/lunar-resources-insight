@@ -1,6 +1,6 @@
 import React from 'react';
 import type { InspectorLine } from 'services/inspector/inspectorLayers';
-import { binText, formatValue, histogramBins, type Histogram } from 'services/inspector/inspectorStatistics';
+import { binText, formatValue, histogramBins, type Histogram, type HistogramBin } from 'services/inspector/inspectorStatistics';
 import styles from './ShapeHistogram.module.scss';
 
 const WIDTH = 210;
@@ -28,13 +28,19 @@ interface ShapeHistogramProps {
   p85: number;
   line: Pick<InspectorLine, 'decimals' | 'unit'>;
   categoryColor: string;
+  /** The bin under the pointer, or null when it leaves. */
+  onBinHover?: (bin: HistogramBin | null) => void;
+  /** Values lit on the picture. Bars inside them stand out, the others recede. */
+  highlight?: [number, number] | null;
 }
 
 /**
  * The shape's pixels in bins from its lowest to highest value, with the Most
  * range shaded, the median as a solid line and the average as a dashed one.
  */
-export const ShapeHistogram: React.FC<ShapeHistogramProps> = ({ histogram, median, mean, p15, p85, line, categoryColor }) => {
+export const ShapeHistogram: React.FC<ShapeHistogramProps> = ({
+  histogram, median, mean, p15, p85, line, categoryColor, onBinHover, highlight,
+}) => {
   const bins = histogramBins(histogram);
   const lo = histogram.edges[0];
   const hi = histogram.edges[histogram.edges.length - 1];
@@ -48,12 +54,13 @@ export const ShapeHistogram: React.FC<ShapeHistogramProps> = ({ histogram, media
         <rect className={styles.most} x={x(p15)} y={0} width={x(p85) - x(p15)} height={HEIGHT} />
         {bins.map((bin, i) => {
           const height = bin.share > 0 ? Math.max((bin.share / peak) * (HEIGHT - 4), 1) : 0;
+          const lit = highlight ? (bin.from >= highlight[0] && bin.to <= highlight[1] ? styles.hot : styles.cold) : '';
           return (
-            <g key={i} data-bin={i}>
+            <g key={i} data-bin={i} onMouseEnter={() => onBinHover?.(bin)} onMouseLeave={() => onBinHover?.(null)}>
               <title>{binText(bin, line)}</title>
               {/* The full column takes the hover, so a short bar is as easy to point at as a tall one */}
               <rect className={styles.hit} x={i * step} y={0} width={step} height={HEIGHT} />
-              {height > 0 && <path className={styles.bar} d={barPath(i * step + GAP / 2, HEIGHT - height, step - GAP, height)} />}
+              {height > 0 && <path className={`${styles.bar} ${lit}`} d={barPath(i * step + GAP / 2, HEIGHT - height, step - GAP, height)} />}
             </g>
           );
         })}

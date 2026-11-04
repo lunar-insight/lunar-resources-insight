@@ -63,16 +63,31 @@
   color: var(--text-body);
 }
 
-.lines + .sentence {
-  margin-top: 0.45rem;
-}
-
 .sentence + .sentence {
   margin-top: 0.35rem;
 }
 
 .note {
   color: var(--text-secondary);
+}
+
+// A sentence after rows: it reads the numbers above it
+.callout {
+  margin-top: 0.55rem;
+  padding: 0.35rem 0.5rem;
+  border-left: 2px solid var(--data-coverage);
+  border-radius: 0 0.25rem 0.25rem 0;
+  background: color-mix(in srgb, var(--data-coverage) 12%, transparent);
+
+  .sentence {
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--text-primary);
+  }
+
+  .note {
+    color: var(--text-secondary);
+  }
 }
 
 @keyframes popover-slide {

@@ -195,6 +195,13 @@ export function binText(bin: HistogramBin, line: Pick<InspectorLine, 'decimals' 
   return `${range}: ${share} of pixels`;
 }
 
+/** A range of values lit on a shape's picture, with its share of the shape. */
+export function highlightText(bin: HistogramBin, line: Pick<InspectorLine, 'decimals' | 'unit'>): string {
+  const share = bin.share < 1 ? '<1%' : `${Math.round(bin.share)}%`;
+  const range = withUnit(`${formatValue(bin.from, line.decimals)} to ${formatValue(bin.to, line.decimals)}`, line.unit);
+  return `${range}: ${share} of the shape`;
+}
+
 export const showsCoverage = (coverage: number | undefined): coverage is number =>
   coverage !== undefined && coverage < COVERAGE_SHOWN_BELOW;
 

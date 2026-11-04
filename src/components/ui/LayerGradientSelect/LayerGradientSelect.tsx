@@ -91,7 +91,7 @@ const LayerGradientSelect: React.FC<LayerGradientSelectProps> = ({ layerId }) =>
     <Select
       className="layer-gradient-select"
       onSelectionChange={(value) => handleGradientChange(value.toString())}
-      defaultSelectedKey={selectedLayerGradient}
+      selectedKey={selectedLayerGradient}
     >
       <Label>Select a gradient</Label>
       <Button 

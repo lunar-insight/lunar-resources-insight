@@ -104,6 +104,15 @@ export default defineConfig(({ mode }) => ({
       reporter: ['text'],
       include: ['src/**/*.{ts,tsx}'],
       exclude: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)', 'src/**/*TestUtils.tsx', 'src/setupTests.ts', 'src/scratch/**', 'src/**/*.d.ts'],
+      // The mini viewer stays fully covered, file by file.
+      thresholds: {
+        'src/services/inspector/showOnMap.ts': { 100: true },
+        'src/services/inspector/pictureGeometry.ts': { 100: true },
+        'src/services/inspector/pictureValues.ts': { 100: true },
+        'src/services/inspector/PictureStore.ts': { 100: true },
+        'src/components/inspector/ShowOnMap/**': { 100: true },
+        'src/components/inspector/MiniViewer/**': { 100: true },
+      },
     },
     // The Inspector window tests take about 2 s alone and over 5 s (the default)
     // in a full parallel run on a loaded machine; the prod build runs the suite.

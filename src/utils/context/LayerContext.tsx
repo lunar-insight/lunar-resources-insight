@@ -20,11 +20,25 @@ interface DynamicLayerMetadata {
   element?: string;
 }
 
+export interface AddLayerOptions {
+  /** The layer's first colors. Applies to a layer id, not a compound. */
+  colormap?: string;
+  /** Added by the Inspector, which removes it on a second press until it is adjusted. */
+  fromInspector?: boolean;
+}
+
+/** What the map draws for a layer: its colors, their range, and the values kept. */
+export interface MapDisplay {
+  colormap: string;
+  rescale: [number, number];
+  filter: [number, number] | null;
+}
+
 interface LayerContextType {
   selectedLayers: string[];
   visibleLayers: Set<string>;
   dynamicLayerMetadata: Map<string, DynamicLayerMetadata>;
-  addLayer: (layer: string, metadata?: DynamicLayerMetadata) => void;
+  addLayer: (layer: string, metadata?: DynamicLayerMetadata, options?: AddLayerOptions) => void;
   removeLayer: (layer: string) => void;
   reorderLayers: (layers: string[]) => void;
   toggleLayerVisibility: (layer: string) => void;
@@ -39,6 +53,10 @@ interface LayerContextType {
   swapLayerVariant: (layerId: string, variantIndex: number) => Promise<void>;
   statsVersion: number;
   setBulkLayerVisibility: (ids: Set<string>) => void;
+  /** Raised when what `getMapDisplay` or `isInspectorLayer` returns may have changed. */
+  layerStyleVersion: number;
+  getMapDisplay: (layer: string) => MapDisplay | undefined;
+  isInspectorLayer: (layer: string) => boolean;
 }
 
 const LayerContext = createContext<LayerContextType | undefined>(undefined);
@@ -55,6 +73,8 @@ class CesiumLayerManager {
   private activeFilenames: Map<string, string>
   // imageryLayers.add() calls happen in addLayer() call order.
   private insertQueue: Promise<void> = Promise.resolve();
+  // Adds in progress. A remove deletes the token, which stops its add at the next step.
+  private pending = new Map<string, symbol>();
 
   constructor(
     private viewer: Cesium.CesiumWidget | null,
@@ -69,7 +89,7 @@ class CesiumLayerManager {
     this.activeFilenames = new Map();
   }
 
-  async addLayer(layerId: string) {
+  async addLayer(layerId: string, colormap?: string) {
     if (!this.viewer) return;
 
     if (this.layerMap.has(layerId)) {
@@ -80,11 +100,19 @@ class CesiumLayerManager {
       return;
     }
 
+    if (this.pending.has(layerId)) return;
+
     const layerConfig = layersConfig.layers[layerId];
     if (!layerConfig) {
       console.error(`Layer configuration not found for ${layerId}`);
       return;
     }
+
+    const token = Symbol(layerId);
+    this.pending.set(layerId, token);
+    const isCurrent = () => this.pending.get(layerId) === token;
+
+    if (colormap) this.layerStyleConfig.set(layerId, { type: colormap, colors: [] });
 
     let releaseSlot: () => void;
     const previousSlot = this.insertQueue;
@@ -92,9 +120,11 @@ class CesiumLayerManager {
 
     try {
       const bounds = await fetchLayerBounds(layerConfig.filename, layerConfig.stac);
+      if (!isCurrent()) return;
 
       // Bounds checking
       await pointValueService.setLayerBounds(layerId, bounds);
+      if (!isCurrent()) return;
 
       const stats = layerStatsService.getLayerStats(layerId);
       const min = stats.loaded ? stats.min : 0;
@@ -108,9 +138,11 @@ class CesiumLayerManager {
       )
 
       this.layerStats.set(layerId, { min, max });
+      if (colormap) this.layerStyleConfig.set(layerId, { type: colormap, colors: [], min, max });
 
       const imageryProvider = new Cesium.UrlTemplateImageryProvider({
         url: buildCogTileUrl(layerConfig.filename, {
+          colormap: colormap === 'gray' ? undefined : colormap,
           rescale: [min, max]
         }),
         tilingScheme: new Cesium.GeographicTilingScheme(),
@@ -125,7 +157,7 @@ class CesiumLayerManager {
       });
 
       await previousSlot;
-      if (!this.viewer) return;
+      if (!this.viewer || !isCurrent()) return;
 
       this.viewer.imageryLayers.add(layer);
       this.layerMap.set(layerId, layer);
@@ -135,7 +167,9 @@ class CesiumLayerManager {
     } catch (error) {
       console.error(`Failed to add layer ${layerId}:`, error);
     } finally {
-      releaseSlot!();
+      if (isCurrent()) this.pending.delete(layerId);
+      // After the earlier adds, so a stopped add does not let a later one pass them
+      previousSlot.then(() => releaseSlot!());
     }
   }
 
@@ -143,8 +177,14 @@ class CesiumLayerManager {
   removeLayer(layerId: string) {
     if (!this.viewer) return;
 
+    this.pending.delete(layerId);
+    this.layerStyleConfig.delete(layerId);
+    this.rangeFilterEnabled.delete(layerId);
+    this.gradientLocked.delete(layerId);
+    this.layerStats.delete(layerId);
+
     const layer = this.layerMap.get(layerId);
-    
+
     if (layer) {
       this.viewer.imageryLayers.remove(layer, true) // True to delete layer
       this.layerMap.delete(layerId); // Remove ref
@@ -419,6 +459,24 @@ class CesiumLayerManager {
     return this.layerStyleConfig.get(layerId);
   }
 
+  /** Follows the lock and filter rules of `updateLayerStyle`. */
+  getMapDisplay(layerId: string): MapDisplay | undefined {
+    if (!this.layerMap.has(layerId)) return undefined;
+
+    const stats = this.layerStats.get(layerId)!;
+    const style = this.layerStyleConfig.get(layerId);
+    // The lock and the filter take effect with a style
+    if (!style) return { colormap: 'gray', rescale: [stats.min, stats.max], filter: null };
+
+    const min = style.min ?? 0;
+    const max = style.max ?? 100;
+    return {
+      colormap: style.type,
+      rescale: this.gradientLocked.get(layerId) ? [stats.min, stats.max] : [min, max],
+      filter: this.rangeFilterEnabled.get(layerId) ? [min, max] : null,
+    };
+  }
+
   private forceResumeMouseTracking() {
     // Delay in ms to wait Cesium finish operations
     setTimeout(() => {
@@ -437,6 +495,8 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [activeVariants, setActiveVariants] = useState<Map<string, number>>(new Map());
   const [swappingLayers, setSwappingLayers] = useState<Set<string>>(new Set());
   const [statsVersion, setStatsVersion] = useState(0);
+  const [layerStyleVersion, setLayerStyleVersion] = useState(0);
+  const inspectorLayersRef = useRef<Set<string>>(new Set());
   const { viewer } = useViewer();
   const { hasDisableRequests } = useMouseTracking();
   const cesiumManagerRef = useRef<CesiumLayerManager | null>(null);
@@ -447,17 +507,24 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }
 
 
-  const addLayer = useCallback((layerOrCompound: string, metadata?: DynamicLayerMetadata) => {
+  const markAdjusted = useCallback((layer: string) => {
+    inspectorLayersRef.current.delete(layer);
+    setLayerStyleVersion(v => v + 1);
+  }, []);
+
+
+  const addLayer = useCallback((layerOrCompound: string, metadata?: DynamicLayerMetadata, options?: AddLayerOptions) => {
     const directConfig = layersConfig.layers[layerOrCompound];
 
     if (directConfig) {
       if (metadata) {
         setDynamicLayerMetadata(prev => new Map(prev).set(layerOrCompound, metadata));
       }
-      setSelectedLayers(prev => [layerOrCompound, ...prev]);
+      if (options?.fromInspector) inspectorLayersRef.current.add(layerOrCompound);
+      setSelectedLayers(prev => prev.includes(layerOrCompound) ? prev : [layerOrCompound, ...prev]);
       setVisibleLayers(prev => new Set(prev).add(layerOrCompound));
       if (directConfig.filename) {
-        cesiumManagerRef.current?.addLayer(layerOrCompound);
+        cesiumManagerRef.current?.addLayer(layerOrCompound, options?.colormap);
       } else {
         console.log(`Layer ${layerOrCompound} has no COG file. Added to management list only.`);
       }
@@ -516,6 +583,7 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return next;
       });
       layerStatsService.clearActiveFile(layerId);
+      inspectorLayersRef.current.delete(layerId);
       cesiumManagerRef.current?.removeLayer(layerId);
     });
   }, []);
@@ -552,49 +620,62 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateRampValues = useCallback(async (layer: string, min: number, max: number) => {
     try {
       cesiumManagerRef.current?.updateRampValues(layer, min, max);
+      markAdjusted(layer);
     } catch (error) {
       console.error(`Error updating ramp values for layer ${layer}:`, error);
     }
-  }, []);
+  }, [markAdjusted]);
 
 
   const updateStyle = useCallback(async (layer: string, styleConfig: StyleConfig) => {
     try {
       cesiumManagerRef.current?.updateLayerStyle(layer, styleConfig);
+      markAdjusted(layer);
     } catch (error) {
       console.error(`Error updating style for layer ${layer}:`, error);
     }
-  }, []);
+  }, [markAdjusted]);
 
 
   const updateLayerOpacity = useCallback((layer: string, opacity: number) => {
     try {
       cesiumManagerRef.current?.updateLayerOpacity(layer, opacity);
+      // A slider drag sends one per step, and `getMapDisplay` does not read the opacity,
+      // so only the first change of an Inspector layer updates the readers.
+      if (inspectorLayersRef.current.has(layer)) markAdjusted(layer);
     } catch (error) {
       console.error(`Error updating opacity for layer ${layer}:`, error);
     }
-  }, []);
+  }, [markAdjusted]);
 
 
   const updateLayerRangeFilter = useCallback((layer: string, enabled: boolean) => {
     try {
       cesiumManagerRef.current?.updateLayerRangeFilter(layer, enabled);
+      markAdjusted(layer);
     } catch (error) {
       console.error(`Error updating range filter for layer ${layer}:`, error)
     }
-  }, []);
+  }, [markAdjusted]);
 
   const updateLayerGradientLock = useCallback((layer: string, locked: boolean) => {
     try {
       cesiumManagerRef.current?.updateLayerGradientLock(layer, locked);
+      markAdjusted(layer);
     } catch (error) {
       console.error(`Error updating gradient lock for layer ${layer}:`, error);
     }
-  }, []);
+  }, [markAdjusted]);
 
   const getLayerStyle = useCallback((layer: string) => {
     return cesiumManagerRef.current?.getLayerStyleConfig(layer);
   }, []);
+
+  const getMapDisplay = useCallback((layer: string) => {
+    return cesiumManagerRef.current?.getMapDisplay(layer);
+  }, []);
+
+  const isInspectorLayer = useCallback((layer: string) => inspectorLayersRef.current.has(layer), []);
 
   const swappingRef = useRef<Set<string>>(new Set());
 
@@ -637,12 +718,13 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       next.set(layerId, variantIndex);
       return next;
     });
+    markAdjusted(layerId);
 
     // Statistics are stored by file, so a variant already read needs no request.
     layerStatsService.setActiveFile(layerId, variant.filename)
       .then(() => setStatsVersion(v => v + 1))
       .catch(console.error);
-  }, []);
+  }, [markAdjusted]);
 
   const contextValue = useMemo(() => ({
     selectedLayers,
@@ -663,6 +745,9 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     swappingLayers,
     swapLayerVariant,
     statsVersion,
+    layerStyleVersion,
+    getMapDisplay,
+    isInspectorLayer,
   }), [
     selectedLayers,
     visibleLayers,
@@ -682,6 +767,9 @@ export const LayerProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     swappingLayers,
     swapLayerVariant,
     statsVersion,
+    layerStyleVersion,
+    getMapDisplay,
+    isInspectorLayer,
   ]);
 
   return (

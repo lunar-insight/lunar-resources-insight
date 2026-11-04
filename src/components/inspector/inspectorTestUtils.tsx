@@ -3,6 +3,7 @@ import * as Cesium from 'cesium';
 import type { Feature } from 'components/navigation/FeaturesSection/types';
 import type { LayerStats } from 'services/LayerStatsService';
 import type { InspectorStore, FeatureResults, LineResult } from 'services/inspector/InspectorStore';
+import type { PictureEntry } from 'services/inspector/PictureStore';
 import { inspectorLines } from 'services/inspector/inspectorLayers';
 import type { FeatureStatistics } from 'services/inspector/inspectorStatistics';
 
@@ -85,6 +86,13 @@ export function fakeStore(results: Record<string, FeatureResults | undefined> = 
     pauseAreas: vi.fn(),
     resumeAreas: vi.fn(),
     dispose: vi.fn(),
+    pictures: {
+      subscribe: () => () => {},
+      getVersion: () => 0,
+      get: () => undefined as PictureEntry | undefined,
+      request: vi.fn(),
+      retry: vi.fn(),
+    },
   };
   return store as typeof store & InspectorStore;
 }

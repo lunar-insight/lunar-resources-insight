@@ -78,6 +78,45 @@ describe('RequestQueue', () => {
     expect(await other).toBe(3)
   })
 
+  it('runs a front task ahead of those queued', async () => {
+    const queue = new RequestQueue(1)
+    const gate = deferred()
+    const started: string[] = []
+    const task = (name: string) => async () => { started.push(name) }
+    const first = queue.run('a', async () => { started.push('running'); await gate.promise })
+    const queued = queue.run('a', task('queued'))
+    const front = queue.run('a', task('front'), { front: true })
+
+    await flush()
+    expect(started).toEqual(['running'])
+    gate.resolve()
+    await Promise.all([first, queued, front])
+    expect(started).toEqual(['running', 'front', 'queued'])
+  })
+
+  it('holds a front task while paused', async () => {
+    const queue = new RequestQueue(4)
+    queue.pause()
+    let ran = false
+    const front = queue.run('a', async () => { ran = true }, { front: true })
+    await flush()
+    expect(ran).toBe(false)
+    queue.resume()
+    await front
+    expect(ran).toBe(true)
+  })
+
+  it('cancels a queued front task with its group', async () => {
+    const queue = new RequestQueue(1)
+    const gate = deferred()
+    const running = queue.run('b', () => gate.promise)
+    const front = queue.run('a', async () => 1, { front: true })
+    queue.cancelGroup('a')
+    await expect(front).rejects.toBeInstanceOf(CanceledError)
+    gate.resolve()
+    await running
+  })
+
   it('passes a task failure on, and continues', async () => {
     const queue = new RequestQueue(1)
     const failing = queue.run('a', async () => { throw new Error('boom') })

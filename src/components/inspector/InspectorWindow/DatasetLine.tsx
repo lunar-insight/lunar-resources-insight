@@ -2,7 +2,11 @@ import React from 'react';
 import { ToggleButton, TooltipTrigger } from 'react-aria-components';
 import { ButtonTooltip } from 'components/layout/Tooltip/ButtonTooltip';
 import { ValueBar } from 'components/inspector/ValueBar/ValueBar';
+import { MiniViewer } from 'components/inspector/MiniViewer/MiniViewer';
 import { CoverageIcon, EmptySlot, LimitIcon, SpreadIcon } from 'components/inspector/RowIcons/RowIcons';
+import { PopoverFooter } from 'components/inspector/ShowOnMap/PopoverFooter';
+import { ShowOnMapToggle } from 'components/inspector/ShowOnMap/ShowOnMapToggle';
+import type { Feature } from 'components/navigation/FeaturesSection/types';
 import { Sparkline, type SparkScale } from 'components/inspector/Sparkline/Sparkline';
 import { StatPopover } from 'components/inspector/StatPopover/StatPopover';
 import { barView, CATEGORY_COLOR, fullLineName, pointLimit } from 'components/inspector/lineView';
@@ -20,6 +24,7 @@ export interface ChartControl {
 }
 
 interface DatasetLineProps {
+  feature: Feature;
   line: InspectorLine;
   result: LineResult;
   results: FeatureResults;
@@ -63,7 +68,7 @@ export const DatasetName: React.FC<{ line: InspectorLine }> = ({ line }) => (
 );
 
 export const DatasetLine: React.FC<DatasetLineProps> = ({
-  line, result, results, sparkScale, sparkFractions, chart, limitSlot = false,
+  feature, line, result, results, sparkScale, sparkFractions, chart, limitSlot = false,
 }) => {
   const moon = layerStatsService.getFileStats(result.file.filename);
   const categoryColor = CATEGORY_COLOR[line.category];
@@ -71,8 +76,18 @@ export const DatasetLine: React.FC<DatasetLineProps> = ({
   const isShape = results.kind === 'shape';
   const isLine = results.kind === 'line';
   const hasValue = result.value !== undefined && !result.noData;
+  const picture = { feature, line, file: result.file };
 
-  let graphic: React.ReactNode = <ValueBar view={bar} categoryColor={categoryColor} />;
+  // A point's bar holds its picture. Lines have none, and a shape's sits in its spread popover.
+  const pointPicture = results.kind === 'point' && hasValue;
+  let graphic: React.ReactNode = (
+    <ValueBar
+      view={bar}
+      categoryColor={categoryColor}
+      chart={pointPicture ? <MiniViewer {...picture} /> : undefined}
+      footer={pointPicture ? <PopoverFooter feature={feature} file={result.file} /> : undefined}
+    />
+  );
   if (isLine && hasValue && result.profile) {
     graphic = <Sparkline profile={result.profile} fractions={sparkFractions} scale={sparkScale} moon={moon} categoryColor={categoryColor} />;
   } else if (isShape) {
@@ -82,7 +97,7 @@ export const DatasetLine: React.FC<DatasetLineProps> = ({
     const coverage = hasValue ? result.stats?.coverage : undefined;
     graphic = (
       <span className={styles.barSet}>
-        {spread ? <SpreadIcon state={spread} line={line} categoryColor={categoryColor} /> : <EmptySlot />}
+        {spread ? <SpreadIcon state={spread} line={line} categoryColor={categoryColor} picture={picture} /> : <EmptySlot />}
         {graphic}
         {showsCoverage(coverage) ? <CoverageIcon coverage={coverage} /> : <EmptySlot />}
       </span>
@@ -92,7 +107,7 @@ export const DatasetLine: React.FC<DatasetLineProps> = ({
     graphic = (
       <span className={styles.barSet}>
         {graphic}
-        {limit ? <LimitIcon state={limit} line={line} /> : <EmptySlot />}
+        {limit ? <LimitIcon state={limit} line={line} picture={picture} longitudes={result.clip?.longitudes} /> : <EmptySlot />}
       </span>
     );
   }
@@ -117,6 +132,7 @@ export const DatasetLine: React.FC<DatasetLineProps> = ({
   return (
     <div className={`${styles.datasetLine} ${hasValue ? '' : styles.lineNoData}`} data-line={line.id}>
       {chart && hasValue ? <ChartButton line={line} chart={chart} /> : isLine && <span className={styles.chartSlot} />}
+      {hasValue ? <ShowOnMapToggle line={line} file={result.file} className={styles.mapToggle} /> : <EmptySlot />}
       <DatasetName line={line} />
       {graphic}
       <span className={styles.value}>{value}</span>
