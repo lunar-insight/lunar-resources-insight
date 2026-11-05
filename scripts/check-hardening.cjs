@@ -1,6 +1,7 @@
 // Fails when a security setting of the repository is missing or loosened: npm
 // settings, container restrictions, pinned base images, build checks, the scripts
-// that run containers or Firefox, and the CSP and headers. Runs in the production
+// that run containers or Firefox, the CSP and headers, and which nginx location takes
+// the tiler's and other served paths. Runs in the production
 // build; run it on the host after editing the files in FILES. A local pre-edit hook
 // also runs it on each proposed edit of those files. Node built-ins only.
 //   node scripts/check-hardening.cjs [repository root] [--list]
@@ -190,7 +191,7 @@ for (const [name, value] of [
   check('scripts/firefox-bidi/locked.user.js', `${name} = ${value}`, pref(name, value));
 }
 
-// --- nginx: CSP and headers ---
+// --- nginx: CSP, headers and routing ---
 // Splits a config into nested blocks of statements. Comments, quoted strings,
 // ${VARIABLES} and Lua code blocks are not read as structure.
 function nginxBlocks(text) {
@@ -275,6 +276,22 @@ function nginxHeaderRules(file, text) {
   });
   return all;
 }
+// nginx tries regex locations after prefix ones and prefers them, unless the prefix
+// is ^~. A location serving the tiler or another directory must use ^~ or =, or
+// a regex such as the asset rule takes those of its paths that it matches.
+function nginxRoutingRules(file, text) {
+  for (const server of nginxBlocks(text).children.filter((c) => c.head === 'server')) {
+    const label = `server ${server.statements.find((s) => s.startsWith('listen '))?.slice(7) ?? ''}`.trim();
+    const locations = server.children.filter((c) => c.head.startsWith('location '));
+    const modifier = (location) => location.head.split(' ')[1];
+    if (!locations.some((l) => ['~', '~*'].includes(modifier(l)))) continue;
+    const servesElsewhere = (l) => l.statements.some((s) => /^(proxy_pass|root|alias) /.test(s));
+    for (const location of locations.filter((l) => !l.head.startsWith('location @') && servesElsewhere(l))) {
+      check(file, `${label}, ${location.head}: ^~ or =, so no regex location takes its paths`,
+        ['^~', '='].includes(modifier(location)));
+    }
+  }
+}
 const cspDirectives = (value) => Object.fromEntries(value.split(';').map((d) => d.trim()).filter(Boolean).map((d) => {
   const [name, ...sources] = d.split(/\s+/);
   return [name.toLowerCase(), sources];
@@ -285,6 +302,7 @@ const everyCsp = (csps, directive, allowed) => csps.length > 0 && csps.every((c)
 
 const N = 'nginx.conf';
 const prodHeaders = nginxHeaderRules(N, read(N) ?? '');
+nginxRoutingRules(N, read(N) ?? '');
 const prodCsps = prodHeaders.filter((h) => h.name === 'content-security-policy').map((h) => cspDirectives(h.value));
 const pageLocation = locationsOf(nginxBlocks(read(N) ?? '').children.find((c) => c.head === 'server') ?? { children: [] })
   .find((l) => l.head === 'location /');
@@ -309,6 +327,7 @@ if (devNginx === null) {
   console.log(`skipped ${D} (not present; outside the build context)`);
 } else {
   const devCsps = nginxHeaderRules(D, devNginx).filter((h) => h.name === 'content-security-policy').map((h) => cspDirectives(h.value));
+  nginxRoutingRules(D, devNginx);
   check(D, 'connect-src only same origin, the HMR socket and the terrain port',
     everyCsp(devCsps, 'connect-src', ["'self'", 'ws://localhost:5173', 'http://localhost:${TERRAIN_PORT}']));
   check(D, "object-src 'none'", everyCsp(devCsps, 'object-src', ["'none'"]));

@@ -114,7 +114,9 @@ build steps, the container restrictions and published ports, the scripts that st
 containers or Firefox, the locked Firefox prefs, the editor settings, and the
 production and development CSPs and security headers. Every CSP in a config must pass,
 so a second, weaker one is caught, and a location that sets any header must repeat the
-headers it would otherwise inherit. The production build runs it; the build context
+headers it would otherwise inherit. A location that proxies or serves another directory
+must use `^~` or `=` when the server has a regex location, since nginx otherwise lets a
+regex such as the static asset rule take those of its paths it matches, like a tiler `.png`. The production build runs it; the build context
 excludes the development nginx template and the editor settings, which are checked when
 the script runs on the host.
 

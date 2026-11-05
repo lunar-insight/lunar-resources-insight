@@ -186,7 +186,7 @@ Vite bakes environment variables at build time, so `.env.production` must exist 
 docker build --no-cache -t lunar-resources-insight .
 ```
 
-`--no-cache` makes the audit and the signature check run again; a cached build reuses their earlier result. The build fails on a high advisory, a known malicious package, an invalid signature, a missing or loosened security setting (`scripts/check-hardening.cjs`), a failing test, or a host in the bundle that is missing from `scripts/bundle-hosts.txt`.
+`--no-cache` makes the audit and the signature check run again; a cached build reuses their earlier result. The build fails on a high advisory, a known malicious package, an invalid signature, a missing or loosened security setting or an nginx location that the asset rule would shadow (`scripts/check-hardening.cjs`), a failing test, or a host in the bundle that is missing from `scripts/bundle-hosts.txt`.
 
 After editing `.npmrc`, a Dockerfile, `docker-compose.yml` or an nginx config, run `node scripts/check-hardening.cjs`. On the host it also checks the dev nginx template, which the build does not see. `node --test "scripts/tests/*.test.cjs"` tests the checks themselves (the build runs it too); run it after changing a check script.
 

@@ -143,6 +143,10 @@ const loosened = [
   ['Referrer-Policy missing at server level', 'nginx.conf', (s) => s.replace('\n    add_header Referrer-Policy "no-referrer" always;\n', '\n'), 'server 80: Referrer-Policy no-referrer'],
   ['a location drops nosniff', 'nginx.conf', (s) => s.replace('        add_header Cache-Control "public, immutable";\n        add_header X-Content-Type-Options "nosniff" always;\n', '        add_header Cache-Control "public, immutable";\n'), 'location /cesiumStatic/: repeats nosniff'],
   ['a new location sets only a cache header', 'nginx.conf', (s) => s.replace(SPA, `    location /downloads/ {\n        add_header Cache-Control "no-store";\n    }\n\n${SPA}`), 'location /downloads/: repeats nosniff'],
+  ['the asset regex takes picture paths', 'nginx.conf', (s) => s.replace('location ^~ /cog/ {', 'location /cog/ {'), 'location /cog/: ^~ or ='],
+  ['the asset regex takes terrain paths', 'nginx.conf', (s) => s.replace('location ^~ /terrain/ {', 'location /terrain/ {'), 'location /terrain/: ^~ or ='],
+  ['a new proxied location without ^~', 'nginx.conf', (s) => s.replace(SPA, `    location /api/ {\n        proxy_pass http://planetcantile:8000/api/;\n    }\n\n${SPA}`), 'location /api/: ^~ or ='],
+  ['a new location serving another directory without ^~', 'nginx.conf', (s) => s.replace(SPA, `    location /exports/ {\n        root /srv/static;\n    }\n\n${SPA}`), 'location /exports/: ^~ or ='],
   // development nginx
   ['dev CSP allows any websocket', 'nginx.dev.conf.template', (s) => s.replace('ws://localhost:5173', 'ws:'), 'connect-src only same origin, the HMR socket and the terrain port'],
   ['dev server version shown', 'nginx.dev.conf.template', (s) => s.replace('    server_tokens off;\n', ''), 'server 5173: server_tokens off'],
@@ -167,6 +171,8 @@ const equivalent = [
   ['a build stage based on an earlier stage', 'Dockerfile', (s) => `${s}\nFROM builder AS inspect\n`],
   ['a commented-out weaker CSP in nginx', 'nginx.conf', (s) => s.replace(SPA, `    # add_header Content-Security-Policy "script-src 'unsafe-eval'";\n${SPA}`)],
   ['a new location without headers (inherits the server ones)', 'nginx.conf', (s) => s.replace(SPA, `    location = /robots.txt {\n        return 200 "User-agent: *\\n";\n    }\n\n${SPA}`)],
+  ['a new proxied location matched exactly', 'nginx.conf', (s) => s.replace(SPA, `    location = /health {\n        proxy_pass http://planetcantile:8000/health;\n    }\n\n${SPA}`)],
+  ['a plain prefix serving the page root', 'nginx.conf', (s) => s.replace(SPA, `    location /docs/ {\n        try_files $uri =404;\n    }\n\n${SPA}`)],
 ];
 
 for (const [name, file, change] of equivalent) {
