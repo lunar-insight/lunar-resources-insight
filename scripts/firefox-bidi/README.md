@@ -3,7 +3,7 @@
 Controls a headless Firefox from a JSON plan: open a page, wait until it is
 ready, run JavaScript, click and take screenshots. It uses WebDriver BiDi, a
 protocol built into Firefox, so it needs nothing beyond Firefox and Node 22 or
-later.
+later. Adding the app helpers to a plan takes Python 3.
 
 `firefox --screenshot` takes one picture as soon as the page loads and cannot
 click. Use this driver when a page loads data or draws after loading, or when a
@@ -71,6 +71,33 @@ React Aria buttons accept `element.click()`. Find a button by its `aria-label`,
 for example `[aria-label="Inspect"]`, or by its text when it has no label. An
 icon adds its name to the button's text: the Features button reads
 `shapesFeatures`, the icon `shapes` followed by the label.
+
+## Helpers for the app
+
+`app-helpers.js` defines page functions for checks on the app. `add-helpers.py`
+writes a copy of a plan whose pages run it as their first step:
+
+```
+python -I scripts/firefox-bidi/add-helpers.py <plan.json> <out.json>
+node scripts/firefox-bidi/drive.mjs <out.json>
+```
+
+| Function | Does |
+|---|---|
+| `sleep(ms)`, `until(test, timeoutMs)` | Waits a time, or until `test()` returns a truthy value (null after the timeout). |
+| `contextValue(test)` | The first React context value that passes `test`. |
+| `viewer()`, `features()`, `inspectorStore()` | The Cesium viewer, the features list and the Inspector store. |
+| `lookAt(lon, lat, heightM)` | Camera above a point, looking straight down. |
+| `placeAt(lon, lat, x, y)` | Moves the camera until that point shows at page pixel `x`, `y`, for example to draw around a pole with `click` steps. |
+| `groundAt(x, y)` | Longitude and latitude under a page pixel. |
+| `addPoint(id, [lon, lat])`, `addPolygon(id, vertices)`, `addCircle(id, center, radiusM)` | Adds a feature at exact coordinates in degrees, with its Inspector open. The globe does not draw it. |
+| `results(id)`, `waitReady(id)` | A feature's Inspector results, and a wait until they are ready. |
+| `requests(prefix)` | Count, statuses and slowest time of the requests whose path starts with `prefix`, such as `/cog/statistics`. |
+
+A step's `const` stays declared for the steps after it, so wrap a step's code in
+a function when it declares names. The helpers find the app's state through
+React's internal fibers: a React upgrade can break them, and nothing in the app
+depends on them. They run on the production build too.
 
 ## Checking a component with fixed data
 
