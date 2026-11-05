@@ -7,9 +7,7 @@ import {
   geometryKey,
   gridInsideRing,
   isInsideBounds,
-  ringBounds,
-  ringParts,
-  ringToGeoJson,
+  shapeBounds,
   sampleLine,
   shapeRing,
   type FeatureKind,
@@ -78,8 +76,8 @@ export interface InspectorDependencies {
   fetchResolution: (stac?: string) => Promise<number | undefined>;
   fetchClip: (stac?: string) => Promise<ClippedRange | undefined>;
   fetchPointValues: (filenames: string[], position: LonLat, signal?: AbortSignal) => Promise<Map<string, number | null>>;
-  fetchShapeStatistics: (filename: string, geojson: object, signal?: AbortSignal) => Promise<FeatureStatistics | null>;
-  sampleElevation: (positions: LonLat[]) => Promise<Elevation | null>;
+  fetchShapeStatistics: (filename: string, ring: LonLat[], signal?: AbortSignal) => Promise<FeatureStatistics | null>;
+  sampleElevation: (positions: LonLat[], outline?: LonLat[]) => Promise<Elevation | null>;
   /** Shape requests share the tile instance: at most 4 at once, paused while the camera moves. */
   areaQueue: RequestQueue;
   /** Line samples go to the point instance, which the scanner shares. */
@@ -269,8 +267,12 @@ export class InspectorStore {
     }));
   }
 
-  private elevation(positions: LonLat[], update: (change: () => Partial<FeatureResults>) => void): Promise<void> {
-    return this.deps.sampleElevation(positions)
+  private elevation(
+    positions: LonLat[],
+    update: (change: () => Partial<FeatureResults>) => void,
+    outline?: LonLat[],
+  ): Promise<void> {
+    return this.deps.sampleElevation(positions, outline)
       .catch((): null => null)
       .then(elevation => update(() => ({ elevation })));
   }
@@ -317,10 +319,9 @@ export class InspectorStore {
 
     const areaKm2 = featureAreaKm2(feature);
     update(() => ({ center, areaKm2 }));
-    const elevation = this.elevation(gridInsideRing(ring), update);
+    const elevation = this.elevation(gridInsideRing(ring), update, ring);
 
-    const geojson = ringToGeoJson(ring);
-    const partBounds = ringParts(ring).map(ringBounds);
+    const partBounds = shapeBounds(ring);
     const setLine = (lineId: string, result: LineResult, failed = false) => update(current => ({
       lines: { ...current.lines, [lineId]: result },
       done: current.done + 1,
@@ -335,7 +336,7 @@ export class InspectorStore {
       }
       try {
         const stats = await this.deps.areaQueue.run(feature.id, signal =>
-          this.deps.fetchShapeStatistics(file.filename, geojson, signal));
+          this.deps.fetchShapeStatistics(file.filename, ring, signal));
         if (!stats) {
           setLine(line.id, { file, noData: 'inside', extent });
           return;

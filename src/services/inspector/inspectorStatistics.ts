@@ -35,7 +35,7 @@ export interface FeatureStatistics {
   max: number;
   p15: number;
   p85: number;
-  /** Pixels or samples holding data. */
+  /** Cells of the grid read, or samples, holding data. A shape's grid can be finer than the file. */
   count: number;
   /** Share of the feature holding data, 0 to 100. */
   coverage: number;
@@ -366,6 +366,68 @@ const quantile = (sorted: number[], q: number): number => {
   const upper = Math.ceil(position);
   return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
 };
+
+/** One part of a shape read in parts, with its histogram in fine bins over the whole shape's range. */
+export interface StatisticsPart {
+  areaKm2: number;
+  stats: FeatureStatistics;
+  fine: Histogram;
+}
+
+/**
+ * Statistics of a shape from its parts, each weighted by the ground holding data,
+ * since parts can be read at different pixel sizes. The median and percentiles come
+ * from the merged fine histogram, so they are good to one fine bin.
+ */
+export function mergePartStatistics(parts: StatisticsPart[], shapeAreaKm2: number, shownBins: number): FeatureStatistics {
+  const weights = parts.map(({ areaKm2, stats }) => (areaKm2 * stats.coverage) / 100);
+  const ground = weights.reduce((sum, weight) => sum + weight, 0);
+  const weighted = (value: (stats: FeatureStatistics) => number) =>
+    parts.reduce((sum, { stats }, i) => sum + weights[i] * value(stats), 0) / ground;
+
+  const mean = weighted(stats => stats.mean);
+  const variance = weighted(stats => stats.std ** 2 + (stats.mean - mean) ** 2);
+  const min = Math.min(...parts.map(({ stats }) => stats.min));
+  const max = Math.max(...parts.map(({ stats }) => stats.max));
+
+  const { edges } = parts[0].fine;
+  const counts = new Array<number>(edges.length - 1).fill(0);
+  parts.forEach(({ fine }, i) => {
+    const total = fine.counts.reduce((sum, count) => sum + count, 0);
+    if (total > 0) fine.counts.forEach((count, bin) => { counts[bin] += (count * weights[i]) / total; });
+  });
+
+  const atShare = (share: number) => {
+    const target = share * counts.reduce((sum, count) => sum + count, 0);
+    let below = 0;
+    for (let bin = 0; bin < counts.length; bin++) {
+      if (counts[bin] > 0 && below + counts[bin] >= target) {
+        const value = edges[bin] + ((target - below) / counts[bin]) * (edges[bin + 1] - edges[bin]);
+        return Math.min(max, Math.max(min, value));
+      }
+      below += counts[bin];
+    }
+    return max;
+  };
+
+  const perShown = counts.length / shownBins;
+  return {
+    mean,
+    median: atShare(0.5),
+    std: Math.sqrt(variance),
+    min,
+    max,
+    p15: atShare(0.15),
+    p85: atShare(0.85),
+    count: parts.reduce((sum, { stats }) => sum + stats.count, 0),
+    coverage: (ground / shapeAreaKm2) * 100,
+    histogram: {
+      counts: Array.from({ length: shownBins }, (_, shown) =>
+        counts.slice(shown * perShown, (shown + 1) * perShown).reduce((sum, count) => sum + count, 0)),
+      edges: Array.from({ length: shownBins + 1 }, (_, shown) => edges[shown * perShown]),
+    },
+  };
+}
 
 /** Statistics over a line's samples. Coverage is the share of samples holding data. */
 export function statisticsOfSamples(samples: (number | null)[]): FeatureStatistics | null {

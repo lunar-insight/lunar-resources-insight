@@ -11,8 +11,15 @@ import {
 } from 'geoConfigExporter';
 import { stacService } from 'services/StacService';
 import { TerrainService } from 'services/TerrainService';
-import type { ClippedRange, FeatureStatistics, Histogram } from './inspectorStatistics';
-import { MOON_RADIUS_M, type LonLat } from './featureGeometry';
+import { mergePartStatistics, type ClippedRange, type FeatureStatistics, type Histogram } from './inspectorStatistics';
+import {
+  MOON_RADIUS_M,
+  localShape,
+  ringExtentKm,
+  ringNearMeridian,
+  shapeParts,
+  type LonLat,
+} from './featureGeometry';
 import { PICTURE_HEIGHT, PICTURE_WIDTH, localCrs, type View, type ViewPart } from './pictureGeometry';
 import { decodeRgba, type ValueRange } from './pictureValues';
 
@@ -157,21 +164,33 @@ function readHistogram(value: unknown): Histogram | undefined {
   return { counts, edges };
 }
 
+const MOON_CRS = 'IAU_2015:30100';
 /**
- * Statistics over the pixels inside a shape, given as a GeoJSON Feature in
- * degrees. Null when the shape holds no data.
+ * A warped read reaching 180° reads a file's whole width. On a global file of
+ * this many pixels across, that takes over a minute for a small shape.
  */
-export async function fetchShapeStatistics(
+const WIDE_FILE_PIXELS = 10_000;
+/** From this size, a warped read uses an overview coarse enough to answer in seconds. */
+const PARTS_BELOW_KM = 400;
+/** Fine bins per bin shown, when two parts are read over one range. */
+const FINE_BINS_PER_BIN = 100;
+
+async function isWideGlobalFile(filename: string): Promise<boolean> {
+  const { crs, width } = await fetchFileInfo(filename);
+  return !isProjectedCrs(crs) && width >= WIDE_FILE_PIXELS;
+}
+
+async function postStatistics(
   filename: string,
   geojson: object,
+  query: Record<string, string>,
   signal?: AbortSignal,
-): Promise<FeatureStatistics | null> {
+) {
   const params = new URLSearchParams({
     url: `${workspacePath}/${filename}`,
     bidx: '1',
-    coord_crs: 'IAU_2015:30100',
     max_size: String(SHAPE_MAX_SIZE),
-    histogram_bins: String(HISTOGRAM_BINS),
+    ...query,
   });
   params.append('p', '15');
   params.append('p', '85');
@@ -186,8 +205,72 @@ export async function fetchShapeStatistics(
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     return response.json();
   }, signal);
+  return data?.properties?.statistics?.b1;
+}
 
-  const b1 = data?.properties?.statistics?.b1;
+/**
+ * Two reads in a file's own grid, which end exactly at 180°, merged by the ground
+ * each holds. The first gives the shape's range, the second each part's histogram
+ * over that range, since histograms over different ranges do not add.
+ */
+async function fetchStatisticsInParts(
+  filename: string,
+  parts: ReturnType<typeof shapeParts>,
+  signal?: AbortSignal,
+): Promise<FeatureStatistics | null> {
+  const read: { part: (typeof parts)[number]; stats: FeatureStatistics }[] = [];
+  for (const part of parts) {
+    const b1 = await postStatistics(
+      filename, part.geojson, { coord_crs: MOON_CRS, histogram_bins: String(HISTOGRAM_BINS) }, signal,
+    );
+    const stats = toStatistics(b1);
+    if (stats) read.push({ part, stats });
+  }
+  if (read.length === 0) return null;
+
+  const shapeAreaKm2 = parts.reduce((sum, part) => sum + part.areaKm2, 0);
+  if (read.length === 1) {
+    const [{ part, stats }] = read;
+    return { ...stats, coverage: (stats.coverage * part.areaKm2) / shapeAreaKm2 };
+  }
+
+  const lowest = Math.min(...read.map(({ stats }) => stats.min));
+  const highest = Math.max(...read.map(({ stats }) => stats.max));
+  const merged = [];
+  for (const { part, stats } of read) {
+    const b1 = await postStatistics(filename, part.geojson, {
+      coord_crs: MOON_CRS,
+      histogram_bins: String(HISTOGRAM_BINS * FINE_BINS_PER_BIN),
+      histogram_range: `${lowest},${highest}`,
+    }, signal);
+    const fine = readHistogram(b1?.histogram);
+    if (!fine) throw new Error(`No histogram for a part of ${filename}`);
+    merged.push({ areaKm2: part.areaKm2, stats, fine });
+  }
+  return mergePartStatistics(merged, shapeAreaKm2, HISTOGRAM_BINS);
+}
+
+/**
+ * Statistics over the ground inside a shape. Null when it holds no data. Read in
+ * a projection local to the shape, where every pixel covers the same ground. A
+ * small shape at 180° on a very wide global file is read in two parts instead.
+ */
+export async function fetchShapeStatistics(
+  filename: string,
+  ring: LonLat[],
+  signal?: AbortSignal,
+): Promise<FeatureStatistics | null> {
+  if (ringNearMeridian(ring) && ringExtentKm(ring) < PARTS_BELOW_KM && await isWideGlobalFile(filename)) {
+    return fetchStatisticsInParts(filename, shapeParts(ring), signal);
+  }
+  const { crs, geojson } = localShape(ring);
+  return toStatistics(await postStatistics(
+    filename, geojson, { coord_crs: crs, dst_crs: crs, histogram_bins: String(HISTOGRAM_BINS) }, signal,
+  ));
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function toStatistics(b1: any): FeatureStatistics | null {
   if (!b1 || !b1.count || !Number.isFinite(b1.mean)) return null;
 
   const histogram = readHistogram(b1.histogram);
@@ -212,19 +295,27 @@ export interface Elevation {
   highest: number;
 }
 
-/** Elevation from the terrain tiles, or null when no terrain is loaded. */
-export async function sampleElevation(positions: LonLat[]): Promise<Elevation | null> {
+/**
+ * Elevation from the terrain tiles, or null when no terrain is loaded. The value
+ * is the mean of `positions`. An `outline` adds to the lowest and highest only,
+ * as its vertices crowd the rim of a shape, unless no position has a height.
+ */
+export async function sampleElevation(positions: LonLat[], outline: LonLat[] = []): Promise<Elevation | null> {
   const provider = TerrainService.getTerrainProvider();
-  if (!(provider instanceof Cesium.CesiumTerrainProvider) || positions.length === 0) return null;
+  const all = [...positions, ...outline];
+  if (!(provider instanceof Cesium.CesiumTerrainProvider) || all.length === 0) return null;
 
   const sampled = await TerrainService.sampleTerrainHeights(
-    positions.map(p => Cesium.Cartographic.fromDegrees(p.lon, p.lat)),
+    all.map(p => Cesium.Cartographic.fromDegrees(p.lon, p.lat)),
   );
-  const heights = sampled.map(c => c.height).filter(h => Number.isFinite(h));
+  const isHeight = (h: number) => Number.isFinite(h);
+  const heights = sampled.map(c => c.height).filter(isHeight);
   if (heights.length === 0) return null;
 
+  const spread = sampled.slice(0, positions.length).map(c => c.height).filter(isHeight);
+  const averaged = spread.length > 0 ? spread : heights;
   return {
-    value: heights.reduce((sum, h) => sum + h, 0) / heights.length,
+    value: averaged.reduce((sum, h) => sum + h, 0) / averaged.length,
     lowest: Math.min(...heights),
     highest: Math.max(...heights),
   };
@@ -232,24 +323,26 @@ export async function sampleElevation(positions: LonLat[]): Promise<Elevation | 
 
 const KM_PER_DEGREE = (Math.PI * MOON_RADIUS_M) / 180 / 1000;
 
-const pixelKmByFile = new Map<string, Promise<number>>();
+const infoByFile = new Map<string, ReturnType<typeof fetchCogInfo>>();
 
-/** Width of a file's pixel in km, read once per file. A projected file gives its bounds in meters. */
-export function fetchFilePixelKm(filename: string): Promise<number> {
-  let request = pixelKmByFile.get(filename);
+/** A file's bounds, CRS and width, read once per file. */
+function fetchFileInfo(filename: string): ReturnType<typeof fetchCogInfo> {
+  let request = infoByFile.get(filename);
   if (!request) {
-    request = fetchCogInfo(filename)
-      .then(({ bounds, crs, width }) => {
-        const pixel = (bounds[2] - bounds[0]) / width;
-        return isProjectedCrs(crs) ? pixel / 1000 : pixel * KM_PER_DEGREE;
-      })
-      .catch(error => {
-        pixelKmByFile.delete(filename);
-        throw error;
-      });
-    pixelKmByFile.set(filename, request);
+    request = fetchCogInfo(filename).catch(error => {
+      infoByFile.delete(filename);
+      throw error;
+    });
+    infoByFile.set(filename, request);
   }
   return request;
+}
+
+/** Width of a file's pixel in km. A projected file gives its bounds in meters. */
+export async function fetchFilePixelKm(filename: string): Promise<number> {
+  const { bounds, crs, width } = await fetchFileInfo(filename);
+  const pixel = (bounds[2] - bounds[0]) / width;
+  return isProjectedCrs(crs) ? pixel / 1000 : pixel * KM_PER_DEGREE;
 }
 
 /** Gray and alpha of a picture, row by row from the top. */
@@ -311,6 +404,6 @@ export async function fetchPicture(
 /** Test hook: forgets the stored bounds, file pixels and asset list. */
 export function resetInspectorRequestCaches(): void {
   boundsByFile.clear();
-  pixelKmByFile.clear();
+  infoByFile.clear();
   assetKeysRequest = null;
 }

@@ -197,8 +197,16 @@ describe('InspectorStore, shapes', () => {
     expect(result.lines.band).toMatchObject({ noData: 'outside' })
     expect(result.lines.pole).toMatchObject({ value: 5, file: { filename: 'south.tif' } })
     expect(vi.mocked(deps.fetchShapeStatistics).mock.calls.map(c => c[0])).toEqual(['global.tif', 'south.tif'])
-    const geojson = vi.mocked(deps.fetchShapeStatistics).mock.calls[0][1] as { geometry: { coordinates: number[][][] } }
-    expect(geojson.geometry.coordinates[0]).toHaveLength(5)
+    expect(vi.mocked(deps.fetchShapeStatistics).mock.calls[0][1]).toHaveLength(4)
+  })
+
+  it('samples elevation over the ground, with the outline only for its extremes', async () => {
+    const { store, deps } = setup()
+    store.sync([square(10, -70)])
+    await settle()
+    const [spread, outline] = vi.mocked(deps.sampleElevation).mock.calls[0]
+    expect(spread.length).toBeGreaterThan(100)
+    expect(outline).toHaveLength(4)
   })
 
   it('reads no data inside the dataset and counts failures', async () => {
@@ -230,12 +238,11 @@ describe('InspectorStore, shapes', () => {
     expect(store.get('s')!.status).toBe('ready')
   })
 
-  it('sends a shape across 180° as a MultiPolygon, with the area of the same box elsewhere', async () => {
+  it('reads a shape across 180° with the area of the same box elsewhere', async () => {
     const { store, deps } = setup()
     store.sync([acrossMeridian()])
     await settle()
-    const geojson = vi.mocked(deps.fetchShapeStatistics).mock.calls[0][1] as { geometry: { type: string } }
-    expect(geojson.geometry.type).toBe('MultiPolygon')
+    expect(deps.fetchShapeStatistics).toHaveBeenCalled()
     expect(store.get('s')!.areaKm2).toBeGreaterThan(0)
     expect(store.get('s')!.areaKm2).toBeLessThan(1e4)
   })
@@ -261,9 +268,19 @@ describe('InspectorStore, shapes', () => {
     const { store, deps } = setup()
     store.sync([feature('c', 'circle', { center: deg(0, 0), radius: 20_000 })])
     await settle()
-    const geojson = vi.mocked(deps.fetchShapeStatistics).mock.calls[0][1] as { geometry: { coordinates: number[][][] } }
-    expect(geojson.geometry.coordinates[0].length).toBeGreaterThan(20)
+    expect(vi.mocked(deps.fetchShapeStatistics).mock.calls[0][1].length).toBeGreaterThan(20)
     expect(store.get('c')!.kind).toBe('shape')
+  })
+
+  it('reads a dataset reaching a pole for a ring around it, even when the ring stays off that dataset', async () => {
+    const nearPole: Record<string, number[]> = { ...BOUNDS, 'global.tif': [-10, -90, 10, -88], 'band.tif': [-10, 10, 10, 20] }
+    const { store, deps } = setup({ fetchBounds: vi.fn(async (filename: string) => nearPole[filename]) })
+    store.sync([feature('c', 'circle', { center: deg(40, -87), radius: 200_000 })])
+    await settle()
+    const read = vi.mocked(deps.fetchShapeStatistics).mock.calls.map(c => c[0])
+    expect(read).toContain('global.tif')
+    expect(read).not.toContain('band.tif')
+    expect(store.get('c')!.lines.band).toMatchObject({ noData: 'outside' })
   })
 
   it('keeps the value when the catalog item fails', async () => {

@@ -106,6 +106,7 @@ export default defineConfig(({ mode }) => ({
       exclude: ['src/**/*.{test,spec}.?(c|m)[jt]s?(x)', 'src/**/*TestUtils.tsx', 'src/setupTests.ts', 'src/scratch/**', 'src/**/*.d.ts'],
       // The mini viewer stays fully covered, file by file.
       thresholds: {
+        'src/services/inspector/featureGeometry.ts': { 100: true },
         'src/services/inspector/showOnMap.ts': { 100: true },
         'src/services/inspector/pictureGeometry.ts': { 100: true },
         'src/services/inspector/pictureValues.ts': { 100: true },

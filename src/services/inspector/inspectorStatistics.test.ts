@@ -18,6 +18,7 @@ import {
   isRanked,
   limitPopover,
   limitState,
+  mergePartStatistics,
   noDataPopover,
   showsCoverage,
   skewRatio,
@@ -325,6 +326,110 @@ describe('statisticsOfSamples', () => {
   it('returns null without data', () => {
     expect(statisticsOfSamples([null, null])).toBeNull()
     expect(statisticsOfSamples([])).toBeNull()
+  })
+})
+
+describe('mergePartStatistics', () => {
+  const FINE = 1200
+  const edges = Array.from({ length: FINE + 1 }, (_, i) => 2 + (i * 6) / FINE)
+  const fine = (bins: Record<number, number>) => ({
+    counts: Array.from({ length: FINE }, (_, i) => bins[i] ?? 0),
+    edges,
+  })
+  const stats = (over: Partial<FeatureStatistics>): FeatureStatistics => ({
+    mean: 5, median: 5, std: 0, min: 2, max: 8, p15: 2, p85: 8, count: 100, coverage: 100, ...over,
+  })
+
+  it('weights each part by the ground it holds, not by its pixels', () => {
+    const merged = mergePartStatistics([
+      { areaKm2: 30, stats: stats({ mean: 4, count: 900 }), fine: fine({ 0: 900 }) },
+      { areaKm2: 10, stats: stats({ mean: 8, count: 10 }), fine: fine({ 1199: 10 }) },
+    ], 40, 12)
+    expect(merged.mean).toBe(5)
+    expect(merged.count).toBe(910)
+    expect(merged.coverage).toBe(100)
+    const shares = merged.histogram!.counts.map(c => c / merged.histogram!.counts.reduce((a, b) => a + b, 0))
+    expect(shares[0]).toBeCloseTo(0.75)
+    expect(shares[11]).toBeCloseTo(0.25)
+  })
+
+  it('counts only the ground holding data', () => {
+    const merged = mergePartStatistics([
+      { areaKm2: 10, stats: stats({ mean: 4, coverage: 50 }), fine: fine({ 0: 1 }) },
+      { areaKm2: 10, stats: stats({ mean: 8 }), fine: fine({ 1199: 1 }) },
+    ], 20, 12)
+    expect(merged.coverage).toBe(75)
+    expect(merged.mean).toBeCloseTo((5 * 4 + 10 * 8) / 15)
+  })
+
+  it('pools the spread within and between parts', () => {
+    const merged = mergePartStatistics([
+      { areaKm2: 10, stats: stats({ mean: 4, std: 1 }), fine: fine({ 0: 1 }) },
+      { areaKm2: 10, stats: stats({ mean: 6, std: 1 }), fine: fine({ 1199: 1 }) },
+    ], 20, 12)
+    expect(merged.std).toBeCloseTo(Math.sqrt(2))
+  })
+
+  it('takes the extremes of both parts', () => {
+    const merged = mergePartStatistics([
+      { areaKm2: 1, stats: stats({ min: 2, max: 5 }), fine: fine({ 0: 1 }) },
+      { areaKm2: 1, stats: stats({ min: 4, max: 8 }), fine: fine({ 1199: 1 }) },
+    ], 2, 12)
+    expect([merged.min, merged.max]).toEqual([2, 8])
+  })
+
+  it('reads the median and percentiles from the merged histogram', () => {
+    // 100 units evenly over the first half of the range in one part, the second half in the other
+    const half = (from: number) => Object.fromEntries(Array.from({ length: 600 }, (_, i) => [from + i, 1]))
+    const merged = mergePartStatistics([
+      { areaKm2: 1, stats: stats({}), fine: fine(half(0)) },
+      { areaKm2: 1, stats: stats({}), fine: fine(half(600)) },
+    ], 2, 12)
+    expect(merged.median).toBeCloseTo(5, 6)
+    expect(merged.p15).toBeCloseTo(2.9, 6)
+    expect(merged.p85).toBeCloseTo(7.1, 6)
+  })
+
+  it('stays within the extremes for a shape holding one value', () => {
+    const narrow = Array.from({ length: FINE + 1 }, (_, i) => 4.5 + i / FINE)
+    const one = { counts: Array.from({ length: FINE }, (_, i) => (i === 600 ? 1 : 0)), edges: narrow }
+    const merged = mergePartStatistics([
+      { areaKm2: 1, stats: stats({ min: 5, max: 5 }), fine: one },
+      { areaKm2: 1, stats: stats({ min: 5, max: 5 }), fine: one },
+    ], 2, 12)
+    expect([merged.p15, merged.median, merged.p85]).toEqual([5, 5, 5])
+  })
+
+  it('groups the fine bins into the bins shown, edges included', () => {
+    const merged = mergePartStatistics([
+      { areaKm2: 1, stats: stats({}), fine: fine({ 0: 1, 99: 1, 100: 2 }) },
+      { areaKm2: 1, stats: stats({}), fine: fine({ 1199: 4 }) },
+    ], 2, 12)
+    const { counts, edges: shown } = merged.histogram!
+    expect(counts).toHaveLength(12)
+    expect(shown).toHaveLength(13)
+    expect(shown[0]).toBe(2)
+    expect(shown[1]).toBeCloseTo(2.5)
+    expect(shown[12]).toBe(8)
+    expect(counts[0]).toBeCloseTo(counts[1])
+    expect(counts[11]).toBeCloseTo(counts[0] * 2)
+  })
+
+  it('reads a part with an empty histogram as holding no bars', () => {
+    const merged = mergePartStatistics([
+      { areaKm2: 1, stats: stats({ mean: 4 }), fine: fine({}) },
+      { areaKm2: 1, stats: stats({ mean: 6 }), fine: fine({ 600: 1 }) },
+    ], 2, 12)
+    expect(merged.mean).toBe(5)
+    expect(merged.histogram!.counts.reduce((a, b) => a + b, 0)).toBeCloseTo(1)
+  })
+
+  it('falls to the top of the range when no bar holds anything', () => {
+    const merged = mergePartStatistics([
+      { areaKm2: 1, stats: stats({}), fine: fine({}) },
+      { areaKm2: 1, stats: stats({}), fine: fine({}) },
+    ], 2, 12)
+    expect(merged.median).toBe(8)
   })
 })
 

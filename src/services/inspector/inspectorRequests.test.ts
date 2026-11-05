@@ -28,6 +28,7 @@ import {
   sampleElevation,
   PointRequestError,
 } from './inspectorRequests'
+import { circleRing, localShape, shapeParts } from './featureGeometry'
 import { localCrs } from './pictureGeometry'
 
 const json = (body: unknown, status = 200) =>
@@ -237,9 +238,9 @@ describe('fetchPointValues', () => {
 })
 
 describe('fetchShapeStatistics', () => {
-  const geojson = { type: 'Feature', properties: {}, geometry: { type: 'Polygon', coordinates: [] as number[][][] } }
+  const ring = [{ lon: 10, lat: 10 }, { lon: 11, lat: 10 }, { lon: 11, lat: 11 }, { lon: 10, lat: 11 }]
 
-  it('posts the shape with the Moon CRS, the read cap and two percentiles', async () => {
+  it('posts the shape in its local projection, with the read cap and two percentiles', async () => {
     fetchMock.mockResolvedValue(json({
       properties: { statistics: { b1: {
         mean: 4.75, median: 4.8, std: 0.44, min: 3.6, max: 7.2, count: 576,
@@ -248,7 +249,7 @@ describe('fetchShapeStatistics', () => {
       } } },
     }))
 
-    const stats = await fetchShapeStatistics('chemical_elements/th.tif', geojson)
+    const stats = await fetchShapeStatistics('chemical_elements/th.tif', ring)
 
     expect(stats).toEqual({
       mean: 4.75, median: 4.8, std: 0.44, min: 3.6, max: 7.2, p15: 4.4, p85: 5, count: 576, coverage: 100,
@@ -256,9 +257,11 @@ describe('fetchShapeStatistics', () => {
     })
     const [url, init] = fetchMock.mock.calls[0]
     expect(init?.method).toBe('POST')
+    const { crs, geojson } = localShape(ring)
     expect(JSON.parse(init?.body as string)).toEqual(geojson)
     const params = new URL(url, 'http://host').searchParams
-    expect(params.get('coord_crs')).toBe('IAU_2015:30100')
+    expect(params.get('coord_crs')).toBe(crs)
+    expect(params.get('dst_crs')).toBe(crs)
     expect(params.get('max_size')).toBe('1024')
     expect(params.getAll('p')).toEqual(['15', '85'])
     expect(params.get('histogram_bins')).toBe('12')
@@ -269,13 +272,13 @@ describe('fetchShapeStatistics', () => {
     const b1 = { mean: 5, median: 5, std: 1, min: 3, max: 7, count: 10, valid_percent: 100, percentile_15: 4, percentile_85: 6 }
     for (const histogram of [[[1, 2], [3, 7]], [[1, 'x'], [3, 5, 7]], [[], [3]], 'none', [[1, 2]]]) {
       fetchMock.mockResolvedValueOnce(json({ properties: { statistics: { b1: { ...b1, histogram } } } }))
-      expect(await fetchShapeStatistics('f.tif', geojson)).not.toHaveProperty('histogram')
+      expect(await fetchShapeStatistics('f.tif', ring)).not.toHaveProperty('histogram')
     }
   })
 
   it('returns null for a shape holding no data', async () => {
     fetchMock.mockResolvedValue(json({ properties: { statistics: { b1: { mean: null, count: 0, valid_percent: 0 } } } }))
-    expect(await fetchShapeStatistics('f.tif', geojson)).toBeNull()
+    expect(await fetchShapeStatistics('f.tif', ring)).toBeNull()
   })
 
   it('retries a failed request once', async () => {
@@ -284,13 +287,13 @@ describe('fetchShapeStatistics', () => {
       .mockResolvedValueOnce(json({ properties: { statistics: { b1: {
         mean: 5, median: 5, std: 1, min: 3, max: 7, count: 10, valid_percent: 100, percentile_15: 4, percentile_85: 6,
       } } } }))
-    expect(await fetchShapeStatistics('f.tif', geojson)).toMatchObject({ mean: 5, coverage: 100 })
+    expect(await fetchShapeStatistics('f.tif', ring)).toMatchObject({ mean: 5, coverage: 100 })
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
   it('fails after the retry fails too', async () => {
     fetchMock.mockResolvedValue(json({}, 502))
-    await expect(fetchShapeStatistics('f.tif', geojson)).rejects.toThrow('HTTP 502')
+    await expect(fetchShapeStatistics('f.tif', ring)).rejects.toThrow('HTTP 502')
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
 
@@ -300,8 +303,119 @@ describe('fetchShapeStatistics', () => {
       controller.abort()
       throw new DOMException('aborted', 'AbortError')
     })
-    await expect(fetchShapeStatistics('f.tif', geojson, controller.signal)).rejects.toThrow('aborted')
+    await expect(fetchShapeStatistics('f.tif', ring, controller.signal)).rejects.toThrow('aborted')
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  describe('a shape at 180°', () => {
+    const crossing = [{ lon: 179.5, lat: -1 }, { lon: -179.5, lat: -1 }, { lon: -179.5, lat: 1 }, { lon: 179.5, lat: 1 }]
+    const large = circleRing({ lon: 180, lat: 0 }, 300_000)
+    const WIDE = { bounds: [-180, -65, 180, 65], width: 184320, crs: 'GEOGCS["Moon"]' }
+    const b1 = (mean: number, min: number, max: number, histogram?: [number[], number[]], valid = 100) => ({
+      properties: { statistics: { b1: {
+        mean, median: mean, std: 1, min, max, count: 100, valid_percent: valid, percentile_15: min, percentile_85: max,
+        ...(histogram ? { histogram } : {}),
+      } } },
+    })
+    const fine = (bin: number): [number[], number[]] => [
+      Array.from({ length: 1200 }, (_, i) => (i === bin ? 100 : 0)),
+      Array.from({ length: 1201 }, (_, i) => 2 + (i * 6) / 1200),
+    ]
+    const search = (call: number) => new URL(fetchMock.mock.calls[call][0], 'http://host').searchParams
+    const body = (call: number) => JSON.parse(fetchMock.mock.calls[call][1]?.body as string)
+
+    it('reads a wide global file in two parts of its own grid, and merges them', async () => {
+      fetchMock
+        .mockResolvedValueOnce(json(WIDE))
+        .mockResolvedValueOnce(json(b1(4, 2, 5)))
+        .mockResolvedValueOnce(json(b1(6, 5, 8)))
+        .mockResolvedValueOnce(json(b1(4, 2, 5, fine(300))))
+        .mockResolvedValueOnce(json(b1(6, 5, 8, fine(900))))
+
+      const stats = await fetchShapeStatistics('wide-both.tif', crossing)
+
+      expect(stats).toMatchObject({ mean: 5, min: 2, max: 8, count: 200, coverage: 100 })
+      expect(stats!.histogram!.counts).toHaveLength(12)
+      expect(fetchMock).toHaveBeenCalledTimes(5)
+      expect(search(1).get('coord_crs')).toBe('IAU_2015:30100')
+      expect(search(1).has('dst_crs')).toBe(false)
+      expect(search(1).get('histogram_bins')).toBe('12')
+      expect(body(1)).toEqual(shapeParts(crossing)[0].geojson)
+      expect(body(2)).toEqual(shapeParts(crossing)[1].geojson)
+      expect(search(3).get('histogram_bins')).toBe('1200')
+      expect(search(3).get('histogram_range')).toBe('2,8')
+      expect(search(4).get('histogram_range')).toBe('2,8')
+      expect(body(4)).toEqual(shapeParts(crossing)[1].geojson)
+    })
+
+    it('reads the file once for all shapes', async () => {
+      fetchMock
+        .mockResolvedValueOnce(json(WIDE))
+        .mockResolvedValue(json({ properties: { statistics: { b1: { mean: null, count: 0, valid_percent: 0 } } } }))
+      await fetchShapeStatistics('wide-once.tif', crossing)
+      const calls = fetchMock.mock.calls.length
+      await fetchShapeStatistics('wide-once.tif', crossing)
+      expect(fetchMock.mock.calls.length).toBe(calls + 2)
+      expect(fetchMock.mock.calls.filter(([url]) => url.includes('/cog/info'))).toHaveLength(1)
+    })
+
+    it('returns null when neither part holds data', async () => {
+      fetchMock
+        .mockResolvedValueOnce(json(WIDE))
+        .mockResolvedValue(json({ properties: { statistics: { b1: { mean: null, count: 0, valid_percent: 0 } } } }))
+      expect(await fetchShapeStatistics('wide-empty.tif', crossing)).toBeNull()
+      expect(fetchMock).toHaveBeenCalledTimes(3)
+    })
+
+    it('keeps the statistics of the one part holding data, with coverage over the whole shape', async () => {
+      fetchMock
+        .mockResolvedValueOnce(json(WIDE))
+        .mockResolvedValueOnce(json({ properties: { statistics: { b1: { mean: null, count: 0, valid_percent: 0 } } } }))
+        .mockResolvedValueOnce(json(b1(6, 5, 8, [[100], [5, 8]], 80)))
+      const stats = await fetchShapeStatistics('wide-one.tif', crossing)
+      expect(stats).toMatchObject({ mean: 6, min: 5, max: 8 })
+      expect(stats!.coverage).toBeCloseTo(40, 3)
+      expect(fetchMock).toHaveBeenCalledTimes(3)
+    })
+
+    it('fails a merge when a part returns no histogram', async () => {
+      fetchMock
+        .mockResolvedValueOnce(json(WIDE))
+        .mockResolvedValueOnce(json(b1(4, 2, 5)))
+        .mockResolvedValueOnce(json(b1(6, 5, 8)))
+        .mockResolvedValue(json(b1(4, 2, 5)))
+      await expect(fetchShapeStatistics('wide-nohist.tif', crossing)).rejects.toThrow('No histogram')
+    })
+
+    it('reads a coarse file in one local request', async () => {
+      fetchMock
+        .mockResolvedValueOnce(json({ bounds: [-180, -90, 180, 90], width: 720, crs: 'GEOGCS["Moon"]' }))
+        .mockResolvedValueOnce(json(b1(4, 2, 5)))
+      expect(await fetchShapeStatistics('coarse.tif', crossing)).toMatchObject({ mean: 4 })
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(search(1).get('dst_crs')).toBe(localShape(crossing).crs)
+    })
+
+    it('reads a polar file in one local request, as its grid has no seam at 180°', async () => {
+      fetchMock
+        .mockResolvedValueOnce(json({ bounds: [-1267472, -1267472, 1267472, 1267472], width: 25290, crs: 'PROJCS["Moon"]' }))
+        .mockResolvedValueOnce(json(b1(4, 2, 5)))
+      expect(await fetchShapeStatistics('polar.tif', crossing)).toMatchObject({ mean: 4 })
+      expect(search(1).get('dst_crs')).toBe(localShape(crossing).crs)
+    })
+
+    it('reads a large shape in one local request without asking for the file', async () => {
+      fetchMock.mockResolvedValueOnce(json(b1(4, 2, 5)))
+      expect(await fetchShapeStatistics('wide-large.tif', large)).toMatchObject({ mean: 4 })
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+      expect(search(0).get('dst_crs')).toBe(localShape(large).crs)
+    })
+
+    it('asks for no file info for a shape away from 180°', async () => {
+      fetchMock.mockResolvedValueOnce(json(b1(4, 2, 5)))
+      await fetchShapeStatistics('wide-away.tif', ring)
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
   })
 })
 
@@ -393,6 +507,35 @@ describe('sampleElevation', () => {
     expect(await sampleElevation([{ lon: 0, lat: 0 }, { lon: 1, lat: 0 }, { lon: 2, lat: 0 }]))
       .toEqual({ value: -100, lowest: -300, highest: 100 })
     expect(await sampleElevation([])).toBeNull()
+  })
+
+  describe('with an outline', () => {
+    const heightsInOrder = (heights: number[]) => {
+      terrain.provider = Object.create(Cesium.CesiumTerrainProvider.prototype)
+      terrain.sampleTerrainHeights.mockImplementation(async (positions: Cesium.Cartographic[]) =>
+        positions.map((p, i) => {
+          const sampled = new Cesium.Cartographic(p.longitude, p.latitude)
+          sampled.height = heights[i]
+          return sampled
+        }))
+    }
+    const place = (lon: number) => ({ lon, lat: 0 })
+
+    it('averages the points spread over the ground, with extremes from the outline too', async () => {
+      heightsInOrder([10, 20, 900, -900])
+      expect(await sampleElevation([place(0), place(1)], [place(2), place(3)]))
+        .toEqual({ value: 15, lowest: -900, highest: 900 })
+    })
+
+    it('averages the outline when no point fell inside the shape', async () => {
+      heightsInOrder([4, 8])
+      expect(await sampleElevation([], [place(2), place(3)])).toEqual({ value: 6, lowest: 4, highest: 8 })
+    })
+
+    it('averages the outline when no point inside has a height', async () => {
+      heightsInOrder([NaN, 4, 8])
+      expect(await sampleElevation([place(0)], [place(2), place(3)])).toEqual({ value: 6, lowest: 4, highest: 8 })
+    })
   })
 
   it('has no elevation when no height was sampled', async () => {

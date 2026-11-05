@@ -82,13 +82,25 @@ Deleting a feature cancels its requests and drops its results.
   covering the point fails the whole batch. The files' catalog items load
   alongside it, for their `lri:clipped_*` fields.
 - **Polygon and circle.** One `POST /cog/statistics` per line, with the shape
-  as a GeoJSON Feature in the Moon's coordinate system, read from an overview
-  capped in size. The response holds the histogram as well. A circle is
-  converted to a polygon. Lines whose dataset bounds do not reach the shape
-  need no request. A ring across 180° is sent as a MultiPolygon split at that
-  meridian, with the crossing vertices at the interpolated latitude, and its
-  area, bounds and sample grid use continuous longitudes. A ring around a pole
-  has no continuous form and is sent as drawn.
+  as a GeoJSON Feature in meters of a Lambert azimuthal equal-area projection
+  on its center, the mini viewer's projection, read on a grid capped in size.
+  The response holds the histogram as well. Every cell covers the same ground,
+  so the average is over the ground at any latitude, around a pole and across
+  180°. A circle is converted to a polygon, and a polygon's edges, drawn as
+  geodesics, get vertices every 5°. Area and elevation samples use the same
+  projection. The elevation mean uses points spread evenly over the ground; the
+  outline's vertices count only for the lowest and highest, as they crowd the
+  rim. Lines whose dataset bounds do not reach the shape need no request.
+- **Polygon or circle at 180° on a very wide file.** Statistics move the edges of
+  a warped read outward onto a grid of the whole file, so a read near 180°
+  crosses it however far short it stops, and then reads the file's whole width.
+  A shape under 400 km on a global file 10000 or more pixels across takes over a
+  minute that way. It is read in two parts in the file's own grid, split at
+  180°. A first request per part gives the range, a second its histogram in 1200
+  bins over that range. Parts merge by the ground holding data; the median and
+  percentiles come from the merged histogram, good to one fine bin. Inside a part,
+  pixels count equally, which matters little at this size. Larger shapes use an
+  overview that answers in seconds, and polar files have no seam at 180°.
 - **Line.** A fixed number of samples spread evenly by distance along the whole
   line, plus each vertex, interpolated along the geodesic. Each sample is one
   batched point request. Statistics for a line are computed over its samples.

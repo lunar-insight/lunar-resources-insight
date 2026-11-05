@@ -21,12 +21,20 @@ import {
   boundsIntersect,
   ringBounds,
   lineLengthM,
+  localShape,
+  project,
   ringAreaKm2,
+  ringCenter,
+  ringExtentKm,
+  ringHoldsPole,
+  ringNearMeridian,
   ringParts,
-  ringToGeoJson,
   sampleLine,
+  shapeBounds,
+  shapeParts,
   shapeRing,
   shapeWord,
+  subdivideRing,
   unwrapRing,
 } from './featureGeometry'
 
@@ -86,11 +94,6 @@ describe('shapes', () => {
     expect(shapeRing(feature('polygon', { positions: [deg(0, 0), deg(1, 0)] }))).toBeNull()
     expect(shapeRing(feature('circle', { center: deg(0, 0) }))).toBeNull()
     expect(featureAreaKm2(feature('circle', { center: deg(0, 0) }))).toBeNull()
-  })
-
-  it('closes the GeoJSON ring', () => {
-    const geojson = ringToGeoJson([{ lon: 0, lat: 0 }, { lon: 1, lat: 0 }, { lon: 1, lat: 1 }])
-    expect(geojson.geometry.coordinates[0]).toEqual([[0, 0], [1, 0], [1, 1], [0, 0]])
   })
 
   it('measures a one degree box near the equator', () => {
@@ -229,12 +232,14 @@ describe('rings and bounds', () => {
     expect(isInsideRing({ lon: 2, lat: 2 }, triangle)).toBe(true)
   })
 
-  it('samples a grid inside the ring plus its vertices', () => {
+  it('samples a grid inside the ring', () => {
     const inSquare = gridInsideRing(square, 16)
-    expect(inSquare).toHaveLength(16 + 4)
-    const inTriangle = gridInsideRing(triangle, 16)
-    expect(inTriangle.length).toBeLessThan(16 + 3)
-    inTriangle.slice(0, -3).forEach(p => expect(isInsideRing(p, triangle)).toBe(true))
+    expect(inSquare).toHaveLength(16)
+    const small = triangle.map(p => ({ lon: p.lon / 10, lat: p.lat / 10 }))
+    const inTriangle = gridInsideRing(small, 16)
+    expect(inTriangle.length).toBeLessThan(16)
+    // Grid points can lie on the long edge, which runs along the grid's diagonal
+    inTriangle.forEach(p => expect(p.lon + p.lat).toBeLessThan(1.001))
   })
 
   it('compares bounds', () => {
@@ -265,16 +270,6 @@ describe('rings across the 180° meridian', () => {
     expect(ringParts(aroundPole)).toEqual([aroundPole])
   })
 
-  it('sends a crossing ring as a MultiPolygon split at 180°', () => {
-    expect(ringToGeoJson(crossing).geometry).toEqual({
-      type: 'MultiPolygon',
-      coordinates: [
-        [[[179.5, -1], [180, -1], [180, 1], [179.5, 1], [179.5, -1]]],
-        [[[-180, -1], [-179.5, -1], [-179.5, 1], [-180, 1], [-180, -1]]],
-      ],
-    })
-  })
-
   it('splits a ring first listed west of the meridian the same way', () => {
     const fromWest = [crossing[1], crossing[2], crossing[3], crossing[0]]
     const parts = ringParts(fromWest).map(ringBounds)
@@ -287,22 +282,6 @@ describe('rings across the 180° meridian', () => {
     const [west, east] = ringParts(slanted)
     expect(west).toEqual([{ lon: 179, lat: 0 }, { lon: 180, lat: 1 }, { lon: 180, lat: 3 }, { lon: 179, lat: 4 }])
     expect(east).toEqual([{ lon: -180, lat: 1 }, { lon: -179, lat: 2 }, { lon: -180, lat: 3 }])
-  })
-
-  it('keeps a ring not crossing as a Polygon, byte for byte', () => {
-    expect(JSON.stringify(ringToGeoJson(elsewhere))).toBe(JSON.stringify({
-      type: 'Feature',
-      properties: {},
-      geometry: { type: 'Polygon', coordinates: [[[9.5, -1], [10.5, -1], [10.5, 1], [9.5, 1], [9.5, -1]]] },
-    }))
-  })
-
-  it('gives a ring touching 180° one Polygon on the side it lies', () => {
-    const touching = [{ lon: 179, lat: 0 }, { lon: -180, lat: 0 }, { lon: -180, lat: 1 }, { lon: 179, lat: 1 }]
-    expect(ringToGeoJson(touching).geometry).toEqual({
-      type: 'Polygon',
-      coordinates: [[[179, 0], [180, 0], [180, 1], [179, 1], [179, 0]]],
-    })
   })
 
   it('drops a part holding only vertices on the meridian', () => {
@@ -327,7 +306,7 @@ describe('rings across the 180° meridian', () => {
 
   it('samples a grid inside the ring, normalized to ±180°', () => {
     const grid = gridInsideRing(crossing, 16)
-    expect(grid).toHaveLength(16 + 4)
+    expect(grid).toHaveLength(16)
     grid.forEach(p => {
       expect(Math.abs(p.lon)).toBeGreaterThanOrEqual(179.5)
       expect(Math.abs(p.lon)).toBeLessThanOrEqual(180)
@@ -339,6 +318,149 @@ describe('rings across the 180° meridian', () => {
   it('normalizes a grid starting west of the meridian', () => {
     const fromWest = [crossing[1], crossing[2], crossing[3], crossing[0]]
     gridInsideRing(fromWest, 16).forEach(p => expect(Math.abs(p.lon)).toBeLessThanOrEqual(180))
+  })
+})
+
+describe('shapes read in a local projection', () => {
+  const square = [{ lon: 10, lat: 10 }, { lon: 14, lat: 10 }, { lon: 14, lat: 14 }, { lon: 10, lat: 14 }]
+  const crossing = [{ lon: 179.5, lat: -1 }, { lon: -179.5, lat: -1 }, { lon: -179.5, lat: 1 }, { lon: 179.5, lat: 1 }]
+  // The polygons measured against the files, near each latitude. Exact areas from the spherical polygon.
+  const nearPole = [
+    { ring: [[10, -87], [100, -87.2], [-170, -87.1], [-80, -87.3]], areaKm2: 14925 },
+    { ring: [[30, -80], [150, -80], [-90, -80.5]], areaKm2: 116465 },
+    { ring: [[0, -70], [72, -71], [144, -70], [-144, -72], [-72, -70]], areaKm2: 830336 },
+  ].map(({ ring, areaKm2 }) => ({ ring: ring.map(([lon, lat]) => ({ lon, lat })), areaKm2 }))
+  const polygon = (ring: { lon: number; lat: number }[]) =>
+    feature('polygon', { positions: ring.map(p => deg(p.lon, p.lat)) })
+
+  it('builds the ring of a circle centered exactly on a pole, around that pole', () => {
+    ;[-90, 90].forEach(lat => {
+      const ring = circleRing({ lon: 0, lat }, 150_000)
+      expect(ringHoldsPole(ring)).toBe(true)
+      ring.forEach(p => expect(Math.abs(p.lat)).toBeCloseTo(90 - (150_000 / MOON_RADIUS_M) * (180 / Math.PI), 6))
+    })
+  })
+
+  it('heads along the expected meridian from a pole', () => {
+    expect(destination({ lon: 0, lat: -90 }, 30, 100_000).lon).toBeCloseTo(30, 6)
+    expect(destination({ lon: 0, lat: 90 }, 30, 100_000).lon).toBeCloseTo(150, 6)
+  })
+
+  it('tells which rings hold a pole', () => {
+    nearPole.forEach(({ ring }) => expect(ringHoldsPole(ring)).toBe(true))
+    expect(ringHoldsPole(square)).toBe(false)
+    expect(ringHoldsPole(crossing)).toBe(false)
+    expect(ringHoldsPole([...nearPole[0].ring].reverse())).toBe(true)
+  })
+
+  it('adds vertices along geodesics to edges over 5°, and none to shorter ones', () => {
+    expect(subdivideRing(square)).toEqual(square)
+    const [a, b] = [{ lon: 0, lat: -70 }, { lon: 120, lat: -70 }]
+    const ring = subdivideRing([a, b, { lon: 120, lat: -60 }, { lon: 0, lat: -60 }])
+    expect(ring[0]).toEqual(a)
+    expect(ring.length).toBeGreaterThan(4)
+    // The geodesic between them reaches about 79.7°S at its middle
+    expect(Math.min(...ring.map(p => p.lat))).toBeCloseTo(-79.7, 0)
+  })
+
+  it('leaves a repeated vertex as it is', () => {
+    const repeated = [{ lon: 1, lat: 1 }, { lon: 1, lat: 1 }, { lon: 2, lat: 1 }, { lon: 2, lat: 2 }]
+    expect(subdivideRing(repeated)).toEqual(repeated)
+  })
+
+  it('gives a polygon its geodesic edges as its ring, and a small one its own vertices', () => {
+    expect(shapeRing(polygon(nearPole[2].ring))!.length).toBeGreaterThan(5)
+    expect(shapeRing(polygon(square))).toHaveLength(4)
+  })
+
+  it('measures a polygon around a pole as the spherical polygon, within 0.2%', () => {
+    nearPole.forEach(({ ring, areaKm2 }) => {
+      expect(featureAreaKm2(polygon(ring))! / areaKm2).toBeCloseTo(1, 2)
+      expect(Math.abs(featureAreaKm2(polygon(ring))! / areaKm2 - 1)).toBeLessThan(0.002)
+    })
+  })
+
+  it('measures the same polygon around the north pole', () => {
+    const north = nearPole[1].ring.map(p => ({ lon: p.lon, lat: -p.lat }))
+    expect(featureAreaKm2(polygon(north))! / nearPole[1].areaKm2).toBeCloseTo(1, 2)
+  })
+
+  it('samples the whole of a shape around a pole, up to the pole', () => {
+    const center = { lon: 40, lat: -89 }
+    const ring = circleRing(center, 120_000)
+    const grid = gridInsideRing(ring, 144)
+    expect(grid.length).toBeGreaterThan(90)
+    expect(Math.min(...grid.map(p => 90 + p.lat))).toBeLessThan(0.5)
+    grid.forEach(p => expect(Math.abs(p.lon)).toBeLessThanOrEqual(180))
+    const radius = (p: { lon: number; lat: number }) => Math.hypot(project(p, center).x, project(p, center).y)
+    grid.forEach(p => expect(radius(p)).toBeLessThan(121_000))
+  })
+
+  it('centers a ring on the mean of its vertices', () => {
+    expect(ringCenter(square).lat).toBeCloseTo(12, 0)
+    expect(Math.abs(ringCenter(crossing).lon)).toBeCloseTo(180, 6)
+    expect(ringCenter(nearPole[0].ring).lat).toBeLessThan(-87)
+  })
+
+  it('sends a shape in meters around its center, closed, with that center as the CRS', () => {
+    const { crs, geojson } = localShape(square)
+    const center = ringCenter(square)
+    expect(crs).toBe(`+proj=laea +lat_0=${center.lat} +lon_0=${center.lon} +R=${MOON_RADIUS_M} +units=m +no_defs +type=crs`)
+    expect(geojson.type).toBe('Feature')
+    expect(geojson.properties).toEqual({})
+    expect(geojson.geometry.type).toBe('Polygon')
+    const coordinates = geojson.geometry.coordinates[0]
+    expect(coordinates).toHaveLength(5)
+    expect(coordinates[4]).toEqual(coordinates[0])
+    const first = project(square[0], center)
+    expect(coordinates[0]).toEqual([first.x, first.y])
+  })
+
+  it('sends a ring around a pole or across 180° as one polygon in the same form', () => {
+    expect(localShape(nearPole[0].ring).geojson.geometry.coordinates[0]).toHaveLength(5)
+    expect(localShape(crossing).geojson.geometry.coordinates[0]).toHaveLength(5)
+    localShape(crossing).geojson.geometry.coordinates[0].forEach(([x]) => expect(Math.abs(x)).toBeLessThan(40_000))
+  })
+
+  it('splits a shape into parts in degrees at 180°, each with its area', () => {
+    const parts = shapeParts(crossing)
+    expect(parts.map(part => part.geojson.geometry.coordinates[0])).toEqual([
+      [[179.5, -1], [180, -1], [180, 1], [179.5, 1], [179.5, -1]],
+      [[-180, -1], [-179.5, -1], [-179.5, 1], [-180, 1], [-180, -1]],
+    ])
+    expect(parts[0].areaKm2).toBeCloseTo(parts[1].areaKm2, 3)
+    expect((parts[0].areaKm2 + parts[1].areaKm2) / ringAreaKm2(crossing)).toBeCloseTo(1, 4)
+  })
+
+  it('gives a ring not crossing one part', () => {
+    const parts = shapeParts(square)
+    expect(parts).toHaveLength(1)
+    expect(parts[0].geojson.geometry.coordinates[0]).toHaveLength(5)
+  })
+
+  it('tells a ring reaching close to 180° from the others', () => {
+    expect(ringNearMeridian(crossing)).toBe(true)
+    expect(ringNearMeridian(square)).toBe(false)
+    expect(ringNearMeridian([{ lon: 179.995, lat: 0 }, { lon: 179, lat: 0 }, { lon: 179, lat: 1 }])).toBe(true)
+    expect(ringNearMeridian([{ lon: -179.995, lat: 0 }, { lon: -179, lat: 0 }, { lon: -179, lat: 1 }])).toBe(true)
+    expect(ringNearMeridian([{ lon: 179.9, lat: 0 }, { lon: 179, lat: 0 }, { lon: 179, lat: 1 }])).toBe(false)
+    expect(ringNearMeridian(nearPole[0].ring)).toBe(false)
+  })
+
+  it('measures the longer side of a ring on the ground', () => {
+    expect(ringExtentKm(crossing)).toBeCloseTo(2 * kmPerDegree, -1)
+    expect(ringExtentKm(circleRing({ lon: 0, lat: 0 }, 100_000))).toBeCloseTo(200, 0)
+  })
+
+  it('bounds a ring around a pole by every longitude up to that pole', () => {
+    expect(shapeBounds(nearPole[0].ring)).toEqual([[-180, -90, 180, -87]])
+    const north = nearPole[1].ring.map(p => ({ lon: p.lon, lat: -p.lat }))
+    expect(shapeBounds(north)).toEqual([[-180, 80, 180, 90]])
+  })
+
+  it('bounds other rings by their parts', () => {
+    expect(shapeBounds(square)).toEqual([[10, 10, 14, 14]])
+    expect(shapeBounds(crossing)).toEqual([[179.5, -1, 180, 1], [-180, -1, -179.5, 1]])
   })
 })
 

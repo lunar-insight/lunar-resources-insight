@@ -23,6 +23,15 @@ export const LINE_SAMPLE_COUNT = 128;
 /** Vertices of the polygon a circle is converted to. */
 export const CIRCLE_VERTICES = 72;
 
+/** A polygon's edge is drawn as a geodesic and read as straight, so it gets vertices at this spacing. */
+const MAX_EDGE_DEGREES = 5;
+
+/**
+ * Below this distance from 180°, a warped read can reach that meridian, as the
+ * tiler moves the edges of its read outward onto a grid of the whole file.
+ */
+const MERIDIAN_MARGIN_DEGREES = 0.01;
+
 export function featureKind(type: Feature['type']): FeatureKind {
   if (type === 'point') return 'point';
   if (type === 'line') return 'line';
@@ -53,9 +62,10 @@ export function destination(from: LonLat, bearingDeg: number, distanceM: number)
   const lambda1 = Cesium.Math.toRadians(from.lon);
 
   const phi2 = Math.asin(Math.sin(phi1) * Math.cos(delta) + Math.cos(phi1) * Math.sin(delta) * Math.cos(theta));
+  // Free of the cos(phi1) factor that leaves only rounding noise at a pole.
   const lambda2 = lambda1 + Math.atan2(
-    Math.sin(theta) * Math.sin(delta) * Math.cos(phi1),
-    Math.cos(delta) - Math.sin(phi1) * Math.sin(phi2),
+    Math.sin(theta) * Math.sin(delta),
+    Math.cos(delta) * Math.cos(phi1) - Math.sin(phi1) * Math.sin(delta) * Math.cos(theta),
   );
 
   return {
@@ -68,11 +78,43 @@ export function circleRing(center: LonLat, radiusM: number, vertices = CIRCLE_VE
   return Array.from({ length: vertices }, (_, i) => destination(center, (360 * i) / vertices, radiusM));
 }
 
-/** Vertices of a shape feature, unclosed. A circle becomes a polygon. */
+const toUnitVector = ({ lon, lat }: LonLat): [number, number, number] => {
+  const phi = Cesium.Math.toRadians(lat);
+  const lambda = Cesium.Math.toRadians(lon);
+  return [Math.cos(phi) * Math.cos(lambda), Math.cos(phi) * Math.sin(lambda), Math.sin(phi)];
+};
+
+/** The ring with vertices added along its geodesic edges, so no piece spans over `maxDegrees`. */
+export function subdivideRing(ring: LonLat[], maxDegrees = MAX_EDGE_DEGREES): LonLat[] {
+  return ring.flatMap((from, index) => {
+    const a = toUnitVector(from);
+    const b = toUnitVector(ring[(index + 1) % ring.length]);
+    const arc = Math.atan2(
+      Math.hypot(a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]),
+      a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+    );
+    const pieces = Math.ceil(Cesium.Math.toDegrees(arc) / maxDegrees);
+    if (pieces <= 1) return [from];
+
+    return Array.from({ length: pieces }, (_, piece) => {
+      if (piece === 0) return from;
+      const share = piece / pieces;
+      const fromA = Math.sin((1 - share) * arc) / Math.sin(arc);
+      const fromB = Math.sin(share * arc) / Math.sin(arc);
+      const [x, y, z] = a.map((value, axis) => fromA * value + fromB * b[axis]);
+      return {
+        lon: Cesium.Math.toDegrees(Math.atan2(y, x)),
+        lat: Cesium.Math.toDegrees(Math.atan2(z, Math.hypot(x, y))),
+      };
+    });
+  });
+}
+
+/** Vertices of a shape feature, unclosed, following its geodesic edges. A circle becomes a polygon. */
 export function shapeRing(feature: Feature): LonLat[] | null {
   if (feature.type === 'polygon') {
     const positions = feature.metadata.positions ?? [];
-    return positions.length >= 3 ? positions.map(toLonLat) : null;
+    return positions.length >= 3 ? subdivideRing(positions.map(toLonLat)) : null;
   }
   const center = circleCenter(feature);
   const radius = feature.metadata.radius;
@@ -82,11 +124,8 @@ export function shapeRing(feature: Feature): LonLat[] | null {
 
 const wrapLon = (lon: number) => (lon > 180 ? lon - 360 : lon < -180 ? lon + 360 : lon);
 
-/**
- * The ring with continuous longitudes, adding 360° at a jump over 180°. A ring
- * around a pole has no continuous form and stays as given.
- */
-export function unwrapRing(ring: LonLat[]): LonLat[] {
+/** Continuous longitudes, adding 360° at a jump over 180°, and the offset left on closing the ring. */
+function continuousRing(ring: LonLat[]): { unwrapped: LonLat[]; closingOffset: number } {
   let offset = 0;
   const offsetAfter = (from: LonLat, to: LonLat) => {
     const step = to.lon - from.lon;
@@ -98,7 +137,53 @@ export function unwrapRing(ring: LonLat[]): LonLat[] {
     return { lon: p.lon + offset, lat: p.lat };
   });
   offsetAfter(ring[ring.length - 1], ring[0]);
-  return offset === 0 ? unwrapped : ring;
+  return { unwrapped, closingOffset: offset };
+}
+
+/** A ring going once around the Moon's axis holds one pole. */
+export function ringHoldsPole(ring: LonLat[]): boolean {
+  return continuousRing(ring).closingOffset !== 0;
+}
+
+/** The ring with continuous longitudes. A ring around a pole has no continuous form and stays as given. */
+export function unwrapRing(ring: LonLat[]): LonLat[] {
+  const { unwrapped, closingOffset } = continuousRing(ring);
+  return closingOffset === 0 ? unwrapped : ring;
+}
+
+/** Whether a ring not holding a pole crosses 180° or comes close enough that a warped read can reach it. */
+export function ringNearMeridian(ring: LonLat[]): boolean {
+  if (ringHoldsPole(ring)) return false;
+  const lons = unwrapRing(ring).map(p => p.lon);
+  return Math.max(...lons) >= 180 - MERIDIAN_MARGIN_DEGREES || Math.min(...lons) <= -180 + MERIDIAN_MARGIN_DEGREES;
+}
+
+export function localCrs(center: LonLat): string {
+  return `+proj=laea +lat_0=${center.lat} +lon_0=${center.lon} +R=${MOON_RADIUS_M} +units=m +no_defs +type=crs`;
+}
+
+/** Lambert azimuthal equal-area, in meters around `center`. */
+export function project(p: LonLat, center: LonLat): { x: number; y: number } {
+  const phi = Cesium.Math.toRadians(p.lat);
+  const phi0 = Cesium.Math.toRadians(center.lat);
+  const delta = Cesium.Math.toRadians(p.lon - center.lon);
+  const k = Math.sqrt(2 / (1 + Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(delta)));
+  return {
+    x: MOON_RADIUS_M * k * Math.cos(phi) * Math.sin(delta),
+    y: MOON_RADIUS_M * k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(delta)),
+  };
+}
+
+export function unproject({ x, y }: { x: number; y: number }, center: LonLat): LonLat {
+  const rho = Math.hypot(x, y);
+  if (rho === 0) return { lon: center.lon, lat: center.lat };
+
+  const c = 2 * Math.asin(rho / (2 * MOON_RADIUS_M));
+  const phi0 = Cesium.Math.toRadians(center.lat);
+  const lat = Math.asin(Math.cos(c) * Math.sin(phi0) + (y * Math.sin(c) * Math.cos(phi0)) / rho);
+  const delta = Math.atan2(x * Math.sin(c), rho * Math.cos(phi0) * Math.cos(c) - y * Math.sin(phi0) * Math.sin(c));
+  const lon = center.lon + Cesium.Math.toDegrees(delta);
+  return { lon: wrapLon(lon), lat: Cesium.Math.toDegrees(lat) };
 }
 
 /** The part of a continuous ring on one side of a meridian: `side` 1 keeps east of it, -1 west. */
@@ -132,32 +217,49 @@ export function ringParts(ring: LonLat[]): LonLat[][] {
   return [...part(-1, meridian < 0 ? 360 : 0), ...part(1, meridian > 0 ? -360 : 0)];
 }
 
-const closedRing = (ring: LonLat[]) => [...ring, ring[0]].map(p => [p.lon, p.lat]);
+const polygonFeature = (vertices: number[][]) => ({
+  type: 'Feature' as const,
+  properties: {},
+  geometry: { type: 'Polygon' as const, coordinates: [[...vertices, vertices[0]]] },
+});
 
-/** GeoJSON Feature for a shape, in degrees, closed. A ring across 180° is split into a MultiPolygon. */
-export function ringToGeoJson(ring: LonLat[]) {
-  const parts = ringParts(ring);
+/** A shape as one read: a closed GeoJSON Feature in meters around its center, and that projection. */
+export function localShape(ring: LonLat[]) {
+  const center = ringCenter(ring);
   return {
-    type: 'Feature' as const,
-    properties: {},
-    geometry: parts.length > 1
-      ? { type: 'MultiPolygon' as const, coordinates: parts.map(part => [closedRing(part)]) }
-      : { type: 'Polygon' as const, coordinates: [closedRing(parts[0])] },
+    crs: localCrs(center),
+    geojson: polygonFeature(ring.map(p => {
+      const { x, y } = project(p, center);
+      return [x, y];
+    })),
   };
 }
 
-/** Area of a ring on the Moon's sphere, in km². */
+/** Area of a ring on the Moon's sphere, in km², from its equal-area projection. */
 export function ringAreaKm2(ring: LonLat[]): number {
-  const unwrapped = unwrapRing(ring);
-  let sum = 0;
-  for (let i = 0; i < unwrapped.length; i++) {
-    const a = unwrapped[i];
-    const b = unwrapped[(i + 1) % unwrapped.length];
-    sum += Cesium.Math.toRadians(b.lon - a.lon)
-      * (2 + Math.sin(Cesium.Math.toRadians(a.lat)) + Math.sin(Cesium.Math.toRadians(b.lat)));
-  }
-  const radiusKm = MOON_RADIUS_M / 1000;
-  return Math.abs((sum * radiusKm * radiusKm) / 2);
+  const center = ringCenter(ring);
+  const points = ring.map(p => project(p, center));
+  const doubled = points.reduce((sum, a, i) => {
+    const b = points[(i + 1) % points.length];
+    return sum + a.x * b.y - b.x * a.y;
+  }, 0);
+  return Math.abs(doubled) / 2 / 1e6;
+}
+
+/** A shape as parts in degrees, split at 180°, each a closed GeoJSON Feature with its area. */
+export function shapeParts(ring: LonLat[]) {
+  return ringParts(ring).map(part => ({
+    geojson: polygonFeature(part.map(p => [p.lon, p.lat])),
+    areaKm2: ringAreaKm2(part),
+  }));
+}
+
+/** The longer side of a ring's box in its local projection, in km. */
+export function ringExtentKm(ring: LonLat[]): number {
+  const center = ringCenter(ring);
+  const points = ring.map(p => project(p, center));
+  const span = (values: number[]) => Math.max(...values) - Math.min(...values);
+  return Math.max(span(points.map(p => p.x)), span(points.map(p => p.y))) / 1000;
 }
 
 /** Area of a shape feature in km². A circle is the exact spherical cap. */
@@ -187,6 +289,9 @@ function meanPosition(points: LonLat[]): LonLat {
     lat: Cesium.Math.toDegrees(Math.atan2(z, Math.hypot(x, y))),
   };
 }
+
+/** Where a ring's local projection is centered. */
+export const ringCenter = meanPosition;
 
 /** Point position, circle center, or the mean of a polygon's or line's vertices. */
 export function featureCenter(feature: Feature): LonLat | null {
@@ -257,26 +362,29 @@ export function isInsideRing(point: LonLat, ring: LonLat[]): boolean {
   return inside;
 }
 
-/** About `target` points on a regular grid inside a ring, plus its vertices. */
+/** About `target` points inside a ring, evenly spread over the ground. */
 export function gridInsideRing(ring: LonLat[], target = 144): LonLat[] {
-  const unwrapped = unwrapRing(ring);
-  const lons = unwrapped.map(p => p.lon);
-  const lats = unwrapped.map(p => p.lat);
-  const west = Math.min(...lons), east = Math.max(...lons);
-  const south = Math.min(...lats), north = Math.max(...lats);
+  const center = ringCenter(ring);
+  // In the projection's meters, held in the fields isInsideRing reads
+  const planar = ring.map(p => {
+    const { x, y } = project(p, center);
+    return { lon: x, lat: y };
+  });
+  const xs = planar.map(p => p.lon);
+  const ys = planar.map(p => p.lat);
+  const west = Math.min(...xs), east = Math.max(...xs);
+  const south = Math.min(...ys), north = Math.max(...ys);
   const steps = Math.max(2, Math.round(Math.sqrt(target)));
 
   const points: LonLat[] = [];
   for (let i = 0; i < steps; i++) {
     for (let j = 0; j < steps; j++) {
-      const p = {
-        lon: west + ((east - west) * (i + 0.5)) / steps,
-        lat: south + ((north - south) * (j + 0.5)) / steps,
-      };
-      if (isInsideRing(p, unwrapped)) points.push({ lon: wrapLon(p.lon), lat: p.lat });
+      const lon = west + ((east - west) * (i + 0.5)) / steps;
+      const lat = south + ((north - south) * (j + 0.5)) / steps;
+      if (isInsideRing({ lon, lat }, planar)) points.push(unproject({ x: lon, y: lat }, center));
     }
   }
-  return [...points, ...ring];
+  return points;
 }
 
 /**
@@ -288,6 +396,15 @@ export function ringBounds(ring: LonLat[]): number[] {
   const lons = unwrapped.map(p => p.lon);
   const lats = unwrapped.map(p => p.lat);
   return [wrapLon(Math.min(...lons)), Math.min(...lats), wrapLon(Math.max(...lons)), Math.max(...lats)];
+}
+
+/** Bounding boxes of a shape, none across 180°. A ring around a pole reaches that pole at every longitude. */
+export function shapeBounds(ring: LonLat[]): number[][] {
+  if (!ringHoldsPole(ring)) return ringParts(ring).map(ringBounds);
+  const lats = ring.map(p => p.lat);
+  return [ringCenter(ring).lat < 0
+    ? [-180, -90, 180, Math.max(...lats)]
+    : [-180, Math.min(...lats), 180, 90]];
 }
 
 export function boundsIntersect(a: number[], b: number[]): boolean {

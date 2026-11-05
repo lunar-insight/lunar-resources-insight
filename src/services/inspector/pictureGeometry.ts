@@ -1,4 +1,6 @@
-import { MOON_RADIUS_M, type LonLat } from './featureGeometry';
+import { localCrs, project, unproject, type LonLat } from './featureGeometry';
+
+export { localCrs, project, unproject };
 
 /** The picture's box in CSS pixels. Requests ask for `scale` times as many. */
 export const FRAME = { width: 211, height: 150, scale: 2 };
@@ -18,9 +20,6 @@ export const SHAPE_MARGIN = 0.1;
 const MERIDIAN_GAP_M = 5;
 /** Perimeter samples per side when looking for the 180° meridian. */
 const PERIMETER_SAMPLES = 32;
-
-const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
-const toDegrees = (radians: number) => (radians * 180) / Math.PI;
 
 /** One request of a view, in meters of the view's projection. */
 export interface ViewPart {
@@ -44,33 +43,6 @@ export interface View {
 }
 
 type Box = Omit<View, 'parts'>;
-
-export function localCrs(center: LonLat): string {
-  return `+proj=laea +lat_0=${center.lat} +lon_0=${center.lon} +R=${MOON_RADIUS_M} +units=m +no_defs +type=crs`;
-}
-
-export function project(p: LonLat, center: LonLat): { x: number; y: number } {
-  const phi = toRadians(p.lat);
-  const phi0 = toRadians(center.lat);
-  const delta = toRadians(p.lon - center.lon);
-  const k = Math.sqrt(2 / (1 + Math.sin(phi0) * Math.sin(phi) + Math.cos(phi0) * Math.cos(phi) * Math.cos(delta)));
-  return {
-    x: MOON_RADIUS_M * k * Math.cos(phi) * Math.sin(delta),
-    y: MOON_RADIUS_M * k * (Math.cos(phi0) * Math.sin(phi) - Math.sin(phi0) * Math.cos(phi) * Math.cos(delta)),
-  };
-}
-
-export function unproject({ x, y }: { x: number; y: number }, center: LonLat): LonLat {
-  const rho = Math.hypot(x, y);
-  if (rho === 0) return { lon: center.lon, lat: center.lat };
-
-  const c = 2 * Math.asin(rho / (2 * MOON_RADIUS_M));
-  const phi0 = toRadians(center.lat);
-  const lat = Math.asin(Math.cos(c) * Math.sin(phi0) + (y * Math.sin(c) * Math.cos(phi0)) / rho);
-  const delta = Math.atan2(x * Math.sin(c), rho * Math.cos(phi0) * Math.cos(c) - y * Math.sin(phi0) * Math.sin(c));
-  const lon = center.lon + toDegrees(delta);
-  return { lon: lon > 180 ? lon - 360 : lon < -180 ? lon + 360 : lon, lat: toDegrees(lat) };
-}
 
 /** A box crossing every meridian. Never split: files reaching a pole answer quickly. */
 export function holdsPole(view: Box): boolean {
