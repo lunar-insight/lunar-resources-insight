@@ -18,6 +18,7 @@ import {
   ringExtentKm,
   ringNearMeridian,
   shapeParts,
+  subdivideRing,
   type LonLat,
 } from './featureGeometry';
 import { PICTURE_HEIGHT, PICTURE_WIDTH, localCrs, type View, type ViewPart } from './pictureGeometry';
@@ -174,6 +175,13 @@ const WIDE_FILE_PIXELS = 10_000;
 const PARTS_BELOW_KM = 400;
 /** Fine bins per bin shown, when two parts are read over one range. */
 const FINE_BINS_PER_BIN = 100;
+/** Vertex spacing of parts in degrees, so their edges follow the drawn geodesics. */
+const PART_EDGE_DEGREES = 0.05;
+/**
+ * A part in degrees with no span in latitude fails in the tiler, and one of 1e-9°
+ * reads no data. A flatter shape is read in its local projection instead.
+ */
+const MIN_PART_HEIGHT_DEGREES = 1e-4;
 
 async function isWideGlobalFile(filename: string): Promise<boolean> {
   const { crs, width } = await fetchFileInfo(filename);
@@ -261,7 +269,10 @@ export async function fetchShapeStatistics(
   signal?: AbortSignal,
 ): Promise<FeatureStatistics | null> {
   if (ringNearMeridian(ring) && ringExtentKm(ring) < PARTS_BELOW_KM && await isWideGlobalFile(filename)) {
-    return fetchStatisticsInParts(filename, shapeParts(ring), signal);
+    const parts = shapeParts(subdivideRing(ring, PART_EDGE_DEGREES));
+    if (parts.every(part => part.heightDegrees >= MIN_PART_HEIGHT_DEGREES)) {
+      return fetchStatisticsInParts(filename, parts, signal);
+    }
   }
   const { crs, geojson } = localShape(ring);
   return toStatistics(await postStatistics(

@@ -41,7 +41,9 @@ const Cell: React.FC<{ line: InspectorLine; column: Column; highlighted: boolean
           <span className={styles.barSet}>{bar}<EmptySlot /></span>
           <span className={`${styles.value} ${styles.noData}`}>
             {view.kind === 'no-data' && (
-              <StatPopover content={view.popover} label="No data" className={styles.noDataText}>No data</StatPopover>
+              <StatPopover content={view.popover} label={view.popover.title} className={styles.noDataText}>
+                {view.popover.title}
+              </StatPopover>
             )}
           </span>
         </div>

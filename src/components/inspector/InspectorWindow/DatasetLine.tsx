@@ -123,8 +123,8 @@ export const DatasetLine: React.FC<DatasetLineProps> = ({
     );
   } else if (bar.kind === 'no-data') {
     value = (
-      <StatPopover content={bar.popover} label="No data" className={styles.noDataText}>
-        No data
+      <StatPopover content={bar.popover} label={bar.popover.title} className={styles.noDataText}>
+        {bar.popover.title}
       </StatPopover>
     );
   }

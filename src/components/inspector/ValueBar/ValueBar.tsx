@@ -3,9 +3,9 @@ import { StatPopover } from 'components/inspector/StatPopover/StatPopover';
 import type { BarView } from 'components/inspector/lineView';
 import styles from './ValueBar.module.scss';
 
-const LABELS: Record<BarView['kind'], string> = {
+/** No data takes its popover's title, which names why: "No data" or "No area". */
+const LABELS: Record<Exclude<BarView['kind'], 'no-data'>, string> = {
   value: 'Bar scale',
-  'no-data': 'No data',
   'no-scale': 'Scale unavailable',
   failed: 'Not computed',
 };
@@ -26,7 +26,7 @@ interface ValueBarProps {
 export const ValueBar: React.FC<ValueBarProps> = ({ view, categoryColor, chart, footer }) => (
   <StatPopover
     content={view.popover}
-    label={LABELS[view.kind]}
+    label={view.kind === 'no-data' ? view.popover.title : LABELS[view.kind]}
     chart={chart}
     footer={footer}
     className={styles.bar}

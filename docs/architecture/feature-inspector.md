@@ -90,17 +90,22 @@ Deleting a feature cancels its requests and drops its results.
   geodesics, get vertices every 5°. Area and elevation samples use the same
   projection. The elevation mean uses points spread evenly over the ground; the
   outline's vertices count only for the lowest and highest, as they crowd the
-  rim. Lines whose dataset bounds do not reach the shape need no request.
+  rim. Lines whose dataset bounds do not reach the shape need no request. A
+  shape under 1 m², its vertices on one geodesic or one spot, needs none either:
+  it holds no ground, and the tiler would average the pixels its outline touches.
 - **Polygon or circle at 180° on a very wide file.** Statistics move the edges of
   a warped read outward onto a grid of the whole file, so a read near 180°
   crosses it however far short it stops, and then reads the file's whole width.
   A shape under 400 km on a global file 10000 or more pixels across takes over a
   minute that way. It is read in two parts in the file's own grid, split at
-  180°. A first request per part gives the range, a second its histogram in 1200
-  bins over that range. Parts merge by the ground holding data; the median and
-  percentiles come from the merged histogram, good to one fine bin. Inside a part,
-  pixels count equally, which matters little at this size. Larger shapes use an
-  overview that answers in seconds, and polar files have no seam at 180°.
+  180°, with a vertex every 0.05° so their edges follow the geodesics. A part
+  under 1e-4° in latitude fails in the tiler or reads nothing, so a shape that
+  thin is read in its local projection, slowly. A first request per part gives
+  the range, a second its histogram in 1200 bins over that range. Parts merge by
+  the ground holding data; the median and percentiles come from the merged
+  histogram, good to one fine bin. Inside a part, pixels count equally, which
+  matters little at this size. Larger shapes use an overview that answers in
+  seconds, and polar files have no seam at 180°.
 - **Line.** A fixed number of samples spread evenly by distance along the whole
   line, plus each vertex, interpolated along the geodesic. Each sample is one
   batched point request. Statistics for a line are computed over its samples.
@@ -124,6 +129,7 @@ pauses on demand, and cancels by feature.
 | Bar | Hybrid scale: a reference range when one exists, so the same position means the same value across datasets; otherwise the percentile within the dataset's whole Moon statistics. Without either, the bar shows a center dash. Elements, compounds and minerals take their range from `constants/elementReferenceRanges.ts`; a derived index takes its range, and what its low and high values mean, from the Derived Indices data. |
 | Limit mark | A point value equal to either end of its file's `lri:clipped_range`, inside `lri:clipped_longitudes` when the item sets them: an amber arrow against a ceiling or a floor, right of the bar. Every line of the window keeps the slot once any line has the mark. The explanation gives the limit, says values beyond it are set to it, then the item's `lri:clipped_notes` sentence for that end. The match is exact: point values are the float32 pixels, and the range ends are exact in float32. |
 | No data | A hatched track. Outside the dataset's bounds, the explanation gives its extent; inside them, the dataset has no measurements at that location. |
+| No area | A hatched track on every line of a shape with no area: it has no average. The CSV status reads `no area`. |
 
 Whole Moon statistics are not displayed; they set the percentile scale and the
 reference width of the spread word and the skew mark. A point has one value, so

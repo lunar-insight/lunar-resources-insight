@@ -62,6 +62,11 @@ describe('statisticsCsv', () => {
     expect(rows(statisticsCsv(lines, results('point', { lines: {} })))[1]).toContain(',not computed,')
   })
 
+  it('marks a shape with no area apart from no data', () => {
+    const csv = statisticsCsv([lines[0]], results('shape', { lines: { feo: { file, noData: 'no-area' } } }))
+    expect(rows(csv)[1]).toBe('FeO,Iron oxide,Clementine CNN (Qiu 2025),,wt%,no area,,,,,,,,,,')
+  })
+
   it('counts the samples of a line', () => {
     const csv = statisticsCsv([lines[0]], results('line', {
       lines: { feo: { file, value: 2, profile: [1, 3, null] } },

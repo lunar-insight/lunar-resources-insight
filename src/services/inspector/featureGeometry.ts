@@ -246,12 +246,16 @@ export function ringAreaKm2(ring: LonLat[]): number {
   return Math.abs(doubled) / 2 / 1e6;
 }
 
-/** A shape as parts in degrees, split at 180°, each a closed GeoJSON Feature with its area. */
+/** A shape as parts in degrees, split at 180°, each a closed GeoJSON Feature with its area and its span in latitude. */
 export function shapeParts(ring: LonLat[]) {
-  return ringParts(ring).map(part => ({
-    geojson: polygonFeature(part.map(p => [p.lon, p.lat])),
-    areaKm2: ringAreaKm2(part),
-  }));
+  return ringParts(ring).map(part => {
+    const lats = part.map(p => p.lat);
+    return {
+      geojson: polygonFeature(part.map(p => [p.lon, p.lat])),
+      areaKm2: ringAreaKm2(part),
+      heightDegrees: Math.max(...lats) - Math.min(...lats),
+    };
+  });
 }
 
 /** The longer side of a ring's box in its local projection, in km. */

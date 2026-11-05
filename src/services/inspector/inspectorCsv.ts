@@ -25,6 +25,7 @@ const STATISTICS_HEADER = [
 function status(result?: LineResult): string {
   if (!result) return 'not computed';
   if (result.failed) return 'failed';
+  if (result.noData === 'no-area') return 'no area';
   if (result.noData) return 'no data';
   return 'ok';
 }

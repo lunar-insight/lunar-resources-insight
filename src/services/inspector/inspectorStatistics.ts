@@ -310,9 +310,13 @@ export function barPopover(
   };
 }
 
-export type NoDataReason = 'outside' | 'inside';
+/** `no-area`: the shape's vertices lie on one geodesic or one spot, so it holds no ground to average. */
+export type NoDataReason = 'outside' | 'inside' | 'no-area';
 
 export function noDataPopover(reason: NoDataReason, extent?: string): PopoverContent {
+  if (reason === 'no-area') {
+    return { title: 'No area', lines: [], sentence: 'This shape has no area, so it has no average.' };
+  }
   return {
     title: 'No data',
     lines: [],

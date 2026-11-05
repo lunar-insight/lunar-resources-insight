@@ -117,6 +117,15 @@ describe('ComparisonView', () => {
     expect(screen.getAllByRole('dialog').at(-1)).toHaveTextContent('This dataset covers 50°N to 50°S.')
   })
 
+  it('names a shape with no area as such', async () => {
+    const dialog = await renderComparison([a], {
+      a: makeResults('shape', { olivine_kaguya_mi_lemelin2016: { value: undefined, stats: undefined, noData: 'no-area' } }),
+    })
+    const cells = row(dialog, 'Kaguya Multiband Imager (Lemelin 2016)', 3).querySelectorAll('td')
+    expect(cells[1]).toHaveTextContent('No area')
+    expect(within(cells[1]).getAllByRole('button', { name: 'No area' })).toHaveLength(2)
+  })
+
   it('names each symbol once with its unit', async () => {
     const dialog = await renderComparison([a], { a: makeResults('shape') })
     expect(within(dialog).getByText('Iron oxide').closest('tr')).toHaveTextContent('FeOIron oxidewt%')

@@ -28,7 +28,7 @@ import {
   sampleElevation,
   PointRequestError,
 } from './inspectorRequests'
-import { circleRing, localShape, shapeParts } from './featureGeometry'
+import { circleRing, localShape, shapeParts, subdivideRing } from './featureGeometry'
 import { localCrs } from './pictureGeometry'
 
 const json = (body: unknown, status = 200) =>
@@ -334,18 +334,23 @@ describe('fetchShapeStatistics', () => {
 
       const stats = await fetchShapeStatistics('wide-both.tif', crossing)
 
-      expect(stats).toMatchObject({ mean: 5, min: 2, max: 8, count: 200, coverage: 100 })
+      expect(stats).toMatchObject({ min: 2, max: 8, count: 200 })
+      expect(stats!.mean).toBeCloseTo(5, 9)
+      expect(stats!.coverage).toBeCloseTo(100, 9)
       expect(stats!.histogram!.counts).toHaveLength(12)
       expect(fetchMock).toHaveBeenCalledTimes(5)
       expect(search(1).get('coord_crs')).toBe('IAU_2015:30100')
       expect(search(1).has('dst_crs')).toBe(false)
       expect(search(1).get('histogram_bins')).toBe('12')
-      expect(body(1)).toEqual(shapeParts(crossing)[0].geojson)
-      expect(body(2)).toEqual(shapeParts(crossing)[1].geojson)
+      // Edges in degrees follow the geodesics, a vertex every 0.05°
+      const parts = shapeParts(subdivideRing(crossing, 0.05))
+      expect(body(1)).toEqual(parts[0].geojson)
+      expect(body(2)).toEqual(parts[1].geojson)
+      expect(body(1).geometry.coordinates[0].length).toBeGreaterThan(40)
       expect(search(3).get('histogram_bins')).toBe('1200')
       expect(search(3).get('histogram_range')).toBe('2,8')
       expect(search(4).get('histogram_range')).toBe('2,8')
-      expect(body(4)).toEqual(shapeParts(crossing)[1].geojson)
+      expect(body(4)).toEqual(parts[1].geojson)
     })
 
     it('reads the file once for all shapes', async () => {
@@ -385,6 +390,28 @@ describe('fetchShapeStatistics', () => {
         .mockResolvedValueOnce(json(b1(6, 5, 8)))
         .mockResolvedValue(json(b1(4, 2, 5)))
       await expect(fetchShapeStatistics('wide-nohist.tif', crossing)).rejects.toThrow('No histogram')
+    })
+
+    it('reads vertices on one parallel in parts, as the geodesics between them give the parts height', async () => {
+      const onParallel = [{ lon: 179.6, lat: 45 }, { lon: -179.7, lat: 45 }, { lon: -179.4, lat: 45 }]
+      fetchMock
+        .mockResolvedValueOnce(json(WIDE))
+        .mockResolvedValue(json({ properties: { statistics: { b1: { mean: null, count: 0, valid_percent: 0 } } } }))
+      await fetchShapeStatistics('wide-parallel.tif', onParallel)
+      expect(fetchMock).toHaveBeenCalledTimes(3)
+      expect(search(1).get('coord_crs')).toBe('IAU_2015:30100')
+      const lats = body(1).geometry.coordinates[0].map(([, lat]: number[]) => lat)
+      expect(Math.max(...lats) - Math.min(...lats)).toBeGreaterThan(1e-4)
+    })
+
+    it('reads a shape too flat for parts in one local request, as the tiler fails on a part of no height', async () => {
+      const flat = [{ lon: 179.9, lat: 2 }, { lon: -179.95, lat: 2 }, { lon: -179.9, lat: 2 }]
+      fetchMock
+        .mockResolvedValueOnce(json(WIDE))
+        .mockResolvedValueOnce(json(b1(4, 2, 5)))
+      expect(await fetchShapeStatistics('wide-flat.tif', flat)).toMatchObject({ mean: 4 })
+      expect(fetchMock).toHaveBeenCalledTimes(2)
+      expect(search(1).get('dst_crs')).toBe(localShape(flat).crs)
     })
 
     it('reads a coarse file in one local request', async () => {

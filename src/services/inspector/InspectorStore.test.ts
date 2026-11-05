@@ -4,7 +4,7 @@ import * as Cesium from 'cesium'
 import type { Feature } from 'components/navigation/FeaturesSection/types'
 import type { LayersConfig } from 'types/layers'
 import { buildInspectorLines } from './inspectorLayers'
-import { defaultDependencies, InspectorStore, type InspectorDependencies } from './InspectorStore'
+import { defaultDependencies, InspectorStore, MIN_AREA_KM2, type InspectorDependencies } from './InspectorStore'
 import {
   fetchClippedRange,
   fetchFileBounds,
@@ -288,6 +288,31 @@ describe('InspectorStore, shapes', () => {
     store.sync([square(10, -70)])
     await settle()
     expect(store.get('s')!.lines.global).toMatchObject({ value: 5, resolutionKm: undefined })
+  })
+
+  it('reads no statistics for a shape with no area, whatever its datasets cover', async () => {
+    const { store, deps } = setup()
+    store.sync([
+      feature('meridian', 'polygon', { positions: [deg(40, -60), deg(40, -55), deg(40, -52)] }),
+      feature('spot', 'polygon', { positions: [deg(10, 10), deg(10, 10), deg(10, 10)] }),
+    ])
+    await settle()
+    expect(deps.fetchShapeStatistics).not.toHaveBeenCalled()
+    for (const id of ['meridian', 'spot']) {
+      const result = store.get(id)!
+      expect(result).toMatchObject({ status: 'ready', done: 3, failedRequests: 0, elevation: { value: -100 } })
+      expect(result.areaKm2).toBeLessThan(MIN_AREA_KM2)
+      expect(Object.values(result.lines).map(line => line.noData)).toEqual(['no-area', 'no-area', 'no-area'])
+    }
+  })
+
+  it('reads a sliver, which holds ground', async () => {
+    const { store, deps } = setup()
+    store.sync([feature('sliver', 'polygon', { positions: [deg(10, 10), deg(12, 10), deg(12, 10.0001)] })])
+    await settle()
+    expect(store.get('sliver')!.areaKm2).toBeCloseTo(0.09, 2)
+    expect(deps.fetchShapeStatistics).toHaveBeenCalled()
+    expect(store.get('sliver')!.lines.global).toMatchObject({ value: 5 })
   })
 
   it('finishes a shape without a ring at once', async () => {

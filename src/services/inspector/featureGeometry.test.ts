@@ -430,6 +430,12 @@ describe('shapes read in a local projection', () => {
     ])
     expect(parts[0].areaKm2).toBeCloseTo(parts[1].areaKm2, 3)
     expect((parts[0].areaKm2 + parts[1].areaKm2) / ringAreaKm2(crossing)).toBeCloseTo(1, 4)
+    expect(parts.map(part => part.heightDegrees)).toEqual([2, 2])
+  })
+
+  it('gives no height to a part of a ring on one parallel', () => {
+    const flat = [{ lon: 179.6, lat: 45 }, { lon: -179.7, lat: 45 }, { lon: -179.4, lat: 45 }]
+    expect(shapeParts(flat).map(part => part.heightDegrees)).toEqual([0, 0])
   })
 
   it('gives a ring not crossing one part', () => {

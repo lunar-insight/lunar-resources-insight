@@ -188,6 +188,16 @@ describe('shape window', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('This dataset covers the poles, from 50° latitude.')
   })
 
+  it('names a shape with no area as such', async () => {
+    await renderWindow(polygon, makeResults('shape', {
+      thorium_grs: { value: undefined, stats: undefined, noData: 'no-area' },
+    }))
+    const line = lineOf('thorium_grs')
+    expect(within(line).getAllByRole('button', { name: 'No area' })).toHaveLength(2)
+    await userEvent.click(within(line).getByText('No area'))
+    expect(screen.getByRole('dialog')).toHaveTextContent('This shape has no area, so it has no average.')
+  })
+
   it('filters the layer list', async () => {
     await renderWindow(polygon, makeResults('shape'))
     await userEvent.type(screen.getByRole('textbox', { name: 'Filter layers' }), 'plagio')

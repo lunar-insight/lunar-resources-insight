@@ -283,6 +283,12 @@ describe('no data', () => {
     expect(noDataPopover('outside').sentence).toBe('This dataset has no measurements at this location.')
   })
 
+  it('states that a shape with no area has no average', () => {
+    expect(noDataPopover('no-area', '50°N to 50°S')).toEqual({
+      title: 'No area', lines: [], sentence: 'This shape has no area, so it has no average.',
+    })
+  })
+
   it('writes extents', () => {
     expect(formatExtent([-180, -50, 180, 50])).toBe('50°N to 50°S')
     expect(formatExtent([-178.6, -88.1, 179.9, 87.2])).toBe('87°N to 88°S')

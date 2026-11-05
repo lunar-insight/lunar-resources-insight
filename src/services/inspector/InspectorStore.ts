@@ -88,6 +88,12 @@ export interface InspectorDependencies {
 
 const GLOBAL_BOUNDS = [-180, -90, 180, 90];
 
+/**
+ * Under this area, about 1 m², a shape's vertices lie on one geodesic or one spot.
+ * The tiler would average the pixels its outline touches, which is no average over an area.
+ */
+export const MIN_AREA_KM2 = 1e-6;
+
 export const defaultDependencies = (): InspectorDependencies => ({
   lines: inspectorLines,
   fetchBounds: fetchFileBounds,
@@ -329,6 +335,11 @@ export class InspectorStore {
     }));
 
     const targets = await this.targets(center.lat);
+    if (areaKm2 < MIN_AREA_KM2) {
+      targets.forEach(({ line, file }) => setLine(line.id, { file, noData: 'no-area' }));
+      await elevation;
+      return;
+    }
     await Promise.all(targets.map(async ({ line, file, bounds, extent }) => {
       if (!partBounds.some(part => boundsIntersect(part, bounds))) {
         setLine(line.id, { file, noData: 'outside', extent });

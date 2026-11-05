@@ -13,11 +13,11 @@ describe('ValueBar', () => {
     expect(screen.getByRole('button', { name: 'Bar scale' })).toHaveStyle({ '--cat': 'rgb(1, 2, 3)' })
   })
 
-  it('hatches the track for no data, with no fill', () => {
-    const { container } = render(<ValueBar view={{ kind: 'no-data', popover }} categoryColor="rgb(0, 0, 0)" />)
+  it('hatches the track for no data, with no fill, named by its popover title', () => {
+    const { container } = render(<ValueBar view={{ kind: 'no-data', popover: { ...popover, title: 'No area' } }} categoryColor="rgb(0, 0, 0)" />)
     expect(track(container)).toHaveClass(styles.noData)
     expect(container.querySelector(`.${styles.fill}`)).toBeNull()
-    expect(screen.getByRole('button', { name: 'No data' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'No area' })).toBeInTheDocument()
   })
 
   it('draws a center dash without a scale or a value', () => {
